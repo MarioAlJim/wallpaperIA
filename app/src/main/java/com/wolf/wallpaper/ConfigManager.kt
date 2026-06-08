@@ -12,11 +12,13 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_RAIN_INTENSITY = "rain_intensity"
         const val KEY_LIGHTNING_FREQUENCY = "lightning_frequency"
         const val KEY_WIND_DIRECTION = "wind_direction"
+        const val KEY_RAIN_COLOR_INDEX = "rain_color_index"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
         const val DEFAULT_LIGHTNING_FREQUENCY = 50
         const val DEFAULT_WIND_DIRECTION = 0
+        const val DEFAULT_RAIN_COLOR_INDEX = 0
     }
 
     override fun getCloudDensity(): Int {
@@ -35,6 +37,10 @@ class ConfigManager(context: Context) : ConfigProvider {
         return prefs.getInt(KEY_WIND_DIRECTION, DEFAULT_WIND_DIRECTION)
     }
 
+    override fun getRainColorIndex(): Int {
+        return prefs.getInt(KEY_RAIN_COLOR_INDEX, DEFAULT_RAIN_COLOR_INDEX)
+    }
+
     fun setCloudDensity(density: Int) {
         prefs.edit().putInt(KEY_CLOUD_DENSITY, density.coerceIn(0, 100)).apply()
     }
@@ -49,5 +55,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setWindDirection(direction: Int) {
         prefs.edit().putInt(KEY_WIND_DIRECTION, direction.coerceIn(0, 2)).apply()
+    }
+
+    fun setRainColorIndex(index: Int) {
+        prefs.edit().putInt(KEY_RAIN_COLOR_INDEX, index.coerceIn(0, 5)).apply()
     }
 }
