@@ -1,6 +1,6 @@
 # Walkthrough – Configuración de Dirección de Viento/Lluvia, Ajuste de Gotas y Color de la Lluvia
 
-Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) en tres opciones (Izquierda, Vertical, Derecha), configurado la escala de gotas de lluvia a una escala no lineal de 50, 150, 300 y 500 partículas, y agregado una nueva configuración para cambiar el color de las gotas de lluvia entre 6 variantes.
+Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) en tres opciones (Izquierda, Vertical, Derecha), configurado la escala de gotas de lluvia a una escala no lineal con opción de "Nada" (0, 50, 150, 300 y 500 partículas), y agregado una nueva configuración para cambiar el color de las gotas de lluvia entre 6 variantes.
 
 ## Cambios Realizados
 
@@ -16,15 +16,15 @@ Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) e
 * **Control y Límites**:
   - En [SceneManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/SceneManager.kt), se añadió el seguimiento del estado de dirección del viento. Al detectar un cambio de viento en SharedPreferences, se re-inicializan las gotas activas.
   - Se modificaron los límites de reinicio en X para detectar salidas del viewport por el lado derecho o izquierdo según el signo de `velocityX`.
-  - Se implementó un mapeo no lineal en `adjustRain()` para cambiar el recuento de gotas de lluvia a **50, 150, 300 y 500** gotas según la intensidad configurada.
+  - Se implementó un mapeo no lineal en `adjustRain()` para cambiar el recuento de gotas de lluvia a **0, 50, 150, 300 y 500** gotas según la intensidad configurada.
 
 * **Interfaz de Usuario**:
   - Se añadió un nuevo `CardView` con una barra deslizante (SeekBar) de 3 estados a [activity_settings.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/res/layout/activity_settings.xml).
   - Se agregaron recursos de cadenas al archivo [strings.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/res/values/strings.xml).
-  - Se enlazaron los controles Seekbar en [WallpaperSettingsActivity.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/WallpaperSettingsActivity.kt) y se actualizó `updateRainTextView` para mostrar el recuento correcto de partículas no lineales (50, 150, 300 y 500 gotas).
+  - Se enlazaron los controles Seekbar en [WallpaperSettingsActivity.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/WallpaperSettingsActivity.kt) y se actualizó `updateRainTextView` para mostrar el recuento correcto de partículas no lineales (0, 50, 150, 300 y 500 gotas) incluyendo la nueva opción **Nada**.
 
 * **Pruebas**:
-  - Se mockeó la nueva propiedad de dirección de viento y se actualizaron las aserciones de recuento de partículas (50, 150, 300 y 500) en [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt).
+  - Se mockeó la nueva propiedad de dirección de viento y se actualizaron las aserciones de recuento de partículas (0, 50, 150, 300 y 500) en [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt).
 
 ### 2. Color de las Gotas de Lluvia
 
@@ -63,6 +63,7 @@ Realizamos commits incrementales para cada fase lógica:
 - `feat(ui): hook up seekBarRainColor settings listener and label`
 - `test(scene): mock rain color index in test suite MockConfigProvider`
 - `feat(physics): change rain intensity mapping to 50, 150, 300, and 500 drops`
+- `feat(ui): add Nada option with 0 drops to rain intensity settings`
 
 ## Verificación
 
