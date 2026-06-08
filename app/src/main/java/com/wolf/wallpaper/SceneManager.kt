@@ -85,6 +85,7 @@ class SceneManager(
 
     fun getClouds(): List<Cloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
+    fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
 
     private fun updateFromConfig() {
         val targetDensity = configProvider.getCloudDensity()
