@@ -166,7 +166,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             3 -> "Muy alta"
             else -> "Media"
         }
-        val particles = (percentage / 100f * 600).toInt()
+        val particles = when (progress) {
+            0 -> 50
+            1 -> 150
+            2 -> 300
+            3 -> 500
+            else -> 150
+        }
         textView.text = "$levelName ($percentage% - $particles gotas)"
     }
 

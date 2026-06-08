@@ -59,15 +59,15 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(0, sceneManager.getRainDrops().size)
 
-        // Case 2: Intensity 50 -> 300 rain drops
+        // Case 2: Intensity 50 -> 150 rain drops
         mockConfig.mockRainIntensity = 50
         sceneManager.update(0.016f)
-        assertEquals(300, sceneManager.getRainDrops().size)
+        assertEquals(150, sceneManager.getRainDrops().size)
 
-        // Case 3: Intensity 100 -> 600 rain drops
+        // Case 3: Intensity 100 -> 500 rain drops
         mockConfig.mockRainIntensity = 100
         sceneManager.update(0.016f)
-        assertEquals(600, sceneManager.getRainDrops().size)
+        assertEquals(500, sceneManager.getRainDrops().size)
     }
 
     @Test
