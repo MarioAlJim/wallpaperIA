@@ -135,14 +135,14 @@ class SceneManager(
     }
 
     private fun adjustRain(intensity: Int) {
-        // Map 0-100 intensity to non-linear drops count: 50, 150, 300, 500
+        // Map 0-100 intensity to non-linear drops count: 0, 10, 25, 50, 100
         val targetCount = when (intensity) {
             0 -> 0
-            25 -> 50
-            50 -> 150
-            75 -> 300
-            100 -> 500
-            else -> (intensity / 100f * 500).toInt()
+            25 -> 10
+            50 -> 25
+            75 -> 50
+            100 -> 100
+            else -> (intensity / 100f * 100).toInt()
         }.coerceIn(0, 1000)
         
         while (rainDrops.size < targetCount) {

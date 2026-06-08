@@ -169,11 +169,11 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
         val particles = when (progress) {
             0 -> 0
-            1 -> 50
-            2 -> 150
-            3 -> 300
-            4 -> 500
-            else -> 150
+            1 -> 10
+            2 -> 25
+            3 -> 50
+            4 -> 100
+            else -> 25
         }
         textView.text = "$levelName ($percentage% - $particles gotas)"
     }
