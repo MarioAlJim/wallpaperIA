@@ -2,8 +2,10 @@
 
 precision mediump float;
 
+uniform vec4 uRainColor;
+
 out vec4 fragColor;
 
 void main() {
-    fragColor = vec4(0.7, 0.8, 1.0, 0.7);
+    fragColor = uRainColor;
 }
