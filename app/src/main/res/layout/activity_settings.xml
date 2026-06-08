@@ -181,6 +181,58 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
+    <!-- Wind Intensity Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1F1F23">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wind_intensity_label"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textViewWindIntensityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="50%"
+                    android:textColor="#9D9DA6"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarWindIntensity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="50"
+                android:progressTint="#00BFFF"
+                android:thumbTint="#00BFFF" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
     <!-- Rain Color Card -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
