@@ -1,0 +1,340 @@
+package com.wolf.wallpaper
+
+import android.content.Context
+import android.graphics.BitmapFactory
+import android.opengl.GLES30
+import android.opengl.GLUtils
+import android.opengl.Matrix
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+import java.nio.FloatBuffer
+
+class StormRenderer(private val context: Context) {
+
+    private var cloudProgram = 0
+    private var rainProgram = 0
+    private var lightningProgram = 0
+
+    // Texture IDs
+    private val cloudTextures = IntArray(3)
+    private var rainTexture = 0
+    
+    // MVP Matrices
+    private val projectionMatrix = FloatArray(16)
+    private val viewMatrix = FloatArray(16)
+    private val mvpMatrix = FloatArray(16)
+    private val identityMatrix = FloatArray(16)
+
+    // Buffers for geometric drawing
+    private lateinit var fullscreenQuadBuffer: FloatBuffer
+    private lateinit var cloudQuadBuffer: FloatBuffer
+
+    init {
+        Matrix.setIdentityM(viewMatrix, 0)
+        Matrix.setIdentityM(identityMatrix, 0)
+    }
+
+    fun onSurfaceCreated() {
+        // Enable blending for textures and transparency effects
+        GLES30.glEnable(GLES30.GL_BLEND)
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
+
+        // Compile and link shaders
+        val cloudVert = readAssetFile(context, "shaders/cloud.vert")
+        val cloudFrag = readAssetFile(context, "shaders/cloud.frag")
+        cloudProgram = createProgram(cloudVert, cloudFrag)
+
+        val rainVert = readAssetFile(context, "shaders/rain.vert")
+        val rainFrag = readAssetFile(context, "shaders/rain.frag")
+        rainProgram = createProgram(rainVert, rainFrag)
+
+        val lightningVert = readAssetFile(context, "shaders/lightning.vert")
+        val lightningFrag = readAssetFile(context, "shaders/lightning.frag")
+        lightningProgram = createProgram(lightningVert, lightningFrag)
+
+        // Load textures from assets
+        cloudTextures[0] = loadTexture(context, "clouds/cloud_01.png")
+        cloudTextures[1] = loadTexture(context, "clouds/cloud_02.png")
+        cloudTextures[2] = loadTexture(context, "clouds/cloud_03.png")
+        rainTexture = loadTexture(context, "rain/rain_particle.png")
+
+        // Screen quad coordinates (for full-screen flash using identity matrix)
+        val fullscreenCoords = floatArrayOf(
+            -1f,  1f,
+            -1f, -1f,
+             1f,  1f,
+             1f, -1f
+        )
+        fullscreenQuadBuffer = ByteBuffer.allocateDirect(fullscreenCoords.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer().apply {
+                put(fullscreenCoords)
+                position(0)
+            }
+
+        // Cloud quad coordinates with UV coordinates: (X, Y, U, V)
+        val cloudCoords = floatArrayOf(
+            -0.5f,  0.5f, 0f, 0f,
+            -0.5f, -0.5f, 0f, 1f,
+             0.5f,  0.5f, 1f, 0f,
+             0.5f, -0.5f, 1f, 1f
+        )
+        cloudQuadBuffer = ByteBuffer.allocateDirect(cloudCoords.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer().apply {
+                put(cloudCoords)
+                position(0)
+            }
+    }
+
+    fun onSurfaceChanged(width: Int, height: Int) {
+        GLES30.glViewport(0, 0, width, height)
+        val aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
+        // Setup orthographic camera matrix (RF-006: Keeps proportions in rotation/scale)
+        Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
+    }
+
+    fun drawFrame(sceneManager: SceneManager) {
+        // Clear background with deep dark storm color
+        var clearR = 0.04f
+        var clearG = 0.04f
+        var clearB = 0.06f
+
+        // Apply lightning flash peak color directly to background (Disabled for now)
+        /*
+        val lightning = sceneManager.lightning
+        if (lightning.isActive) {
+            val flashCoeff = lightning.intensity * 0.45f
+            clearR += flashCoeff
+            clearG += flashCoeff
+            clearB += flashCoeff + 0.05f // Tint flash slightly blue
+        }
+        */
+
+        GLES30.glClearColor(clearR, clearG, clearB, 1.0f)
+        GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
+
+        // Render layered elements in order: Nubes -> Lluvia -> Rayos
+        // drawClouds(sceneManager.getClouds())
+        drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
+        // drawLightning(lightning)
+    }
+
+    private fun drawClouds(clouds: List<Cloud>) {
+        if (clouds.isEmpty()) return
+
+        GLES30.glUseProgram(cloudProgram)
+        val mvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
+        val opacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
+        val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
+
+        // Bind positions attribute (location 0)
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        // Bind UV coordinates attribute (location 1)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+        GLES30.glUniform1i(textureHandle, 0)
+
+        for (cloud in clouds) {
+            val modelMatrix = FloatArray(16)
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, cloud.positionX, cloud.positionY, 0f)
+            // Stretches clouds landscape-wise (width = scale * 2.4, height = scale)
+            Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
+            
+            val modelViewProjection = FloatArray(16)
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+
+            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
+            GLES30.glUniform1f(opacityHandle, cloud.opacity)
+
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex])
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        }
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+    }
+
+    private fun drawRain(rainDrops: List<RainDrop>, colorIndex: Int) {
+        if (rainDrops.isEmpty()) return
+
+        GLES30.glUseProgram(rainProgram)
+        val mvpMatrixHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
+        val colorHandle = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
+        
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
+
+        val color = getRainColor(colorIndex)
+        GLES30.glUniform4fv(colorHandle, 1, color, 0)
+
+        // Construct coordinate buffer for all rain drop lines
+        // Each raindrop is drawn as a line (start point to end point) to achieve motion blur
+        val vertexData = FloatArray(rainDrops.size * 4)
+        var idx = 0
+        for (drop in rainDrops) {
+            vertexData[idx++] = drop.positionX
+            vertexData[idx++] = drop.positionY
+            
+            // Draw diagonal line along the drop's direction vector
+            vertexData[idx++] = drop.positionX + drop.dirX * drop.length
+            vertexData[idx++] = drop.positionY + drop.dirY * drop.length
+        }
+
+        val rainBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer().apply {
+                put(vertexData)
+                position(0)
+            }
+
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, rainBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        GLES30.glLineWidth(2.0f)
+        GLES30.glDrawArrays(GLES30.GL_LINES, 0, rainDrops.size * 2)
+
+        GLES30.glDisableVertexAttribArray(0)
+    }
+
+    private fun getRainColor(index: Int): FloatArray {
+        return when (index) {
+            0 -> floatArrayOf(0.7f, 0.8f, 1.0f, 0.7f) // Azul Claro
+            1 -> floatArrayOf(1.0f, 1.0f, 1.0f, 0.7f) // Blanco
+            2 -> floatArrayOf(1.0f, 0.2f, 0.2f, 0.7f) // Rojo
+            3 -> floatArrayOf(0.2f, 1.0f, 0.2f, 0.7f) // Verde
+            4 -> floatArrayOf(1.0f, 0.9f, 0.0f, 0.7f) // Amarillo
+            5 -> floatArrayOf(0.7f, 0.3f, 1.0f, 0.7f) // Morado
+            else -> floatArrayOf(0.7f, 0.8f, 1.0f, 0.7f)
+        }
+    }
+
+    private fun drawLightning(lightning: Lightning) {
+        if (!lightning.isActive) return
+
+        GLES30.glUseProgram(lightningProgram)
+        val mvpMatrixHandle = GLES30.glGetUniformLocation(lightningProgram, "uMVPMatrix")
+        val flashIntensityHandle = GLES30.glGetUniformLocation(lightningProgram, "uFlashIntensity")
+
+        // 1. Draw full screen overlay flash
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, identityMatrix, 0)
+        // Flash is soft transparent white
+        GLES30.glUniform1f(flashIntensityHandle, lightning.intensity * 0.20f)
+
+        fullscreenQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+        // 2. Draw procedural lightning branches
+        val branches = lightning.branches
+        if (branches.isNotEmpty()) {
+            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
+            // The bolt core is full intensity white
+            GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
+
+            val lineVertices = FloatArray(branches.size * 4)
+            var idx = 0
+            for (branch in branches) {
+                lineVertices[idx++] = branch.startX
+                lineVertices[idx++] = branch.startY
+                lineVertices[idx++] = branch.endX
+                lineVertices[idx++] = branch.endY
+            }
+
+            val lineBuffer = ByteBuffer.allocateDirect(lineVertices.size * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer().apply {
+                    put(lineVertices)
+                    position(0)
+                }
+
+            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, lineBuffer)
+            
+            // Draw thick line for the main bolt
+            GLES30.glLineWidth(3.5f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, 0, branches.size * 2)
+        }
+
+        GLES30.glDisableVertexAttribArray(0)
+    }
+
+    private fun readAssetFile(context: Context, path: String): String {
+        return try {
+            context.assets.open(path).bufferedReader().use { it.readText() }
+        } catch (e: IOException) {
+            throw RuntimeException("Could not open asset file: $path", e)
+        }
+    }
+
+    private fun loadTexture(context: Context, assetPath: String): Int {
+        val textureIds = IntArray(1)
+        GLES30.glGenTextures(1, textureIds, 0)
+        if (textureIds[0] == 0) {
+            return 0
+        }
+
+        val options = BitmapFactory.Options().apply {
+            inScaled = false // Disable pre-scaling to preserve pixel integrity
+        }
+        try {
+            context.assets.open(assetPath).use { inputStream ->
+                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
+                if (bitmap != null) {
+                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
+                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
+                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
+                    GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
+                    bitmap.recycle()
+                }
+            }
+        } catch (e: IOException) {
+            GLES30.glDeleteTextures(1, textureIds, 0)
+            throw RuntimeException("Could not load texture from asset: $assetPath", e)
+        }
+        return textureIds[0]
+    }
+
+    private fun loadShader(type: Int, shaderCode: String): Int {
+        val shader = GLES30.glCreateShader(type)
+        GLES30.glShaderSource(shader, shaderCode)
+        GLES30.glCompileShader(shader)
+
+        val compileStatus = IntArray(1)
+        GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compileStatus, 0)
+        if (compileStatus[0] == 0) {
+            val log = GLES30.glGetShaderInfoLog(shader)
+            GLES30.glDeleteShader(shader)
+            throw RuntimeException("Error compiling shader ($type): $log")
+        }
+        return shader
+    }
+
+    private fun createProgram(vertexCode: String, fragmentCode: String): Int {
+        val vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexCode)
+        val fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentCode)
+        val program = GLES30.glCreateProgram()
+        GLES30.glAttachShader(program, vertexShader)
+        GLES30.glAttachShader(program, fragmentShader)
+        GLES30.glLinkProgram(program)
+
+        val linkStatus = IntArray(1)
+        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
+        if (linkStatus[0] == 0) {
+            val log = GLES30.glGetProgramInfoLog(program)
+            GLES30.glDeleteProgram(program)
+            throw RuntimeException("Error linking program: $log")
+        }
+        return program
+    }
+}
