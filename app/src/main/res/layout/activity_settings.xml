@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#121214">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/settings_title"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- Cloud Density Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1F1F23">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/cloud_density_label"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textViewCloudDensityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="50%"
+                    android:textColor="#9D9DA6"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarCloudDensity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="50"
+                android:progressTint="#8A2BE2"
+                android:thumbTint="#8A2BE2" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Rain Intensity Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1F1F23">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/rain_intensity_label"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textViewRainIntensityValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="50%"
+                    android:textColor="#9D9DA6"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarRainIntensity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="3"
+                android:progress="1"
+                android:progressTint="#1E90FF"
+                android:thumbTint="#1E90FF" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Wind Direction Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1F1F23">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wind_direction_label"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textViewWindDirectionValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Izquierda"
+                    android:textColor="#9D9DA6"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarWindDirection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="2"
+                android:progress="0"
+                android:progressTint="#00FA9A"
+                android:thumbTint="#00FA9A" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Lightning Frequency Card -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#1F1F23">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/lightning_frequency_label"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true" />
+
+                <TextView
+                    android:id="@+id/textViewLightningFrequencyValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="50%"
+                    android:textColor="#9D9DA6"
+                    android:textSize="14sp"
+                    android:layout_alignParentEnd="true" />
+
+            </RelativeLayout>
+
+            <SeekBar
+                android:id="@+id/seekBarLightningFrequency"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="50"
+                android:progressTint="#FFD700"
+                android:thumbTint="#FFD700" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+        <!-- Apply Wallpaper Button -->
+        <Button
+            android:id="@+id/buttonApplyWallpaper"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="Establecer como Fondo de Pantalla"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:padding="14dp"
+            android:textAllCaps="false"
+            android:backgroundTint="#1E90FF"
+            app:cornerRadius="12dp" />
+
+    </LinearLayout>
+</ScrollView>
