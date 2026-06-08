@@ -15,12 +15,14 @@ class SceneManagerTest {
         var mockLightningFrequency = 50
         var mockWindDirection = 0
         var mockRainColorIndex = 0
+        var mockWindIntensity = 50
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
         override fun getLightningFrequency(): Int = mockLightningFrequency
         override fun getWindDirection(): Int = mockWindDirection
         override fun getRainColorIndex(): Int = mockRainColorIndex
+        override fun getWindIntensity(): Int = mockWindIntensity
     }
 
     @Test
