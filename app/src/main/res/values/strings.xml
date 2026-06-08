@@ -4,6 +4,7 @@
     <string name="cloud_density_label">Densidad de Nubes</string>
     <string name="rain_intensity_label">Densidad de Lluvia</string>
     <string name="wind_direction_label">Dirección de la Lluvia</string>
+    <string name="rain_color_label">Color de la Lluvia</string>
     <string name="lightning_frequency_label">Frecuencia de Rayos</string>
     <string name="wallpaper_description">Simulador interactivo de tormenta con nubes animadas, lluvia y rayos procedimentales.</string>
     <string name="wallpaper_label">Tormenta OpenGL</string>
