@@ -27,18 +27,18 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudDensity(value)
         }
 
-        // Configuración especial para la densidad de lluvia en 4 niveles
+        // Configuración especial para la densidad de lluvia en 5 niveles
         val rainSeek = findViewById<SeekBar>(R.id.seekBarRainIntensity)
         val rainText = findViewById<TextView>(R.id.textViewRainIntensityValue)
         val initialRainValue = configManager.getRainIntensity()
-        val initialProgress = (initialRainValue / 25 - 1).coerceIn(0, 3)
+        val initialProgress = (initialRainValue / 25).coerceIn(0, 4)
         rainSeek.progress = initialProgress
         updateRainTextView(initialProgress, rainText)
 
         rainSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    val value = (progress + 1) * 25
+                    val value = progress * 25
                     configManager.setRainIntensity(value)
                     updateRainTextView(progress, rainText)
                 }
@@ -158,19 +158,21 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     }
 
     private fun updateRainTextView(progress: Int, textView: TextView) {
-        val percentage = (progress + 1) * 25
+        val percentage = progress * 25
         val levelName = when (progress) {
-            0 -> "Pocas"
-            1 -> "Media"
-            2 -> "Alta"
-            3 -> "Muy alta"
+            0 -> "Nada"
+            1 -> "Pocas"
+            2 -> "Media"
+            3 -> "Alta"
+            4 -> "Muy alta"
             else -> "Media"
         }
         val particles = when (progress) {
-            0 -> 50
-            1 -> 150
-            2 -> 300
-            3 -> 500
+            0 -> 0
+            1 -> 50
+            2 -> 150
+            3 -> 300
+            4 -> 500
             else -> 150
         }
         textView.text = "$levelName ($percentage% - $particles gotas)"

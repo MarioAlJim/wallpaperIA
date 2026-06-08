@@ -121,8 +121,8 @@
                 android:id="@+id/seekBarRainIntensity"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="3"
-                android:progress="1"
+                android:max="4"
+                android:progress="2"
                 android:progressTint="#1E90FF"
                 android:thumbTint="#1E90FF" />
 
