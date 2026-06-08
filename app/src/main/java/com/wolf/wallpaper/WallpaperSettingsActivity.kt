@@ -67,6 +67,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        // Configuración para la intensidad del viento
+        setupSlider(
+            R.id.seekBarWindIntensity,
+            R.id.textViewWindIntensityValue,
+            configManager.getWindIntensity()
+        ) { value ->
+            configManager.setWindIntensity(value)
+        }
+
         // Configuración para el color de la lluvia
         val colorSeek = findViewById<SeekBar>(R.id.seekBarRainColor)
         val colorText = findViewById<TextView>(R.id.textViewRainColorValue)
@@ -153,6 +162,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     else -> "Cada 5 segundos"
                 }
                 textView.text = "$value% ($desc)"
+            }
+            R.id.seekBarWindIntensity -> {
+                textView.text = "$value%"
             }
         }
     }
