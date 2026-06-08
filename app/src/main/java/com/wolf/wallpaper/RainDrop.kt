@@ -33,13 +33,14 @@ class RainDrop(
         // Rendering is coordinated by StormRenderer
     }
 
-    fun reset(aspectRatio: Float, windDirection: Int, startOnScreen: Boolean = false) {
+    fun reset(aspectRatio: Float, windDirection: Int, windIntensity: Int, startOnScreen: Boolean = false) {
         // Speed of drop (between 3.0 and 4.5)
         val speed = Random.nextFloat() * 1.5f + 3.0f
         
         when (windDirection) {
             0 -> { // Izquierda
-                val angleDeg = Random.nextFloat() * 10f + 20f
+                val maxAngleAtIntensity = (windIntensity / 100f) * 35f
+                val angleDeg = maxAngleAtIntensity + Random.nextFloat() * 5f
                 val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
                 velocityY = -speed * kotlin.math.cos(angleRad)
                 velocityX = -speed * kotlin.math.sin(angleRad)
@@ -49,7 +50,8 @@ class RainDrop(
                 velocityX = 0f
             }
             2 -> { // Derecha
-                val angleDeg = Random.nextFloat() * 10f + 20f
+                val maxAngleAtIntensity = (windIntensity / 100f) * 35f
+                val angleDeg = maxAngleAtIntensity + Random.nextFloat() * 5f
                 val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
                 velocityY = -speed * kotlin.math.cos(angleRad)
                 velocityX = speed * kotlin.math.sin(angleRad)
