@@ -67,6 +67,25 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        // Configuración para el color de la lluvia
+        val colorSeek = findViewById<SeekBar>(R.id.seekBarRainColor)
+        val colorText = findViewById<TextView>(R.id.textViewRainColorValue)
+        val initialColorValue = configManager.getRainColorIndex()
+        colorSeek.progress = initialColorValue
+        updateColorTextView(initialColorValue, colorText)
+
+        colorSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    configManager.setRainColorIndex(progress)
+                    updateColorTextView(progress, colorText)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
         setupSlider(
             R.id.seekBarLightningFrequency,
             R.id.textViewLightningFrequencyValue,
@@ -159,5 +178,18 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Izquierda"
         }
         textView.text = directionName
+    }
+
+    private fun updateColorTextView(progress: Int, textView: TextView) {
+        val colorName = when (progress) {
+            0 -> "Azul"
+            1 -> "Blanco"
+            2 -> "Rojo"
+            3 -> "Verde"
+            4 -> "Amarillo"
+            5 -> "Morado"
+            else -> "Azul"
+        }
+        textView.text = colorName
     }
 }
