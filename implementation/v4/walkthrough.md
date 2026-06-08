@@ -1,6 +1,6 @@
-# Walkthrough – Configuración de Dirección de Viento/Lluvia, Ajuste de Gotas y Color de la Lluvia
+# Walkthrough – Configuración de Dirección, Fuerza de Viento, Ajuste de Gotas y Color de la Lluvia
 
-Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) en tres opciones (Izquierda, Vertical, Derecha), configurado la escala de gotas de lluvia a una escala no lineal con opción de "Nada" (0, 10, 25, 50 y 100 partículas), y agregado una nueva configuración para cambiar el color de las gotas de lluvia entre 6 variantes.
+Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) en tres opciones (Izquierda, Vertical, Derecha), regular de forma variable la fuerza del viento (0% a 100%), configurar la escala de gotas de lluvia a una escala no lineal con opción de "Nada" (0, 10, 25, 50 y 100 partículas), y agregado una nueva configuración para cambiar el color de las gotas de lluvia entre 6 variantes.
 
 ## Cambios Realizados
 
@@ -46,6 +46,25 @@ Hemos implementado la posibilidad de cambiar la dirección del viento (lluvia) e
 * **Pruebas**:
   - Se mockeó la propiedad `getRainColorIndex(): Int` en `MockConfigProvider` dentro de [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt).
 
+### 3. Intensidad de Viento Variable
+
+* **Configuración**:
+  - Se agregó `getWindIntensity(): Int` a [ConfigProvider.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/ConfigProvider.kt).
+  - Se implementaron métodos en [ConfigManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/ConfigManager.kt) para leer y escribir SharedPreferences (`KEY_WIND_INTENSITY`, `setWindIntensity()`).
+
+* **Físicas de Partículas**:
+  - En [RainDrop.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/RainDrop.kt), la función `reset()` utiliza el valor `windIntensity` para escalar el ángulo de caída en un rango progresivo de hasta 35 grados (con 5 grados de variación aleatoria por gota), resultando en una caída recta a 0% de intensidad y caída muy diagonal a 100%.
+
+* **Control y Límites**:
+  - En [SceneManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/SceneManager.kt), se añadió `windIntensity` al seguimiento de variables. Un cambio en la fuerza del viento provocará el reinicio de las trayectorias de las gotas en la animación.
+
+* **Interfaz de Usuario**:
+  - Se añadió un nuevo `CardView` con una barra deslizante (SeekBar) de 0% a 100% a [activity_settings.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/res/layout/activity_settings.xml).
+  - Se enlazaron los controles Seekbar en [WallpaperSettingsActivity.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/WallpaperSettingsActivity.kt) y se agregó el caso `seekBarWindIntensity` en `updateTextView()` para dar formato al porcentaje en pantalla.
+
+* **Pruebas**:
+  - Se mockeó `getWindIntensity(): Int` en `MockConfigProvider` dentro de [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt).
+
 ## Commits Realizados (Conventional Commits)
 
 Realizamos commits incrementales para cada fase lógica:
@@ -65,6 +84,12 @@ Realizamos commits incrementales para cada fase lógica:
 - `feat(physics): change rain intensity mapping to 50, 150, 300, and 500 drops`
 - `feat(ui): add Nada option with 0 drops to rain intensity settings`
 - `feat(physics): update rain intensity mapping to 0, 10, 25, 50, and 100 drops`
+- `feat(config): add wind intensity preference interface and keys`
+- `feat(physics): support variable windIntensity angle calculation in RainDrop`
+- `feat(scene): integrate windIntensity variable in SceneManager reset calls`
+- `feat(ui): add wind intensity seekbar and string label`
+- `feat(ui): hook up seekBarWindIntensity settings listener and label`
+- `test(scene): mock wind intensity in test suite MockConfigProvider`
 
 ## Verificación
 
