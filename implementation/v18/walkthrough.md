@@ -14,11 +14,15 @@ Hemos implementado un nuevo parámetro de configuración deslizante (Slider) baj
 - **[Cloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/Cloud.kt)**:
   - Actualizamos la firma del método `update()` para aceptar el factor `dynamicsSpeed` (entre `0.0f` y `1.0f`, por defecto `1.0f`).
   - Escalamos el incremento de fase `pulseTime` y la amplitud del seno de tamaño (`scale`) usando `dynamicsSpeed`. Al estar en `0f` (0%), el tamaño permanece estático en su `baseScale`.
+  - **Aumento del 50% en la amplitud de respiración**: Incrementamos la fluctuación de tamaño a ±12% (anteriormente ±8%) para una variación más perceptible:
+    `scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)`
   - Multiplicamos la velocidad base de transición de opacidad (`activeFadeSpeed`) por el factor `(0.2f + 0.8f * dynamicsSpeed)` para que la aparición/desaparición al cambiar de densidad opere a un 20% de velocidad mínima de seguridad, evitando que las nubes se queden invisibles de forma permanente si el parámetro está al 0%.
 - **[SceneManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/SceneManager.kt)**:
   - Recuperamos `dynamicsSpeed` en el bucle principal de físicas de `update()` y lo pasamos al llamar a `cloud.update(deltaTime, windSpeed, dynamicsSpeed)`.
 
-### 3. Pantalla de Ajustes
+### 3. Pantalla de Ajustes y Manifiesto
+- **[AndroidManifest.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/AndroidManifest.xml)**:
+  - Configuramos los atributos `android:icon` y `android:roundIcon` para utilizar el recurso `@drawable/ic_storm`, estableciendo el ícono vectorizado premium como ícono oficial de la aplicación.
 - **[activity_settings.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/res/layout/activity_settings.xml)**:
   - Insertamos un nuevo grupo de control RelativeLayout + Slider + TextView para "Respiración y Opacidad" (ID `seekBarCloudDynamicsSpeed`) dentro del primer acordeón.
 - **[WallpaperSettingsActivity.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/WallpaperSettingsActivity.kt)**:

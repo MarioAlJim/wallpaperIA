@@ -34,7 +34,7 @@ class Cloud(
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         // Decrease breathing speed by 90% (multiply accumulation by 0.1f) and scale by dynamicsSpeed
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
-        scale = baseScale * (1.0f + sin(pulseTime) * 0.08f * dynamicsSpeed)
+        scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)
 
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)

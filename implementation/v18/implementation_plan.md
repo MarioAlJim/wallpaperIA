@@ -50,7 +50,7 @@ Este plan describe el diseño e implementación de un nuevo parámetro de config
       // Aplicar dynamicsSpeed a la velocidad de respiración
       pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
       // Aplicar dynamicsSpeed a la amplitud de la respiración (0% = sin cambio de tamaño)
-      scale = baseScale * (1.0f + sin(pulseTime) * 0.08f * dynamicsSpeed)
+      scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)
 
       val windThreshold = 0.1f
       val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)

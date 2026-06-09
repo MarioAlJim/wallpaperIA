@@ -498,14 +498,14 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Cloud should have moved due to driftSpeed", startX != cloud.positionX)
         
-        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 8% of baseScale)
+        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 12% of baseScale)
         val baseSc = cloud.baseScale
         val initialScale = cloud.scale
-        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.081f)
+        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.121f)
         
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Scale should change over time due to pulseTime", initialScale != cloud.scale)
-        assertTrue("Scale should remain within +/- 8% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.081f)
+        assertTrue("Scale should remain within +/- 12% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.121f)
         
         // 4. Verify scaling proportional to wind speed
         // Under zero wind, windFactor = 1.0f -> pulseTime increments by 0.1s
