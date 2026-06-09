@@ -45,6 +45,12 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.dividerLightning,
             R.id.arrowLightning
         )
+        setupAccordion(
+            R.id.headerBackground,
+            R.id.contentBackground,
+            R.id.dividerBackground,
+            R.id.arrowBackground
+        )
 
         // 2. Setup Nubes y Viento Controls
         setupSlider(
@@ -125,6 +131,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.getLightningDuration()
         ) { value ->
             configManager.setLightningDuration(value)
+        }
+
+        val backgroundModes = arrayOf("Color Oscuro (Original)", "Imagen de Fondo")
+        setupSpinner(
+            R.id.spinnerBackgroundMode,
+            backgroundModes,
+            if (configManager.getShowBackground()) 1 else 0
+        ) { position ->
+            configManager.setShowBackground(position == 1)
         }
 
         // 5. Initialize dynamic summaries in headers
@@ -256,6 +271,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val summaryCloudsWind = findViewById<TextView>(R.id.summaryCloudsWind) ?: return
         val summaryRain = findViewById<TextView>(R.id.summaryRain) ?: return
         val summaryLightning = findViewById<TextView>(R.id.summaryLightning) ?: return
+        val summaryBackground = findViewById<TextView>(R.id.summaryBackground) ?: return
 
         // 1. Nubes y Viento summary
         val cloudDensity = configManager.getCloudDensity()
@@ -309,5 +325,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Extremo"
         }
         summaryLightning.text = "Freq: $lightningFreq% | Color: $lightningColorText | Dur: $durationText ($lightningDuration%)"
+
+        // 4. Fondo summary
+        val bgModeText = if (configManager.getShowBackground()) "Imagen de Fondo" else "Color Oscuro"
+        summaryBackground.text = "Fondo: $bgModeText"
     }
 }

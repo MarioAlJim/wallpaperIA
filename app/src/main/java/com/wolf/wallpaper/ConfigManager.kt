@@ -17,6 +17,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_RAIN_SPEED = "rain_speed"
         const val KEY_LIGHTNING_COLOR_INDEX = "lightning_color_index"
         const val KEY_LIGHTNING_DURATION = "lightning_duration"
+        const val KEY_SHOW_BACKGROUND = "show_background"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -27,6 +28,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_RAIN_SPEED = 50
         const val DEFAULT_LIGHTNING_COLOR_INDEX = 0
         const val DEFAULT_LIGHTNING_DURATION = 30
+        const val DEFAULT_SHOW_BACKGROUND = true
     }
 
     override fun getCloudDensity(): Int {
@@ -99,5 +101,13 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setLightningDuration(duration: Int) {
         prefs.edit().putInt(KEY_LIGHTNING_DURATION, duration.coerceIn(0, 100)).apply()
+    }
+
+    override fun getShowBackground(): Boolean {
+        return prefs.getBoolean(KEY_SHOW_BACKGROUND, DEFAULT_SHOW_BACKGROUND)
+    }
+
+    fun setShowBackground(show: Boolean) {
+        prefs.edit().putBoolean(KEY_SHOW_BACKGROUND, show).apply()
     }
 }

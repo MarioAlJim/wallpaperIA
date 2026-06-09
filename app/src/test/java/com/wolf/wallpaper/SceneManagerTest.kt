@@ -19,6 +19,7 @@ class SceneManagerTest {
         var mockRainSpeed = 50
         var mockLightningColorIndex = 0
         var mockLightningDuration = 30
+        var mockShowBackground = true
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -29,6 +30,7 @@ class SceneManagerTest {
         override fun getRainSpeed(): Int = mockRainSpeed
         override fun getLightningColorIndex(): Int = mockLightningColorIndex
         override fun getLightningDuration(): Int = mockLightningDuration
+        override fun getShowBackground(): Boolean = mockShowBackground
     }
 
     @Test
@@ -55,6 +57,19 @@ class SceneManagerTest {
         mockConfig.mockCloudDensity = 100
         sceneManager.update(0.016f)
         assertEquals(20, sceneManager.getClouds().size)
+    }
+
+    @Test
+    fun testBackgroundConfigWrapper() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+
+        mockConfig.mockShowBackground = true
+        sceneManager.update(0.016f)
+        assertTrue(sceneManager.getShowBackground())
+
+        mockConfig.mockShowBackground = false
+        sceneManager.update(0.016f)
+        assertTrue(!sceneManager.getShowBackground())
     }
 
     @Test

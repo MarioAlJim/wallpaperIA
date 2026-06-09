@@ -10,4 +10,5 @@ interface ConfigProvider {
     fun getRainSpeed(): Int
     fun getLightningColorIndex(): Int
     fun getLightningDuration(): Int
+    fun getShowBackground(): Boolean
 }
