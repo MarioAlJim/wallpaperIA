@@ -256,8 +256,13 @@ class StormRenderer(private val context: Context) {
         val flashIntensityHandle = GLES30.glGetUniformLocation(lightningProgram, "uFlashIntensity")
         val isTexturedHandle = GLES30.glGetUniformLocation(lightningProgram, "uIsTextured")
         val textureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
+        val colorHandle = GLES30.glGetUniformLocation(lightningProgram, "uLightningColor")
 
-        // 1. Draw full screen overlay flash (solid color white, uIsTextured = 0)
+        // Load and bind lightning color
+        val color = getLightningColor(lightning.selectedColorIndex)
+        GLES30.glUniform4fv(colorHandle, 1, color, 0)
+
+        // 1. Draw full screen overlay flash (solid color, uIsTextured = 0)
         GLES30.glUniform1i(isTexturedHandle, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, identityMatrix, 0)
         GLES30.glUniform1f(flashIntensityHandle, lightning.intensity * 0.20f)
@@ -300,6 +305,18 @@ class StormRenderer(private val context: Context) {
             GLES30.glDisableVertexAttribArray(1)
         }
         GLES30.glDisableVertexAttribArray(0)
+    }
+
+    private fun getLightningColor(index: Int): FloatArray {
+        return when (index) {
+            0 -> floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f) // Blanco
+            1 -> floatArrayOf(0.4f, 0.6f, 1.0f, 1.0f) // Azul
+            2 -> floatArrayOf(1.0f, 0.9f, 0.2f, 1.0f) // Amarillo
+            3 -> floatArrayOf(1.0f, 0.2f, 0.2f, 1.0f) // Rojo
+            4 -> floatArrayOf(0.2f, 1.0f, 0.2f, 1.0f) // Verde
+            5 -> floatArrayOf(0.8f, 0.3f, 1.0f, 1.0f) // Morado
+            else -> floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
+        }
     }
 
     private fun readAssetFile(context: Context, path: String): String {
