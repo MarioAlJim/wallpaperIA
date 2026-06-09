@@ -19,6 +19,7 @@ class StormRenderer(private val context: Context) {
     // Texture IDs
     private val cloudTextures = IntArray(3)
     private var rainTexture = 0
+    private val lightningTextures = mutableListOf<Int>()
     
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -29,6 +30,7 @@ class StormRenderer(private val context: Context) {
     // Buffers for geometric drawing
     private lateinit var fullscreenQuadBuffer: FloatBuffer
     private lateinit var cloudQuadBuffer: FloatBuffer
+    private lateinit var lightningQuadBuffer: FloatBuffer
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -59,6 +61,23 @@ class StormRenderer(private val context: Context) {
         cloudTextures[2] = loadTexture(context, "clouds/cloud_03.png")
         rainTexture = loadTexture(context, "rain/rain_particle.png")
 
+        // Dynamically load lightning textures from assets/lightning
+        lightningTextures.clear()
+        try {
+            val assetManager = context.assets
+            val files = assetManager.list("lightning") ?: emptyArray()
+            for (file in files) {
+                if (file.endsWith(".png")) {
+                    val tex = loadTexture(context, "lightning/$file")
+                    if (tex != 0) {
+                        lightningTextures.add(tex)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         // Screen quad coordinates (for full-screen flash using identity matrix)
         val fullscreenCoords = floatArrayOf(
             -1f,  1f,
@@ -86,6 +105,20 @@ class StormRenderer(private val context: Context) {
                 put(cloudCoords)
                 position(0)
             }
+
+        // Lightning quad coordinates with UV coordinates: (X, Y, U, V)
+        val lightningCoords = floatArrayOf(
+            -0.5f,  0.5f, 0f, 0f,
+            -0.5f, -0.5f, 0f, 1f,
+             0.5f,  0.5f, 1f, 0f,
+             0.5f, -0.5f, 1f, 1f
+        )
+        lightningQuadBuffer = ByteBuffer.allocateDirect(lightningCoords.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer().apply {
+                put(lightningCoords)
+                position(0)
+            }
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
@@ -101,8 +134,7 @@ class StormRenderer(private val context: Context) {
         var clearG = 0.04f
         var clearB = 0.06f
 
-        // Apply lightning flash peak color directly to background (Disabled for now)
-        /*
+        // Apply lightning flash peak color directly to background
         val lightning = sceneManager.lightning
         if (lightning.isActive) {
             val flashCoeff = lightning.intensity * 0.45f
@@ -110,7 +142,6 @@ class StormRenderer(private val context: Context) {
             clearG += flashCoeff
             clearB += flashCoeff + 0.05f // Tint flash slightly blue
         }
-        */
 
         GLES30.glClearColor(clearR, clearG, clearB, 1.0f)
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
@@ -118,7 +149,7 @@ class StormRenderer(private val context: Context) {
         // Render layered elements in order: Nubes -> Lluvia -> Rayos
         // drawClouds(sceneManager.getClouds())
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
-        // drawLightning(lightning)
+        drawLightning(lightning)
     }
 
     private fun drawClouds(clouds: List<Cloud>) {
@@ -223,10 +254,12 @@ class StormRenderer(private val context: Context) {
         GLES30.glUseProgram(lightningProgram)
         val mvpMatrixHandle = GLES30.glGetUniformLocation(lightningProgram, "uMVPMatrix")
         val flashIntensityHandle = GLES30.glGetUniformLocation(lightningProgram, "uFlashIntensity")
+        val isTexturedHandle = GLES30.glGetUniformLocation(lightningProgram, "uIsTextured")
+        val textureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
 
-        // 1. Draw full screen overlay flash
+        // 1. Draw full screen overlay flash (solid color white, uIsTextured = 0)
+        GLES30.glUniform1i(isTexturedHandle, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, identityMatrix, 0)
-        // Flash is soft transparent white
         GLES30.glUniform1f(flashIntensityHandle, lightning.intensity * 0.20f)
 
         fullscreenQuadBuffer.position(0)
@@ -234,36 +267,38 @@ class StormRenderer(private val context: Context) {
         GLES30.glEnableVertexAttribArray(0)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 
-        // 2. Draw procedural lightning branches
-        val branches = lightning.branches
-        if (branches.isNotEmpty()) {
-            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
-            // The bolt core is full intensity white
+        // 2. Draw textured lightning bolt (uIsTextured = 1)
+        if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
+            GLES30.glUniform1i(isTexturedHandle, 1)
             GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
 
-            val lineVertices = FloatArray(branches.size * 4)
-            var idx = 0
-            for (branch in branches) {
-                lineVertices[idx++] = branch.startX
-                lineVertices[idx++] = branch.startY
-                lineVertices[idx++] = branch.endX
-                lineVertices[idx++] = branch.endY
-            }
-
-            val lineBuffer = ByteBuffer.allocateDirect(lineVertices.size * 4)
-                .order(ByteOrder.nativeOrder())
-                .asFloatBuffer().apply {
-                    put(lineVertices)
-                    position(0)
-                }
-
-            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, lineBuffer)
+            val modelMatrix = FloatArray(16)
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, lightning.positionX, lightning.positionY, 0f)
+            Matrix.scaleM(modelMatrix, 0, lightning.scaleX, lightning.scaleY, 1.0f)
             
-            // Draw thick line for the main bolt
-            GLES30.glLineWidth(3.5f)
-            GLES30.glDrawArrays(GLES30.GL_LINES, 0, branches.size * 2)
-        }
+            val modelViewProjection = FloatArray(16)
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
+            // Bind position coordinates (location 0)
+            lightningQuadBuffer.position(0)
+            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
+            GLES30.glEnableVertexAttribArray(0)
+
+            // Bind UV texture coordinates (location 1)
+            lightningQuadBuffer.position(2)
+            GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
+            GLES30.glEnableVertexAttribArray(1)
+
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, lightningTextures[lightning.selectedTextureIndex])
+            GLES30.glUniform1i(textureHandle, 0)
+
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+            GLES30.glDisableVertexAttribArray(1)
+        }
         GLES30.glDisableVertexAttribArray(0)
     }
 
