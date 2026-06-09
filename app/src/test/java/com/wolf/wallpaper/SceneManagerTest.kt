@@ -195,7 +195,7 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
-            assertTrue("ScaleY should be in range [0.3f, 1.5f]", sceneManager.lightning.scaleY in 0.3f..1.5f)
+            assertTrue("ScaleY should be in range [0.45f, 1.5f]", sceneManager.lightning.scaleY in 0.45f..1.5f)
             assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.45f..0.91f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
@@ -551,14 +551,31 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Cloud should have moved due to driftSpeed", startX != cloud.positionX)
         
-        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 28.125% of baseScale)
+        // 3. Verify scale oscillates within the new bounds (+/- 56.25% of baseScale)
         val baseSc = cloud.baseScale
-        val initialScale = cloud.scale
-        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.28126f)
         
-        cloud.update(deltaTime = 1.0f, windSpeed = 0f)
-        assertTrue("Scale should change over time due to pulseTime", initialScale != cloud.scale)
-        assertTrue("Scale should remain within +/- 28.125% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.28126f)
+        // Force grow-only behavior
+        cloud.onlyGrows = true
+        cloud.pulseTime = 0f
+        cloud.update(deltaTime = 0f, windSpeed = 0f) // recalculate scale
+        val initialScaleGrow = cloud.scale
+        assertTrue("For grow-only, scale should be >= baseScale", cloud.scale >= baseSc - 0.001f)
+        assertTrue("Grow-only scale should be in range [baseScale, baseScale * 1.5625f]", cloud.scale in baseSc - 0.001f..baseSc * 1.5626f)
+        
+        cloud.update(deltaTime = 5.0f, windSpeed = 0f)
+        assertTrue("Scale should change over time", initialScaleGrow != cloud.scale)
+        assertTrue("Grow-only scale should remain in range [baseScale, baseScale * 1.5625f]", cloud.scale in baseSc - 0.001f..baseSc * 1.5626f)
+        
+        // Force shrink-only behavior
+        cloud.onlyGrows = false
+        cloud.update(deltaTime = 0f, windSpeed = 0f) // recalculate scale
+        val initialScaleShrink = cloud.scale
+        assertTrue("For shrink-only, scale should be <= baseScale", cloud.scale <= baseSc + 0.001f)
+        assertTrue("Shrink-only scale should be in range [baseScale * 0.4375f, baseScale]", cloud.scale in baseSc * 0.4374f..baseSc + 0.001f)
+        
+        cloud.update(deltaTime = 5.0f, windSpeed = 0f)
+        assertTrue("Scale should change over time", initialScaleShrink != cloud.scale)
+        assertTrue("Shrink-only scale should remain in range [baseScale * 0.4375f, baseScale]", cloud.scale in baseSc * 0.4374f..baseSc + 0.001f)
         
         // 4. Verify scaling proportional to wind speed
         // Under zero wind, windFactor = 1.0f -> pulseTime increments by 0.1s

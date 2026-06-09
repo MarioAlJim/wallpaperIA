@@ -22,6 +22,7 @@ class Cloud(
     var baseScale: Float = scale
     var basePositionY: Float = positionY
     var pulseTime: Float = 0f
+    var onlyGrows: Boolean = true
 
     val speedZFactor: Float
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
@@ -34,7 +35,14 @@ class Cloud(
         val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
-        scale = baseScale * (1.0f + sin(pulseTime) * 0.28125f * dynamicsSpeed)
+        
+        val breathingFactor = (sin(pulseTime) + 1.0f) * 0.5f
+        val amplitude = 0.5625f * dynamicsSpeed
+        scale = if (onlyGrows) {
+            baseScale * (1.0f + breathingFactor * amplitude)
+        } else {
+            baseScale * (1.0f - breathingFactor * amplitude)
+        }
 
         // Subtle vertical Y axis movement based on dynamicsSpeed
         positionY = basePositionY + sin(pulseTime * 0.5f) * 0.06f * baseScale * dynamicsSpeed
@@ -82,5 +90,6 @@ class Cloud(
 
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
+        onlyGrows = Random.nextBoolean()
     }
 }

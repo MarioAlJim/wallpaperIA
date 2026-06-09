@@ -93,7 +93,7 @@ class Lightning(
             }
         }
 
-        val minHeight = 2.0f * 0.15f // 15% of screen height (0.3f)
+        val minHeight = 2.0f * 0.225f // 22.5% of screen height (0.45f, increased by 50% from 0.15f/0.3f)
         val maxHeight = 2.0f * 0.75f // 75% of screen height (1.5f)
         scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
         scaleX = kotlin.random.Random.nextFloat() * 0.45f + 0.45f // width of the bolt: 0.45 to 0.9 (doubled from 0.225..0.45)
