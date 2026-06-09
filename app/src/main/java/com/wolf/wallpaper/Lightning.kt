@@ -42,11 +42,18 @@ class Lightning(
         // Coordinated by StormRenderer
     }
 
-    fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int) {
+    fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int, durationPercentage: Int = 30) {
         isActive = true
         age = 0f
         intensity = 1.0f
-        duration = kotlin.random.Random.nextFloat() * 0.15f + 0.2f // between 200ms and 350ms
+        
+        val baseMin = if (durationPercentage <= 50) {
+            0.15f + (durationPercentage / 50f) * 0.15f
+        } else {
+            0.30f + ((durationPercentage - 50) / 50f) * 0.70f
+        }
+        val baseMax = baseMin + 0.15f
+        duration = kotlin.random.Random.nextFloat() * (baseMax - baseMin) + baseMin
         
         // Select random texture index
         selectedTextureIndex = if (textureCount > 0) kotlin.random.Random.nextInt(textureCount) else 0

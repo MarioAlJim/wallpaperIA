@@ -100,7 +100,7 @@ class SceneManager(
                     } else {
                         configColorIndex
                     }
-                    inactiveLightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse)
+                    inactiveLightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse, configProvider.getLightningDuration())
                 }
                 timeSinceLastLightning = 0f
                 setupNextLightningDelay()
