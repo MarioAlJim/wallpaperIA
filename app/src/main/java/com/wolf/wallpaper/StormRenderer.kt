@@ -182,10 +182,10 @@ class StormRenderer(private val context: Context) {
         GLES30.glClearColor(clearR, clearG, clearB, 1.0f)
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
-        // Render layered elements in order: Nubes -> Lluvia -> Rayos
-        drawClouds(sceneManager.getClouds())
+        // Render layered elements in order: Lluvia -> Rayos -> Nubes
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings)
+        drawClouds(sceneManager.getClouds())
     }
 
     private fun drawClouds(clouds: List<Cloud>) {
