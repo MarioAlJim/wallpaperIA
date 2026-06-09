@@ -8,4 +8,5 @@ interface ConfigProvider {
     fun getRainColorIndex(): Int
     fun getWindIntensity(): Int
     fun getRainSpeed(): Int
+    fun getLightningColorIndex(): Int
 }
