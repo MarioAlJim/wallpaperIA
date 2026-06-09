@@ -21,6 +21,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_BACKGROUND_INDEX = "background_index"
         const val KEY_CLOUD_FLASH_FREQUENCY = "cloud_flash_frequency"
         const val KEY_CLOUD_FLASH_COLOR_INDEX = "cloud_flash_color_index"
+        const val KEY_CLOUD_DYNAMICS_SPEED = "cloud_dynamics_speed"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -34,6 +35,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_BACKGROUND_INDEX = 1
         const val DEFAULT_CLOUD_FLASH_FREQUENCY = 50
         const val DEFAULT_CLOUD_FLASH_COLOR_INDEX = 0
+        const val DEFAULT_CLOUD_DYNAMICS_SPEED = 100
     }
 
     override fun getCloudDensity(): Int {
@@ -130,5 +132,13 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setCloudFlashColorIndex(index: Int) {
         prefs.edit().putInt(KEY_CLOUD_FLASH_COLOR_INDEX, index.coerceIn(0, 6)).apply()
+    }
+
+    override fun getCloudDynamicsSpeed(): Int {
+        return prefs.getInt(KEY_CLOUD_DYNAMICS_SPEED, DEFAULT_CLOUD_DYNAMICS_SPEED)
+    }
+
+    fun setCloudDynamicsSpeed(speed: Int) {
+        prefs.edit().putInt(KEY_CLOUD_DYNAMICS_SPEED, speed.coerceIn(0, 100)).apply()
     }
 }

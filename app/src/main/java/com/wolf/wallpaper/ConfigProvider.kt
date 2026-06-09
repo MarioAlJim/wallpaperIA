@@ -13,4 +13,5 @@ interface ConfigProvider {
     fun getBackgroundIndex(): Int
     fun getCloudFlashFrequency(): Int
     fun getCloudFlashColorIndex(): Int
+    fun getCloudDynamicsSpeed(): Int
 }

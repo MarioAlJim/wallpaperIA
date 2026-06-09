@@ -65,8 +65,9 @@ class SceneManager(
             2 -> (windIntensity / 100f) * 0.15f
             else -> 0f
         }
+        val dynamicsSpeed = configProvider.getCloudDynamicsSpeed() / 100f
         for (cloud in clouds) {
-            cloud.update(deltaTime, windSpeed)
+            cloud.update(deltaTime, windSpeed, dynamicsSpeed)
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
             if (windSpeed > 0f) {

@@ -22,6 +22,7 @@ class SceneManagerTest {
         var mockBackgroundIndex = 1
         var mockCloudFlashFrequency = 50
         var mockCloudFlashColorIndex = 0
+        var mockCloudDynamicsSpeed = 100
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -35,6 +36,7 @@ class SceneManagerTest {
         override fun getBackgroundIndex(): Int = mockBackgroundIndex
         override fun getCloudFlashFrequency(): Int = mockCloudFlashFrequency
         override fun getCloudFlashColorIndex(): Int = mockCloudFlashColorIndex
+        override fun getCloudDynamicsSpeed(): Int = mockCloudDynamicsSpeed
     }
 
     @Test
@@ -525,5 +527,30 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0.1f)
         val expectedMove = 0.1f * cloud.speedFactor * cloud.speedZFactor * 1.0f
         assertEquals(startXWind + expectedMove, cloud.positionX, 0.001f)
+    }
+
+    @Test
+    fun testCloudDynamicsSpeedConfig() {
+        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
+        cloud.reset(0f, 1.0f)
+        
+        // 1. With dynamicsSpeed = 0f (0% speed)
+        // Breathing phase should not advance (pulseTime remains the same)
+        val pTimeBefore = cloud.pulseTime
+        cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
+        assertEquals(pTimeBefore, cloud.pulseTime, 0.001f)
+        
+        // Scale should remain exactly baseScale (no amplitude fluctuation)
+        assertEquals(cloud.baseScale, cloud.scale, 0.001f)
+        
+        // Opacity transition should still progress at a minimum of 20% speed
+        // Set targetOpacity to 1.0f (so it fades in)
+        cloud.targetOpacity = 1.0f
+        cloud.opacity = 0.5f
+        cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
+        // windFactorOpacity = 1.0f
+        // activeFadeSpeed = 0.15f * 1.0f * (0.2f + 0.8f * 0f) = 0.03f
+        // opacity should increase by exactly 0.03f
+        assertEquals(0.53f, cloud.opacity, 0.001f)
     }
 }

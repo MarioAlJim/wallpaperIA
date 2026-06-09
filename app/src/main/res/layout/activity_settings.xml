@@ -234,6 +234,47 @@
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
 
+                    <!-- Cloud Dynamics / Breathing Effect -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Respiración y Opacidad"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewCloudDynamicsSpeedValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="100%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarCloudDynamicsSpeed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="100"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ajusta la velocidad del efecto de respiración de tamaño y transiciones de opacidad en las nubes (0% para desactivar)."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp" />
+
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

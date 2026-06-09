@@ -115,6 +115,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setWindIntensity(value)
         }
 
+        setupSlider(
+            R.id.seekBarCloudDynamicsSpeed,
+            R.id.textViewCloudDynamicsSpeedValue,
+            configManager.getCloudDynamicsSpeed()
+        ) { value ->
+            configManager.setCloudDynamicsSpeed(value)
+        }
+
         // 3. Setup Lluvia Controls
         val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
         val initialRainValue = configManager.getRainIntensity()
@@ -290,6 +298,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             }
             R.id.seekBarWindIntensity -> {
                 textView.text = "$value%"
+            }
+            R.id.seekBarCloudDynamicsSpeed -> {
+                textView.text = if (value == 0) "Desactivado" else "$value%"
             }
             R.id.seekBarRainSpeed -> {
                 textView.text = "$value%"
