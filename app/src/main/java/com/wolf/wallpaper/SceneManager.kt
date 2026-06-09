@@ -81,26 +81,34 @@ class SceneManager(
             }
         }
 
-        // 3. Update Lightning (Disabled for now)
-        /*
+        // 3. Update Lightning
         if (lightning.isActive) {
             lightning.update(deltaTime)
         } else {
             if (lightningFrequency > 0) {
                 timeSinceLastLightning += deltaTime
                 if (timeSinceLastLightning >= nextLightningDelay) {
-                    lightning.trigger(aspectRatio)
+                    lightning.trigger(aspectRatio, getLightningTextureCount())
                     timeSinceLastLightning = 0f
                     setupNextLightningDelay()
                 }
             }
         }
-        */
     }
 
     fun getClouds(): List<Cloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
+
+    fun getLightningTextureCount(): Int {
+        if (context == null) return 1
+        return try {
+            val files = context.assets.list("lightning") ?: emptyArray()
+            files.filter { it.endsWith(".png") }.size
+        } catch (e: Exception) {
+            1
+        }
+    }
 
     private fun updateFromConfig() {
         val targetDensity = configProvider.getCloudDensity()
