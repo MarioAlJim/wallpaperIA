@@ -19,11 +19,14 @@ Hemos implementado la característica de **Dinámica Atmosférica y Deriva Bidir
   - Esto da un efecto vaporoso y natural a las nubes, simulando que "respiran" y cambian de forma lentamente.
 
 ### 3. Escalamiento Proporcional al Viento (`windFactor`)
-- Para sincronizar el dinamismo atmosférico general, la velocidad del desvanecimiento (`fadeSpeed`) y la velocidad de la oscilación de tamaño (`pulseTime`) se multiplican por un factor que depende de la velocidad del viento:
-  $$\text{windFactor} = 1.0f + |windSpeed| \times 10.0f$$
-  - `activeFadeSpeed = 1.5f * windFactor`
-  - `pulseTime += deltaTime * windFactor`
-- Al aumentar el viento horizontal, las nubes cambian su opacidad y tamaño de manera más ágil, sin producir transiciones bruscas.
+- Para sincronizar el dinamismo atmosférico general, la velocidad del desvanecimiento (`fadeSpeed`) y la velocidad de la oscilación de tamaño (`pulseTime`) se multiplican por factores que dependen de la velocidad del viento horizontal:
+  - Opacidad:
+    $$\text{windFactorOpacity} = 1.0f + |windSpeed| \times 10.0f$$
+    `activeFadeSpeed = 1.5f * windFactorOpacity`
+  - Respiración/Tamaño (influencia reducida en un 50% para evitar oscilaciones exageradas):
+    $$\text{windFactorBreathing} = 1.0f + |windSpeed| \times 5.0f$$
+    `pulseTime += deltaTime * windFactorBreathing`
+- Al aumentar el viento horizontal, las nubes cambian su opacidad y tamaño de manera más ágil, sin producir transiciones bruscas ni exageradas.
 
 ### 4. Nuevos Límites de Tamaño (+15% mínimo, +25% máximo)
 - En `reset()`, se aumentaron los límites del tamaño inicial calculado antes de la escala por profundidad `z`:

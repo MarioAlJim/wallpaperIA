@@ -511,11 +511,11 @@ class SceneManagerTest {
         cloud.update(deltaTime = 0.1f, windSpeed = 0f)
         val deltaZero = cloud.pulseTime - pTimeZero
         
-        // Under strong wind (0.15f), windFactor = 1.0f + 0.15f * 10 = 2.5f -> pulseTime increments by 0.25s
+        // Under strong wind (0.15f), windFactor = 1.0f + 0.15f * 5 = 1.75f -> pulseTime increments by 0.175s
         val pTimeWind = cloud.pulseTime
         cloud.update(deltaTime = 0.1f, windSpeed = 0.15f)
         val deltaWind = cloud.pulseTime - pTimeWind
         
-        assertTrue("Pulse time should accumulate faster with wind ($deltaWind vs $deltaZero)", deltaWind > deltaZero * 1.5f)
+        assertTrue("Pulse time should accumulate faster with wind ($deltaWind vs $deltaZero)", deltaWind > deltaZero * 1.3f)
     }
 }
