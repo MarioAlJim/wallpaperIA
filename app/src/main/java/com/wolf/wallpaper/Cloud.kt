@@ -20,6 +20,7 @@ class Cloud(
 
     var driftSpeed: Float = 0f
     var baseScale: Float = scale
+    var basePositionY: Float = positionY
     var pulseTime: Float = 0f
 
     val speedZFactor: Float
@@ -33,14 +34,17 @@ class Cloud(
         val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
-        scale = baseScale * (1.0f + sin(pulseTime) * 0.15f * dynamicsSpeed)
+        scale = baseScale * (1.0f + sin(pulseTime) * 0.1875f * dynamicsSpeed)
+
+        // Subtle vertical Y axis movement based on dynamicsSpeed
+        positionY = basePositionY + sin(pulseTime * 0.5f) * 0.03f * baseScale * dynamicsSpeed
 
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
         positionX += (windSpeed + (driftSpeed * driftInfluence)) * speedFactor * speedZFactor * deltaTime
         
-        // Smoothly transition opacity - decreased by 90% (base speed from 1.5f to 0.225f) and scaled by dynamicsSpeed (min speed 20%)
-        val activeFadeSpeed = 0.225f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
+        // Smoothly transition opacity - decreased by 90% (base speed from 1.5f to 0.3375f) and scaled by dynamicsSpeed (min speed 20%)
+        val activeFadeSpeed = 0.3375f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
         if (isFadingOut) {
             opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(0f)
         } else {
@@ -62,7 +66,7 @@ class Cloud(
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         
         val minScale = 0.345f
-        val maxScale = 1.25f
+        val maxScale = 1.5625f
         baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
         scale = baseScale
         
@@ -70,6 +74,7 @@ class Cloud(
         val minY = scale * 0.5f
         val maxY = 1.0f - scale * 0.5f
         positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else minY
+        basePositionY = positionY
         
         targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z
         opacity = targetOpacity

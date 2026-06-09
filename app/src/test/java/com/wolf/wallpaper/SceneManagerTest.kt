@@ -416,7 +416,7 @@ class SceneManagerTest {
             
             // 2. scale should be (Random.nextFloat() * (1.25f - 0.345f) + 0.345f) * z
             val minExpectedScale = 0.345f * cloud.z - 0.001f
-            val maxExpectedScale = 1.25f * cloud.z + 0.001f
+            val maxExpectedScale = 1.5625f * cloud.z + 0.001f
             assertTrue("Scale (${cloud.scale}) should be scaled by z", cloud.scale in minExpectedScale..maxExpectedScale)
             
             // 3. opacity should be (Random.nextFloat() * 0.4f + 0.4f) * z
@@ -549,14 +549,14 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Cloud should have moved due to driftSpeed", startX != cloud.positionX)
         
-        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 15% of baseScale)
+        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 18.75% of baseScale)
         val baseSc = cloud.baseScale
         val initialScale = cloud.scale
-        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.151f)
+        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.1876f)
         
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Scale should change over time due to pulseTime", initialScale != cloud.scale)
-        assertTrue("Scale should remain within +/- 15% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.151f)
+        assertTrue("Scale should remain within +/- 18.75% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.1876f)
         
         // 4. Verify scaling proportional to wind speed
         // Under zero wind, windFactor = 1.0f -> pulseTime increments by 0.1s
@@ -578,6 +578,20 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0.1f)
         val expectedMove = 0.1f * cloud.speedFactor * cloud.speedZFactor * 1.0f
         assertEquals(startXWind + expectedMove, cloud.positionX, 0.001f)
+
+        // 6. Verify Y-axis oscillation
+        val basePosY = cloud.basePositionY
+        val initialPosY = cloud.positionY
+        // With dynamicsSpeed = 1.0f, positionY should oscillate sutilmente around basePositionY
+        assertTrue("Initial Y position should be near basePositionY", kotlin.math.abs(cloud.positionY - basePosY) <= 0.031f * cloud.baseScale)
+        
+        cloud.update(deltaTime = 2.0f, windSpeed = 0f, dynamicsSpeed = 1.0f)
+        assertTrue("Y position should change over time", initialPosY != cloud.positionY)
+        assertTrue("Y position should remain within oscillation bounds", kotlin.math.abs(cloud.positionY - basePosY) <= 0.031f * cloud.baseScale)
+        
+        // With dynamicsSpeed = 0f, Y position should be exactly basePositionY
+        cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
+        assertEquals(basePosY, cloud.positionY, 0.001f)
     }
 
     @Test
@@ -593,6 +607,9 @@ class SceneManagerTest {
         
         // Scale should remain exactly baseScale (no amplitude fluctuation)
         assertEquals(cloud.baseScale, cloud.scale, 0.001f)
+
+        // Y position should remain exactly basePositionY
+        assertEquals(cloud.basePositionY, cloud.positionY, 0.001f)
         
         // Opacity transition should still progress at a minimum of 20% speed
         // Set targetOpacity to 1.0f (so it fades in)
@@ -600,8 +617,8 @@ class SceneManagerTest {
         cloud.opacity = 0.5f
         cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
         // windFactorOpacity = 1.0f
-        // activeFadeSpeed = 0.225f * 1.0f * (0.2f + 0.8f * 0f) = 0.045f
-        // opacity should increase by exactly 0.045f
-        assertEquals(0.545f, cloud.opacity, 0.001f)
+        // activeFadeSpeed = 0.3375f * 1.0f * (0.2f + 0.8f * 0f) = 0.0675f
+        // opacity should increase by exactly 0.0675f
+        assertEquals(0.5675f, cloud.opacity, 0.001f)
     }
 }
