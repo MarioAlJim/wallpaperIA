@@ -71,11 +71,15 @@ class SceneManager(
             val maxBound = aspectRatio + halfWidth
             if (windSpeed > 0f) {
                 if (cloud.positionX > maxBound) {
-                    cloud.reset(-maxBound, aspectRatio)
+                    cloud.reset(0f, aspectRatio)
+                    val newHalfWidth = cloud.scale * 1.2f
+                    cloud.positionX = -aspectRatio - newHalfWidth
                 }
             } else if (windSpeed < 0f) {
                 if (cloud.positionX < -maxBound) {
-                    cloud.reset(maxBound, aspectRatio)
+                    cloud.reset(0f, aspectRatio)
+                    val newHalfWidth = cloud.scale * 1.2f
+                    cloud.positionX = aspectRatio + newHalfWidth
                 }
             }
         }
