@@ -7,6 +7,7 @@ Adicionalmente, se aplicaron las siguientes correcciones de diseño y UI solicit
 2. **Posición delantera (Capas)**: Se cambió el orden de renderizado para dibujar las nubes al final del ciclo de renderizado, colocándolas delante de la lluvia y de los rayos.
 3. **Incremento de tamaño**: Se aumentó el tamaño general de las nubes y sus variaciones en `0.2` (escalas entre `0.5` y `1.3`).
 4. **Visibilidad en Configuración**: Se removió el atributo `android:visibility="gone"` de la tarjeta de Densidad de Nubes en `activity_settings.xml`, haciendo visible y funcional la opción para que el usuario controle la densidad o cantidad de nubes flotando simultáneamente.
+5. **Grosor de la Lluvia**: Se incrementó la anchura de las líneas de la lluvia en `0.1`, cambiando la llamada `GLES30.glLineWidth(2.0f)` a `GLES30.glLineWidth(2.1f)` en `StormRenderer.kt`.
 
 ## Cambios Realizados
 
@@ -26,6 +27,7 @@ Adicionalmente, se aplicaron las siguientes correcciones de diseño y UI solicit
 * En `onSurfaceCreated()`, se cargan dinámicamente y se ordenan alfabéticamente todos los PNG de `assets/clouds`.
 * En `drawFrame()`, se cambió el orden de renderizado para llamar a `drawClouds` después de dibujar la lluvia y los rayos (dibujándolas al final para colocarlas al frente).
 * Se actualizó `drawClouds()` para usar la lista dinámica de texturas de forma segura aplicando el módulo del tamaño de la lista: `cloudTextures[cloud.textureIndex % cloudTextures.size]`.
+* Se aumentó el grosor de las líneas en `drawRain()` incrementando `glLineWidth` a `2.1f`.
 
 ### 4. Interfaz de Configuración (`activity_settings.xml`)
 * Se eliminó el atributo `android:visibility="gone"` en el contenedor `CardView` de la densidad de nubes (`seekBarCloudDensity`) para revelar y habilitar la opción en la UI.
@@ -41,6 +43,7 @@ Adicionalmente, se aplicaron las siguientes correcciones de diseño y UI solicit
 - `test(scene): add test cases for cloud movement, wind direction, and screen wrapping`
 - `fix(clouds): disperse clouds along Y axis, render them in front of rain/lightning, and increase scale by 0.2`
 - `fix(settings): remove gone visibility from Cloud Density Card view to expose density slider in UI`
+- `fix(rain): increase rain drop line width by 0.1 to 2.1f`
 
 ## Verificación
 
