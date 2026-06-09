@@ -32,16 +32,15 @@ class Cloud(
     fun update(deltaTime: Float, windSpeed: Float, dynamicsSpeed: Float = 1.0f) {
         val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
-        // Decrease breathing speed by 90% (multiply accumulation by 0.1f) and scale by dynamicsSpeed
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
-        scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)
+        scale = baseScale * (1.0f + sin(pulseTime) * 0.15f * dynamicsSpeed)
 
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
         positionX += (windSpeed + (driftSpeed * driftInfluence)) * speedFactor * speedZFactor * deltaTime
         
-        // Smoothly transition opacity - decreased by 90% (base speed from 1.5f to 0.15f) and scaled by dynamicsSpeed (min speed 20%)
-        val activeFadeSpeed = 0.15f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
+        // Smoothly transition opacity - decreased by 90% (base speed from 1.5f to 0.225f) and scaled by dynamicsSpeed (min speed 20%)
+        val activeFadeSpeed = 0.225f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
         if (isFadingOut) {
             opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(0f)
         } else {

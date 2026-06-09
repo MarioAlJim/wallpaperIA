@@ -50,14 +50,14 @@ Este plan describe el diseño e implementación de un nuevo parámetro de config
       // Aplicar dynamicsSpeed a la velocidad de respiración
       pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
       // Aplicar dynamicsSpeed a la amplitud de la respiración (0% = sin cambio de tamaño)
-      scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)
+      scale = baseScale * (1.0f + sin(pulseTime) * 0.15f * dynamicsSpeed)
 
       val windThreshold = 0.1f
       val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
       positionX += (windSpeed + (driftSpeed * driftInfluence)) * speedFactor * speedZFactor * deltaTime
       
       // Escalar la velocidad de desvanecimiento manteniendo una velocidad mínima de seguridad del 20%
-      val activeFadeSpeed = 0.15f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
+      val activeFadeSpeed = 0.225f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
       if (isFadingOut) {
           opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(0f)
       } else {

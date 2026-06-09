@@ -14,9 +14,12 @@ Hemos implementado un nuevo parámetro de configuración deslizante (Slider) baj
 - **[Cloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/Cloud.kt)**:
   - Actualizamos la firma del método `update()` para aceptar el factor `dynamicsSpeed` (entre `0.0f` y `1.0f`, por defecto `1.0f`).
   - Escalamos el incremento de fase `pulseTime` y la amplitud del seno de tamaño (`scale`) usando `dynamicsSpeed`. Al estar en `0f` (0%), el tamaño permanece estático en su `baseScale`.
-  - **Aumento del 50% en la amplitud de respiración**: Incrementamos la fluctuación de tamaño a ±12% (anteriormente ±8%) para una variación más perceptible:
-    `scale = baseScale * (1.0f + sin(pulseTime) * 0.12f * dynamicsSpeed)`
-  - Multiplicamos la velocidad base de transición de opacidad (`activeFadeSpeed`) por el factor `(0.2f + 0.8f * dynamicsSpeed)` para que la aparición/desaparición al cambiar de densidad opere a un 20% de velocidad mínima de seguridad, evitando que las nubes se queden invisibles de forma permanente si el parámetro está al 0%.
+  - **Ajustes en los factores de respiración**:
+    - **Crecimiento**: Incrementamos la amplitud de la fluctuación de tamaño en un 25%, estableciéndola en ±15% (anteriormente ±12%):
+      `scale = baseScale * (1.0f + sin(pulseTime) * 0.15f * dynamicsSpeed)`
+    - **Opacidad**: Aumentamos la velocidad base de transición de opacidad en un 50% (pasando de `0.15f` a `0.225f`):
+      `val activeFadeSpeed = 0.225f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)`
+  - Multiplicamos la velocidad base de transición de opacidad por el factor `(0.2f + 0.8f * dynamicsSpeed)` para que la aparición/desaparición al cambiar de densidad opere a un 20% de velocidad mínima de seguridad, evitando que las nubes se queden invisibles de forma permanente si el parámetro está al 0%.
 - **[SceneManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/SceneManager.kt)**:
   - Recuperamos `dynamicsSpeed` en el bucle principal de físicas de `update()` y lo pasamos al llamar a `cloud.update(deltaTime, windSpeed, dynamicsSpeed)`.
   - **Corrección de límites y envolvimiento para viento neutro**: Modificamos el bucle de actualización de nubes para verificar si alguna de ellas sale de la pantalla por la izquierda o por la derecha (`positionX > maxBound || positionX < -maxBound`), sin importar si el viento está activo o es neutro. Cuando una nube sale de los límites, se restablece llamando a `cloud.reset(0f, aspectRatio)` y se reubica dinámicamente en el borde izquierdo o derecho dependiendo de su nueva velocidad neta (dirección del viento + dirección de deriva aleatoria asignada tras el reset), de forma que continúe deslizándose de vuelta al área visible.
