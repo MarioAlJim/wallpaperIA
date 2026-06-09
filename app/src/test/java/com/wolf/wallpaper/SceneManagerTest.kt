@@ -18,6 +18,7 @@ class SceneManagerTest {
         var mockWindIntensity = 50
         var mockRainSpeed = 50
         var mockLightningColorIndex = 0
+        var mockLightningDuration = 30
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -27,6 +28,7 @@ class SceneManagerTest {
         override fun getWindIntensity(): Int = mockWindIntensity
         override fun getRainSpeed(): Int = mockRainSpeed
         override fun getLightningColorIndex(): Int = mockLightningColorIndex
+        override fun getLightningDuration(): Int = mockLightningDuration
     }
 
     @Test
@@ -174,5 +176,25 @@ class SceneManagerTest {
             assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.5f..0.9f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
+    }
+
+    @Test
+    fun testLightningDurationMapping() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        
+        // 1. Duration at 0% should be in range [0.15s, 0.30s]
+        sceneManager.lightning.trigger(1.0f, 1, 0, durationPercentage = 0)
+        var duration = sceneManager.lightning.duration
+        assertTrue("Duration $duration out of bounds for 0%", duration in 0.15f..0.30f)
+
+        // 2. Duration at 50% should be in range [0.30s, 0.45s]
+        sceneManager.lightning.trigger(1.0f, 1, 0, durationPercentage = 50)
+        duration = sceneManager.lightning.duration
+        assertTrue("Duration $duration out of bounds for 50%", duration in 0.30f..0.45f)
+
+        // 3. Duration at 100% should be in range [1.00s, 1.15s]
+        sceneManager.lightning.trigger(1.0f, 1, 0, durationPercentage = 100)
+        duration = sceneManager.lightning.duration
+        assertTrue("Duration $duration out of bounds for 100%", duration in 1.00f..1.15f)
     }
 }
