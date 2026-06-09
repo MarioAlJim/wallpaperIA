@@ -294,6 +294,55 @@ class SceneManagerTest {
     }
 
     @Test
+    fun testCloudNeutralWindWrapping() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920) // aspectRatio is 1080 / 1920 = 0.5625
+        val aspectRatio = 0.5625f
+
+        // Map density 50 -> 5 clouds
+        mockConfig.mockCloudDensity = 50
+        // Set wind to neutral (0)
+        mockConfig.mockWindDirection = 1 // Neutral/variable
+        mockConfig.mockWindIntensity = 0
+        sceneManager.update(0.016f)
+        val clouds = sceneManager.getClouds()
+        assertEquals(5, clouds.size)
+
+        val cloud = clouds[0]
+        val halfWidth = cloud.scale * 1.2f
+        val maxBound = aspectRatio + halfWidth
+
+        // Test 1: Force cloud out of bounds to the right
+        cloud.positionX = maxBound + 0.1f
+        // Update should trigger reset & wrap
+        sceneManager.update(0.016f)
+
+        // After reset, the cloud should be positioned according to the direction of its new driftSpeed
+        val newHalfWidth = cloud.scale * 1.2f
+        if (cloud.driftSpeed >= 0f) {
+            // Reappear on left
+            assertEquals(-aspectRatio - newHalfWidth, cloud.positionX, 0.001f)
+        } else {
+            // Reappear on right
+            assertEquals(aspectRatio + newHalfWidth, cloud.positionX, 0.001f)
+        }
+
+        // Test 2: Force cloud out of bounds to the left
+        cloud.positionX = -maxBound - 0.1f
+        // Update should trigger reset & wrap
+        sceneManager.update(0.016f)
+
+        val newHalfWidth2 = cloud.scale * 1.2f
+        if (cloud.driftSpeed >= 0f) {
+            // Reappear on left
+            assertEquals(-aspectRatio - newHalfWidth2, cloud.positionX, 0.001f)
+        } else {
+            // Reappear on right
+            assertEquals(aspectRatio + newHalfWidth2, cloud.positionX, 0.001f)
+        }
+    }
+
+    @Test
     fun testRainDropDepthAndScaling() {
         val drop = RainDrop(0f, 0f, 0f, 0f)
         

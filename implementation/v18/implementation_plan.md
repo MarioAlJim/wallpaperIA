@@ -75,6 +75,7 @@ Este plan describe el diseño e implementación de un nuevo parámetro de config
   `val dynamicsSpeed = configProvider.getCloudDynamicsSpeed() / 100f`
 - Pasar `dynamicsSpeed` en el bucle de actualización de nubes:
   `cloud.update(deltaTime, windSpeed, dynamicsSpeed)`
+- **Corrección de viento neutro**: Se modificó la verificación de límites para actuar sobre `cloud.positionX > maxBound || cloud.positionX < -maxBound` independientemente de `windSpeed`, calculando la dirección neta (viento + deriva del reset) para posicionar la nube restablecida en el lado correcto (izquierdo o derecho).
 
 ---
 
@@ -108,6 +109,7 @@ Este plan describe el diseño e implementación de un nuevo parámetro de config
 #### [MODIFY] [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt)
 - Registrar `mockCloudDynamicsSpeed = 100` y `getCloudDynamicsSpeed()` en `MockConfigProvider`.
 - Añadir una prueba unitaria `testCloudDynamicsSpeedConfig()` para verificar que cuando `dynamicsSpeed` se establece a 0, la escala no fluctúa y que la velocidad de desvanecimiento opera a su ritmo básico del 20%.
+- Añadir la prueba `testCloudNeutralWindWrapping()` para comprobar que bajo viento neutro (`windSpeed = 0f`), las nubes que superen los límites de pantalla (izquierdo o derecho) se restablezcan y reaparezcan en el lado apropiado según su nueva deriva.
 
 ---
 

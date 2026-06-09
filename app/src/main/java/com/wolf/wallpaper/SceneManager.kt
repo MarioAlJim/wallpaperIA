@@ -70,16 +70,15 @@ class SceneManager(
             cloud.update(deltaTime, windSpeed, dynamicsSpeed)
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
-            if (windSpeed > 0f) {
-                if (cloud.positionX > maxBound) {
-                    cloud.reset(0f, aspectRatio)
-                    val newHalfWidth = cloud.scale * 1.2f
+            if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
+                cloud.reset(0f, aspectRatio)
+                val newHalfWidth = cloud.scale * 1.2f
+                val windThreshold = 0.1f
+                val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
+                val netSpeed = windSpeed + (cloud.driftSpeed * driftInfluence)
+                if (netSpeed >= 0f) {
                     cloud.positionX = -aspectRatio - newHalfWidth
-                }
-            } else if (windSpeed < 0f) {
-                if (cloud.positionX < -maxBound) {
-                    cloud.reset(0f, aspectRatio)
-                    val newHalfWidth = cloud.scale * 1.2f
+                } else {
                     cloud.positionX = aspectRatio + newHalfWidth
                 }
             }

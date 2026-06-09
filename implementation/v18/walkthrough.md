@@ -19,6 +19,7 @@ Hemos implementado un nuevo parámetro de configuración deslizante (Slider) baj
   - Multiplicamos la velocidad base de transición de opacidad (`activeFadeSpeed`) por el factor `(0.2f + 0.8f * dynamicsSpeed)` para que la aparición/desaparición al cambiar de densidad opere a un 20% de velocidad mínima de seguridad, evitando que las nubes se queden invisibles de forma permanente si el parámetro está al 0%.
 - **[SceneManager.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/SceneManager.kt)**:
   - Recuperamos `dynamicsSpeed` en el bucle principal de físicas de `update()` y lo pasamos al llamar a `cloud.update(deltaTime, windSpeed, dynamicsSpeed)`.
+  - **Corrección de límites y envolvimiento para viento neutro**: Modificamos el bucle de actualización de nubes para verificar si alguna de ellas sale de la pantalla por la izquierda o por la derecha (`positionX > maxBound || positionX < -maxBound`), sin importar si el viento está activo o es neutro. Cuando una nube sale de los límites, se restablece llamando a `cloud.reset(0f, aspectRatio)` y se reubica dinámicamente en el borde izquierdo o derecho dependiendo de su nueva velocidad neta (dirección del viento + dirección de deriva aleatoria asignada tras el reset), de forma que continúe deslizándose de vuelta al área visible.
 
 ### 3. Pantalla de Ajustes y Manifiesto
 - **[AndroidManifest.xml](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/AndroidManifest.xml)**:
@@ -33,6 +34,7 @@ Hemos implementado un nuevo parámetro de configuración deslizante (Slider) baj
 - En **[SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt)**:
   - Actualizamos el `MockConfigProvider` para implementar `getCloudDynamicsSpeed()`.
   - Añadimos la prueba unitaria `testCloudDynamicsSpeedConfig()` que valida que al estar en 0% de dinámica, la escala de las nubes permanece estática en su valor base y la opacidad sigue aumentando al 20% de su velocidad de seguridad.
+  - Añadimos la prueba unitaria `testCloudNeutralWindWrapping()` que verifica que cuando el viento es neutro (0) y una nube es forzada fuera de los límites (izquierdo o derecho), el sistema la restablece correctamente y la hace reaparecer en el extremo opuesto apropiado según su nueva deriva aleatoria para que entre de nuevo deslizándose.
 
 ---
 
