@@ -277,6 +277,7 @@ class StormRenderer(private val context: Context) {
         val isTexturedHandle = GLES30.glGetUniformLocation(lightningProgram, "uIsTextured")
         val textureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
         val colorHandle = GLES30.glGetUniformLocation(lightningProgram, "uLightningColor")
+        val growthProgressHandle = GLES30.glGetUniformLocation(lightningProgram, "uGrowthProgress")
 
         // 1. Draw a single combined full screen overlay flash
         var maxIntensity = 0f
@@ -294,6 +295,7 @@ class StormRenderer(private val context: Context) {
         GLES30.glUniform1i(isTexturedHandle, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, identityMatrix, 0)
         GLES30.glUniform1f(flashIntensityHandle, maxIntensity * 0.20f)
+        GLES30.glUniform1f(growthProgressHandle, 1.0f)
 
         val avgColor = floatArrayOf(
             (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
@@ -326,6 +328,7 @@ class StormRenderer(private val context: Context) {
                 GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
                 val color = getLightningColor(lightning.selectedColorIndex)
                 GLES30.glUniform4fv(colorHandle, 1, color, 0)
+                GLES30.glUniform1f(growthProgressHandle, lightning.growthProgress)
 
                 val modelMatrix = FloatArray(16)
                 Matrix.setIdentityM(modelMatrix, 0)
