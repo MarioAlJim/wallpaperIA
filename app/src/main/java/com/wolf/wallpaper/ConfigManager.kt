@@ -109,6 +109,6 @@ class ConfigManager(context: Context) : ConfigProvider {
     }
 
     fun setBackgroundIndex(index: Int) {
-        prefs.edit().putInt(KEY_BACKGROUND_INDEX, index.coerceIn(0, 3)).apply()
+        prefs.edit().putInt(KEY_BACKGROUND_INDEX, index.coerceIn(0, 5)).apply()
     }
 }

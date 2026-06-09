@@ -21,7 +21,7 @@ class StormRenderer(private val context: Context) {
     private val cloudTextures = mutableListOf<Int>()
     private var rainTexture = 0
     private val lightningTextures = mutableListOf<Int>()
-    private val backgroundTextures = IntArray(3)
+    private val backgroundTextures = IntArray(5)
     
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -31,7 +31,7 @@ class StormRenderer(private val context: Context) {
 
     // Aspect ratio and scaling
     private var aspectRatio = 1.0f
-    private val backgroundAspectRatios = FloatArray(3) { 1.0f }
+    private val backgroundAspectRatios = FloatArray(5) { 1.0f }
 
     // Buffers for geometric drawing
     private lateinit var fullscreenQuadBuffer: FloatBuffer
@@ -110,6 +110,8 @@ class StormRenderer(private val context: Context) {
         loadBackgroundTexture(context, 0, "background/background.jpg")
         loadBackgroundTexture(context, 1, "background/background_02.png")
         loadBackgroundTexture(context, 2, "background/background_03.png")
+        loadBackgroundTexture(context, 3, "background/background_04.png")
+        loadBackgroundTexture(context, 4, "background/background_05.png")
 
         // Screen quad coordinates (for full-screen flash using identity matrix)
         val fullscreenCoords = floatArrayOf(

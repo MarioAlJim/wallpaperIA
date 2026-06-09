@@ -133,7 +133,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningDuration(value)
         }
 
-        val backgroundModes = arrayOf("Color Oscuro (Original)", "Fondo 1 (Montaña)", "Fondo 2 (Valle)", "Fondo 3 (Bosque)")
+        val backgroundModes = arrayOf(
+            "Color Oscuro (Original)",
+            "Fondo 1 (Montaña)",
+            "Fondo 2 (Valle)",
+            "Fondo 3 (Bosque)",
+            "Fondo 4 (Pico Rocoso)",
+            "Fondo 5 (Lago Nebloso)"
+        )
         setupSpinner(
             R.id.spinnerBackgroundMode,
             backgroundModes,
@@ -332,6 +339,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             1 -> "Fondo 1 (Montaña)"
             2 -> "Fondo 2 (Valle)"
             3 -> "Fondo 3 (Bosque)"
+            4 -> "Fondo 4 (Pico Rocoso)"
+            5 -> "Fondo 5 (Lago Nebloso)"
             else -> "Color Oscuro"
         }
         summaryBackground.text = "Fondo: $bgModeText"
