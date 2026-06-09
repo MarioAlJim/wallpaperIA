@@ -7,11 +7,15 @@ uniform sampler2D uTexture;
 uniform float uFlashIntensity;
 uniform int uIsTextured;
 uniform vec4 uLightningColor;
+uniform float uGrowthProgress;
 
 out vec4 fragColor;
 
 void main() {
     if (uIsTextured == 1) {
+        if (vTexCoord.y > uGrowthProgress) {
+            discard;
+        }
         vec4 texColor = texture(uTexture, vTexCoord);
         fragColor = vec4(texColor.rgb * uLightningColor.rgb, texColor.a * uFlashIntensity * uLightningColor.a);
     } else {
