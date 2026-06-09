@@ -80,6 +80,9 @@ class SceneManager(
             }
         }
 
+        // Remove clouds that have finished fading out
+        clouds.removeAll { it.isFadingOut && it.opacity <= 0f }
+
         // 2. Update Rain
         for (drop in rainDrops) {
             drop.updateVelocity(currentWindAngle, currentRainSpeed)
@@ -232,16 +235,34 @@ class SceneManager(
         }.coerceIn(0, 15)
         val textureCount = getCloudTextureCount()
         
-        while (clouds.size < targetCount) {
-            val cloudId = clouds.size
-            val textureIndex = Random.nextInt(textureCount)
-            val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-            cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
-            clouds.add(cloud)
-        }
+        val activeClouds = clouds.filter { !it.isFadingOut }
         
-        while (clouds.size > targetCount) {
-            clouds.removeAt(clouds.size - 1)
+        if (activeClouds.size < targetCount) {
+            val fadingOutClouds = clouds.filter { it.isFadingOut }
+            var needed = targetCount - activeClouds.size
+            for (cloud in fadingOutClouds) {
+                if (needed > 0) {
+                    cloud.isFadingOut = false
+                    needed--
+                }
+            }
+            while (needed > 0) {
+                val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
+                val textureIndex = Random.nextInt(textureCount)
+                val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
+                cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
+                cloud.opacity = 0f
+                clouds.add(cloud)
+                needed--
+            }
+        } else if (activeClouds.size > targetCount) {
+            var excess = activeClouds.size - targetCount
+            for (i in activeClouds.indices.reversed()) {
+                if (excess > 0) {
+                    activeClouds[i].isFadingOut = true
+                    excess--
+                }
+            }
         }
     }
 

@@ -13,6 +13,8 @@ class Cloud(
 ) : StormObject {
 
     var z: Float = 1.0f
+    var targetOpacity: Float = opacity
+    var isFadingOut: Boolean = false
 
     val speedZFactor: Float
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
@@ -23,6 +25,18 @@ class Cloud(
 
     fun update(deltaTime: Float, windSpeed: Float) {
         positionX += windSpeed * speedFactor * speedZFactor * deltaTime
+        
+        // Smoothly transition opacity
+        val fadeSpeed = 1.5f // Fades in/out in less than 1 second
+        if (isFadingOut) {
+            opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(0f)
+        } else {
+            if (opacity < targetOpacity) {
+                opacity = (opacity + fadeSpeed * deltaTime).coerceAtMost(targetOpacity)
+            } else if (opacity > targetOpacity) {
+                opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
+            }
+        }
     }
 
     override fun render() {
@@ -40,6 +54,8 @@ class Cloud(
         val maxY = 1.0f - scale * 0.5f
         positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else minY
         
-        opacity = (Random.nextFloat() * 0.4f + 0.4f) * z
+        targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z
+        opacity = targetOpacity
+        isFadingOut = false
     }
 }

@@ -45,22 +45,22 @@ class SceneManagerTest {
         // Case 1: Density 0 -> 0 clouds
         mockConfig.mockCloudDensity = 0
         sceneManager.update(0.016f)
-        assertEquals(0, sceneManager.getClouds().size)
+        assertEquals(0, sceneManager.getClouds().filter { !it.isFadingOut }.size)
 
         // Case 2: Density 25 -> 2 clouds
         mockConfig.mockCloudDensity = 25
         sceneManager.update(0.016f)
-        assertEquals(2, sceneManager.getClouds().size)
+        assertEquals(2, sceneManager.getClouds().filter { !it.isFadingOut }.size)
 
         // Case 3: Density 50 -> 5 clouds
         mockConfig.mockCloudDensity = 50
         sceneManager.update(0.016f)
-        assertEquals(5, sceneManager.getClouds().size)
+        assertEquals(5, sceneManager.getClouds().filter { !it.isFadingOut }.size)
 
         // Case 4: Density 100 -> 15 clouds
         mockConfig.mockCloudDensity = 100
         sceneManager.update(0.016f)
-        assertEquals(15, sceneManager.getClouds().size)
+        assertEquals(15, sceneManager.getClouds().filter { !it.isFadingOut }.size)
     }
 
     @Test
@@ -436,5 +436,50 @@ class SceneManagerTest {
 
         cloudFar.update(deltaTime = 1.0f, windSpeed = 1.0f)
         assertEquals(0.225f, cloudFar.positionX, 0.001f)
+    }
+
+    @Test
+    fun testCloudFadeInAndFadeOut() {
+        // 1. Spawning transition (Fade In)
+        // Set mockConfig to 0 so we initialize with no clouds, then trigger density change to 50
+        mockConfig.mockCloudDensity = 0
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+        
+        assertEquals(0, sceneManager.getClouds().size)
+
+        mockConfig.mockCloudDensity = 50 // should trigger 5 active clouds
+        // update(0.0f) triggers updateFromConfig and adjustClouds but advances no time, leaving opacity at 0f
+        sceneManager.update(0.0f)
+        
+        val clouds = sceneManager.getClouds()
+        assertEquals(5, clouds.size)
+        // Since they were just created, their opacity should start at 0f
+        for (c in clouds) {
+            assertEquals(0f, c.opacity, 0.001f)
+            assertTrue("targetOpacity should be set to positive value", c.targetOpacity > 0f)
+        }
+
+        // Simulate 0.5 seconds of time -> opacity should increase towards targetOpacity
+        sceneManager.update(0.5f)
+        for (c in clouds) {
+            assertTrue("Opacity should have increased from 0f", c.opacity > 0f)
+        }
+
+        // 2. Despawning transition (Fade Out)
+        mockConfig.mockCloudDensity = 0 // should trigger 0 active clouds
+        sceneManager.update(0.016f)
+
+        // The clouds are NOT immediately removed from list, but marked isFadingOut
+        val cloudsAfterDespawn = sceneManager.getClouds()
+        assertTrue("Clouds should not be immediately removed", cloudsAfterDespawn.isNotEmpty())
+        for (c in cloudsAfterDespawn) {
+            assertTrue("Clouds should be marked as fading out", c.isFadingOut)
+        }
+
+        // Simulate time to finish fading out
+        sceneManager.update(1.0f)
+        // They should be removed from the sceneManager's list entirely
+        assertTrue("Faded out clouds should be removed from list", sceneManager.getClouds().isEmpty())
     }
 }
