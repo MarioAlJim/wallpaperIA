@@ -37,7 +37,7 @@ class Cloud(
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
         
         val breathingFactor = (sin(pulseTime) + 1.0f) * 0.5f
-        val amplitude = 0.5625f * dynamicsSpeed
+        val amplitude = 0.84375f * dynamicsSpeed
         scale = if (onlyGrows) {
             baseScale * (1.0f + breathingFactor * amplitude)
         } else {
@@ -45,7 +45,7 @@ class Cloud(
         }
 
         // Subtle vertical Y axis movement based on dynamicsSpeed
-        positionY = basePositionY + sin(pulseTime * 0.5f) * 0.06f * baseScale * dynamicsSpeed
+        positionY = basePositionY + sin(pulseTime * 0.5f) * 0.12f * baseScale * dynamicsSpeed
 
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -73,8 +73,8 @@ class Cloud(
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         
-        val minScale = 0.345f
-        val maxScale = 1.5625f
+        val minScale = 0.43125f
+        val maxScale = 2.34375f
         baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
         scale = baseScale
         

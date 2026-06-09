@@ -197,8 +197,8 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
-            assertTrue("ScaleY should be in range [0.45f, 1.5f]", sceneManager.lightning.scaleY in 0.45f..1.5f)
-            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.45f..0.91f)
+            assertTrue("ScaleY should be in range [0.45f, 2.25f]", sceneManager.lightning.scaleY in 0.45f..2.26f)
+            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.45f..1.576f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }
@@ -419,8 +419,8 @@ class SceneManagerTest {
             assertTrue("z (${cloud.z}) should be in range [0.3, 1.0]", cloud.z in 0.3f..1.0f)
             
             // 2. scale should be (Random.nextFloat() * (1.25f - 0.345f) + 0.345f) * z
-            val minExpectedScale = 0.345f * cloud.z - 0.001f
-            val maxExpectedScale = 1.5625f * cloud.z + 0.001f
+            val minExpectedScale = 0.43125f * cloud.z - 0.001f
+            val maxExpectedScale = 2.34375f * cloud.z + 0.001f
             assertTrue("Scale (${cloud.scale}) should be scaled by z", cloud.scale in minExpectedScale..maxExpectedScale)
             
             // 3. opacity should be (Random.nextFloat() * 0.4f + 0.4f) * z
@@ -562,22 +562,22 @@ class SceneManagerTest {
         cloud.update(deltaTime = 0f, windSpeed = 0f) // recalculate scale
         val initialScaleGrow = cloud.scale
         assertTrue("For grow-only, scale should be >= baseScale", cloud.scale >= baseSc - 0.001f)
-        assertTrue("Grow-only scale should be in range [baseScale, baseScale * 1.5625f]", cloud.scale in baseSc - 0.001f..baseSc * 1.5626f)
+        assertTrue("Grow-only scale should be in range [baseScale, baseScale * 1.84375f]", cloud.scale in baseSc - 0.001f..baseSc * 1.84376f)
         
         cloud.update(deltaTime = 5.0f, windSpeed = 0f)
         assertTrue("Scale should change over time", initialScaleGrow != cloud.scale)
-        assertTrue("Grow-only scale should remain in range [baseScale, baseScale * 1.5625f]", cloud.scale in baseSc - 0.001f..baseSc * 1.5626f)
+        assertTrue("Grow-only scale should remain in range [baseScale, baseScale * 1.84375f]", cloud.scale in baseSc - 0.001f..baseSc * 1.84376f)
         
         // Force shrink-only behavior
         cloud.onlyGrows = false
         cloud.update(deltaTime = 0f, windSpeed = 0f) // recalculate scale
         val initialScaleShrink = cloud.scale
         assertTrue("For shrink-only, scale should be <= baseScale", cloud.scale <= baseSc + 0.001f)
-        assertTrue("Shrink-only scale should be in range [baseScale * 0.4375f, baseScale]", cloud.scale in baseSc * 0.4374f..baseSc + 0.001f)
+        assertTrue("Shrink-only scale should be in range [baseScale * 0.15625f, baseScale]", cloud.scale in baseSc * 0.15624f..baseSc + 0.001f)
         
         cloud.update(deltaTime = 5.0f, windSpeed = 0f)
         assertTrue("Scale should change over time", initialScaleShrink != cloud.scale)
-        assertTrue("Shrink-only scale should remain in range [baseScale * 0.4375f, baseScale]", cloud.scale in baseSc * 0.4374f..baseSc + 0.001f)
+        assertTrue("Shrink-only scale should remain in range [baseScale * 0.15625f, baseScale]", cloud.scale in baseSc * 0.15624f..baseSc + 0.001f)
         
         // 4. Verify scaling proportional to wind speed
         // Under zero wind, windFactor = 1.0f -> pulseTime increments by 0.1s
@@ -604,11 +604,11 @@ class SceneManagerTest {
         val basePosY = cloud.basePositionY
         val initialPosY = cloud.positionY
         // With dynamicsSpeed = 1.0f, positionY should oscillate sutilmente around basePositionY
-        assertTrue("Initial Y position should be near basePositionY", kotlin.math.abs(cloud.positionY - basePosY) <= 0.061f * cloud.baseScale)
+        assertTrue("Initial Y position should be near basePositionY", kotlin.math.abs(cloud.positionY - basePosY) <= 0.121f * cloud.baseScale)
         
         cloud.update(deltaTime = 2.0f, windSpeed = 0f, dynamicsSpeed = 1.0f)
         assertTrue("Y position should change over time", initialPosY != cloud.positionY)
-        assertTrue("Y position should remain within oscillation bounds", kotlin.math.abs(cloud.positionY - basePosY) <= 0.061f * cloud.baseScale)
+        assertTrue("Y position should remain within oscillation bounds", kotlin.math.abs(cloud.positionY - basePosY) <= 0.121f * cloud.baseScale)
         
         // With dynamicsSpeed = 0f, Y position should be exactly basePositionY
         cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
