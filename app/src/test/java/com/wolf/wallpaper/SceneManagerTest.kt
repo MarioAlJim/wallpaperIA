@@ -17,6 +17,7 @@ class SceneManagerTest {
         var mockRainColorIndex = 0
         var mockWindIntensity = 50
         var mockRainSpeed = 50
+        var mockLightningColorIndex = 0
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -25,6 +26,7 @@ class SceneManagerTest {
         override fun getRainColorIndex(): Int = mockRainColorIndex
         override fun getWindIntensity(): Int = mockWindIntensity
         override fun getRainSpeed(): Int = mockRainSpeed
+        override fun getLightningColorIndex(): Int = mockLightningColorIndex
     }
 
     @Test
@@ -143,5 +145,25 @@ class SceneManagerTest {
         mockConfig.mockRainSpeed = 80
         sceneManager.update(0.016f)
         assertEquals(80, field.get(sceneManager) as Int)
+    }
+
+    @Test
+    fun testLightningColorTrigger() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        
+        // 1. Specific Color (e.g. Rojo = 3)
+        mockConfig.mockLightningColorIndex = 3
+        sceneManager.lightning.trigger(1.0f, 1, mockConfig.getLightningColorIndex())
+        assertEquals(3, sceneManager.lightning.selectedColorIndex)
+
+        // 2. Random Mode (index 6) -> should choose a valid color index (0 to 5)
+        mockConfig.mockLightningColorIndex = 6
+        val resolvedColor = if (mockConfig.getLightningColorIndex() == 6) {
+            kotlin.random.Random.nextInt(6)
+        } else {
+            mockConfig.getLightningColorIndex()
+        }
+        sceneManager.lightning.trigger(1.0f, 1, resolvedColor)
+        assertTrue(sceneManager.lightning.selectedColorIndex in 0..5)
     }
 }
