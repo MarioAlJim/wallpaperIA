@@ -4,8 +4,15 @@ import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import android.widget.SeekBar
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
@@ -19,6 +26,27 @@ class WallpaperSettingsActivity : AppCompatActivity() {
 
         configManager = ConfigManager(this)
 
+        // 1. Setup Accordions
+        setupAccordion(
+            R.id.headerCloudsWind,
+            R.id.contentCloudsWind,
+            R.id.dividerCloudsWind,
+            R.id.arrowCloudsWind
+        )
+        setupAccordion(
+            R.id.headerRain,
+            R.id.contentRain,
+            R.id.dividerRain,
+            R.id.arrowRain
+        )
+        setupAccordion(
+            R.id.headerLightning,
+            R.id.contentLightning,
+            R.id.dividerLightning,
+            R.id.arrowLightning
+        )
+
+        // 2. Setup Nubes y Viento Controls
         setupSlider(
             R.id.seekBarCloudDensity,
             R.id.textViewCloudDensityValue,
@@ -27,47 +55,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudDensity(value)
         }
 
-        // Configuración especial para la densidad de lluvia en 5 niveles
-        val rainSeek = findViewById<SeekBar>(R.id.seekBarRainIntensity)
-        val rainText = findViewById<TextView>(R.id.textViewRainIntensityValue)
-        val initialRainValue = configManager.getRainIntensity()
-        val initialProgress = (initialRainValue / 25).coerceIn(0, 4)
-        rainSeek.progress = initialProgress
-        updateRainTextView(initialProgress, rainText)
+        val windDirections = arrayOf("Izquierda", "Vertical", "Derecha")
+        setupSpinner(
+            R.id.spinnerWindDirection,
+            windDirections,
+            configManager.getWindDirection()
+        ) { position ->
+            configManager.setWindDirection(position)
+        }
 
-        rainSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    val value = progress * 25
-                    configManager.setRainIntensity(value)
-                    updateRainTextView(progress, rainText)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
-        // Configuración para la dirección de la lluvia
-        val windSeek = findViewById<SeekBar>(R.id.seekBarWindDirection)
-        val windText = findViewById<TextView>(R.id.textViewWindDirectionValue)
-        val initialWindValue = configManager.getWindDirection()
-        windSeek.progress = initialWindValue
-        updateWindTextView(initialWindValue, windText)
-
-        windSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    configManager.setWindDirection(progress)
-                    updateWindTextView(progress, windText)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
-        // Configuración para la intensidad del viento
         setupSlider(
             R.id.seekBarWindIntensity,
             R.id.textViewWindIntensityValue,
@@ -76,7 +72,18 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setWindIntensity(value)
         }
 
-        // Configuración para la velocidad de la lluvia
+        // 3. Setup Lluvia Controls
+        val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
+        val initialRainValue = configManager.getRainIntensity()
+        val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
+        setupSpinner(
+            R.id.spinnerRainIntensity,
+            rainIntensities,
+            initialRainProgress
+        ) { position ->
+            configManager.setRainIntensity(position * 25)
+        }
+
         setupSlider(
             R.id.seekBarRainSpeed,
             R.id.textViewRainSpeedValue,
@@ -85,25 +92,16 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setRainSpeed(value)
         }
 
-        // Configuración para el color de la lluvia
-        val colorSeek = findViewById<SeekBar>(R.id.seekBarRainColor)
-        val colorText = findViewById<TextView>(R.id.textViewRainColorValue)
-        val initialColorValue = configManager.getRainColorIndex()
-        colorSeek.progress = initialColorValue
-        updateColorTextView(initialColorValue, colorText)
+        val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
+        setupSpinner(
+            R.id.spinnerRainColor,
+            rainColors,
+            configManager.getRainColorIndex()
+        ) { position ->
+            configManager.setRainColorIndex(position)
+        }
 
-        colorSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    configManager.setRainColorIndex(progress)
-                    updateColorTextView(progress, colorText)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
+        // 4. Setup Rayos Controls
         setupSlider(
             R.id.seekBarLightningFrequency,
             R.id.textViewLightningFrequencyValue,
@@ -112,24 +110,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningFrequency(value)
         }
 
-        // Configuración para el color de los rayos
-        val lightningColorSeek = findViewById<SeekBar>(R.id.seekBarLightningColor)
-        val lightningColorText = findViewById<TextView>(R.id.textViewLightningColorValue)
-        val initialLightningColorValue = configManager.getLightningColorIndex()
-        lightningColorSeek.progress = initialLightningColorValue
-        updateLightningColorTextView(initialLightningColorValue, lightningColorText)
-
-        lightningColorSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    configManager.setLightningColorIndex(progress)
-                    updateLightningColorTextView(progress, lightningColorText)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        val lightningColors = arrayOf("Blanco", "Azul", "Amarillo", "Rojo", "Verde", "Morado", "Aleatorio")
+        setupSpinner(
+            R.id.spinnerLightningColor,
+            lightningColors,
+            configManager.getLightningColorIndex()
+        ) { position ->
+            configManager.setLightningColorIndex(position)
+        }
 
         setupSlider(
             R.id.seekBarLightningDuration,
@@ -138,6 +126,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         ) { value ->
             configManager.setLightningDuration(value)
         }
+
+        // 5. Initialize dynamic summaries in headers
+        updateSummaries()
 
         val buttonApply = findViewById<Button>(R.id.buttonApplyWallpaper)
         buttonApply.setOnClickListener {
@@ -148,6 +139,51 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 )
             }
             startActivity(intent)
+        }
+    }
+
+    private fun setupAccordion(headerId: Int, contentId: Int, dividerId: Int, arrowId: Int) {
+        val header = findViewById<RelativeLayout>(headerId)
+        val content = findViewById<LinearLayout>(contentId)
+        val divider = findViewById<View>(dividerId)
+        val arrow = findViewById<ImageView>(arrowId)
+
+        header.setOnClickListener {
+            if (content.visibility == View.VISIBLE) {
+                content.visibility = View.GONE
+                divider.visibility = View.GONE
+                arrow.animate().rotation(0f).setDuration(200).start()
+            } else {
+                content.visibility = View.VISIBLE
+                divider.visibility = View.VISIBLE
+                arrow.animate().rotation(180f).setDuration(200).start()
+            }
+        }
+    }
+
+    private fun setupSpinner(
+        spinnerId: Int,
+        options: Array<String>,
+        initialIndex: Int,
+        onSelected: (Int) -> Unit
+    ) {
+        val spinner = findViewById<Spinner>(spinnerId)
+        val adapter = ArrayAdapter(
+            this,
+            R.layout.spinner_item,
+            options
+        )
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
+        spinner.adapter = adapter
+        spinner.setSelection(initialIndex)
+
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                onSelected(position)
+                updateSummaries()
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
@@ -168,6 +204,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 if (fromUser) {
                     onValueChanged(progress)
                     updateTextView(seekBarId, valueTextView, progress)
+                    updateSummaries()
                 }
             }
 
@@ -181,9 +218,6 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.seekBarCloudDensity -> {
                 val count = (value / 100f * 20).toInt()
                 textView.text = "$value% ($count nubes)"
-            }
-            R.id.seekBarRainIntensity -> {
-                // No-op here since it is handled by custom seekbar listener
             }
             R.id.seekBarLightningFrequency -> {
                 val desc = when {
@@ -218,9 +252,24 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateRainTextView(progress: Int, textView: TextView) {
-        val percentage = progress * 25
-        val levelName = when (progress) {
+    private fun updateSummaries() {
+        val summaryCloudsWind = findViewById<TextView>(R.id.summaryCloudsWind) ?: return
+        val summaryRain = findViewById<TextView>(R.id.summaryRain) ?: return
+        val summaryLightning = findViewById<TextView>(R.id.summaryLightning) ?: return
+
+        // 1. Nubes y Viento summary
+        val cloudDensity = configManager.getCloudDensity()
+        val windIntensity = configManager.getWindIntensity()
+        val windDirText = when (configManager.getWindDirection()) {
+            0 -> "Izquierda"
+            1 -> "Vertical"
+            2 -> "Derecha"
+            else -> "Izquierda"
+        }
+        summaryCloudsWind.text = "Densidad: $cloudDensity% | Viento: $windDirText ($windIntensity%)"
+
+        // 2. Lluvia summary
+        val rainIntName = when (configManager.getRainIntensity() / 25) {
             0 -> "Nada"
             1 -> "Pocas"
             2 -> "Media"
@@ -228,29 +277,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             4 -> "Muy alta"
             else -> "Media"
         }
-        val particles = when (progress) {
-            0 -> 0
-            1 -> 10
-            2 -> 25
-            3 -> 50
-            4 -> 100
-            else -> 25
-        }
-        textView.text = "$levelName ($percentage% - $particles gotas)"
-    }
-
-    private fun updateWindTextView(progress: Int, textView: TextView) {
-        val directionName = when (progress) {
-            0 -> "Izquierda"
-            1 -> "Vertical"
-            2 -> "Derecha"
-            else -> "Izquierda"
-        }
-        textView.text = directionName
-    }
-
-    private fun updateColorTextView(progress: Int, textView: TextView) {
-        val colorName = when (progress) {
+        val rainColorText = when (configManager.getRainColorIndex()) {
             0 -> "Azul"
             1 -> "Blanco"
             2 -> "Rojo"
@@ -259,11 +286,12 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             5 -> "Morado"
             else -> "Azul"
         }
-        textView.text = colorName
-    }
+        val rainSpeed = configManager.getRainSpeed()
+        summaryRain.text = "Lluvia: $rainIntName | Color: $rainColorText | Vel: $rainSpeed%"
 
-    private fun updateLightningColorTextView(progress: Int, textView: TextView) {
-        val colorName = when (progress) {
+        // 3. Rayos summary
+        val lightningFreq = configManager.getLightningFrequency()
+        val lightningColorText = when (configManager.getLightningColorIndex()) {
             0 -> "Blanco"
             1 -> "Azul"
             2 -> "Amarillo"
@@ -273,6 +301,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             6 -> "Aleatorio"
             else -> "Blanco"
         }
-        textView.text = colorName
+        val lightningDuration = configManager.getLightningDuration()
+        val durationText = when {
+            lightningDuration <= 20 -> "Corto"
+            lightningDuration <= 60 -> "Normal"
+            lightningDuration <= 85 -> "Largo"
+            else -> "Extremo"
+        }
+        summaryLightning.text = "Freq: $lightningFreq% | Color: $lightningColorText | Dur: $durationText ($lightningDuration%)"
     }
 }
