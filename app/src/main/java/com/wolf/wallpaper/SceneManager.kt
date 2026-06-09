@@ -9,7 +9,7 @@ class SceneManager(
 ) {
     private val clouds = mutableListOf<Cloud>()
     private val rainDrops = mutableListOf<RainDrop>()
-    val lightnings = List(8) { Lightning() }
+    val lightnings = List(3) { Lightning() }
     val lightning: Lightning get() = lightnings[0]
     
     private var cloudDensity = -1
@@ -208,9 +208,9 @@ class SceneManager(
         // 0 -> Never
         // 25 -> 20s
         // 50 -> 5s
-        // 75 -> 1.5s
-        // 90 -> 0.4s
-        // 100 -> 0.08s
+        // 75 -> 2s
+        // 90 -> 0.8s
+        // 100 -> 0.25s
         val baseDelay = when {
             lightningFrequency <= 25 -> {
                 val t = lightningFrequency / 25f
@@ -222,15 +222,15 @@ class SceneManager(
             }
             lightningFrequency <= 75 -> {
                 val t = (lightningFrequency - 50) / 25f
-                5f - t * 3.5f
+                5f - t * 3f
             }
             lightningFrequency <= 90 -> {
                 val t = (lightningFrequency - 75) / 15f
-                1.5f - t * 1.1f
+                2f - t * 1.2f
             }
             else -> {
                 val t = (lightningFrequency - 90) / 10f
-                0.4f - t * 0.32f
+                0.8f - t * 0.55f
             }
         }
         

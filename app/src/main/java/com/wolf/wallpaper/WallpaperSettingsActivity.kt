@@ -184,11 +184,11 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     value == 25 -> "Cada 20 segundos"
                     value < 50 -> "Frecuente (5–20s)"
                     value == 50 -> "Cada 5 segundos"
-                    value < 75 -> "Tormenta (1.5–5s)"
-                    value == 75 -> "Cada 1.5 segundos"
-                    value < 90 -> "Tormenta eléctrica (0.4–1.5s)"
-                    value < 100 -> "Tempestad extrema (0.08–0.4s)"
-                    else -> "Máximo caos (múltiples rayos)"
+                    value < 75 -> "Tormenta (2–5s)"
+                    value == 75 -> "Cada 2 segundos"
+                    value < 90 -> "Tormenta eléctrica (0.8–2s)"
+                    value < 100 -> "Tempestad extrema (0.25–0.8s)"
+                    else -> "Máximo caos (rayos rápidos)"
                 }
                 textView.text = "$value% ($desc)"
             }

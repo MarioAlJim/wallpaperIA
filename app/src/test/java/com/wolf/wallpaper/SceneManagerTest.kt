@@ -102,26 +102,26 @@ class SceneManagerTest {
             assertTrue("Delay $delay out of bounds for freq 50", delay >= 4.5f && delay <= 5.5f)
         }
 
-        // Test frequency 75 -> base delay 1.5s (+/- 10% tolerance)
-        // Expected range: [1.35s, 1.65s]
+        // Test frequency 75 -> base delay 2s (+/- 10% tolerance)
+        // Expected range: [1.8s, 2.2s]
         mockConfig.mockLightningFrequency = 75
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 75", delay >= 1.35f && delay <= 1.65f)
+            assertTrue("Delay $delay out of bounds for freq 75", delay >= 1.8f && delay <= 2.2f)
         }
 
-        // Test frequency 100 -> base delay 0.08s (+/- 10% tolerance)
-        // Expected range: [0.072s, 0.088s]
+        // Test frequency 100 -> base delay 0.25s (+/- 10% tolerance)
+        // Expected range: [0.225s, 0.275s]
         mockConfig.mockLightningFrequency = 100
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 100", delay >= 0.072f && delay <= 0.088f)
+            assertTrue("Delay $delay out of bounds for freq 100", delay >= 0.225f && delay <= 0.275f)
         }
     }
 
@@ -172,7 +172,7 @@ class SceneManagerTest {
             sceneManager.lightning.trigger(1.0f, 1, 0)
             assertTrue("ScaleY should be adjusted to be >= 2.0f", sceneManager.lightning.scaleY >= 2.0f)
             assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.5f..0.9f)
-            assertTrue("Rotation angle should be in bounds [-40, 40]", sceneManager.lightning.rotationAngle in -40f..40f)
+            assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }
 }
