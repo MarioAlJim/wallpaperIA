@@ -26,10 +26,14 @@ class Cloud(
 
     fun reset(startX: Float, aspectRatio: Float) {
         positionX = startX
-        // Disperse clouds along the Y axis (from -0.9 to 0.9)
-        positionY = Random.nextFloat() * 1.8f - 0.9f
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         scale = Random.nextFloat() * 0.5f + 0.3f // Size of cloud: base size 0.3, variation 0.5 (range 0.3 to 0.8)
+        
+        // Calculate Y range to keep the entire cloud body in the upper half (Y >= 0.0f and Y <= 1.0f)
+        val minY = scale * 0.5f
+        val maxY = 1.0f - scale * 0.5f
+        positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else minY
+        
         opacity = Random.nextFloat() * 0.4f + 0.4f // Transparency
     }
 }
