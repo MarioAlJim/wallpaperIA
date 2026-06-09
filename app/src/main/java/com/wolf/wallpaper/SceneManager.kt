@@ -9,7 +9,8 @@ class SceneManager(
 ) {
     private val clouds = mutableListOf<Cloud>()
     private val rainDrops = mutableListOf<RainDrop>()
-    val lightning = Lightning()
+    val lightnings = List(8) { Lightning() }
+    val lightning: Lightning get() = lightnings[0]
     
     private var cloudDensity = -1
     private var rainIntensity = -1
@@ -82,22 +83,27 @@ class SceneManager(
         }
 
         // 3. Update Lightning
-        if (lightning.isActive) {
-            lightning.update(deltaTime)
-        } else {
-            if (lightningFrequency > 0) {
-                timeSinceLastLightning += deltaTime
-                if (timeSinceLastLightning >= nextLightningDelay) {
+        for (l in lightnings) {
+            if (l.isActive) {
+                l.update(deltaTime)
+            }
+        }
+
+        if (lightningFrequency > 0) {
+            timeSinceLastLightning += deltaTime
+            if (timeSinceLastLightning >= nextLightningDelay) {
+                val inactiveLightning = lightnings.firstOrNull { !it.isActive }
+                if (inactiveLightning != null) {
                     val configColorIndex = configProvider.getLightningColorIndex()
                     val colorToUse = if (configColorIndex == 6) {
                         Random.nextInt(6)
                     } else {
                         configColorIndex
                     }
-                    lightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse)
-                    timeSinceLastLightning = 0f
-                    setupNextLightningDelay()
+                    inactiveLightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse)
                 }
+                timeSinceLastLightning = 0f
+                setupNextLightningDelay()
             }
         }
     }
@@ -200,26 +206,31 @@ class SceneManager(
 
         // Map frequency to delay in seconds:
         // 0 -> Never
-        // 25 -> 60s
-        // 50 -> 30s
-        // 75 -> 15s
-        // 100 -> 5s
+        // 25 -> 20s
+        // 50 -> 5s
+        // 75 -> 1.5s
+        // 90 -> 0.4s
+        // 100 -> 0.08s
         val baseDelay = when {
             lightningFrequency <= 25 -> {
-                val t = lightningFrequency / 25.0f
-                if (t <= 0.05f) 3600f else 60f / t
+                val t = lightningFrequency / 25f
+                if (t <= 0.05f) 3600f else 60f - t * 40f
             }
             lightningFrequency <= 50 -> {
-                val t = (lightningFrequency - 25) / 25.0f
-                60f - t * 30f
+                val t = (lightningFrequency - 25) / 25f
+                20f - t * 15f
             }
             lightningFrequency <= 75 -> {
-                val t = (lightningFrequency - 50) / 25.0f
-                30f - t * 15f
+                val t = (lightningFrequency - 50) / 25f
+                5f - t * 3.5f
+            }
+            lightningFrequency <= 90 -> {
+                val t = (lightningFrequency - 75) / 15f
+                1.5f - t * 1.1f
             }
             else -> {
-                val t = (lightningFrequency - 75) / 25.0f
-                15f - t * 10f
+                val t = (lightningFrequency - 90) / 10f
+                0.4f - t * 0.32f
             }
         }
         

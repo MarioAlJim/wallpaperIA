@@ -10,7 +10,8 @@ class Lightning(
     var duration: Float = 0.25f,
     var intensity: Float = 1.0f,
     var selectedTextureIndex: Int = 0,
-    var selectedColorIndex: Int = 0
+    var selectedColorIndex: Int = 0,
+    var rotationAngle: Float = 0f
 ) : StormObject {
 
     private var age = 0f
@@ -45,16 +46,51 @@ class Lightning(
         isActive = true
         age = 0f
         intensity = 1.0f
-        duration = Random.nextFloat() * 0.15f + 0.2f // between 200ms and 350ms
+        duration = kotlin.random.Random.nextFloat() * 0.15f + 0.2f // between 200ms and 350ms
         
         // Select random texture index
-        selectedTextureIndex = if (textureCount > 0) Random.nextInt(textureCount) else 0
+        selectedTextureIndex = if (textureCount > 0) kotlin.random.Random.nextInt(textureCount) else 0
         selectedColorIndex = colorIndex
         
-        // Spans the full height (scaleY = 2f, positionY = 0f)
-        positionX = (Random.nextFloat() * 1.4f - 0.7f) * aspectRatio
-        positionY = 0f
-        scaleY = 2f
-        scaleX = Random.nextFloat() * 0.4f + 0.5f // width of the bolt
+        val startX: Float
+        val startY: Float
+        
+        val spawnType = kotlin.random.Random.nextInt(3)
+        when (spawnType) {
+            0 -> { // Standard top-center
+                startX = (kotlin.random.Random.nextFloat() * 1.0f - 0.5f) * aspectRatio
+                startY = 1.0f
+                rotationAngle = kotlin.random.Random.nextFloat() * 20f - 10f
+            }
+            1 -> { // Left lateral
+                val startsOnSide = kotlin.random.Random.nextBoolean()
+                if (startsOnSide) {
+                    startX = -aspectRatio
+                    startY = kotlin.random.Random.nextFloat() * 0.5f + 0.5f // upper half
+                } else {
+                    startX = -aspectRatio * (kotlin.random.Random.nextFloat() * 0.4f + 0.6f)
+                    startY = 1.0f
+                }
+                rotationAngle = kotlin.random.Random.nextFloat() * 25f + 15f // shoots down-right
+            }
+            else -> { // Right lateral
+                val startsOnSide = kotlin.random.Random.nextBoolean()
+                if (startsOnSide) {
+                    startX = aspectRatio
+                    startY = kotlin.random.Random.nextFloat() * 0.5f + 0.5f // upper half
+                } else {
+                    startX = aspectRatio * (kotlin.random.Random.nextFloat() * 0.4f + 0.6f)
+                    startY = 1.0f
+                }
+                rotationAngle = -(kotlin.random.Random.nextFloat() * 25f + 15f) // shoots down-left
+            }
+        }
+
+        val rad = Math.toRadians(rotationAngle.toDouble())
+        scaleY = (2.0 / Math.cos(rad)).toFloat().coerceIn(2.0f, 2.8f)
+        scaleX = kotlin.random.Random.nextFloat() * 0.4f + 0.5f // width of the bolt
+
+        positionX = startX
+        positionY = startY - scaleY * 0.5f
     }
 }
