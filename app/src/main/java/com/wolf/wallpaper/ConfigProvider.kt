@@ -11,4 +11,6 @@ interface ConfigProvider {
     fun getLightningColorIndex(): Int
     fun getLightningDuration(): Int
     fun getBackgroundIndex(): Int
+    fun getCloudFlashFrequency(): Int
+    fun getCloudFlashColorIndex(): Int
 }

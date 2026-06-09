@@ -133,6 +133,23 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningDuration(value)
         }
 
+        // 4b. Setup Destellos en Nubes Controls
+        setupSlider(
+            R.id.seekBarCloudFlashFrequency,
+            R.id.textViewCloudFlashFrequencyValue,
+            configManager.getCloudFlashFrequency()
+        ) { value ->
+            configManager.setCloudFlashFrequency(value)
+        }
+
+        setupSpinner(
+            R.id.spinnerCloudFlashColor,
+            lightningColors,
+            configManager.getCloudFlashColorIndex()
+        ) { position ->
+            configManager.setCloudFlashColorIndex(position)
+        }
+
         val backgroundModes = arrayOf(
             "Color Oscuro (Original)",
             "Fondo 1 (Montaña)",
@@ -279,6 +296,21 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 }
                 textView.text = "$value% ($desc)"
             }
+            R.id.seekBarCloudFlashFrequency -> {
+                val desc = when {
+                    value <= 0 -> "Nunca"
+                    value < 25 -> "Muy raro"
+                    value == 25 -> "Cada 20 segundos"
+                    value < 50 -> "Frecuente"
+                    value == 50 -> "Cada 5 segundos"
+                    value < 75 -> "Tormenta"
+                    value == 75 -> "Cada 2 segundos"
+                    value < 90 -> "Tormenta eléctrica"
+                    value < 100 -> "Tempestad extrema"
+                    else -> "Máximo caos"
+                }
+                textView.text = "$value% ($desc)"
+            }
         }
     }
 
@@ -333,13 +365,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Blanco"
         }
         val lightningDuration = configManager.getLightningDuration()
-        val durationText = when {
-            lightningDuration <= 20 -> "Corto"
-            lightningDuration <= 60 -> "Normal"
-            lightningDuration <= 85 -> "Largo"
-            else -> "Extremo"
-        }
-        summaryLightning.text = "Freq: $lightningFreq% | Color: $lightningColorText | Dur: $durationText ($lightningDuration%)"
+        val cloudFlashFreq = configManager.getCloudFlashFrequency()
+        summaryLightning.text = "Rayos: $lightningFreq% | Nubes: $cloudFlashFreq% | Color: $lightningColorText"
 
         // 4. Fondo summary
         val bgModeText = when (configManager.getBackgroundIndex()) {

@@ -15,6 +15,7 @@ class SceneManager(
     private var cloudDensity = -1
     private var rainIntensity = -1
     private var lightningFrequency = -1
+    private var cloudFlashFrequency = -1
     private var windDirection = -1
     private var windIntensity = -1
     private var rainSpeed = -1
@@ -26,6 +27,8 @@ class SceneManager(
     
     private var timeSinceLastLightning = 0f
     private var nextLightningDelay = 0f
+    private var timeSinceLastCloudFlash = 0f
+    private var nextCloudFlashDelay = 0f
     private var aspectRatio = 1.0f
 
     init {
@@ -33,6 +36,7 @@ class SceneManager(
         currentWindAngle = targetWindAngle
         currentRainSpeed = targetRainSpeed
         setupNextLightningDelay()
+        setupNextCloudFlashDelay()
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
@@ -106,17 +110,41 @@ class SceneManager(
                     } else {
                         configColorIndex
                     }
-                    val isInternalOnly = Random.nextFloat() < 0.5f
                     inactiveLightning.trigger(
                         aspectRatio,
                         getLightningTextureCount(),
                         colorToUse,
                         configProvider.getLightningDuration(),
-                        isInternalOnly = isInternalOnly
+                        isInternalOnly = false
                     )
                 }
                 timeSinceLastLightning = 0f
                 setupNextLightningDelay()
+            }
+        }
+
+        val currentCloudFlashFreq = configProvider.getCloudFlashFrequency()
+        if (currentCloudFlashFreq > 0) {
+            timeSinceLastCloudFlash += deltaTime
+            if (timeSinceLastCloudFlash >= nextCloudFlashDelay) {
+                val inactiveLightning = lightnings.firstOrNull { !it.isActive }
+                if (inactiveLightning != null) {
+                    val configColorIndex = configProvider.getCloudFlashColorIndex()
+                    val colorToUse = if (configColorIndex == 6) {
+                        Random.nextInt(6)
+                    } else {
+                        configColorIndex
+                    }
+                    inactiveLightning.trigger(
+                        aspectRatio,
+                        getLightningTextureCount(),
+                        colorToUse,
+                        configProvider.getLightningDuration(),
+                        isInternalOnly = true
+                    )
+                }
+                timeSinceLastCloudFlash = 0f
+                setupNextCloudFlashDelay()
             }
         }
     }
@@ -151,6 +179,7 @@ class SceneManager(
         val targetDensity = configProvider.getCloudDensity()
         val targetRain = configProvider.getRainIntensity()
         val targetLightning = configProvider.getLightningFrequency()
+        val targetCloudFlashFreq = configProvider.getCloudFlashFrequency()
         val targetWind = configProvider.getWindDirection()
         val targetWindIntensity = configProvider.getWindIntensity()
         val targetRainSpeedVal = configProvider.getRainSpeed()
@@ -181,6 +210,12 @@ class SceneManager(
             lightningFrequency = targetLightning
             timeSinceLastLightning = 0f
             setupNextLightningDelay()
+        }
+
+        if (targetCloudFlashFreq != cloudFlashFrequency) {
+            cloudFlashFrequency = targetCloudFlashFreq
+            timeSinceLastCloudFlash = 0f
+            setupNextCloudFlashDelay()
         }
     }
 
@@ -272,5 +307,40 @@ class SceneManager(
         val maxVariance = 0.40f
         val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
         nextLightningDelay = baseDelay + variance
+    }
+
+    private fun setupNextCloudFlashDelay() {
+        val freq = cloudFlashFrequency
+        if (freq <= 0) {
+            nextCloudFlashDelay = Float.MAX_VALUE
+            return
+        }
+
+        val baseDelay = when {
+            freq <= 25 -> {
+                val t = freq / 25f
+                if (t <= 0.05f) 3600f else 60f - t * 40f
+            }
+            freq <= 50 -> {
+                val t = (freq - 25) / 25f
+                20f - t * 15f
+            }
+            freq <= 75 -> {
+                val t = (freq - 50) / 25f
+                5f - t * 3f
+            }
+            freq <= 90 -> {
+                val t = (freq - 75) / 15f
+                2f - t * 1.2f
+            }
+            else -> {
+                val t = (freq - 90) / 10f
+                0.8f - t * 0.55f
+            }
+        }
+        
+        val maxVariance = 0.40f
+        val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
+        nextCloudFlashDelay = baseDelay + variance
     }
 }

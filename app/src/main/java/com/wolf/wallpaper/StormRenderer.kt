@@ -270,7 +270,7 @@ class StormRenderer(private val context: Context) {
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glUniform1i(textureHandle, 0)
 
-        for (cloud in clouds) {
+        for (cloud in clouds.sortedBy { it.z }) {
             val modelMatrix = FloatArray(16)
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, cloud.positionX, cloud.positionY, 0f)

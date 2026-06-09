@@ -93,10 +93,9 @@ class Lightning(
             }
         }
 
-        val rad = Math.toRadians(rotationAngle.toDouble())
-        val fullHeight = (2.0 / Math.cos(rad)).toFloat().coerceIn(2.0f, 3.0f)
-        val heightFactor = kotlin.random.Random.nextFloat() * 0.6f + 0.4f // random height factor: 0.4 to 1.0
-        scaleY = fullHeight * heightFactor
+        val minHeight = 2.0f * 0.15f // 15% of screen height (0.3f)
+        val maxHeight = 2.0f * 0.75f // 75% of screen height (1.5f)
+        scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
         scaleX = kotlin.random.Random.nextFloat() * 0.15f + 0.15f // width of the bolt: 0.15 to 0.30
 
         positionX = startX

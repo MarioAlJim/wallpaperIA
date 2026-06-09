@@ -20,6 +20,8 @@ class SceneManagerTest {
         var mockLightningColorIndex = 0
         var mockLightningDuration = 30
         var mockBackgroundIndex = 1
+        var mockCloudFlashFrequency = 50
+        var mockCloudFlashColorIndex = 0
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -31,6 +33,8 @@ class SceneManagerTest {
         override fun getLightningColorIndex(): Int = mockLightningColorIndex
         override fun getLightningDuration(): Int = mockLightningDuration
         override fun getBackgroundIndex(): Int = mockBackgroundIndex
+        override fun getCloudFlashFrequency(): Int = mockCloudFlashFrequency
+        override fun getCloudFlashColorIndex(): Int = mockCloudFlashColorIndex
     }
 
     @Test
@@ -187,7 +191,7 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
-            assertTrue("ScaleY should be adjusted to be >= 0.8f", sceneManager.lightning.scaleY >= 0.8f)
+            assertTrue("ScaleY should be in range [0.3f, 1.5f]", sceneManager.lightning.scaleY in 0.3f..1.5f)
             assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.15f..0.35f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
@@ -341,5 +345,76 @@ class SceneManagerTest {
         }
         assertTrue("Should support internal-only lightning triggers", hasInternal)
         assertTrue("Should support normal lightning triggers", hasNormal)
+    }
+
+    @Test
+    fun testCloudDepthAndParallax() {
+        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
+        
+        // Before reset, z defaults to 1.0f
+        assertEquals(1.0f, cloud.z)
+        
+        // Reset 100 times to verify bounds and scaling
+        for (i in 0 until 100) {
+            cloud.reset(0f, 1.0f)
+            
+            // 1. z must be in [0.3f, 1.0f]
+            assertTrue("z (${cloud.z}) should be in range [0.3, 1.0]", cloud.z in 0.3f..1.0f)
+            
+            // 2. scale should be (Random.nextFloat() * 0.5f + 0.3f) * z
+            val minExpectedScale = 0.3f * cloud.z - 0.001f
+            val maxExpectedScale = 0.8f * cloud.z + 0.001f
+            assertTrue("Scale (${cloud.scale}) should be scaled by z", cloud.scale in minExpectedScale..maxExpectedScale)
+            
+            // 3. opacity should be (Random.nextFloat() * 0.4f + 0.4f) * z
+            val minExpectedOpacity = 0.4f * cloud.z - 0.001f
+            val maxExpectedOpacity = 0.8f * cloud.z + 0.001f
+            assertTrue("Opacity (${cloud.opacity}) should be scaled by z", cloud.opacity in minExpectedOpacity..maxExpectedOpacity)
+        }
+    }
+
+    @Test
+    fun testIndependentCloudFlashes() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+
+        // 1. Set Lightning Frequency to 0 (Never) and Cloud Flash Frequency to 100 (Always/Maximum)
+        mockConfig.mockLightningFrequency = 0
+        mockConfig.mockCloudFlashFrequency = 100
+        sceneManager.update(0.016f) // triggers updateFromConfig
+
+        var triggeredCloudFlash = false
+        // Simulate to guarantee trigger
+        for (i in 0 until 500) {
+            sceneManager.update(0.05f)
+            val active = sceneManager.lightnings.filter { it.isActive }
+            for (l in active) {
+                assertTrue("Any active lightning must be internal only when lightningFreq is 0", l.isInternalOnly)
+                triggeredCloudFlash = true
+            }
+        }
+        assertTrue("Cloud flashes should have triggered independently", triggeredCloudFlash)
+
+        // 2. Set Lightning Frequency to 100 and Cloud Flash Frequency to 0
+        mockConfig.mockLightningFrequency = 100
+        mockConfig.mockCloudFlashFrequency = 0
+        sceneManager.update(0.016f)
+        
+        // Deactivate all lightnings
+        for (l in sceneManager.lightnings) {
+            val field = l.javaClass.getDeclaredField("isActive")
+            field.isAccessible = true
+            field.set(l, false)
+        }
+
+        var triggeredNormalLightning = false
+        for (i in 0 until 500) {
+            sceneManager.update(0.05f)
+            val active = sceneManager.lightnings.filter { it.isActive }
+            for (l in active) {
+                assertTrue("Any active lightning must be normal (not internal) when cloudFlashFreq is 0", !l.isInternalOnly)
+                triggeredNormalLightning = true
+            }
+        }
+        assertTrue("Normal lightnings should have triggered independently", triggeredNormalLightning)
     }
 }

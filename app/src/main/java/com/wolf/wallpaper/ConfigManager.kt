@@ -19,6 +19,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_LIGHTNING_DURATION = "lightning_duration"
         const val KEY_SHOW_BACKGROUND = "show_background" // Keep original key if desired, but index type is Int
         const val KEY_BACKGROUND_INDEX = "background_index"
+        const val KEY_CLOUD_FLASH_FREQUENCY = "cloud_flash_frequency"
+        const val KEY_CLOUD_FLASH_COLOR_INDEX = "cloud_flash_color_index"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -30,6 +32,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_LIGHTNING_COLOR_INDEX = 0
         const val DEFAULT_LIGHTNING_DURATION = 30
         const val DEFAULT_BACKGROUND_INDEX = 1
+        const val DEFAULT_CLOUD_FLASH_FREQUENCY = 50
+        const val DEFAULT_CLOUD_FLASH_COLOR_INDEX = 0
     }
 
     override fun getCloudDensity(): Int {
@@ -110,5 +114,21 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setBackgroundIndex(index: Int) {
         prefs.edit().putInt(KEY_BACKGROUND_INDEX, index.coerceIn(0, 5)).apply()
+    }
+
+    override fun getCloudFlashFrequency(): Int {
+        return prefs.getInt(KEY_CLOUD_FLASH_FREQUENCY, DEFAULT_CLOUD_FLASH_FREQUENCY)
+    }
+
+    fun setCloudFlashFrequency(frequency: Int) {
+        prefs.edit().putInt(KEY_CLOUD_FLASH_FREQUENCY, frequency.coerceIn(0, 100)).apply()
+    }
+
+    override fun getCloudFlashColorIndex(): Int {
+        return prefs.getInt(KEY_CLOUD_FLASH_COLOR_INDEX, DEFAULT_CLOUD_FLASH_COLOR_INDEX)
+    }
+
+    fun setCloudFlashColorIndex(index: Int) {
+        prefs.edit().putInt(KEY_CLOUD_FLASH_COLOR_INDEX, index.coerceIn(0, 6)).apply()
     }
 }
