@@ -33,9 +33,10 @@ class RainDrop(
         // Rendering is coordinated by StormRenderer
     }
 
-    fun reset(aspectRatio: Float, windDirection: Int, windIntensity: Int, startOnScreen: Boolean = false) {
-        // Speed of drop (between 3.0 and 4.5)
-        val speed = Random.nextFloat() * 1.5f + 3.0f
+    fun reset(aspectRatio: Float, windDirection: Int, windIntensity: Int, rainSpeed: Int, startOnScreen: Boolean = false) {
+        // Speed of drop (between 3.0 and 4.5) scaled by rainSpeed setting
+        val speedFactor = 0.2f + (rainSpeed / 100f) * 1.6f
+        val speed = (Random.nextFloat() * 1.5f + 3.0f) * speedFactor
         
         when (windDirection) {
             0 -> { // Izquierda
