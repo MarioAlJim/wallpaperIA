@@ -14,12 +14,15 @@ class Cloud(
 
     var z: Float = 1.0f
 
+    val speedZFactor: Float
+        get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
+
     override fun update(deltaTime: Float) {
         // Required by StormObject, we use update(deltaTime, windSpeed) in SceneManager
     }
 
     fun update(deltaTime: Float, windSpeed: Float) {
-        positionX += windSpeed * speedFactor * z * deltaTime
+        positionX += windSpeed * speedFactor * speedZFactor * deltaTime
     }
 
     override fun render() {
