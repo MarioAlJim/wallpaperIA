@@ -112,6 +112,25 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningFrequency(value)
         }
 
+        // Configuración para el color de los rayos
+        val lightningColorSeek = findViewById<SeekBar>(R.id.seekBarLightningColor)
+        val lightningColorText = findViewById<TextView>(R.id.textViewLightningColorValue)
+        val initialLightningColorValue = configManager.getLightningColorIndex()
+        lightningColorSeek.progress = initialLightningColorValue
+        updateLightningColorTextView(initialLightningColorValue, lightningColorText)
+
+        lightningColorSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    configManager.setLightningColorIndex(progress)
+                    updateLightningColorTextView(progress, lightningColorText)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
         val buttonApply = findViewById<Button>(R.id.buttonApplyWallpaper)
         buttonApply.setOnClickListener {
             val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
@@ -221,6 +240,20 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             4 -> "Amarillo"
             5 -> "Morado"
             else -> "Azul"
+        }
+        textView.text = colorName
+    }
+
+    private fun updateLightningColorTextView(progress: Int, textView: TextView) {
+        val colorName = when (progress) {
+            0 -> "Blanco"
+            1 -> "Azul"
+            2 -> "Amarillo"
+            3 -> "Rojo"
+            4 -> "Verde"
+            5 -> "Morado"
+            6 -> "Aleatorio"
+            else -> "Blanco"
         }
         textView.text = colorName
     }
