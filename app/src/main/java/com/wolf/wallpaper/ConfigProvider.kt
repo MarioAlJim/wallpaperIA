@@ -7,4 +7,5 @@ interface ConfigProvider {
     fun getWindDirection(): Int
     fun getRainColorIndex(): Int
     fun getWindIntensity(): Int
+    fun getRainSpeed(): Int
 }
