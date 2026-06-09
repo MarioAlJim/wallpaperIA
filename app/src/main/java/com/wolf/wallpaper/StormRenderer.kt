@@ -135,12 +135,31 @@ class StormRenderer(private val context: Context) {
         var clearB = 0.06f
 
         // Apply lightning flash peak color directly to background
-        val lightning = sceneManager.lightning
-        if (lightning.isActive) {
-            val flashCoeff = lightning.intensity * 0.45f
-            clearR += flashCoeff
-            clearG += flashCoeff
-            clearB += flashCoeff + 0.05f // Tint flash slightly blue
+        var maxIntensity = 0f
+        var resolvedColor = floatArrayOf(0f, 0f, 0f, 0f)
+        var activeCount = 0
+
+        for (lightning in sceneManager.lightnings) {
+            if (lightning.isActive) {
+                if (lightning.intensity > maxIntensity) {
+                    maxIntensity = lightning.intensity
+                }
+                val color = getLightningColor(lightning.selectedColorIndex)
+                resolvedColor[0] += color[0] * lightning.intensity
+                resolvedColor[1] += color[1] * lightning.intensity
+                resolvedColor[2] += color[2] * lightning.intensity
+                activeCount++
+            }
+        }
+
+        if (activeCount > 0) {
+            val flashCoeff = maxIntensity * 0.45f
+            val r = (resolvedColor[0] / activeCount) * flashCoeff
+            val g = (resolvedColor[1] / activeCount) * flashCoeff
+            val b = (resolvedColor[2] / activeCount) * flashCoeff
+            clearR += r
+            clearG += g
+            clearB += b
         }
 
         GLES30.glClearColor(clearR, clearG, clearB, 1.0f)
@@ -149,7 +168,7 @@ class StormRenderer(private val context: Context) {
         // Render layered elements in order: Nubes -> Lluvia -> Rayos
         // drawClouds(sceneManager.getClouds())
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
-        drawLightning(lightning)
+        drawLightning(sceneManager.lightnings)
     }
 
     private fun drawClouds(clouds: List<Cloud>) {
@@ -248,8 +267,9 @@ class StormRenderer(private val context: Context) {
         }
     }
 
-    private fun drawLightning(lightning: Lightning) {
-        if (!lightning.isActive) return
+    private fun drawLightning(lightnings: List<Lightning>) {
+        val activeLightnings = lightnings.filter { it.isActive }
+        if (activeLightnings.isEmpty()) return
 
         GLES30.glUseProgram(lightningProgram)
         val mvpMatrixHandle = GLES30.glGetUniformLocation(lightningProgram, "uMVPMatrix")
@@ -258,52 +278,83 @@ class StormRenderer(private val context: Context) {
         val textureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
         val colorHandle = GLES30.glGetUniformLocation(lightningProgram, "uLightningColor")
 
-        // Load and bind lightning color
-        val color = getLightningColor(lightning.selectedColorIndex)
-        GLES30.glUniform4fv(colorHandle, 1, color, 0)
+        // 1. Draw a single combined full screen overlay flash
+        var maxIntensity = 0f
+        var resolvedColor = floatArrayOf(0f, 0f, 0f, 0f)
+        for (lightning in activeLightnings) {
+            if (lightning.intensity > maxIntensity) {
+                maxIntensity = lightning.intensity
+            }
+            val color = getLightningColor(lightning.selectedColorIndex)
+            resolvedColor[0] += color[0] * lightning.intensity
+            resolvedColor[1] += color[1] * lightning.intensity
+            resolvedColor[2] += color[2] * lightning.intensity
+        }
 
-        // 1. Draw full screen overlay flash (solid color, uIsTextured = 0)
         GLES30.glUniform1i(isTexturedHandle, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, identityMatrix, 0)
-        GLES30.glUniform1f(flashIntensityHandle, lightning.intensity * 0.20f)
+        GLES30.glUniform1f(flashIntensityHandle, maxIntensity * 0.20f)
+
+        val avgColor = floatArrayOf(
+            (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
+            (resolvedColor[1] / activeLightnings.size).coerceIn(0f, 1f),
+            (resolvedColor[2] / activeLightnings.size).coerceIn(0f, 1f),
+            1.0f
+        )
+        GLES30.glUniform4fv(colorHandle, 1, avgColor, 0)
 
         fullscreenQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
         GLES30.glEnableVertexAttribArray(0)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 
-        // 2. Draw textured lightning bolt (uIsTextured = 1)
-        if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
-            GLES30.glUniform1i(isTexturedHandle, 1)
-            GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
+        // 2. Draw textured lightning bolt for each active lightning
+        GLES30.glUniform1i(isTexturedHandle, 1)
 
-            val modelMatrix = FloatArray(16)
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, lightning.positionX, lightning.positionY, 0f)
-            Matrix.scaleM(modelMatrix, 0, lightning.scaleX, lightning.scaleY, 1.0f)
-            
-            val modelViewProjection = FloatArray(16)
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
+        // Bind position coordinates (location 0)
+        lightningQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
 
-            // Bind position coordinates (location 0)
-            lightningQuadBuffer.position(0)
-            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
-            GLES30.glEnableVertexAttribArray(0)
+        // Bind UV texture coordinates (location 1)
+        lightningQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
 
-            // Bind UV texture coordinates (location 1)
-            lightningQuadBuffer.position(2)
-            GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
-            GLES30.glEnableVertexAttribArray(1)
+        for (lightning in activeLightnings) {
+            if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
+                GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
+                val color = getLightningColor(lightning.selectedColorIndex)
+                GLES30.glUniform4fv(colorHandle, 1, color, 0)
 
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, lightningTextures[lightning.selectedTextureIndex])
-            GLES30.glUniform1i(textureHandle, 0)
+                val modelMatrix = FloatArray(16)
+                Matrix.setIdentityM(modelMatrix, 0)
 
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+                // Apply world translation
+                Matrix.translateM(modelMatrix, 0, lightning.positionX, lightning.positionY, 0f)
 
-            GLES30.glDisableVertexAttribArray(1)
+                if (lightning.rotationAngle != 0f) {
+                    val halfHeight = lightning.scaleY * 0.5f
+                    Matrix.translateM(modelMatrix, 0, 0f, halfHeight, 0f)
+                    Matrix.rotateM(modelMatrix, 0, lightning.rotationAngle, 0f, 0f, 1f)
+                    Matrix.translateM(modelMatrix, 0, 0f, -halfHeight, 0f)
+                }
+
+                // Apply scale
+                Matrix.scaleM(modelMatrix, 0, lightning.scaleX, lightning.scaleY, 1.0f)
+
+                val modelViewProjection = FloatArray(16)
+                Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+                GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
+
+                GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, lightningTextures[lightning.selectedTextureIndex])
+                GLES30.glUniform1i(textureHandle, 0)
+
+                GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+            }
         }
+        GLES30.glDisableVertexAttribArray(1)
         GLES30.glDisableVertexAttribArray(0)
     }
 
