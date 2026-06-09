@@ -30,8 +30,8 @@ class Cloud(
     }
 
     fun update(deltaTime: Float, windSpeed: Float) {
-        val windFactorOpacity = 1.0f + abs(windSpeed) * 10f
-        val windFactorBreathing = 1.0f + abs(windSpeed) * 5f
+        val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
+        val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         pulseTime += deltaTime * windFactorBreathing
         scale = baseScale * (1.0f + sin(pulseTime) * 0.08f)
 

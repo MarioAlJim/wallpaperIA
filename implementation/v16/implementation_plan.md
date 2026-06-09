@@ -8,8 +8,8 @@ Este plan describe el diseño e implementación de la característica de "Dinám
 > - **Deriva Bidireccional**: Cada nube tendrá una velocidad de deriva propia `driftSpeed` entre `-0.03f` y `+0.03f` (asignada de forma aleatoria en `reset()`), lo que permitirá que se crucen en direcciones opuestas incluso cuando no hay viento horizontal (`windSpeed == 0f`).
 > - **Variación Dinámica de Tamaño**: Se implementará una oscilación del tamaño (`scale`) basada en una función seno que fluctúa sutilmente (±8%) del tamaño base (`baseScale`).
 > - **Escalado Proporcional al Viento**: La velocidad del cambio de opacidad (`fadeSpeed`) y la frecuencia de la oscilación de tamaño (`pulseTime`) se multiplicarán por factores que escalan proporcionalmente con la velocidad del viento horizontal:
->   $$\text{windFactorOpacity} = 1.0f + |windSpeed| \times 10.0f$$
->   $$\text{windFactorBreathing} = 1.0f + |windSpeed| \times 5.0f \quad \text{(influencia reducida en 50\%)}$$
+>   $$\text{windFactorOpacity} = 1.0f + |windSpeed| \times 2.5f \quad \text{(influencia reducida en 75\%)}$$
+>   $$\text{windFactorBreathing} = 1.0f + |windSpeed| \times 1.25f \quad \text{(influencia reducida en otro 75\%)}$$
 >   Esto acelera los cambios sutiles bajo vientos fuertes de manera continua y sin saltos bruscos.
 > - **Límites de Tamaño Modificados**: Se incrementará el tamaño máximo de las nubes en un 25% (de `1.0f` a `1.25f` antes de profundidad `z`) y el tamaño mínimo en un 15% (de `0.3f` a `0.345f` antes de `z`).
 
@@ -36,7 +36,7 @@ Este plan describe el diseño e implementación de la característica de "Dinám
   - `scale = baseScale`
   - `pulseTime = Random.nextFloat() * 10f`
 - En `update(deltaTime, windSpeed)`:
-  - Calcular los factores proporcionales al viento: `val windFactorOpacity = 1.0f + kotlin.math.abs(windSpeed) * 10f` y `val windFactorBreathing = 1.0f + kotlin.math.abs(windSpeed) * 5f`.
+  - Calcular los factores proporcionales al viento: `val windFactorOpacity = 1.0f + kotlin.math.abs(windSpeed) * 2.5f` and `val windFactorBreathing = 1.0f + kotlin.math.abs(windSpeed) * 1.25f`.
   - Incrementar `pulseTime` usando `deltaTime * windFactorBreathing`.
   - Actualizar `scale` usando la fórmula de latido:
     $$\text{scale} = \text{baseScale} \times (1.0f + \sin(\text{pulseTime}) \times 0.08f)$$
