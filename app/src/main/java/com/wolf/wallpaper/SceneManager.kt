@@ -234,8 +234,8 @@ class SceneManager(
             }
         }
         
-        // Add random variance (+/- 10% maximum tolerance)
-        val maxVariance = 0.10f
+        // Add random variance (+/- 40% maximum tolerance) to make intervals feel natural and variable
+        val maxVariance = 0.40f
         val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
         nextLightningDelay = baseDelay + variance
     }

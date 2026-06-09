@@ -80,48 +80,48 @@ class SceneManagerTest {
     fun testLightningFrequencyDelayCalculation() {
         val sceneManager = SceneManager(mockContext, mockConfig)
 
-        // Test frequency 25 -> base delay of 20s (+/- 10% tolerance)
-        // Expected range: [18.0s, 22.0s]
+        // Test frequency 25 -> base delay of 20s (+/- 40% tolerance)
+        // Expected range: [12.0s, 28.0s]
         mockConfig.mockLightningFrequency = 25
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 25", delay >= 18.0f && delay <= 22.0f)
+            assertTrue("Delay $delay out of bounds for freq 25", delay >= 12.0f && delay <= 28.0f)
         }
 
-        // Test frequency 50 -> base delay 5s (+/- 10% tolerance)
-        // Expected range: [4.5s, 5.5s]
+        // Test frequency 50 -> base delay 5s (+/- 40% tolerance)
+        // Expected range: [3.0s, 7.0s]
         mockConfig.mockLightningFrequency = 50
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 50", delay >= 4.5f && delay <= 5.5f)
+            assertTrue("Delay $delay out of bounds for freq 50", delay >= 3.0f && delay <= 7.0f)
         }
 
-        // Test frequency 75 -> base delay 2s (+/- 10% tolerance)
-        // Expected range: [1.8s, 2.2s]
+        // Test frequency 75 -> base delay 2s (+/- 40% tolerance)
+        // Expected range: [1.2s, 2.8s]
         mockConfig.mockLightningFrequency = 75
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 75", delay >= 1.8f && delay <= 2.2f)
+            assertTrue("Delay $delay out of bounds for freq 75", delay >= 1.2f && delay <= 2.8f)
         }
 
-        // Test frequency 100 -> base delay 0.25s (+/- 10% tolerance)
-        // Expected range: [0.225s, 0.275s]
+        // Test frequency 100 -> base delay 0.25s (+/- 40% tolerance)
+        // Expected range: [0.15s, 0.35s]
         mockConfig.mockLightningFrequency = 100
         for (i in 0 until 50) {
             sceneManager.update(0.016f)
             val field = SceneManager::class.java.getDeclaredField("nextLightningDelay")
             field.isAccessible = true
             val delay = field.get(sceneManager) as Float
-            assertTrue("Delay $delay out of bounds for freq 100", delay >= 0.225f && delay <= 0.275f)
+            assertTrue("Delay $delay out of bounds for freq 100", delay >= 0.15f && delay <= 0.35f)
         }
     }
 
