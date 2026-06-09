@@ -16,6 +16,7 @@ class SceneManagerTest {
         var mockWindDirection = 0
         var mockRainColorIndex = 0
         var mockWindIntensity = 50
+        var mockRainSpeed = 50
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -23,6 +24,7 @@ class SceneManagerTest {
         override fun getWindDirection(): Int = mockWindDirection
         override fun getRainColorIndex(): Int = mockRainColorIndex
         override fun getWindIntensity(): Int = mockWindIntensity
+        override fun getRainSpeed(): Int = mockRainSpeed
     }
 
     @Test
@@ -121,5 +123,25 @@ class SceneManagerTest {
             val delay = field.get(sceneManager) as Float
             assertTrue("Delay $delay out of bounds for freq 100", delay >= 4.5f && delay <= 5.5f)
         }
+    }
+
+    @Test
+    fun testRainSpeedUpdates() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        // Set initial rainSpeed
+        mockConfig.mockRainSpeed = 50
+        sceneManager.update(0.016f)
+
+        // Verify private rainSpeed field
+        val field = SceneManager::class.java.getDeclaredField("rainSpeed")
+        field.isAccessible = true
+        assertEquals(50, field.get(sceneManager) as Int)
+
+        // Change rainSpeed
+        mockConfig.mockRainSpeed = 80
+        sceneManager.update(0.016f)
+        assertEquals(80, field.get(sceneManager) as Int)
     }
 }

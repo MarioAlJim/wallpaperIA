@@ -76,6 +76,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setWindIntensity(value)
         }
 
+        // Configuración para la velocidad de la lluvia
+        setupSlider(
+            R.id.seekBarRainSpeed,
+            R.id.textViewRainSpeedValue,
+            configManager.getRainSpeed()
+        ) { value ->
+            configManager.setRainSpeed(value)
+        }
+
         // Configuración para el color de la lluvia
         val colorSeek = findViewById<SeekBar>(R.id.seekBarRainColor)
         val colorText = findViewById<TextView>(R.id.textViewRainColorValue)
@@ -164,6 +173,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 textView.text = "$value% ($desc)"
             }
             R.id.seekBarWindIntensity -> {
+                textView.text = "$value%"
+            }
+            R.id.seekBarRainSpeed -> {
                 textView.text = "$value%"
             }
         }

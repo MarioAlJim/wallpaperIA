@@ -16,6 +16,7 @@ class SceneManager(
     private var lightningFrequency = -1
     private var windDirection = -1
     private var windIntensity = -1
+    private var rainSpeed = -1
     
     private var timeSinceLastLightning = 0f
     private var nextLightningDelay = 0f
@@ -37,7 +38,7 @@ class SceneManager(
         }
         */
         for (drop in rainDrops) {
-            drop.reset(aspectRatio, windDirection, windIntensity, startOnScreen = true)
+            drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
         }
     }
 
@@ -63,7 +64,7 @@ class SceneManager(
             if (drop.positionY < -1.05f || 
                 (drop.velocityX < 0f && drop.positionX < -aspectRatio - 0.1f) ||
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f)) {
-                drop.reset(aspectRatio, windDirection, windIntensity, startOnScreen = false)
+                drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = false)
             }
         }
 
@@ -94,17 +95,19 @@ class SceneManager(
         val targetLightning = configProvider.getLightningFrequency()
         val targetWind = configProvider.getWindDirection()
         val targetWindIntensity = configProvider.getWindIntensity()
+        val targetRainSpeed = configProvider.getRainSpeed()
 
         if (targetDensity != cloudDensity) {
             adjustClouds(targetDensity)
             cloudDensity = targetDensity
         }
 
-        if (targetWind != windDirection || targetWindIntensity != windIntensity) {
+        if (targetWind != windDirection || targetWindIntensity != windIntensity || targetRainSpeed != rainSpeed) {
             windDirection = targetWind
             windIntensity = targetWindIntensity
+            rainSpeed = targetRainSpeed
             for (drop in rainDrops) {
-                drop.reset(aspectRatio, windDirection, windIntensity, startOnScreen = true)
+                drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
             }
         }
 
@@ -150,7 +153,7 @@ class SceneManager(
         
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            drop.reset(aspectRatio, windDirection, windIntensity, startOnScreen = true)
+            drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
             rainDrops.add(drop)
         }
         
