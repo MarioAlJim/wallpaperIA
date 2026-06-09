@@ -268,7 +268,7 @@ class StormRenderer(private val context: Context) {
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, rainBuffer)
         GLES30.glEnableVertexAttribArray(0)
 
-        GLES30.glLineWidth(2.2f)
+        GLES30.glLineWidth(5.0f)
         GLES30.glDrawArrays(GLES30.GL_LINES, 0, rainDrops.size * 2)
 
         GLES30.glDisableVertexAttribArray(0)

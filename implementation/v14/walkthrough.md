@@ -32,7 +32,7 @@ Mejoras de diseño aplicadas:
 * En `onSurfaceCreated()`, se cargan dinámicamente y se ordenan alfabéticamente todos los PNG de `assets/clouds`.
 * En `drawFrame()`, se cambió el orden de renderizado para llamar a `drawClouds` después de dibujar la lluvia y los rayos (dibujándolas al final para colocarlas al frente).
 * Se actualizó `drawClouds()` para usar la lista dinámica de texturas de forma segura aplicando el módulo del tamaño de la lista: `cloudTextures[cloud.textureIndex % cloudTextures.size]`.
-* Se aumentó el grosor de las líneas de la lluvia en `0.2` de forma neta (modificando la llamada a `GLES30.glLineWidth(2.2f)` dentro de `drawRain`).
+* Se aumentó el grosor de las líneas de la lluvia a `5.0f` (modificando la llamada a `GLES30.glLineWidth(5.0f)` dentro de `drawRain`) para asegurar que las gotas de lluvia permanezcan perfectamente visibles y destacadas incluso con una densidad de nubes alta y texturas muy cargadas en el fondo.
 
 ### 5. Pruebas Unitarias (`SceneManagerTest.kt`)
 * Se añadió el caso de prueba `testCloudWindAndWrapping()` que valida el movimiento horizontal en ambas direcciones del viento y el correcto screen wrapping bilateral.
@@ -48,6 +48,7 @@ Mejoras de diseño aplicadas:
 - `fix(rain): increase rain drop line width by 0.1 to 2.1f`
 - `fix(rain): increase rain drop line width by 0.2 to 2.2f`
 - `feat(settings): redesign settings screen with accordion cards, Spinners, help texts, and dynamic headers`
+- `fix(rain): increase rain drop line width to 5.0f for higher visibility with dense clouds`
 
 ## Verificación
 
