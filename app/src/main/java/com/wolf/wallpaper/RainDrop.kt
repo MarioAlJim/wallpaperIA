@@ -14,6 +14,8 @@ class RainDrop(
 ) : StormObject {
 
     var isActive = false
+    private var baseSpeed: Float = 0f
+    private var angleOffset: Float = 0f
 
     override fun update(deltaTime: Float) {
         if (spawnDelay > 0f) {
@@ -33,39 +35,25 @@ class RainDrop(
         // Rendering is coordinated by StormRenderer
     }
 
-    fun reset(aspectRatio: Float, windDirection: Int, windIntensity: Int, rainSpeed: Int, startOnScreen: Boolean = false) {
-        // Speed of drop (between 3.0 and 4.5) scaled by rainSpeed setting
+    fun updateVelocity(windAngle: Float, rainSpeed: Float) {
         val speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
-        val speed = (Random.nextFloat() * 1.5f + 3.0f) * speedFactor
+        val speed = baseSpeed * speedFactor
         
-        when (windDirection) {
-            0 -> { // Izquierda
-                val maxAngleAtIntensity = (windIntensity / 100f) * 35f
-                val angleDeg = maxAngleAtIntensity + Random.nextFloat() * 5f
-                val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
-                velocityY = -speed * kotlin.math.cos(angleRad)
-                velocityX = -speed * kotlin.math.sin(angleRad)
-            }
-            1 -> { // Vertical
-                velocityY = -speed
-                velocityX = 0f
-            }
-            2 -> { // Derecha
-                val maxAngleAtIntensity = (windIntensity / 100f) * 35f
-                val angleDeg = maxAngleAtIntensity + Random.nextFloat() * 5f
-                val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
-                velocityY = -speed * kotlin.math.cos(angleRad)
-                velocityX = speed * kotlin.math.sin(angleRad)
-            }
-            else -> {
-                velocityY = -speed
-                velocityX = 0f
-            }
-        }
+        val angleDeg = windAngle + angleOffset
+        val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
+        velocityY = -speed * kotlin.math.cos(angleRad)
+        velocityX = speed * kotlin.math.sin(angleRad)
         
         val dirLength = kotlin.math.sqrt(velocityX * velocityX + velocityY * velocityY)
         dirX = if (dirLength > 0f) velocityX / dirLength else 0f
         dirY = if (dirLength > 0f) velocityY / dirLength else -1f
+    }
+
+    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false) {
+        baseSpeed = Random.nextFloat() * 1.5f + 3.0f
+        angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f // +/- 2.5 degrees deviation
+        
+        updateVelocity(windAngle, rainSpeed)
         
         // Random length to simulate motion blur variety
         length = Random.nextFloat() * 0.08f + 0.06f

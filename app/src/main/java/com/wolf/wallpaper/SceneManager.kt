@@ -17,6 +17,11 @@ class SceneManager(
     private var windDirection = -1
     private var windIntensity = -1
     private var rainSpeed = -1
+
+    private var targetWindAngle = 0f
+    private var targetRainSpeed = 50f
+    private var currentWindAngle = 0f
+    private var currentRainSpeed = 50f
     
     private var timeSinceLastLightning = 0f
     private var nextLightningDelay = 0f
@@ -24,6 +29,8 @@ class SceneManager(
 
     init {
         updateFromConfig()
+        currentWindAngle = targetWindAngle
+        currentRainSpeed = targetRainSpeed
         setupNextLightningDelay()
     }
 
@@ -38,12 +45,17 @@ class SceneManager(
         }
         */
         for (drop in rainDrops) {
-            drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
         }
     }
 
     fun update(deltaTime: Float) {
         updateFromConfig()
+
+        // Interpolate current values (lerp)
+        val lerpFactor = 5f * deltaTime
+        currentWindAngle += (targetWindAngle - currentWindAngle) * lerpFactor.coerceAtMost(1f)
+        currentRainSpeed += (targetRainSpeed - currentRainSpeed) * lerpFactor.coerceAtMost(1f)
 
         // 1. Update Clouds (Disabled for now)
         /*
@@ -59,12 +71,13 @@ class SceneManager(
 
         // 2. Update Rain
         for (drop in rainDrops) {
+            drop.updateVelocity(currentWindAngle, currentRainSpeed)
             drop.update(deltaTime)
             // Check boundaries based on direction of velocity
             if (drop.positionY < -1.05f || 
                 (drop.velocityX < 0f && drop.positionX < -aspectRatio - 0.1f) ||
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f)) {
-                drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = false)
+                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false)
             }
         }
 
@@ -95,21 +108,24 @@ class SceneManager(
         val targetLightning = configProvider.getLightningFrequency()
         val targetWind = configProvider.getWindDirection()
         val targetWindIntensity = configProvider.getWindIntensity()
-        val targetRainSpeed = configProvider.getRainSpeed()
+        val targetRainSpeedVal = configProvider.getRainSpeed()
 
         if (targetDensity != cloudDensity) {
             adjustClouds(targetDensity)
             cloudDensity = targetDensity
         }
 
-        if (targetWind != windDirection || targetWindIntensity != windIntensity || targetRainSpeed != rainSpeed) {
-            windDirection = targetWind
-            windIntensity = targetWindIntensity
-            rainSpeed = targetRainSpeed
-            for (drop in rainDrops) {
-                drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
-            }
+        // Calculate target values
+        targetWindAngle = when (targetWind) {
+            0 -> -(targetWindIntensity / 100f) * 35f
+            2 -> (targetWindIntensity / 100f) * 35f
+            else -> 0f
         }
+        targetRainSpeed = targetRainSpeedVal.toFloat()
+
+        windDirection = targetWind
+        windIntensity = targetWindIntensity
+        rainSpeed = targetRainSpeedVal
 
         if (targetRain != rainIntensity) {
             adjustRain(targetRain)
@@ -153,7 +169,7 @@ class SceneManager(
         
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            drop.reset(aspectRatio, windDirection, windIntensity, rainSpeed, startOnScreen = true)
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
             rainDrops.add(drop)
         }
         
