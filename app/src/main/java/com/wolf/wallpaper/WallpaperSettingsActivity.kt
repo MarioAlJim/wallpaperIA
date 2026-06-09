@@ -131,6 +131,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        setupSlider(
+            R.id.seekBarLightningDuration,
+            R.id.textViewLightningDurationValue,
+            configManager.getLightningDuration()
+        ) { value ->
+            configManager.setLightningDuration(value)
+        }
+
         val buttonApply = findViewById<Button>(R.id.buttonApplyWallpaper)
         buttonApply.setOnClickListener {
             val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
@@ -197,6 +205,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             }
             R.id.seekBarRainSpeed -> {
                 textView.text = "$value%"
+            }
+            R.id.seekBarLightningDuration -> {
+                val desc = when {
+                    value <= 20 -> "Corto"
+                    value <= 60 -> "Normal"
+                    value <= 85 -> "Largo"
+                    else -> "Extremo"
+                }
+                textView.text = "$value% ($desc)"
             }
         }
     }
