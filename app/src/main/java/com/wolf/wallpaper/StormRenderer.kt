@@ -278,17 +278,37 @@ class StormRenderer(private val context: Context) {
         val color = getRainColor(colorIndex)
         GLES30.glUniform4fv(colorHandle, 1, color, 0)
 
-        // Construct coordinate buffer for all rain drop lines
-        // Each raindrop is drawn as a line (start point to end point) to achieve motion blur
-        val vertexData = FloatArray(rainDrops.size * 4)
+        // 1. Sort the rain drops by depth (z) ascending for layers/depth ordering
+        val sortedDrops = rainDrops.sortedBy { it.z }
+
+        // 2. Count drops in each category to optimize draw calls
+        var countFar = 0
+        var countMedium = 0
+        var countNear = 0
+        for (drop in sortedDrops) {
+            when {
+                drop.z < 0.5f -> countFar++
+                drop.z < 0.8f -> countMedium++
+                else -> countNear++
+            }
+        }
+
+        // 3. Construct interleaved coordinate buffer (X, Y, Depth) for all rain drop lines
+        // Each vertex has 3 floats (position X, position Y, depth Z). 2 vertices per drop.
+        val vertexData = FloatArray(sortedDrops.size * 6)
         var idx = 0
-        for (drop in rainDrops) {
+        for (drop in sortedDrops) {
+            val zDepth = drop.z
+            
+            // Start vertex
             vertexData[idx++] = drop.positionX
             vertexData[idx++] = drop.positionY
+            vertexData[idx++] = zDepth
             
-            // Draw diagonal line along the drop's direction vector
+            // End vertex
             vertexData[idx++] = drop.positionX + drop.dirX * drop.length
             vertexData[idx++] = drop.positionY + drop.dirY * drop.length
+            vertexData[idx++] = zDepth
         }
 
         val rainBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
@@ -298,13 +318,36 @@ class StormRenderer(private val context: Context) {
                 position(0)
             }
 
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, rainBuffer)
+        // Bind positions attribute (location 0, stride 12 bytes: 3 floats)
+        rainBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 12, rainBuffer)
         GLES30.glEnableVertexAttribArray(0)
 
-        GLES30.glLineWidth(2.5f)
-        GLES30.glDrawArrays(GLES30.GL_LINES, 0, rainDrops.size * 2)
+        // Bind depth attribute (location 1, stride 12 bytes: 3 floats)
+        rainBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 1, GLES30.GL_FLOAT, false, 12, rainBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        // Draw Far drops (Thin lines)
+        if (countFar > 0) {
+            GLES30.glLineWidth(1.5f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, 0, countFar * 2)
+        }
+
+        // Draw Medium drops (Medium lines)
+        if (countMedium > 0) {
+            GLES30.glLineWidth(3.0f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, countFar * 2, countMedium * 2)
+        }
+
+        // Draw Near drops (Thick lines)
+        if (countNear > 0) {
+            GLES30.glLineWidth(5.0f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, (countFar + countMedium) * 2, countNear * 2)
+        }
 
         GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
     }
 
     private fun getRainColor(index: Int): FloatArray {

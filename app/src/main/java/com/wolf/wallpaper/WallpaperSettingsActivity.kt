@@ -238,7 +238,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     private fun updateTextView(seekBarId: Int, textView: TextView, value: Int) {
         when (seekBarId) {
             R.id.seekBarCloudDensity -> {
-                val count = (value / 100f * 20).toInt()
+                val count = when (value) {
+                    0 -> 0
+                    25 -> 1
+                    50 -> 3
+                    75 -> 5
+                    90 -> 7
+                    100 -> 10
+                    else -> (value / 100f * 10).toInt()
+                }.coerceIn(0, 10)
                 textView.text = "$value% ($count nubes)"
             }
             R.id.seekBarLightningFrequency -> {

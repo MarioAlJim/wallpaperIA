@@ -178,8 +178,16 @@ class SceneManager(
     }
 
     private fun adjustClouds(density: Int) {
-        // Map 0-100 density to 0-20 clouds
-        val targetCount = (density / 100f * 20).toInt().coerceIn(0, 20)
+        // Map 0-100 density to custom cloud count: 0, 1, 3, 5, 7, 10
+        val targetCount = when (density) {
+            0 -> 0
+            25 -> 1
+            50 -> 3
+            75 -> 5
+            90 -> 7
+            100 -> 10
+            else -> (density / 100f * 10).toInt()
+        }.coerceIn(0, 10)
         val textureCount = getCloudTextureCount()
         
         while (clouds.size < targetCount) {
@@ -196,14 +204,14 @@ class SceneManager(
     }
 
     private fun adjustRain(intensity: Int) {
-        // Map 0-100 intensity to non-linear drops count: 0, 10, 25, 50, 100
+        // Map 0-100 intensity to non-linear drops count, increased by 25%: 0, 12, 31, 62, 125
         val targetCount = when (intensity) {
             0 -> 0
-            25 -> 10
-            50 -> 25
-            75 -> 50
-            100 -> 100
-            else -> (intensity / 100f * 100).toInt()
+            25 -> 12
+            50 -> 31
+            75 -> 62
+            100 -> 125
+            else -> (intensity / 100f * 125).toInt()
         }.coerceIn(0, 1000)
         
         while (rainDrops.size < targetCount) {

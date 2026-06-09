@@ -13,6 +13,7 @@ class RainDrop(
     var spawnDelay: Float = 0f
 ) : StormObject {
 
+    var z: Float = 1.0f
     var isActive = false
     private var baseSpeed: Float = 0f
     private var angleOffset: Float = 0f
@@ -36,7 +37,7 @@ class RainDrop(
     }
 
     fun updateVelocity(windAngle: Float, rainSpeed: Float) {
-        val speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
+        val speedFactor = (0.3f + (rainSpeed / 100f) * 1.5f) * z
         val speed = baseSpeed * speedFactor
         
         val angleDeg = windAngle + angleOffset
@@ -50,13 +51,14 @@ class RainDrop(
     }
 
     fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false) {
+        z = Random.nextFloat() * 0.8f + 0.2f
         baseSpeed = Random.nextFloat() * 1.5f + 3.0f
         angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f // +/- 2.5 degrees deviation
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Random length to simulate motion blur variety
-        length = Random.nextFloat() * 0.05f + 0.03f
+        // Random length scaled by z to simulate motion blur variety with depth
+        length = (Random.nextFloat() * 0.05f + 0.03f) * z
         
         // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
         val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f

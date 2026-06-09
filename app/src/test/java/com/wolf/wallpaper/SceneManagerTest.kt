@@ -43,20 +43,20 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(0, sceneManager.getClouds().size)
 
-        // Case 2: Density 25 -> 5 clouds
+        // Case 2: Density 25 -> 1 cloud
         mockConfig.mockCloudDensity = 25
         sceneManager.update(0.016f)
-        assertEquals(5, sceneManager.getClouds().size)
+        assertEquals(1, sceneManager.getClouds().size)
 
-        // Case 3: Density 50 -> 10 clouds
+        // Case 3: Density 50 -> 3 clouds
         mockConfig.mockCloudDensity = 50
         sceneManager.update(0.016f)
-        assertEquals(10, sceneManager.getClouds().size)
+        assertEquals(3, sceneManager.getClouds().size)
 
-        // Case 4: Density 100 -> 20 clouds
+        // Case 4: Density 100 -> 10 clouds
         mockConfig.mockCloudDensity = 100
         sceneManager.update(0.016f)
-        assertEquals(20, sceneManager.getClouds().size)
+        assertEquals(10, sceneManager.getClouds().size)
     }
 
     @Test
@@ -82,15 +82,15 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(0, sceneManager.getRainDrops().size)
 
-        // Case 2: Intensity 50 -> 25 rain drops
+        // Case 2: Intensity 50 -> 31 rain drops
         mockConfig.mockRainIntensity = 50
         sceneManager.update(0.016f)
-        assertEquals(25, sceneManager.getRainDrops().size)
+        assertEquals(31, sceneManager.getRainDrops().size)
 
-        // Case 3: Intensity 100 -> 100 rain drops
+        // Case 3: Intensity 100 -> 125 rain drops
         mockConfig.mockRainIntensity = 100
         sceneManager.update(0.016f)
-        assertEquals(100, sceneManager.getRainDrops().size)
+        assertEquals(125, sceneManager.getRainDrops().size)
     }
 
     @Test
@@ -237,11 +237,11 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         sceneManager.onSurfaceChanged(1080, 1920) // aspectRatio is 1080 / 1920 = 0.5625
 
-        // Map density 50 -> 10 clouds
+        // Map density 50 -> 3 clouds
         mockConfig.mockCloudDensity = 50
         sceneManager.update(0.016f)
         val clouds = sceneManager.getClouds()
-        assertEquals(10, clouds.size)
+        assertEquals(3, clouds.size)
 
         // Save initial positions of clouds
         val initialXPositions = clouds.map { it.positionX }
@@ -284,6 +284,39 @@ class SceneManagerTest {
             } else {
                 assertTrue("Cloud should have moved left", cloud.positionX < preX)
             }
+        }
+    }
+
+    @Test
+    fun testRainDropDepthAndScaling() {
+        val drop = RainDrop(0f, 0f, 0f, 0f)
+        
+        // Before reset, z defaults to 1.0f
+        assertEquals(1.0f, drop.z)
+        
+        // Reset 100 times to check z bounds, scaling of length and velocity
+        for (i in 0 until 100) {
+            drop.reset(1.0f, 0f, 50f, startOnScreen = false)
+            
+            // 1. z should be between 0.2f and 1.0f
+            assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
+            
+            // 2. Length should be scaled by z
+            // Base length formula: (Random.nextFloat() * 0.05f + 0.03f) * z
+            // Min base length = 0.03f, Max base length = 0.08f
+            val minExpectedLength = 0.03f * drop.z - 0.001f
+            val maxExpectedLength = 0.08f * drop.z + 0.001f
+            assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
+            
+            // 3. Velocity should be scaled by z
+            // baseSpeed = Random.nextFloat() * 1.5f + 3.0f -> range [3.0, 4.5]
+            // speedFactor = (0.3f + (rainSpeed / 100f) * 1.5f) * z
+            // For rainSpeed = 50f: speedFactor = (0.3f + 0.75f) * z = 1.05f * z
+            // speed = baseSpeed * speedFactor
+            val speed = kotlin.math.sqrt(drop.velocityX * drop.velocityX + drop.velocityY * drop.velocityY)
+            val expectedMinSpeed = 3.0f * 1.05f * drop.z
+            val expectedMaxSpeed = 4.5f * 1.05f * drop.z
+            assertTrue("Speed ($speed) should be in range [${expectedMinSpeed}, ${expectedMaxSpeed}]", speed in (expectedMinSpeed - 0.05f)..(expectedMaxSpeed + 0.05f))
         }
     }
 }
