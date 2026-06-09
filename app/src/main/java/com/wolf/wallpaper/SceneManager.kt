@@ -160,6 +160,7 @@ class SceneManager(
     fun getRainDrops(): List<RainDrop> = rainDrops
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
+    fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1

@@ -23,6 +23,7 @@ class SceneManagerTest {
         var mockCloudFlashFrequency = 50
         var mockCloudFlashColorIndex = 0
         var mockCloudDynamicsSpeed = 100
+        var mockLightningFlashEnabled = true
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -37,6 +38,7 @@ class SceneManagerTest {
         override fun getCloudFlashFrequency(): Int = mockCloudFlashFrequency
         override fun getCloudFlashColorIndex(): Int = mockCloudFlashColorIndex
         override fun getCloudDynamicsSpeed(): Int = mockCloudDynamicsSpeed
+        override fun isLightningFlashEnabled(): Boolean = mockLightningFlashEnabled
     }
 
     @Test
@@ -313,7 +315,7 @@ class SceneManagerTest {
         val maxBound = aspectRatio + halfWidth
 
         // Test 1: Force cloud out of bounds to the right
-        cloud.positionX = maxBound + 0.1f
+        cloud.positionX = maxBound + 2.0f
         // Update should trigger reset & wrap
         sceneManager.update(0.016f)
 
@@ -330,7 +332,7 @@ class SceneManagerTest {
         // Test 2: Force cloud out of bounds to the left
         val currentHalfWidth = cloud.scale * 1.2f
         val currentMaxBound = aspectRatio + currentHalfWidth
-        cloud.positionX = -currentMaxBound - 0.1f
+        cloud.positionX = -currentMaxBound - 2.0f
         // Update should trigger reset & wrap
         sceneManager.update(0.016f)
 
@@ -549,14 +551,14 @@ class SceneManagerTest {
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Cloud should have moved due to driftSpeed", startX != cloud.positionX)
         
-        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 18.75% of baseScale)
+        // 3. Verify scale oscillates sutilmente using pulseTime (within +/- 28.125% of baseScale)
         val baseSc = cloud.baseScale
         val initialScale = cloud.scale
-        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.1876f)
+        assertTrue("Initial scale should be around baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.28126f)
         
         cloud.update(deltaTime = 1.0f, windSpeed = 0f)
         assertTrue("Scale should change over time due to pulseTime", initialScale != cloud.scale)
-        assertTrue("Scale should remain within +/- 18.75% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.1876f)
+        assertTrue("Scale should remain within +/- 28.125% of baseScale", kotlin.math.abs(cloud.scale - baseSc) <= baseSc * 0.28126f)
         
         // 4. Verify scaling proportional to wind speed
         // Under zero wind, windFactor = 1.0f -> pulseTime increments by 0.1s
@@ -620,5 +622,18 @@ class SceneManagerTest {
         // activeFadeSpeed = 0.3375f * 1.0f * (0.2f + 0.8f * 0f) = 0.0675f
         // opacity should increase by exactly 0.0675f
         assertEquals(0.5675f, cloud.opacity, 0.001f)
+    }
+
+    @Test
+    fun testLightningFlashToggleConfig() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        
+        // 1. Enabled by default
+        assertTrue(sceneManager.isLightningFlashEnabled())
+        
+        // 2. Disable
+        mockConfig.mockLightningFlashEnabled = false
+        sceneManager.update(0.016f)
+        assertTrue(!sceneManager.isLightningFlashEnabled())
     }
 }

@@ -14,4 +14,5 @@ interface ConfigProvider {
     fun getCloudFlashFrequency(): Int
     fun getCloudFlashColorIndex(): Int
     fun getCloudDynamicsSpeed(): Int
+    fun isLightningFlashEnabled(): Boolean
 }

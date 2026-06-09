@@ -195,6 +195,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudFlashColorIndex(position)
         }
 
+        val switchLightningFlash = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchLightningFlash)
+        if (switchLightningFlash != null) {
+            switchLightningFlash.isChecked = configManager.isLightningFlashEnabled()
+            switchLightningFlash.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setLightningFlashEnabled(isChecked)
+                updateSummaries()
+            }
+        }
+
         val backgroundModes = arrayOf(
             "Color Oscuro (Original)",
             "Fondo 1 (Montaña)",

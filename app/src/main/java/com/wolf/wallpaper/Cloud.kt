@@ -34,7 +34,7 @@ class Cloud(
         val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
-        scale = baseScale * (1.0f + sin(pulseTime) * 0.1875f * dynamicsSpeed)
+        scale = baseScale * (1.0f + sin(pulseTime) * 0.28125f * dynamicsSpeed)
 
         // Subtle vertical Y axis movement based on dynamicsSpeed
         positionY = basePositionY + sin(pulseTime * 0.5f) * 0.03f * baseScale * dynamicsSpeed

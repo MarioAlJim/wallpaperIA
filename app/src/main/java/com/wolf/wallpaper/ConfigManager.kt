@@ -22,6 +22,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_CLOUD_FLASH_FREQUENCY = "cloud_flash_frequency"
         const val KEY_CLOUD_FLASH_COLOR_INDEX = "cloud_flash_color_index"
         const val KEY_CLOUD_DYNAMICS_SPEED = "cloud_dynamics_speed"
+        const val KEY_LIGHTNING_FLASH_ENABLED = "lightning_flash_enabled"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -36,6 +37,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_CLOUD_FLASH_FREQUENCY = 50
         const val DEFAULT_CLOUD_FLASH_COLOR_INDEX = 0
         const val DEFAULT_CLOUD_DYNAMICS_SPEED = 100
+        const val DEFAULT_LIGHTNING_FLASH_ENABLED = true
     }
 
     override fun getCloudDensity(): Int {
@@ -140,5 +142,13 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setCloudDynamicsSpeed(speed: Int) {
         prefs.edit().putInt(KEY_CLOUD_DYNAMICS_SPEED, speed.coerceIn(0, 100)).apply()
+    }
+
+    override fun isLightningFlashEnabled(): Boolean {
+        return prefs.getBoolean(KEY_LIGHTNING_FLASH_ENABLED, DEFAULT_LIGHTNING_FLASH_ENABLED)
+    }
+
+    fun setLightningFlashEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_LIGHTNING_FLASH_ENABLED, enabled).apply()
     }
 }
