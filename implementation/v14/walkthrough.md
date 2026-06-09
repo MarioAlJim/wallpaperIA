@@ -2,10 +2,11 @@
 
 Hemos completado la implementación del sistema de nubes dinámicas en el fondo de pantalla animado. Las nubes se basan en los 14 archivos PNG de assets, varían de tamaño de forma aleatoria, responden a la densidad configurada y se desplazan continuamente según la dirección e intensidad del viento.
 
-Adicionalmente, se aplicaron las siguientes correcciones de diseño solicitadas:
+Adicionalmente, se aplicaron las siguientes correcciones de diseño y UI solicitadas:
 1. **Dispersión vertical (Eje Y)**: Las nubes ahora se distribuyen a lo largo de toda la pantalla (eje Y de `-0.9` a `0.9`), en lugar de agruparse únicamente en la mitad superior.
 2. **Posición delantera (Capas)**: Se cambió el orden de renderizado para dibujar las nubes al final del ciclo de renderizado, colocándolas delante de la lluvia y de los rayos.
 3. **Incremento de tamaño**: Se aumentó el tamaño general de las nubes y sus variaciones en `0.2` (escalas entre `0.5` y `1.3`).
+4. **Visibilidad en Configuración**: Se removió el atributo `android:visibility="gone"` de la tarjeta de Densidad de Nubes en `activity_settings.xml`, haciendo visible y funcional la opción para que el usuario controle la densidad o cantidad de nubes flotando simultáneamente.
 
 ## Cambios Realizados
 
@@ -26,7 +27,10 @@ Adicionalmente, se aplicaron las siguientes correcciones de diseño solicitadas:
 * En `drawFrame()`, se cambió el orden de renderizado para llamar a `drawClouds` después de dibujar la lluvia y los rayos (dibujándolas al final para colocarlas al frente).
 * Se actualizó `drawClouds()` para usar la lista dinámica de texturas de forma segura aplicando el módulo del tamaño de la lista: `cloudTextures[cloud.textureIndex % cloudTextures.size]`.
 
-### 4. Pruebas Unitarias (`SceneManagerTest.kt`)
+### 4. Interfaz de Configuración (`activity_settings.xml`)
+* Se eliminó el atributo `android:visibility="gone"` en el contenedor `CardView` de la densidad de nubes (`seekBarCloudDensity`) para revelar y habilitar la opción en la UI.
+
+### 5. Pruebas Unitarias (`SceneManagerTest.kt`)
 * Se añadió el caso de prueba `testCloudWindAndWrapping()` que valida el movimiento horizontal en ambas direcciones del viento y el correcto screen wrapping bilateral.
 
 ## Commits Realizados
@@ -36,6 +40,7 @@ Adicionalmente, se aplicaron las siguientes correcciones de diseño solicitadas:
 - `feat(renderer): load all cloud textures dynamically and enable cloud rendering`
 - `test(scene): add test cases for cloud movement, wind direction, and screen wrapping`
 - `fix(clouds): disperse clouds along Y axis, render them in front of rain/lightning, and increase scale by 0.2`
+- `fix(settings): remove gone visibility from Cloud Density Card view to expose density slider in UI`
 
 ## Verificación
 
