@@ -4,17 +4,54 @@ import android.app.WallpaperManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
+import android.text.Html
+import android.transition.AutoTransition
+import android.transition.TransitionManager
 import android.view.View
-import android.widget.AdapterView
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.slider.Slider
+
+// Utility extension functions for clean premium UI logic
+private fun View.toggleVisibility(divider: View?, arrow: ImageView, durationMs: Long = 250) {
+    val parentView = this.parent as? ViewGroup ?: return
+    TransitionManager.beginDelayedTransition(parentView, AutoTransition().apply {
+        duration = durationMs
+    })
+    val isVisible = this.visibility == View.VISIBLE
+    this.visibility = if (isVisible) View.GONE else View.VISIBLE
+    divider?.visibility = if (isVisible) View.GONE else View.VISIBLE
+    arrow.animate().rotation(if (isVisible) 0f else 180f).setDuration(durationMs).start()
+}
+
+private fun Slider.setup(initialValue: Int, onProgressChanged: (Int) -> Unit) {
+    this.value = initialValue.toFloat()
+    this.addOnChangeListener { _, value, fromUser ->
+        if (fromUser) {
+            onProgressChanged(value.toInt())
+        }
+    }
+}
+
+private fun AutoCompleteTextView.setup(options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
+    val adapter = ArrayAdapter(
+        context,
+        R.layout.spinner_dropdown_item,
+        options
+    )
+    this.setAdapter(adapter)
+    this.setText(options.getOrNull(initialIndex), false)
+    this.setOnItemClickListener { _, _, position, _ ->
+        onSelected(position)
+    }
+}
 
 class WallpaperSettingsActivity : AppCompatActivity() {
 
@@ -62,7 +99,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         val windDirections = arrayOf("Izquierda", "Vertical", "Derecha")
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerWindDirection,
             windDirections,
             configManager.getWindDirection()
@@ -82,7 +119,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
         val initialRainValue = configManager.getRainIntensity()
         val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerRainIntensity,
             rainIntensities,
             initialRainProgress
@@ -99,7 +136,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerRainColor,
             rainColors,
             configManager.getRainColorIndex()
@@ -117,7 +154,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         val lightningColors = arrayOf("Blanco", "Azul", "Amarillo", "Rojo", "Verde", "Morado", "Aleatorio")
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerLightningColor,
             lightningColors,
             configManager.getLightningColorIndex()
@@ -142,7 +179,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudFlashFrequency(value)
         }
 
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerCloudFlashColor,
             lightningColors,
             configManager.getCloudFlashColorIndex()
@@ -158,7 +195,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             "Fondo 4 (Pico Rocoso)",
             "Fondo 5 (Lago Nebloso)"
         )
-        setupSpinner(
+        setupDropdown(
             R.id.spinnerBackgroundMode,
             backgroundModes,
             configManager.getBackgroundIndex()
@@ -166,7 +203,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setBackgroundIndex(position)
         }
 
-        // 5. Initialize dynamic summaries in headers
+        // 5. Initialize summaries
         updateSummaries()
 
         val buttonApply = findViewById<Button>(R.id.buttonApplyWallpaper)
@@ -188,72 +225,42 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val arrow = findViewById<ImageView>(arrowId)
 
         header.setOnClickListener {
-            if (content.visibility == View.VISIBLE) {
-                content.visibility = View.GONE
-                divider.visibility = View.GONE
-                arrow.animate().rotation(0f).setDuration(200).start()
-            } else {
-                content.visibility = View.VISIBLE
-                divider.visibility = View.VISIBLE
-                arrow.animate().rotation(180f).setDuration(200).start()
-            }
+            content.toggleVisibility(divider, arrow)
         }
     }
 
-    private fun setupSpinner(
-        spinnerId: Int,
+    private fun setupDropdown(
+        textViewId: Int,
         options: Array<String>,
         initialIndex: Int,
         onSelected: (Int) -> Unit
     ) {
-        val spinner = findViewById<Spinner>(spinnerId)
-        val adapter = ArrayAdapter(
-            this,
-            R.layout.spinner_item,
-            options
-        )
-        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item)
-        spinner.adapter = adapter
-        spinner.setSelection(initialIndex)
-
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                onSelected(position)
-                updateSummaries()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        val autoCompleteTextView = findViewById<AutoCompleteTextView>(textViewId)
+        autoCompleteTextView.setup(options, initialIndex) { position ->
+            onSelected(position)
+            updateSummaries()
         }
     }
 
     private fun setupSlider(
-        seekBarId: Int,
+        sliderId: Int,
         valueTextViewId: Int,
         initialValue: Int,
         onValueChanged: (Int) -> Unit
     ) {
-        val seekBar = findViewById<SeekBar>(seekBarId)
+        val slider = findViewById<Slider>(sliderId)
         val valueTextView = findViewById<TextView>(valueTextViewId)
 
-        seekBar.progress = initialValue
-        updateTextView(seekBarId, valueTextView, initialValue)
-
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                if (fromUser) {
-                    onValueChanged(progress)
-                    updateTextView(seekBarId, valueTextView, progress)
-                    updateSummaries()
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
+        slider.setup(initialValue) { progress ->
+            onValueChanged(progress)
+            updateTextView(sliderId, valueTextView, progress)
+            updateSummaries()
+        }
+        updateTextView(sliderId, valueTextView, initialValue)
     }
 
-    private fun updateTextView(seekBarId: Int, textView: TextView, value: Int) {
-        when (seekBarId) {
+    private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
+        when (sliderId) {
             R.id.seekBarCloudDensity -> {
                 val count = when (value) {
                     0 -> 0
@@ -264,22 +271,22 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     100 -> 15
                     else -> (value / 100f * 15).toInt()
                 }.coerceIn(0, 15)
-                textView.text = "$value% ($count nubes)"
+                textView.text = "$value% • $count nubes"
             }
             R.id.seekBarLightningFrequency -> {
                 val desc = when {
                     value <= 0 -> "Nunca"
                     value < 25 -> "Muy raro (20–60s)"
-                    value == 25 -> "Cada 20 segundos"
+                    value == 25 -> "Cada 20s"
                     value < 50 -> "Frecuente (5–20s)"
-                    value == 50 -> "Cada 5 segundos"
+                    value == 50 -> "Cada 5s"
                     value < 75 -> "Tormenta (2–5s)"
-                    value == 75 -> "Cada 2 segundos"
+                    value == 75 -> "Cada 2s"
                     value < 90 -> "Tormenta eléctrica (0.8–2s)"
                     value < 100 -> "Tempestad extrema (0.25–0.8s)"
-                    else -> "Máximo caos (rayos rápidos)"
+                    else -> "Máximo caos"
                 }
-                textView.text = "$value% ($desc)"
+                textView.text = "$value% • $desc"
             }
             R.id.seekBarWindIntensity -> {
                 textView.text = "$value%"
@@ -294,22 +301,22 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     value <= 85 -> "Largo"
                     else -> "Extremo"
                 }
-                textView.text = "$value% ($desc)"
+                textView.text = "$value% • $desc"
             }
             R.id.seekBarCloudFlashFrequency -> {
                 val desc = when {
                     value <= 0 -> "Nunca"
                     value < 25 -> "Muy raro"
-                    value == 25 -> "Cada 20 segundos"
+                    value == 25 -> "Cada 20s"
                     value < 50 -> "Frecuente"
-                    value == 50 -> "Cada 5 segundos"
+                    value == 50 -> "Cada 5s"
                     value < 75 -> "Tormenta"
-                    value == 75 -> "Cada 2 segundos"
+                    value == 75 -> "Cada 2s"
                     value < 90 -> "Tormenta eléctrica"
                     value < 100 -> "Tempestad extrema"
                     else -> "Máximo caos"
                 }
-                textView.text = "$value% ($desc)"
+                textView.text = "$value% • $desc"
             }
         }
     }
@@ -320,6 +327,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val summaryLightning = findViewById<TextView>(R.id.summaryLightning) ?: return
         val summaryBackground = findViewById<TextView>(R.id.summaryBackground) ?: return
 
+        val accentColor = "#00E5FF"
+
         // 1. Nubes y Viento summary
         val cloudDensity = configManager.getCloudDensity()
         val windIntensity = configManager.getWindIntensity()
@@ -329,7 +338,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             2 -> "Derecha"
             else -> "Izquierda"
         }
-        summaryCloudsWind.text = "Densidad: $cloudDensity% | Viento: $windDirText ($windIntensity%)"
+        summaryCloudsWind.text = Html.fromHtml(
+            "Densidad: <font color='$accentColor'>$cloudDensity%</font> • Viento: <font color='$accentColor'>$windDirText</font> ($windIntensity%)",
+            Html.FROM_HTML_MODE_LEGACY
+        )
 
         // 2. Lluvia summary
         val rainIntName = when (configManager.getRainIntensity() / 25) {
@@ -350,7 +362,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Azul"
         }
         val rainSpeed = configManager.getRainSpeed()
-        summaryRain.text = "Lluvia: $rainIntName | Color: $rainColorText | Vel: $rainSpeed%"
+        summaryRain.text = Html.fromHtml(
+            "Intensidad: <font color='$accentColor'>$rainIntName</font> • Color: <font color='$accentColor'>$rainColorText</font> • Vel: <font color='$accentColor'>$rainSpeed%</font>",
+            Html.FROM_HTML_MODE_LEGACY
+        )
 
         // 3. Rayos summary
         val lightningFreq = configManager.getLightningFrequency()
@@ -364,20 +379,25 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             6 -> "Aleatorio"
             else -> "Blanco"
         }
-        val lightningDuration = configManager.getLightningDuration()
         val cloudFlashFreq = configManager.getCloudFlashFrequency()
-        summaryLightning.text = "Rayos: $lightningFreq% | Nubes: $cloudFlashFreq% | Color: $lightningColorText"
+        summaryLightning.text = Html.fromHtml(
+            "Rayos: <font color='$accentColor'>$lightningFreq%</font> • Nubes: <font color='$accentColor'>$cloudFlashFreq%</font> • Color: <font color='$accentColor'>$lightningColorText</font>",
+            Html.FROM_HTML_MODE_LEGACY
+        )
 
         // 4. Fondo summary
         val bgModeText = when (configManager.getBackgroundIndex()) {
             0 -> "Color Oscuro"
-            1 -> "Fondo 1 (Montaña)"
-            2 -> "Fondo 2 (Valle)"
-            3 -> "Fondo 3 (Bosque)"
-            4 -> "Fondo 4 (Pico Rocoso)"
-            5 -> "Fondo 5 (Lago Nebloso)"
+            1 -> "Fondo 1"
+            2 -> "Fondo 2"
+            3 -> "Fondo 3"
+            4 -> "Fondo 4"
+            5 -> "Fondo 5"
             else -> "Color Oscuro"
         }
-        summaryBackground.text = "Fondo: $bgModeText"
+        summaryBackground.text = Html.fromHtml(
+            "Fondo: <font color='$accentColor'>$bgModeText</font>",
+            Html.FROM_HTML_MODE_LEGACY
+        )
     }
 }

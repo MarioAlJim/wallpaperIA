@@ -25,14 +25,16 @@
             android:layout_marginBottom="24dp" />
 
         <!-- Accordion 1: Nubes y Viento -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardCloudsWind"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#1F1F23">
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -135,14 +137,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarCloudDensity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#8A2BE2"
-                        android:thumbTint="#8A2BE2" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -163,12 +166,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerWindDirection"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerWindDirection"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -200,14 +216,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarWindIntensity"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#8A2BE2"
-                        android:thumbTint="#8A2BE2" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -219,17 +236,19 @@
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Accordion 2: Lluvia -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardRain"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#1F1F23">
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -320,12 +339,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerRainIntensity"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerRainIntensity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -357,14 +389,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarRainSpeed"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#1E90FF"
-                        android:thumbTint="#1E90FF" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -385,12 +418,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerRainColor"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerRainColor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -401,17 +447,19 @@
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Accordion 3: Rayos y Tormenta -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardLightning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#1F1F23">
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -514,14 +562,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarLightningFrequency"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#FFD700"
-                        android:thumbTint="#FFD700" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -542,12 +591,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerLightningColor"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerLightningColor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -579,14 +641,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarLightningDuration"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#FFD700"
-                        android:thumbTint="#FFD700" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -619,14 +682,15 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <SeekBar
+                    <com.google.android.material.slider.Slider
                         android:id="@+id/seekBarCloudFlashFrequency"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:max="100"
-                        android:progress="50"
-                        android:progressTint="#00BFFF"
-                        android:thumbTint="#00BFFF" />
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -647,12 +711,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerCloudFlashColor"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerCloudFlashColor"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -664,17 +741,19 @@
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Accordion 4: Fondo -->
-        <androidx.cardview.widget.CardView
+        <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardBackground"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="#1F1F23">
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -765,12 +844,25 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <Spinner
-                        android:id="@+id/spinnerBackgroundMode"
+                    <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_marginBottom="12dp"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
+                        app:hintEnabled="false">
+                        <AutoCompleteTextView
+                            android:id="@+id/spinnerBackgroundMode"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:padding="14dp" />
+                    </com.google.android.material.textfield.TextInputLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -781,7 +873,7 @@
 
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Apply Button -->
         <Button
@@ -792,7 +884,7 @@
             android:textColor="#FFFFFF"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:backgroundTint="#8A2BE2"
+            android:backgroundTint="@color/accent_storm"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="24dp"
             app:cornerRadius="12dp" />
