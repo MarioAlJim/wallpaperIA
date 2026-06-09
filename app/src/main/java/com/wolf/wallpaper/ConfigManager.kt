@@ -17,7 +17,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_RAIN_SPEED = "rain_speed"
         const val KEY_LIGHTNING_COLOR_INDEX = "lightning_color_index"
         const val KEY_LIGHTNING_DURATION = "lightning_duration"
-        const val KEY_SHOW_BACKGROUND = "show_background"
+        const val KEY_SHOW_BACKGROUND = "show_background" // Keep original key if desired, but index type is Int
+        const val KEY_BACKGROUND_INDEX = "background_index"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -28,7 +29,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_RAIN_SPEED = 50
         const val DEFAULT_LIGHTNING_COLOR_INDEX = 0
         const val DEFAULT_LIGHTNING_DURATION = 30
-        const val DEFAULT_SHOW_BACKGROUND = true
+        const val DEFAULT_BACKGROUND_INDEX = 1
     }
 
     override fun getCloudDensity(): Int {
@@ -103,11 +104,11 @@ class ConfigManager(context: Context) : ConfigProvider {
         prefs.edit().putInt(KEY_LIGHTNING_DURATION, duration.coerceIn(0, 100)).apply()
     }
 
-    override fun getShowBackground(): Boolean {
-        return prefs.getBoolean(KEY_SHOW_BACKGROUND, DEFAULT_SHOW_BACKGROUND)
+    override fun getBackgroundIndex(): Int {
+        return prefs.getInt(KEY_BACKGROUND_INDEX, DEFAULT_BACKGROUND_INDEX)
     }
 
-    fun setShowBackground(show: Boolean) {
-        prefs.edit().putBoolean(KEY_SHOW_BACKGROUND, show).apply()
+    fun setBackgroundIndex(index: Int) {
+        prefs.edit().putInt(KEY_BACKGROUND_INDEX, index.coerceIn(0, 3)).apply()
     }
 }

@@ -19,7 +19,7 @@ class SceneManagerTest {
         var mockRainSpeed = 50
         var mockLightningColorIndex = 0
         var mockLightningDuration = 30
-        var mockShowBackground = true
+        var mockBackgroundIndex = 1
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -30,7 +30,7 @@ class SceneManagerTest {
         override fun getRainSpeed(): Int = mockRainSpeed
         override fun getLightningColorIndex(): Int = mockLightningColorIndex
         override fun getLightningDuration(): Int = mockLightningDuration
-        override fun getShowBackground(): Boolean = mockShowBackground
+        override fun getBackgroundIndex(): Int = mockBackgroundIndex
     }
 
     @Test
@@ -63,13 +63,13 @@ class SceneManagerTest {
     fun testBackgroundConfigWrapper() {
         val sceneManager = SceneManager(mockContext, mockConfig)
 
-        mockConfig.mockShowBackground = true
+        mockConfig.mockBackgroundIndex = 2
         sceneManager.update(0.016f)
-        assertTrue(sceneManager.getShowBackground())
+        assertEquals(2, sceneManager.getBackgroundIndex())
 
-        mockConfig.mockShowBackground = false
+        mockConfig.mockBackgroundIndex = 0
         sceneManager.update(0.016f)
-        assertTrue(!sceneManager.getShowBackground())
+        assertEquals(0, sceneManager.getBackgroundIndex())
     }
 
     @Test
@@ -187,7 +187,7 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
-            assertTrue("ScaleY should be adjusted to be >= 2.0f", sceneManager.lightning.scaleY >= 2.0f)
+            assertTrue("ScaleY should be adjusted to be >= 0.8f", sceneManager.lightning.scaleY >= 0.8f)
             assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.15f..0.35f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }

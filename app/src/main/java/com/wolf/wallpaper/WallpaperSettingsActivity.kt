@@ -133,13 +133,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningDuration(value)
         }
 
-        val backgroundModes = arrayOf("Color Oscuro (Original)", "Imagen de Fondo")
+        val backgroundModes = arrayOf("Color Oscuro (Original)", "Fondo 1 (Montaña)", "Fondo 2 (Valle)", "Fondo 3 (Bosque)")
         setupSpinner(
             R.id.spinnerBackgroundMode,
             backgroundModes,
-            if (configManager.getShowBackground()) 1 else 0
+            configManager.getBackgroundIndex()
         ) { position ->
-            configManager.setShowBackground(position == 1)
+            configManager.setBackgroundIndex(position)
         }
 
         // 5. Initialize dynamic summaries in headers
@@ -327,7 +327,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         summaryLightning.text = "Freq: $lightningFreq% | Color: $lightningColorText | Dur: $durationText ($lightningDuration%)"
 
         // 4. Fondo summary
-        val bgModeText = if (configManager.getShowBackground()) "Imagen de Fondo" else "Color Oscuro"
+        val bgModeText = when (configManager.getBackgroundIndex()) {
+            0 -> "Color Oscuro"
+            1 -> "Fondo 1 (Montaña)"
+            2 -> "Fondo 2 (Valle)"
+            3 -> "Fondo 3 (Bosque)"
+            else -> "Color Oscuro"
+        }
         summaryBackground.text = "Fondo: $bgModeText"
     }
 }

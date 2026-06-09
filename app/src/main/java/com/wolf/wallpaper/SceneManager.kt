@@ -117,7 +117,7 @@ class SceneManager(
     fun getClouds(): List<Cloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
-    fun getShowBackground(): Boolean = configProvider.getShowBackground()
+    fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1

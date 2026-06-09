@@ -21,7 +21,7 @@ class StormRenderer(private val context: Context) {
     private val cloudTextures = mutableListOf<Int>()
     private var rainTexture = 0
     private val lightningTextures = mutableListOf<Int>()
-    private var backgroundTexture = 0
+    private val backgroundTextures = IntArray(3)
     
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -31,7 +31,7 @@ class StormRenderer(private val context: Context) {
 
     // Aspect ratio and scaling
     private var aspectRatio = 1.0f
-    private var backgroundAspectRatio = 1.0f
+    private val backgroundAspectRatios = FloatArray(3) { 1.0f }
 
     // Buffers for geometric drawing
     private lateinit var fullscreenQuadBuffer: FloatBuffer
@@ -106,8 +106,10 @@ class StormRenderer(private val context: Context) {
             e.printStackTrace()
         }
 
-        // Load background texture
-        loadBackgroundTexture(context, "background/background.jpg")
+        // Load background textures
+        loadBackgroundTexture(context, 0, "background/background.jpg")
+        loadBackgroundTexture(context, 1, "background/background_02.png")
+        loadBackgroundTexture(context, 2, "background/background_03.png")
 
         // Screen quad coordinates (for full-screen flash using identity matrix)
         val fullscreenCoords = floatArrayOf(
@@ -211,7 +213,7 @@ class StormRenderer(private val context: Context) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Render layered elements in order: Fondo -> Lluvia -> Rayos -> Nubes
-        drawBackground(sceneManager.getShowBackground(), sceneManager.lightnings)
+        drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings)
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings)
         drawClouds(sceneManager.getClouds())
@@ -492,7 +494,7 @@ class StormRenderer(private val context: Context) {
         return program
     }
 
-    private fun loadBackgroundTexture(context: Context, assetPath: String) {
+    private fun loadBackgroundTexture(context: Context, index: Int, assetPath: String) {
         val textureIds = IntArray(1)
         GLES30.glGenTextures(1, textureIds, 0)
         if (textureIds[0] == 0) return
@@ -504,7 +506,7 @@ class StormRenderer(private val context: Context) {
             context.assets.open(assetPath).use { inputStream ->
                 val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
                 if (bitmap != null) {
-                    backgroundAspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
+                    backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
                     GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
                     GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
                     GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
@@ -512,7 +514,7 @@ class StormRenderer(private val context: Context) {
                     GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
                     GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
                     bitmap.recycle()
-                    backgroundTexture = textureIds[0]
+                    backgroundTextures[index] = textureIds[0]
                 }
             }
         } catch (e: Exception) {
@@ -521,8 +523,11 @@ class StormRenderer(private val context: Context) {
         }
     }
 
-    private fun drawBackground(showBackground: Boolean, lightnings: List<Lightning>) {
-        if (!showBackground || backgroundTexture == 0) return
+    private fun drawBackground(backgroundIndex: Int, lightnings: List<Lightning>) {
+        if (backgroundIndex <= 0 || backgroundIndex > backgroundTextures.size) return
+        val texIndex = backgroundIndex - 1
+        val textureId = backgroundTextures[texIndex]
+        if (textureId == 0) return
 
         GLES30.glUseProgram(backgroundProgram)
         val mvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
@@ -539,14 +544,14 @@ class StormRenderer(private val context: Context) {
         GLES30.glEnableVertexAttribArray(1)
 
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, backgroundTexture)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
         GLES30.glUniform1i(textureHandle, 0)
 
         val modelMatrix = FloatArray(16)
         Matrix.setIdentityM(modelMatrix, 0)
 
         val screenAspect = aspectRatio
-        val bgAspect = backgroundAspectRatio
+        val bgAspect = backgroundAspectRatios[texIndex]
         var scaleX = 1.0f
         var scaleY = 1.0f
 
