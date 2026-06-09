@@ -1,6 +1,8 @@
 package com.wolf.wallpaper
 
 import kotlin.random.Random
+import kotlin.math.sin
+import kotlin.math.abs
 
 class Cloud(
     val id: Int,
@@ -16,6 +18,10 @@ class Cloud(
     var targetOpacity: Float = opacity
     var isFadingOut: Boolean = false
 
+    var driftSpeed: Float = 0f
+    var baseScale: Float = scale
+    var pulseTime: Float = 0f
+
     val speedZFactor: Float
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
 
@@ -24,17 +30,21 @@ class Cloud(
     }
 
     fun update(deltaTime: Float, windSpeed: Float) {
-        positionX += windSpeed * speedFactor * speedZFactor * deltaTime
+        val windFactor = 1.0f + abs(windSpeed) * 10f
+        pulseTime += deltaTime * windFactor
+        scale = baseScale * (1.0f + sin(pulseTime) * 0.08f)
+
+        positionX += (windSpeed + driftSpeed) * speedFactor * speedZFactor * deltaTime
         
         // Smoothly transition opacity
-        val fadeSpeed = 1.5f // Fades in/out in less than 1 second
+        val activeFadeSpeed = 1.5f * windFactor
         if (isFadingOut) {
-            opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(0f)
+            opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(0f)
         } else {
             if (opacity < targetOpacity) {
-                opacity = (opacity + fadeSpeed * deltaTime).coerceAtMost(targetOpacity)
+                opacity = (opacity + activeFadeSpeed * deltaTime).coerceAtMost(targetOpacity)
             } else if (opacity > targetOpacity) {
-                opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
+                opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
             }
         }
     }
@@ -47,7 +57,11 @@ class Cloud(
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
-        scale = (Random.nextFloat() * 0.7f + 0.3f) * z
+        
+        val minScale = 0.345f
+        val maxScale = 1.25f
+        baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
+        scale = baseScale
         
         // Calculate Y range to keep the entire cloud body in the upper half (Y >= 0.0f and Y <= 1.0f)
         val minY = scale * 0.5f
@@ -57,5 +71,8 @@ class Cloud(
         targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z
         opacity = targetOpacity
         isFadingOut = false
+
+        driftSpeed = Random.nextFloat() * 0.06f - 0.03f
+        pulseTime = Random.nextFloat() * 10f
     }
 }
