@@ -180,14 +180,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.seekBarLightningFrequency -> {
                 val desc = when {
                     value <= 0 -> "Nunca"
-                    value < 25 -> "Muy raro (>60s)"
-                    value == 25 -> "Cada 60 segundos"
-                    value < 50 -> "Cada 30–60s"
-                    value == 50 -> "Cada 30 segundos"
-                    value < 75 -> "Cada 15–30s"
-                    value == 75 -> "Cada 15 segundos"
-                    value < 100 -> "Cada 5–15s"
-                    else -> "Cada 5 segundos"
+                    value < 25 -> "Muy raro (20–60s)"
+                    value == 25 -> "Cada 20 segundos"
+                    value < 50 -> "Frecuente (5–20s)"
+                    value == 50 -> "Cada 5 segundos"
+                    value < 75 -> "Tormenta (1.5–5s)"
+                    value == 75 -> "Cada 1.5 segundos"
+                    value < 90 -> "Tormenta eléctrica (0.4–1.5s)"
+                    value < 100 -> "Tempestad extrema (0.08–0.4s)"
+                    else -> "Máximo caos (múltiples rayos)"
                 }
                 textView.text = "$value% ($desc)"
             }
