@@ -482,4 +482,23 @@ class SceneManagerTest {
         // They should be removed from the sceneManager's list entirely
         assertTrue("Faded out clouds should be removed from list", sceneManager.getClouds().isEmpty())
     }
+
+    @Test
+    fun testCloudDriftAndOpacityOscillation() {
+        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
+        cloud.reset(0f, 1.0f)
+        
+        // 1. Verify drift speed is initialized to +0.02f or -0.02f
+        assertTrue("driftSpeed should be either 0.02 or -0.02", cloud.driftSpeed == 0.02f || cloud.driftSpeed == -0.02f)
+
+        // 2. Verify cloud moves even when windSpeed = 0f
+        val startX = cloud.positionX
+        cloud.update(deltaTime = 1.0f, windSpeed = 0f)
+        assertTrue("Cloud should have moved due to driftSpeed", startX != cloud.positionX)
+        
+        // 3. Verify opacity oscilates
+        val baseOp = cloud.opacity
+        cloud.update(deltaTime = 0.5f, windSpeed = 0f)
+        assertTrue("Opacity should oscilate with sine wave", baseOp != cloud.opacity)
+    }
 }

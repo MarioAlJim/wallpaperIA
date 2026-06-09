@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Fondo circular (Azul Marino Profundo / Negro Medianoche) -->
+    <path
+        android:fillColor="#121212"
+        android:pathData="M54,4A50,50 0,1 1,54 104A50,50 0,1 1,54 4" />
+
+    <!-- Nube (Platino/Plata Metálica) -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="
+            M35,58
+            C30,58 26,54 26,49
+            C26,44 30,40 35,40
+            C37,33 43,28 50,28
+            C58,28 64,33 66,40
+            C73,40 79,46 79,53
+            C79,60 73,66 66,66
+            L38,66
+            C32,66 27,62 27,56
+            C27,61 31,58 35,58Z" />
+
+    <!-- Rayo (Oro Rico/Antiguo) -->
+    <path
+        android:fillColor="#D4AF37"
+        android:pathData="
+            M56,60
+            L48,78
+            L57,78
+            L50,96
+            L68,72
+            L58,72
+            L65,60
+            Z" />
+
+    <!-- Lluvia (Platino/Plata Metálica, unificada con la nube) -->
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M40,72 L43,82 L38,82 Z" />
+
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M54,76 L57,86 L52,86 Z" />
+
+    <path
+        android:fillColor="#C0C0C0"
+        android:pathData="M70,72 L73,82 L68,82 Z" />
+
+</vector>

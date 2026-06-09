@@ -1,6 +1,7 @@
 package com.wolf.wallpaper
 
 import kotlin.random.Random
+import kotlin.math.sin
 
 class Cloud(
     val id: Int,
@@ -15,6 +16,10 @@ class Cloud(
     var z: Float = 1.0f
     var targetOpacity: Float = opacity
     var isFadingOut: Boolean = false
+    
+    var driftSpeed: Float = 0f
+    var timeOffset: Float = 0f
+    private var timeAccumulator: Float = 0f
 
     val speedZFactor: Float
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
@@ -24,18 +29,26 @@ class Cloud(
     }
 
     fun update(deltaTime: Float, windSpeed: Float) {
-        positionX += windSpeed * speedFactor * speedZFactor * deltaTime
+        timeAccumulator += deltaTime
+        positionX += (windSpeed + driftSpeed) * speedFactor * speedZFactor * deltaTime
         
-        // Smoothly transition opacity
+        // Smoothly transition base opacity
         val fadeSpeed = 1.5f // Fades in/out in less than 1 second
+        var baseOpacity = opacity
         if (isFadingOut) {
-            opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(0f)
+            baseOpacity = (baseOpacity - fadeSpeed * deltaTime).coerceAtLeast(0f)
+            opacity = baseOpacity
         } else {
-            if (opacity < targetOpacity) {
-                opacity = (opacity + fadeSpeed * deltaTime).coerceAtMost(targetOpacity)
-            } else if (opacity > targetOpacity) {
-                opacity = (opacity - fadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
+            if (baseOpacity < targetOpacity) {
+                baseOpacity = (baseOpacity + fadeSpeed * deltaTime).coerceAtMost(targetOpacity)
+            } else if (baseOpacity > targetOpacity) {
+                baseOpacity = (baseOpacity - fadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
             }
+            
+            // Apply sine wave oscillation scaled by progress to avoid pops on spawning
+            val progress = if (targetOpacity > 0f) (baseOpacity / targetOpacity).coerceIn(0f, 1f) else 1f
+            val oscillation = sin(timeAccumulator + timeOffset) * 0.05f * progress
+            opacity = (baseOpacity + oscillation).coerceIn(0.0f, 1.0f)
         }
     }
 
@@ -57,5 +70,9 @@ class Cloud(
         targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z
         opacity = targetOpacity
         isFadingOut = false
+        
+        driftSpeed = if (Random.nextBoolean()) 0.02f else -0.02f
+        timeOffset = Random.nextFloat() * 100f
+        timeAccumulator = 0f
     }
 }
