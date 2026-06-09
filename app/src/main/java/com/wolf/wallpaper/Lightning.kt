@@ -11,7 +11,8 @@ class Lightning(
     var intensity: Float = 1.0f,
     var selectedTextureIndex: Int = 0,
     var selectedColorIndex: Int = 0,
-    var rotationAngle: Float = 0f
+    var rotationAngle: Float = 0f,
+    var growthProgress: Float = 1.0f
 ) : StormObject {
 
     private var age = 0f
@@ -24,6 +25,14 @@ class Lightning(
         if (age >= duration) {
             isActive = false
         } else {
+            // Calculate growth progress (takes first 20% of duration)
+            val growthFraction = 0.20f
+            growthProgress = if (duration > 0f) {
+                (age / (duration * growthFraction)).coerceIn(0f, 1f)
+            } else {
+                1f
+            }
+
             // Realistic double flash effect
             val progress = age / duration
             intensity = if (progress < 0.15f) {
@@ -46,6 +55,7 @@ class Lightning(
         isActive = true
         age = 0f
         intensity = 1.0f
+        growthProgress = 0.0f
         
         val baseMin = if (durationPercentage <= 50) {
             0.15f + (durationPercentage / 50f) * 0.15f
