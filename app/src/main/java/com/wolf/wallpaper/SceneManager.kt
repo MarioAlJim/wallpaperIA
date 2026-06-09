@@ -39,12 +39,9 @@ class SceneManager(
         aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
         
         // Re-align objects to new aspect ratio coordinates
-        // Commented out clouds for now
-        /*
         for (cloud in clouds) {
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
         }
-        */
         for (drop in rainDrops) {
             drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
         }
@@ -58,17 +55,26 @@ class SceneManager(
         currentWindAngle += (targetWindAngle - currentWindAngle) * lerpFactor.coerceAtMost(1f)
         currentRainSpeed += (targetRainSpeed - currentRainSpeed) * lerpFactor.coerceAtMost(1f)
 
-        // 1. Update Clouds (Disabled for now)
-        /*
+        // 1. Update Clouds
+        val windSpeed = when (windDirection) {
+            0 -> -(windIntensity / 100f) * 0.15f
+            2 -> (windIntensity / 100f) * 0.15f
+            else -> 0f
+        }
         for (cloud in clouds) {
-            cloud.update(deltaTime)
-            // Reset if cloud is fully off-screen to the right
-            val maxBound = aspectRatio + cloud.scale * 2.0f
-            if (cloud.positionX > maxBound) {
-                cloud.reset(-maxBound, aspectRatio)
+            cloud.update(deltaTime, windSpeed)
+            val halfWidth = cloud.scale * 1.2f
+            val maxBound = aspectRatio + halfWidth
+            if (windSpeed > 0f) {
+                if (cloud.positionX > maxBound) {
+                    cloud.reset(-maxBound, aspectRatio)
+                }
+            } else if (windSpeed < 0f) {
+                if (cloud.positionX < -maxBound) {
+                    cloud.reset(maxBound, aspectRatio)
+                }
             }
         }
-        */
 
         // 2. Update Rain
         for (drop in rainDrops) {
@@ -122,6 +128,17 @@ class SceneManager(
         }
     }
 
+    fun getCloudTextureCount(): Int {
+        if (context == null) return 1
+        return try {
+            val files = context.assets.list("clouds") ?: emptyArray()
+            val count = files.filter { it.endsWith(".png") }.size
+            if (count > 0) count else 1
+        } catch (e: Exception) {
+            1
+        }
+    }
+
     private fun updateFromConfig() {
         val targetDensity = configProvider.getCloudDensity()
         val targetRain = configProvider.getRainIntensity()
@@ -162,10 +179,11 @@ class SceneManager(
     private fun adjustClouds(density: Int) {
         // Map 0-100 density to 0-20 clouds
         val targetCount = (density / 100f * 20).toInt().coerceIn(0, 20)
+        val textureCount = getCloudTextureCount()
         
         while (clouds.size < targetCount) {
             val cloudId = clouds.size
-            val textureIndex = Random.nextInt(3)
+            val textureIndex = Random.nextInt(textureCount)
             val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
             clouds.add(cloud)

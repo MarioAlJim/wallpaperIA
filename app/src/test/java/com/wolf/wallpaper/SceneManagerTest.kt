@@ -216,4 +216,59 @@ class SceneManagerTest {
         sceneManager.lightning.update(restTime)
         assertEquals("Growth progress should reach exactly 1.0", 1.0f, sceneManager.lightning.growthProgress)
     }
+
+    @Test
+    fun testCloudWindAndWrapping() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920) // aspectRatio is 1080 / 1920 = 0.5625
+
+        // Map density 50 -> 10 clouds
+        mockConfig.mockCloudDensity = 50
+        sceneManager.update(0.016f)
+        val clouds = sceneManager.getClouds()
+        assertEquals(10, clouds.size)
+
+        // Save initial positions of clouds
+        val initialXPositions = clouds.map { it.positionX }
+
+        // Case 1: Right wind (mockWindDirection = 2, mockWindIntensity = 100) -> windSpeed > 0f
+        mockConfig.mockWindDirection = 2
+        mockConfig.mockWindIntensity = 100
+        sceneManager.update(1.0f) // Move by 1 second
+
+        // All clouds should have moved to the right (positionX increased)
+        // unless they wrapped around
+        for (i in clouds.indices) {
+            val cloud = clouds[i]
+            val initialX = initialXPositions[i]
+            if (cloud.positionX < initialX) {
+                // If it wrapped, it must have exceeded maxBound and wrapped to -maxBound
+                val halfWidth = cloud.scale * 1.2f
+                val maxBound = 0.5625f + halfWidth
+                assertTrue("Wrapped cloud should be on the left side", cloud.positionX <= -maxBound + 0.5f)
+            } else {
+                assertTrue("Cloud should have moved right", cloud.positionX > initialX)
+            }
+        }
+
+        // Case 2: Left wind (mockWindDirection = 0, mockWindIntensity = 100) -> windSpeed < 0f
+        mockConfig.mockWindDirection = 0
+        mockConfig.mockWindIntensity = 100
+        sceneManager.update(0.0f) // update config only
+        val currentXPositions = clouds.map { it.positionX }
+        sceneManager.update(1.0f) // Move left by 1 second
+
+        for (i in clouds.indices) {
+            val cloud = clouds[i]
+            val preX = currentXPositions[i]
+            if (cloud.positionX > preX) {
+                // Wrapped, should be on the right side
+                val halfWidth = cloud.scale * 1.2f
+                val maxBound = 0.5625f + halfWidth
+                assertTrue("Wrapped cloud should be on the right side", cloud.positionX >= maxBound - 0.5f)
+            } else {
+                assertTrue("Cloud should have moved left", cloud.positionX < preX)
+            }
+        }
+    }
 }

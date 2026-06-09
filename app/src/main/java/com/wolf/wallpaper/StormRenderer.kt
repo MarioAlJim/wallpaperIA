@@ -17,7 +17,7 @@ class StormRenderer(private val context: Context) {
     private var lightningProgram = 0
 
     // Texture IDs
-    private val cloudTextures = IntArray(3)
+    private val cloudTextures = mutableListOf<Int>()
     private var rainTexture = 0
     private val lightningTextures = mutableListOf<Int>()
     
@@ -56,9 +56,26 @@ class StormRenderer(private val context: Context) {
         lightningProgram = createProgram(lightningVert, lightningFrag)
 
         // Load textures from assets
-        cloudTextures[0] = loadTexture(context, "clouds/cloud_01.png")
-        cloudTextures[1] = loadTexture(context, "clouds/cloud_02.png")
-        cloudTextures[2] = loadTexture(context, "clouds/cloud_03.png")
+        cloudTextures.clear()
+        try {
+            val assetManager = context.assets
+            val files = assetManager.list("clouds") ?: emptyArray()
+            val sortedFiles = files.filter { it.endsWith(".png") }.sorted()
+            for (file in sortedFiles) {
+                val tex = loadTexture(context, "clouds/$file")
+                if (tex != 0) {
+                    cloudTextures.add(tex)
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        if (cloudTextures.isEmpty()) {
+            val fallbackTex = loadTexture(context, "clouds/cloud_01.png")
+            if (fallbackTex != 0) {
+                cloudTextures.add(fallbackTex)
+            }
+        }
         rainTexture = loadTexture(context, "rain/rain_particle.png")
 
         // Dynamically load lightning textures from assets/lightning
@@ -166,7 +183,7 @@ class StormRenderer(private val context: Context) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Render layered elements in order: Nubes -> Lluvia -> Rayos
-        // drawClouds(sceneManager.getClouds())
+        drawClouds(sceneManager.getClouds())
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings)
     }
@@ -205,8 +222,10 @@ class StormRenderer(private val context: Context) {
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity)
 
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex])
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+            if (cloudTextures.isNotEmpty()) {
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
+                GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+            }
         }
 
         GLES30.glDisableVertexAttribArray(0)
