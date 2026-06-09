@@ -21,6 +21,15 @@ Hemos completado el desarrollo para atenuar progresivamente el efecto bidireccio
 - En [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt):
   - Añadimos la aserción 5 en `testCloudDriftAndScaleOscillation()` para verificar que al aplicar un viento de `0.1f` (el umbral), el desplazamiento de la nube coincide matemáticamente de forma exacta con la fórmula sin deriva, confirmando la anulación del `driftSpeed`.
 
+### 4. Reducción del 90% en la Velocidad de Respiración y Opacidad
+- En [Cloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/main/java/com/wolf/wallpaper/Cloud.kt):
+  - Multiplicamos la acumulación de `pulseTime` por `0.1f` para ralentizar la oscilación de tamaño:
+    `pulseTime += deltaTime * windFactorBreathing * 0.1f`
+  - Redujimos la velocidad base de desvanecimiento (`fadeSpeed`) de `1.5f` a `0.15f` (un 90% más lenta):
+    `val activeFadeSpeed = 0.15f * windFactorOpacity`
+- En [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/app/src/test/java/com/wolf/wallpaper/SceneManagerTest.kt):
+  - Ajustamos el tiempo simulado en `testCloudFadeInAndFadeOut()` de `1.0f` a `6.0f` segundos para permitir el completamiento de la transición ralentizada.
+
 ---
 
 ## Verificación

@@ -477,8 +477,8 @@ class SceneManagerTest {
             assertTrue("Clouds should be marked as fading out", c.isFadingOut)
         }
 
-        // Simulate time to finish fading out
-        sceneManager.update(1.0f)
+        // Simulate time to finish fading out (6.0 seconds now since fadeSpeed is 90% slower)
+        sceneManager.update(6.0f)
         // They should be removed from the sceneManager's list entirely
         assertTrue("Faded out clouds should be removed from list", sceneManager.getClouds().isEmpty())
     }
