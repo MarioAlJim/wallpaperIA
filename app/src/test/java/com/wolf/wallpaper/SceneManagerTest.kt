@@ -24,6 +24,7 @@ class SceneManagerTest {
         var mockCloudFlashColorIndex = 0
         var mockCloudDynamicsSpeed = 100
         var mockLightningFlashEnabled = true
+        var mockCloudFlashEnabled = true
 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -39,6 +40,7 @@ class SceneManagerTest {
         override fun getCloudFlashColorIndex(): Int = mockCloudFlashColorIndex
         override fun getCloudDynamicsSpeed(): Int = mockCloudDynamicsSpeed
         override fun isLightningFlashEnabled(): Boolean = mockLightningFlashEnabled
+        override fun isCloudFlashEnabled(): Boolean = mockCloudFlashEnabled
     }
 
     @Test
@@ -652,5 +654,18 @@ class SceneManagerTest {
         mockConfig.mockLightningFlashEnabled = false
         sceneManager.update(0.016f)
         assertTrue(!sceneManager.isLightningFlashEnabled())
+    }
+
+    @Test
+    fun testCloudFlashToggleConfig() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        
+        // 1. Enabled by default
+        assertTrue(sceneManager.isCloudFlashEnabled())
+        
+        // 2. Disable
+        mockConfig.mockCloudFlashEnabled = false
+        sceneManager.update(0.016f)
+        assertTrue(!sceneManager.isCloudFlashEnabled())
     }
 }

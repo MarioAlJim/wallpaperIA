@@ -183,14 +183,15 @@ class StormRenderer(private val context: Context) {
         var clearG = 0.04f
         var clearB = 0.06f
 
-        val flashEnabled = sceneManager.isLightningFlashEnabled()
+        val lightningFlashEnabled = sceneManager.isLightningFlashEnabled()
+        val cloudFlashEnabled = sceneManager.isCloudFlashEnabled()
 
         // Apply lightning flash peak color directly to background if enabled
         var maxIntensity = 0f
         var resolvedColor = floatArrayOf(0f, 0f, 0f, 0f)
         var activeCount = 0
 
-        if (flashEnabled) {
+        if (lightningFlashEnabled) {
             for (lightning in sceneManager.lightnings) {
                 if (lightning.isActive && !lightning.isInternalOnly) {
                     if (lightning.intensity > maxIntensity) {
@@ -219,13 +220,13 @@ class StormRenderer(private val context: Context) {
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Render layered elements in order: Fondo -> Lluvia -> Rayos -> Nubes
-        drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, flashEnabled)
+        drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, lightningFlashEnabled)
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
-        drawLightning(sceneManager.lightnings, flashEnabled)
-        drawClouds(sceneManager.getClouds(), sceneManager.lightnings, flashEnabled)
+        drawLightning(sceneManager.lightnings, lightningFlashEnabled)
+        drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
     }
 
-    private fun drawClouds(clouds: List<Cloud>, lightnings: List<Lightning>, flashEnabled: Boolean) {
+    private fun drawClouds(clouds: List<Cloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)
@@ -237,7 +238,12 @@ class StormRenderer(private val context: Context) {
 
         var maxIntensity = 0f
         var resolvedColor = floatArrayOf(0f, 0f, 0f)
-        val activeLightnings = if (flashEnabled) lightnings.filter { it.isActive } else emptyList()
+        val activeLightnings = lightnings.filter { lightning ->
+            lightning.isActive && (
+                (!lightning.isInternalOnly && lightningFlashEnabled) ||
+                (lightning.isInternalOnly && cloudFlashEnabled)
+            )
+        }
         for (lightning in activeLightnings) {
             if (lightning.intensity > maxIntensity) {
                 maxIntensity = lightning.intensity

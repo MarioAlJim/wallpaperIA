@@ -195,6 +195,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudFlashColorIndex(position)
         }
 
+        val switchCloudFlash = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchCloudFlash)
+        if (switchCloudFlash != null) {
+            switchCloudFlash.isChecked = configManager.isCloudFlashEnabled()
+            switchCloudFlash.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setCloudFlashEnabled(isChecked)
+                updateSummaries()
+            }
+        }
+
         val switchLightningFlash = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchLightningFlash)
         if (switchLightningFlash != null) {
             switchLightningFlash.isChecked = configManager.isLightningFlashEnabled()

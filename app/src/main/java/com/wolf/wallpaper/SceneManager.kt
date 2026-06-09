@@ -131,7 +131,7 @@ class SceneManager(
         }
 
         val currentCloudFlashFreq = configProvider.getCloudFlashFrequency()
-        if (currentCloudFlashFreq > 0) {
+        if (configProvider.isCloudFlashEnabled() && currentCloudFlashFreq > 0) {
             timeSinceLastCloudFlash += deltaTime
             if (timeSinceLastCloudFlash >= nextCloudFlashDelay) {
                 val inactiveLightning = lightnings.firstOrNull { !it.isActive }
@@ -161,6 +161,7 @@ class SceneManager(
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
     fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()
+    fun isCloudFlashEnabled(): Boolean = configProvider.isCloudFlashEnabled()
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1
