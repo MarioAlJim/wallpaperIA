@@ -197,4 +197,23 @@ class SceneManagerTest {
         duration = sceneManager.lightning.duration
         assertTrue("Duration $duration out of bounds for 100%", duration in 1.00f..1.15f)
     }
+
+    @Test
+    fun testLightningGrowthProgress() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.lightning.trigger(1.0f, 1, 0, durationPercentage = 50)
+        
+        // At start (age = 0f), growthProgress should be exactly 0.0f
+        assertEquals(0.0f, sceneManager.lightning.growthProgress)
+        
+        // Update halfway through the 20% growth window
+        val halfGrowthTime = sceneManager.lightning.duration * 0.10f
+        sceneManager.lightning.update(halfGrowthTime)
+        assertTrue("Growth progress should be around 0.5", sceneManager.lightning.growthProgress in 0.45f..0.55f)
+        
+        // Update past the 20% growth threshold
+        val restTime = sceneManager.lightning.duration * 0.20f
+        sceneManager.lightning.update(restTime)
+        assertEquals("Growth progress should reach exactly 1.0", 1.0f, sceneManager.lightning.growthProgress)
+    }
 }
