@@ -88,7 +88,13 @@ class SceneManager(
             if (lightningFrequency > 0) {
                 timeSinceLastLightning += deltaTime
                 if (timeSinceLastLightning >= nextLightningDelay) {
-                    lightning.trigger(aspectRatio, getLightningTextureCount())
+                    val configColorIndex = configProvider.getLightningColorIndex()
+                    val colorToUse = if (configColorIndex == 6) {
+                        Random.nextInt(6)
+                    } else {
+                        configColorIndex
+                    }
+                    lightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse)
                     timeSinceLastLightning = 0f
                     setupNextLightningDelay()
                 }

@@ -9,7 +9,8 @@ class Lightning(
     var scaleY: Float = 1.0f,
     var duration: Float = 0.25f,
     var intensity: Float = 1.0f,
-    var selectedTextureIndex: Int = 0
+    var selectedTextureIndex: Int = 0,
+    var selectedColorIndex: Int = 0
 ) : StormObject {
 
     private var age = 0f
@@ -40,7 +41,7 @@ class Lightning(
         // Coordinated by StormRenderer
     }
 
-    fun trigger(aspectRatio: Float, textureCount: Int) {
+    fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int) {
         isActive = true
         age = 0f
         intensity = 1.0f
@@ -48,6 +49,7 @@ class Lightning(
         
         // Select random texture index
         selectedTextureIndex = if (textureCount > 0) Random.nextInt(textureCount) else 0
+        selectedColorIndex = colorIndex
         
         // Spans the full height (scaleY = 2f, positionY = 0f)
         positionX = (Random.nextFloat() * 1.4f - 0.7f) * aspectRatio
