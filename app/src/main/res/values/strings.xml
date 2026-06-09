@@ -8,6 +8,7 @@
     <string name="rain_color_label">Color de la Lluvia</string>
     <string name="rain_speed_label">Velocidad de la Lluvia</string>
     <string name="lightning_frequency_label">Frecuencia de Rayos</string>
+    <string name="lightning_color_label">Color de los Rayos</string>
     <string name="wallpaper_description">Simulador interactivo de tormenta con nubes animadas, lluvia y rayos procedimentales.</string>
     <string name="wallpaper_label">Tormenta OpenGL</string>
 </resources>
