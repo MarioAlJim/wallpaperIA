@@ -47,20 +47,20 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(0, sceneManager.getClouds().size)
 
-        // Case 2: Density 25 -> 1 cloud
+        // Case 2: Density 25 -> 2 clouds
         mockConfig.mockCloudDensity = 25
         sceneManager.update(0.016f)
-        assertEquals(1, sceneManager.getClouds().size)
+        assertEquals(2, sceneManager.getClouds().size)
 
-        // Case 3: Density 50 -> 3 clouds
+        // Case 3: Density 50 -> 5 clouds
         mockConfig.mockCloudDensity = 50
         sceneManager.update(0.016f)
-        assertEquals(3, sceneManager.getClouds().size)
+        assertEquals(5, sceneManager.getClouds().size)
 
-        // Case 4: Density 100 -> 10 clouds
+        // Case 4: Density 100 -> 15 clouds
         mockConfig.mockCloudDensity = 100
         sceneManager.update(0.016f)
-        assertEquals(10, sceneManager.getClouds().size)
+        assertEquals(15, sceneManager.getClouds().size)
     }
 
     @Test
@@ -241,11 +241,11 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         sceneManager.onSurfaceChanged(1080, 1920) // aspectRatio is 1080 / 1920 = 0.5625
 
-        // Map density 50 -> 3 clouds
+        // Map density 50 -> 5 clouds
         mockConfig.mockCloudDensity = 50
         sceneManager.update(0.016f)
         val clouds = sceneManager.getClouds()
-        assertEquals(3, clouds.size)
+        assertEquals(5, clouds.size)
 
         // Save initial positions of clouds
         val initialXPositions = clouds.map { it.positionX }
@@ -361,9 +361,9 @@ class SceneManagerTest {
             // 1. z must be in [0.3f, 1.0f]
             assertTrue("z (${cloud.z}) should be in range [0.3, 1.0]", cloud.z in 0.3f..1.0f)
             
-            // 2. scale should be (Random.nextFloat() * 0.5f + 0.3f) * z
+            // 2. scale should be (Random.nextFloat() * 0.7f + 0.3f) * z
             val minExpectedScale = 0.3f * cloud.z - 0.001f
-            val maxExpectedScale = 0.8f * cloud.z + 0.001f
+            val maxExpectedScale = 1.0f * cloud.z + 0.001f
             assertTrue("Scale (${cloud.scale}) should be scaled by z", cloud.scale in minExpectedScale..maxExpectedScale)
             
             // 3. opacity should be (Random.nextFloat() * 0.4f + 0.4f) * z

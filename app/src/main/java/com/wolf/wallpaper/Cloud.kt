@@ -30,7 +30,7 @@ class Cloud(
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
-        scale = (Random.nextFloat() * 0.5f + 0.3f) * z
+        scale = (Random.nextFloat() * 0.7f + 0.3f) * z
         
         // Calculate Y range to keep the entire cloud body in the upper half (Y >= 0.0f and Y <= 1.0f)
         val minY = scale * 0.5f

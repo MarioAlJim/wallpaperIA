@@ -220,16 +220,16 @@ class SceneManager(
     }
 
     private fun adjustClouds(density: Int) {
-        // Map 0-100 density to custom cloud count: 0, 1, 3, 5, 7, 10
+        // Map 0-100 density to custom cloud count: 0, 2, 5, 10, 13, 15
         val targetCount = when (density) {
             0 -> 0
-            25 -> 1
-            50 -> 3
-            75 -> 5
-            90 -> 7
-            100 -> 10
-            else -> (density / 100f * 10).toInt()
-        }.coerceIn(0, 10)
+            25 -> 2
+            50 -> 5
+            75 -> 10
+            90 -> 13
+            100 -> 15
+            else -> (density / 100f * 15).toInt()
+        }.coerceIn(0, 15)
         val textureCount = getCloudTextureCount()
         
         while (clouds.size < targetCount) {
