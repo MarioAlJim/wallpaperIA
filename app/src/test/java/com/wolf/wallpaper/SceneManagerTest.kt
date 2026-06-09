@@ -319,4 +319,27 @@ class SceneManagerTest {
             assertTrue("Speed ($speed) should be in range [${expectedMinSpeed}, ${expectedMaxSpeed}]", speed in (expectedMinSpeed - 0.05f)..(expectedMaxSpeed + 0.05f))
         }
     }
+
+    @Test
+    fun testInternalLightningFeature() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        
+        // Verify pool size is 6
+        assertEquals(6, sceneManager.lightnings.size)
+        
+        // Trigger lightning and verify it supports isInternalOnly setting
+        var hasInternal = false
+        var hasNormal = false
+        for (i in 0 until 100) {
+            val l = Lightning()
+            l.trigger(1.0f, 1, 0, durationPercentage = 30, isInternalOnly = (i % 2 == 0))
+            if (l.isInternalOnly) {
+                hasInternal = true
+            } else {
+                hasNormal = true
+            }
+        }
+        assertTrue("Should support internal-only lightning triggers", hasInternal)
+        assertTrue("Should support normal lightning triggers", hasNormal)
+    }
 }

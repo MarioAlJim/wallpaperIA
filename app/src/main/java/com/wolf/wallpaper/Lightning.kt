@@ -12,7 +12,8 @@ class Lightning(
     var selectedTextureIndex: Int = 0,
     var selectedColorIndex: Int = 0,
     var rotationAngle: Float = 0f,
-    var growthProgress: Float = 1.0f
+    var growthProgress: Float = 1.0f,
+    var isInternalOnly: Boolean = false
 ) : StormObject {
 
     private var age = 0f
@@ -51,7 +52,8 @@ class Lightning(
         // Coordinated by StormRenderer
     }
 
-    fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int, durationPercentage: Int = 30) {
+    fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int, durationPercentage: Int = 30, isInternalOnly: Boolean = false) {
+        this.isInternalOnly = isInternalOnly
         isActive = true
         age = 0f
         intensity = 1.0f

@@ -9,7 +9,7 @@ class SceneManager(
 ) {
     private val clouds = mutableListOf<Cloud>()
     private val rainDrops = mutableListOf<RainDrop>()
-    val lightnings = List(3) { Lightning() }
+    val lightnings = List(6) { Lightning() }
     val lightning: Lightning get() = lightnings[0]
     
     private var cloudDensity = -1
@@ -106,7 +106,14 @@ class SceneManager(
                     } else {
                         configColorIndex
                     }
-                    inactiveLightning.trigger(aspectRatio, getLightningTextureCount(), colorToUse, configProvider.getLightningDuration())
+                    val isInternalOnly = Random.nextFloat() < 0.5f
+                    inactiveLightning.trigger(
+                        aspectRatio,
+                        getLightningTextureCount(),
+                        colorToUse,
+                        configProvider.getLightningDuration(),
+                        isInternalOnly = isInternalOnly
+                    )
                 }
                 timeSinceLastLightning = 0f
                 setupNextLightningDelay()

@@ -189,7 +189,7 @@ class StormRenderer(private val context: Context) {
         var activeCount = 0
 
         for (lightning in sceneManager.lightnings) {
-            if (lightning.isActive) {
+            if (lightning.isActive && !lightning.isInternalOnly) {
                 if (lightning.intensity > maxIntensity) {
                     maxIntensity = lightning.intensity
                 }
@@ -218,16 +218,44 @@ class StormRenderer(private val context: Context) {
         drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings)
         drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings)
-        drawClouds(sceneManager.getClouds())
+        drawClouds(sceneManager.getClouds(), sceneManager.lightnings)
     }
 
-    private fun drawClouds(clouds: List<Cloud>) {
+    private fun drawClouds(clouds: List<Cloud>, lightnings: List<Lightning>) {
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)
         val mvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
         val opacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
         val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
+        val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
+        val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
+
+        var maxIntensity = 0f
+        var resolvedColor = floatArrayOf(0f, 0f, 0f)
+        val activeLightnings = lightnings.filter { it.isActive }
+        for (lightning in activeLightnings) {
+            if (lightning.intensity > maxIntensity) {
+                maxIntensity = lightning.intensity
+            }
+            val color = getLightningColor(lightning.selectedColorIndex)
+            resolvedColor[0] += color[0] * lightning.intensity
+            resolvedColor[1] += color[1] * lightning.intensity
+            resolvedColor[2] += color[2] * lightning.intensity
+        }
+
+        val avgColor = if (activeLightnings.isNotEmpty()) {
+            floatArrayOf(
+                (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
+                (resolvedColor[1] / activeLightnings.size).coerceIn(0f, 1f),
+                (resolvedColor[2] / activeLightnings.size).coerceIn(0f, 1f)
+            )
+        } else {
+            floatArrayOf(1.0f, 1.0f, 1.0f)
+        }
+
+        GLES30.glUniform1f(flashIntensityHandle, maxIntensity)
+        GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
 
         // Bind positions attribute (location 0)
         cloudQuadBuffer.position(0)
@@ -363,7 +391,7 @@ class StormRenderer(private val context: Context) {
     }
 
     private fun drawLightning(lightnings: List<Lightning>) {
-        val activeLightnings = lightnings.filter { it.isActive }
+        val activeLightnings = lightnings.filter { it.isActive && !it.isInternalOnly }
         if (activeLightnings.isEmpty()) return
 
         GLES30.glUseProgram(lightningProgram)
@@ -616,7 +644,7 @@ class StormRenderer(private val context: Context) {
 
         var maxIntensity = 0f
         var resolvedColor = floatArrayOf(0f, 0f, 0f)
-        val activeLightnings = lightnings.filter { it.isActive }
+        val activeLightnings = lightnings.filter { it.isActive && !it.isInternalOnly }
         for (lightning in activeLightnings) {
             if (lightning.intensity > maxIntensity) {
                 maxIntensity = lightning.intensity
