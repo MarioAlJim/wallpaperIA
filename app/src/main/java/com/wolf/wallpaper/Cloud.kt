@@ -37,7 +37,7 @@ class Cloud(
         scale = baseScale * (1.0f + sin(pulseTime) * 0.28125f * dynamicsSpeed)
 
         // Subtle vertical Y axis movement based on dynamicsSpeed
-        positionY = basePositionY + sin(pulseTime * 0.5f) * 0.03f * baseScale * dynamicsSpeed
+        positionY = basePositionY + sin(pulseTime * 0.5f) * 0.06f * baseScale * dynamicsSpeed
 
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)

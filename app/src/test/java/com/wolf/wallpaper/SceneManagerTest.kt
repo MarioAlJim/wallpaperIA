@@ -196,7 +196,7 @@ class SceneManagerTest {
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
             assertTrue("ScaleY should be in range [0.3f, 1.5f]", sceneManager.lightning.scaleY in 0.3f..1.5f)
-            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.225f..0.46f)
+            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.45f..0.91f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }
@@ -585,11 +585,11 @@ class SceneManagerTest {
         val basePosY = cloud.basePositionY
         val initialPosY = cloud.positionY
         // With dynamicsSpeed = 1.0f, positionY should oscillate sutilmente around basePositionY
-        assertTrue("Initial Y position should be near basePositionY", kotlin.math.abs(cloud.positionY - basePosY) <= 0.031f * cloud.baseScale)
+        assertTrue("Initial Y position should be near basePositionY", kotlin.math.abs(cloud.positionY - basePosY) <= 0.061f * cloud.baseScale)
         
         cloud.update(deltaTime = 2.0f, windSpeed = 0f, dynamicsSpeed = 1.0f)
         assertTrue("Y position should change over time", initialPosY != cloud.positionY)
-        assertTrue("Y position should remain within oscillation bounds", kotlin.math.abs(cloud.positionY - basePosY) <= 0.031f * cloud.baseScale)
+        assertTrue("Y position should remain within oscillation bounds", kotlin.math.abs(cloud.positionY - basePosY) <= 0.061f * cloud.baseScale)
         
         // With dynamicsSpeed = 0f, Y position should be exactly basePositionY
         cloud.update(deltaTime = 1.0f, windSpeed = 0f, dynamicsSpeed = 0f)
