@@ -35,7 +35,9 @@ class Cloud(
         pulseTime += deltaTime * windFactorBreathing
         scale = baseScale * (1.0f + sin(pulseTime) * 0.08f)
 
-        positionX += (windSpeed + driftSpeed) * speedFactor * speedZFactor * deltaTime
+        val windThreshold = 0.1f
+        val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
+        positionX += (windSpeed + (driftSpeed * driftInfluence)) * speedFactor * speedZFactor * deltaTime
         
         // Smoothly transition opacity
         val activeFadeSpeed = 1.5f * windFactorOpacity

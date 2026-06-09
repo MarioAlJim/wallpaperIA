@@ -517,5 +517,13 @@ class SceneManagerTest {
         val deltaWind = cloud.pulseTime - pTimeWind
         
         assertTrue("Pulse time should accumulate faster with wind ($deltaWind vs $deltaZero)", deltaWind > deltaZero * 1.05f)
+
+        // 5. Verify drift speed is fully attenuated at or above windThreshold (0.1f)
+        // With windSpeed = 0.1f, driftInfluence should be 0.0f.
+        // The cloud movement should be exactly windSpeed * speedFactor * speedZFactor * deltaTime.
+        val startXWind = cloud.positionX
+        cloud.update(deltaTime = 1.0f, windSpeed = 0.1f)
+        val expectedMove = 0.1f * cloud.speedFactor * cloud.speedZFactor * 1.0f
+        assertEquals(startXWind + expectedMove, cloud.positionX, 0.001f)
     }
 }
