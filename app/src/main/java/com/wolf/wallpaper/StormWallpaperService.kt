@@ -2,6 +2,7 @@ package com.wolf.wallpaper
 
 import android.content.SharedPreferences
 import android.service.wallpaper.WallpaperService
+import android.view.MotionEvent
 import android.view.SurfaceHolder
 
 class StormWallpaperService : WallpaperService() {
@@ -22,9 +23,20 @@ class StormWallpaperService : WallpaperService() {
             sceneManager = SceneManager(applicationContext, configManager)
             renderer = StormRenderer(applicationContext)
             
+            setTouchEventsEnabled(true)
+            
             // Listen for shared preference changes from the Settings activity to update variables dynamically
             applicationContext.getSharedPreferences(ConfigManager.PREFS_NAME, MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this)
+        }
+
+        override fun onTouchEvent(event: MotionEvent?) {
+            super.onTouchEvent(event)
+            if (event != null && event.action == MotionEvent.ACTION_DOWN) {
+                if (configManager.isInteractiveLightningEnabled()) {
+                    sceneManager.queueTouch(event.x, event.y)
+                }
+            }
         }
 
         override fun onDestroy() {

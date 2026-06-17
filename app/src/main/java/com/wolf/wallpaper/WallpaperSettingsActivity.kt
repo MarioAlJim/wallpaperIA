@@ -213,6 +213,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             }
         }
 
+        val switchInteractiveLightning = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchInteractiveLightning)
+        if (switchInteractiveLightning != null) {
+            switchInteractiveLightning.isChecked = configManager.isInteractiveLightningEnabled()
+            switchInteractiveLightning.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setInteractiveLightningEnabled(isChecked)
+                updateSummaries()
+            }
+        }
+
         val backgroundModes = arrayOf(
             "Color Oscuro (Original)",
             "Fondo 1 (Montaña)",

@@ -30,6 +30,10 @@ class SceneManager(
     private var timeSinceLastCloudFlash = 0f
     private var nextCloudFlashDelay = 0f
     private var aspectRatio = 1.0f
+    private var viewWidth = 0
+    private var viewHeight = 0
+    @Volatile
+    private var pendingTouch: Pair<Float, Float>? = null
 
     init {
         updateFromConfig()
@@ -40,6 +44,8 @@ class SceneManager(
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
+        viewWidth = width
+        viewHeight = height
         aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
         
         // Re-align objects to new aspect ratio coordinates
@@ -52,6 +58,12 @@ class SceneManager(
     }
 
     fun update(deltaTime: Float) {
+        val touch = pendingTouch
+        if (touch != null) {
+            pendingTouch = null
+            triggerInteractiveLightning(touch.first, touch.second)
+        }
+
         updateFromConfig()
 
         // Interpolate current values (lerp)
@@ -369,5 +381,34 @@ class SceneManager(
         val maxVariance = 0.40f
         val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
         nextCloudFlashDelay = baseDelay + variance
+    }
+
+    fun queueTouch(x: Float, y: Float) {
+        pendingTouch = Pair(x, y)
+    }
+
+    private fun triggerInteractiveLightning(x: Float, y: Float) {
+        if (viewWidth <= 0 || viewHeight <= 0) return
+        val openglX = (x / viewWidth * 2.0f - 1.0f) * aspectRatio
+        val openglY = 1.0f - (y / viewHeight * 2.0f)
+        
+        val inactiveLightning = lightnings.firstOrNull { !it.isActive }
+        if (inactiveLightning != null) {
+            val configColorIndex = configProvider.getLightningColorIndex()
+            val colorToUse = if (configColorIndex == 6) {
+                Random.nextInt(6)
+            } else {
+                configColorIndex
+            }
+            inactiveLightning.triggerAt(
+                openglX,
+                openglY,
+                aspectRatio,
+                getLightningTextureCount(),
+                colorToUse,
+                configProvider.getLightningDuration(),
+                isInternalOnly = false
+            )
+        }
     }
 }

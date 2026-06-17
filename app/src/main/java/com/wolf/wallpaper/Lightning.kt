@@ -101,4 +101,71 @@ class Lightning(
         positionX = startX
         positionY = startY - scaleY * 0.5f
     }
+
+    fun triggerAt(touchX: Float, touchY: Float, aspectRatio: Float, textureCount: Int, colorIndex: Int, durationPercentage: Int = 30, isInternalOnly: Boolean = false) {
+        this.isInternalOnly = isInternalOnly
+        isActive = true
+        age = 0f
+        intensity = 1.0f
+        growthProgress = 0.0f
+        
+        val baseMin = if (durationPercentage <= 50) {
+            0.15f + (durationPercentage / 50f) * 0.15f
+        } else {
+            0.30f + ((durationPercentage - 50) / 50f) * 0.70f
+        }
+        val baseMax = baseMin + 0.15f
+        duration = kotlin.random.Random.nextFloat() * (baseMax - baseMin) + baseMin
+        
+        selectedTextureIndex = if (textureCount > 0) kotlin.random.Random.nextInt(textureCount) else 0
+        selectedColorIndex = colorIndex
+
+        val minHeight = 2.0f * 0.225f // 0.45f
+        val maxHeight = 2.0f * 1.125f // 2.25f
+
+        val borderType = if (touchY > 0.4f) {
+            0 // Top border only
+        } else {
+            val rand = kotlin.random.Random.nextInt(2)
+            if (touchX < -aspectRatio / 3f) {
+                if (rand == 0) 0 else 1 // Top or Left
+            } else if (touchX > aspectRatio / 3f) {
+                if (rand == 0) 0 else 2 // Top or Right
+            } else {
+                0
+            }
+        }
+
+        val startX: Float
+        val startY: Float
+
+        when (borderType) {
+            0 -> { // Top border
+                rotationAngle = kotlin.random.Random.nextFloat() * 30f - 15f // -15 to +15 degrees
+                val rad = Math.toRadians(rotationAngle.toDouble()).toFloat()
+                scaleY = ((1.0f - touchY) / kotlin.math.cos(rad)).coerceIn(minHeight, maxHeight)
+                startX = touchX - scaleY * kotlin.math.sin(rad)
+                startY = 1.0f
+            }
+            1 -> { // Left border
+                rotationAngle = kotlin.random.Random.nextFloat() * 25f + 20f // +20 to +45 degrees (shoots down-right)
+                val rad = Math.toRadians(rotationAngle.toDouble()).toFloat()
+                scaleY = ((touchX + aspectRatio) / kotlin.math.sin(rad)).coerceIn(minHeight, maxHeight)
+                startY = (touchY + scaleY * kotlin.math.cos(rad)).coerceIn(0.3f, 1.0f)
+                startX = -aspectRatio
+            }
+            else -> { // Right border
+                rotationAngle = -(kotlin.random.Random.nextFloat() * 25f + 20f) // -20 to -45 degrees (shoots down-left)
+                val rad = Math.toRadians(rotationAngle.toDouble()).toFloat()
+                scaleY = ((touchX - aspectRatio) / kotlin.math.sin(rad)).coerceIn(minHeight, maxHeight)
+                startY = (touchY + scaleY * kotlin.math.cos(rad)).coerceIn(0.3f, 1.0f)
+                startX = aspectRatio
+            }
+        }
+
+        scaleX = kotlin.random.Random.nextFloat() * 1.125f + 0.45f // width of the bolt: 0.45 to 1.575
+
+        positionX = startX
+        positionY = startY - scaleY * 0.5f
+    }
 }

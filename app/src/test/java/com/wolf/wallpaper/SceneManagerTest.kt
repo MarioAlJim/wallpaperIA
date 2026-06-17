@@ -25,7 +25,8 @@ class SceneManagerTest {
         var mockCloudDynamicsSpeed = 100
         var mockLightningFlashEnabled = true
         var mockCloudFlashEnabled = true
-
+        var mockInteractiveLightningEnabled = true
+ 
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
         override fun getLightningFrequency(): Int = mockLightningFrequency
@@ -41,6 +42,7 @@ class SceneManagerTest {
         override fun getCloudDynamicsSpeed(): Int = mockCloudDynamicsSpeed
         override fun isLightningFlashEnabled(): Boolean = mockLightningFlashEnabled
         override fun isCloudFlashEnabled(): Boolean = mockCloudFlashEnabled
+        override fun isInteractiveLightningEnabled(): Boolean = mockInteractiveLightningEnabled
     }
 
     @Test
@@ -667,5 +669,30 @@ class SceneManagerTest {
         mockConfig.mockCloudFlashEnabled = false
         sceneManager.update(0.016f)
         assertTrue(!sceneManager.isCloudFlashEnabled())
+    }
+
+    @Test
+    fun testInteractiveLightningTouchTrigger() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920) // set aspect ratio = 1080 / 1920 = 0.5625
+        val aspectRatio = 0.5625f
+
+        // Queue a touch at the center: x = 540, y = 960 (corresponding to openglX = 0f, openglY = 0f)
+        sceneManager.queueTouch(540f, 960f)
+        sceneManager.update(0.016f)
+
+        // Verify that one lightning became active
+        val activeLightnings = sceneManager.lightnings.filter { it.isActive }
+        assertEquals(1, activeLightnings.size)
+        val l = activeLightnings[0]
+
+        // Verify that the bottom-center of the lightning lands close to (0f, 0f)
+        val rad = Math.toRadians(l.rotationAngle.toDouble()).toFloat()
+        val startY = l.positionY + l.scaleY * 0.5f
+        val bottomX = l.positionX + l.scaleY * kotlin.math.sin(rad)
+        val bottomY = startY - l.scaleY * kotlin.math.cos(rad)
+
+        assertEquals(0f, bottomX, 0.05f)
+        assertEquals(0f, bottomY, 0.05f)
     }
 }
