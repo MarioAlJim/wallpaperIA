@@ -15,7 +15,7 @@
         android:theme="@style/Theme.Wallpaper">
 
         <service
-            android:name="com.wolf.wallpaper.StormWallpaperService"
+            android:name="com.wolf.wallpaper.DynamicWallpaperService"
             android:label="@string/wallpaper_label"
             android:permission="android.permission.BIND_WALLPAPER"
             android:exported="true">

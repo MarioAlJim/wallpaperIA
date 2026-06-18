@@ -1,4 +1,4 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.core
 
 import android.opengl.EGL14
 import android.opengl.EGLConfig

@@ -1,6 +1,7 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.storm
 
 import android.content.Context
+import com.wolf.wallpaper.core.ConfigProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -26,6 +27,10 @@ class SceneManagerTest {
         var mockLightningFlashEnabled = true
         var mockCloudFlashEnabled = true
         var mockInteractiveLightningEnabled = true
+        var mockActiveEffect = 0
+        var mockSunSize = 50
+        var mockSunSpeed = 50
+        var mockSunnyTheme = 0
  
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -43,6 +48,10 @@ class SceneManagerTest {
         override fun isLightningFlashEnabled(): Boolean = mockLightningFlashEnabled
         override fun isCloudFlashEnabled(): Boolean = mockCloudFlashEnabled
         override fun isInteractiveLightningEnabled(): Boolean = mockInteractiveLightningEnabled
+        override fun getActiveEffect(): Int = mockActiveEffect
+        override fun getSunSize(): Int = mockSunSize
+        override fun getSunSpeed(): Int = mockSunSpeed
+        override fun getSunnyTheme(): Int = mockSunnyTheme
     }
 
     @Test

@@ -18,6 +18,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
+import com.google.android.material.tabs.TabLayout
+import com.wolf.wallpaper.core.ConfigManager
 
 // Utility extension functions for clean premium UI logic
 private fun View.toggleVisibility(divider: View?, arrow: ImageView, durationMs: Long = 250) {
@@ -87,6 +89,12 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.contentBackground,
             R.id.dividerBackground,
             R.id.arrowBackground
+        )
+        setupAccordion(
+            R.id.headerSunny,
+            R.id.contentSunny,
+            R.id.dividerSunny,
+            R.id.arrowSunny
         )
 
         // 2. Setup Nubes y Viento Controls
@@ -238,6 +246,48 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setBackgroundIndex(position)
         }
 
+        // 4c. Setup Sunny Controls
+        setupSlider(
+            R.id.seekBarSunSize,
+            R.id.textViewSunSizeValue,
+            configManager.getSunSize()
+        ) { value ->
+            configManager.setSunSize(value)
+        }
+
+        setupSlider(
+            R.id.seekBarSunSpeed,
+            R.id.textViewSunSpeedValue,
+            configManager.getSunSpeed()
+        ) { value ->
+            configManager.setSunSpeed(value)
+        }
+
+        val sunnyThemes = arrayOf("Mediodía Celeste", "Atardecer Dorado", "Anochecer Púrpura")
+        setupDropdown(
+            R.id.spinnerSunnyTheme,
+            sunnyThemes,
+            configManager.getSunnyTheme()
+        ) { position ->
+            configManager.setSunnyTheme(position)
+        }
+
+        // 4d. Setup TabLayout Weather Selector
+        val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
+        val initialActiveEffect = configManager.getActiveEffect()
+        tabLayoutWeather.getTabAt(initialActiveEffect)?.select()
+        updateVisibilityOfCards(initialActiveEffect)
+
+        tabLayoutWeather.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val position = tab?.position ?: 0
+                configManager.setActiveEffect(position)
+                updateVisibilityOfCards(position)
+            }
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+
         // 5. Initialize summaries
         updateSummaries()
 
@@ -246,7 +296,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             val intent = Intent(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER).apply {
                 putExtra(
                     WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
-                    ComponentName(this@WallpaperSettingsActivity, StormWallpaperService::class.java)
+                    ComponentName(this@WallpaperSettingsActivity, DynamicWallpaperService::class.java)
                 )
             }
             startActivity(intent)
@@ -261,6 +311,33 @@ class WallpaperSettingsActivity : AppCompatActivity() {
 
         header.setOnClickListener {
             content.toggleVisibility(divider, arrow)
+        }
+    }
+
+    private fun updateVisibilityOfCards(weatherIndex: Int) {
+        val cardCloudsWind = findViewById<View>(R.id.cardCloudsWind)
+        val cardRain = findViewById<View>(R.id.cardRain)
+        val cardLightning = findViewById<View>(R.id.cardLightning)
+        val cardBackground = findViewById<View>(R.id.cardBackground)
+        val cardSunny = findViewById<View>(R.id.cardSunny)
+
+        val parentView = cardCloudsWind.parent as? ViewGroup ?: return
+        TransitionManager.beginDelayedTransition(parentView, AutoTransition().apply {
+            duration = 250
+        })
+
+        if (weatherIndex == 0) { // Storm
+            cardCloudsWind.visibility = View.VISIBLE
+            cardRain.visibility = View.VISIBLE
+            cardLightning.visibility = View.VISIBLE
+            cardBackground.visibility = View.VISIBLE
+            cardSunny.visibility = View.GONE
+        } else { // Sunny
+            cardCloudsWind.visibility = View.GONE
+            cardRain.visibility = View.GONE
+            cardLightning.visibility = View.GONE
+            cardBackground.visibility = View.GONE
+            cardSunny.visibility = View.VISIBLE
         }
     }
 
@@ -356,6 +433,24 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 }
                 textView.text = "$value% • $desc"
             }
+            R.id.seekBarSunSize -> {
+                val desc = when {
+                    value <= 20 -> "Pequeño"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Grande"
+                    else -> "Gigante"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarSunSpeed -> {
+                val desc = when {
+                    value <= 20 -> "Lento"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Rápido"
+                    else -> "Extremo"
+                }
+                textView.text = "$value% • $desc"
+            }
         }
     }
 
@@ -364,6 +459,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val summaryRain = findViewById<TextView>(R.id.summaryRain) ?: return
         val summaryLightning = findViewById<TextView>(R.id.summaryLightning) ?: return
         val summaryBackground = findViewById<TextView>(R.id.summaryBackground) ?: return
+        val summarySunny = findViewById<TextView>(R.id.summarySunny) ?: return
 
         val accentColor = "#00E5FF"
 
@@ -435,6 +531,20 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
         summaryBackground.text = Html.fromHtml(
             "Fondo: <font color='$accentColor'>$bgModeText</font>",
+            Html.FROM_HTML_MODE_LEGACY
+        )
+
+        // 5. Sunny summary
+        val sunSize = configManager.getSunSize()
+        val sunSpeed = configManager.getSunSpeed()
+        val sunnyThemeText = when (configManager.getSunnyTheme()) {
+            0 -> "Mediodía Celeste"
+            1 -> "Atardecer Dorado"
+            2 -> "Anochecer Púrpura"
+            else -> "Mediodía Celeste"
+        }
+        summarySunny.text = Html.fromHtml(
+            "Tamaño: <font color='$accentColor'>$sunSize%</font> • Pulso: <font color='$accentColor'>$sunSpeed%</font> • Tema: <font color='$accentColor'>$sunnyThemeText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
     }

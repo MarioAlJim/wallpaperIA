@@ -1,11 +1,10 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.core
 
 import android.view.SurfaceHolder
 
 class GLRenderThread(
     private val surfaceHolder: SurfaceHolder,
-    private val renderer: StormRenderer,
-    private val sceneManager: SceneManager
+    private val renderer: GLRenderer
 ) : Thread("GLRenderThread") {
 
     private val eglHelper = EglHelper()
@@ -16,6 +15,7 @@ class GLRenderThread(
     @Volatile private var width = 0
     @Volatile private var height = 0
     @Volatile private var surfaceChanged = false
+    @Volatile private var pendingTouch: Pair<Float, Float>? = null
 
     fun setVisible(visible: Boolean) {
         synchronized(lock) {
@@ -33,6 +33,13 @@ class GLRenderThread(
         }
     }
 
+    fun queueTouch(x: Float, y: Float) {
+        synchronized(lock) {
+            pendingTouch = Pair(x, y)
+            lock.notifyAll()
+        }
+    }
+
     fun shutdown() {
         synchronized(lock) {
             running = false
@@ -44,8 +51,6 @@ class GLRenderThread(
         try {
             eglHelper.initEgl()
             
-            // Create the EGL surface immediately if we have a valid surface, regardless of visibility,
-            // so we have a valid active OpenGL context to compile shaders and load textures in onSurfaceCreated().
             synchronized(lock) {
                 if (surfaceHolder.surface != null && surfaceHolder.surface.isValid) {
                     eglHelper.createSurface(surfaceHolder)
@@ -58,9 +63,8 @@ class GLRenderThread(
             
             while (running) {
                 synchronized(lock) {
-                    // RF-007 and RNF-004: If invisible or surface invalid, sleep to conserve resources
                     while (running && (!visible || surfaceHolder.surface == null || !surfaceHolder.surface.isValid)) {
-                        eglHelper.destroySurface() // Release EGL surface
+                        eglHelper.destroySurface()
                         
                         try {
                             lock.wait()
@@ -68,11 +72,10 @@ class GLRenderThread(
                             // ignore
                         }
                         
-                        // When waking up, recreate EGL surface if we are visible and have valid surface
                         if (running && visible && surfaceHolder.surface != null && surfaceHolder.surface.isValid) {
                             eglHelper.createSurface(surfaceHolder)
                             eglHelper.makeCurrent()
-                            surfaceChanged = true // Trigger projection recalculation
+                            surfaceChanged = true
                         }
                     }
                 }
@@ -94,27 +97,24 @@ class GLRenderThread(
 
                 if (needsViewportUpdate) {
                     renderer.onSurfaceChanged(localWidth, localHeight)
-                    sceneManager.onSurfaceChanged(localWidth, localHeight)
+                }
+
+                val touch = pendingTouch
+                if (touch != null) {
+                    pendingTouch = null
+                    renderer.onTouchEvent(touch.first, touch.second)
                 }
 
                 val currentTime = System.nanoTime()
-                // Convert nanoseconds to float seconds
                 val deltaTime = (currentTime - lastTime) / 1_000_000_000f
                 lastTime = currentTime
-
-                // Clamp deltaTime to avoid sudden jumps when thread lags
                 val clampedDelta = deltaTime.coerceAtMost(0.1f)
 
-                // Update physics positions of objects
-                sceneManager.update(clampedDelta)
+                renderer.onUpdate(clampedDelta)
+                renderer.onDrawFrame()
 
-                // Render current frame
-                renderer.drawFrame(sceneManager)
-
-                // Swap graphics buffers
                 eglHelper.swapBuffers()
 
-                // Sleep to maintain ~60 FPS (approx 16.6ms per frame)
                 val elapsedMs = (System.nanoTime() - currentTime) / 1_000_000
                 val sleepTime = 16 - elapsedMs
                 if (sleepTime > 0) {

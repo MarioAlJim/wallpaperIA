@@ -1,16 +1,20 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.storm
 
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils
 import android.opengl.Matrix
+import com.wolf.wallpaper.core.GLRenderer
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
 
-class StormRenderer(private val context: Context) {
+class StormRenderer(
+    private val context: Context,
+    private val sceneManager: SceneManager
+) : GLRenderer {
 
     private var cloudProgram = 0
     private var rainProgram = 0
@@ -44,7 +48,7 @@ class StormRenderer(private val context: Context) {
         Matrix.setIdentityM(identityMatrix, 0)
     }
 
-    fun onSurfaceCreated() {
+    override fun onSurfaceCreated() {
         // Enable blending for textures and transparency effects
         GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
@@ -170,14 +174,27 @@ class StormRenderer(private val context: Context) {
             }
     }
 
-    fun onSurfaceChanged(width: Int, height: Int) {
+    override fun onSurfaceChanged(width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
         aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
         // Setup orthographic camera matrix (RF-006: Keeps proportions in rotation/scale)
         Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
+        sceneManager.onSurfaceChanged(width, height)
     }
 
-    fun drawFrame(sceneManager: SceneManager) {
+    override fun onUpdate(deltaTime: Float) {
+        sceneManager.update(deltaTime)
+    }
+
+    override fun onDrawFrame() {
+        drawFrame(sceneManager)
+    }
+
+    override fun onTouchEvent(x: Float, y: Float) {
+        sceneManager.queueTouch(x, y)
+    }
+
+    private fun drawFrame(sceneManager: SceneManager) {
         // Clear background with deep dark storm color
         var clearR = 0.04f
         var clearG = 0.04f

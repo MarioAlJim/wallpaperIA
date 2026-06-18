@@ -1,6 +1,7 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.storm
 
 import android.content.Context
+import com.wolf.wallpaper.core.ConfigProvider
 import kotlin.random.Random
 
 class SceneManager(

@@ -4,28 +4,35 @@ import android.content.SharedPreferences
 import android.service.wallpaper.WallpaperService
 import android.view.MotionEvent
 import android.view.SurfaceHolder
+import com.wolf.wallpaper.core.ConfigManager
+import com.wolf.wallpaper.core.GLRenderThread
+import com.wolf.wallpaper.core.GLRenderer
+import com.wolf.wallpaper.core.WeatherType
 
-class StormWallpaperService : WallpaperService() {
+class DynamicWallpaperService : WallpaperService() {
 
     override fun onCreateEngine(): Engine {
-        return StormEngine()
+        return DynamicEngine()
     }
 
-    inner class StormEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener {
+    inner class DynamicEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener {
         private var renderThread: GLRenderThread? = null
         private lateinit var configManager: ConfigManager
-        private lateinit var sceneManager: SceneManager
-        private lateinit var renderer: StormRenderer
+        private lateinit var rendererFactory: AppWallpaperRendererFactory
+        private var currentRenderer: GLRenderer? = null
+        private var activeWeatherType = WeatherType.STORM
+        private var currentHolder: SurfaceHolder? = null
 
         override fun onCreate(surfaceHolder: SurfaceHolder?) {
             super.onCreate(surfaceHolder)
             configManager = ConfigManager(applicationContext)
-            sceneManager = SceneManager(applicationContext, configManager)
-            renderer = StormRenderer(applicationContext)
+            rendererFactory = AppWallpaperRendererFactory(configManager)
+            
+            activeWeatherType = WeatherType.fromIndex(configManager.getActiveEffect())
+            currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
             
             setTouchEventsEnabled(true)
             
-            // Listen for shared preference changes from the Settings activity to update variables dynamically
             applicationContext.getSharedPreferences(ConfigManager.PREFS_NAME, MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this)
         }
@@ -33,9 +40,7 @@ class StormWallpaperService : WallpaperService() {
         override fun onTouchEvent(event: MotionEvent?) {
             super.onTouchEvent(event)
             if (event != null && event.action == MotionEvent.ACTION_DOWN) {
-                if (configManager.isInteractiveLightningEnabled()) {
-                    sceneManager.queueTouch(event.x, event.y)
-                }
+                renderThread?.queueTouch(event.x, event.y)
             }
         }
 
@@ -53,6 +58,7 @@ class StormWallpaperService : WallpaperService() {
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
+            currentHolder = holder
             startRenderThread(holder)
         }
 
@@ -63,16 +69,34 @@ class StormWallpaperService : WallpaperService() {
 
         override fun onSurfaceDestroyed(holder: SurfaceHolder) {
             super.onSurfaceDestroyed(holder)
+            currentHolder = null
             stopRenderThread()
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-            // Configuration is queried on every frame in SceneManager.update(), so updates apply automatically.
+            if (key == ConfigManager.KEY_ACTIVE_EFFECT) {
+                val newIndex = configManager.getActiveEffect()
+                val newWeatherType = WeatherType.fromIndex(newIndex)
+                if (newWeatherType != activeWeatherType) {
+                    activeWeatherType = newWeatherType
+                    
+                    // Detener e inicializar con el nuevo renderizador en caliente
+                    val holder = currentHolder
+                    if (holder != null) {
+                        stopRenderThread()
+                        currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
+                        startRenderThread(holder)
+                    } else {
+                        currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
+                    }
+                }
+            }
         }
 
         private fun startRenderThread(holder: SurfaceHolder) {
             stopRenderThread()
-            renderThread = GLRenderThread(holder, renderer, sceneManager).apply {
+            val renderer = currentRenderer ?: return
+            renderThread = GLRenderThread(holder, renderer).apply {
                 setVisible(isVisible)
                 start()
             }

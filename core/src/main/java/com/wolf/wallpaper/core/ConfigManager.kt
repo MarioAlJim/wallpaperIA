@@ -1,4 +1,4 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.core
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -17,7 +17,6 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_RAIN_SPEED = "rain_speed"
         const val KEY_LIGHTNING_COLOR_INDEX = "lightning_color_index"
         const val KEY_LIGHTNING_DURATION = "lightning_duration"
-        const val KEY_SHOW_BACKGROUND = "show_background" // Keep original key if desired, but index type is Int
         const val KEY_BACKGROUND_INDEX = "background_index"
         const val KEY_CLOUD_FLASH_FREQUENCY = "cloud_flash_frequency"
         const val KEY_CLOUD_FLASH_COLOR_INDEX = "cloud_flash_color_index"
@@ -25,6 +24,12 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_LIGHTNING_FLASH_ENABLED = "lightning_flash_enabled"
         const val KEY_CLOUD_FLASH_ENABLED = "cloud_flash_enabled"
         const val KEY_INTERACTIVE_LIGHTNING_ENABLED = "interactive_lightning_enabled"
+        
+        // New keys
+        const val KEY_ACTIVE_EFFECT = "active_effect"
+        const val KEY_SUN_SIZE = "sun_size"
+        const val KEY_SUN_SPEED = "sun_speed"
+        const val KEY_SUNNY_THEME = "sunny_theme"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -42,6 +47,12 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_LIGHTNING_FLASH_ENABLED = true
         const val DEFAULT_CLOUD_FLASH_ENABLED = true
         const val DEFAULT_INTERACTIVE_LIGHTNING_ENABLED = true
+        
+        // New defaults
+        const val DEFAULT_ACTIVE_EFFECT = 0
+        const val DEFAULT_SUN_SIZE = 50
+        const val DEFAULT_SUN_SPEED = 50
+        const val DEFAULT_SUNNY_THEME = 0
     }
 
     override fun getCloudDensity(): Int {
@@ -170,5 +181,38 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setInteractiveLightningEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_INTERACTIVE_LIGHTNING_ENABLED, enabled).apply()
+    }
+
+    // New configuration methods
+    override fun getActiveEffect(): Int {
+        return prefs.getInt(KEY_ACTIVE_EFFECT, DEFAULT_ACTIVE_EFFECT)
+    }
+
+    fun setActiveEffect(effect: Int) {
+        prefs.edit().putInt(KEY_ACTIVE_EFFECT, effect.coerceIn(0, 1)).apply()
+    }
+
+    override fun getSunSize(): Int {
+        return prefs.getInt(KEY_SUN_SIZE, DEFAULT_SUN_SIZE)
+    }
+
+    fun setSunSize(size: Int) {
+        prefs.edit().putInt(KEY_SUN_SIZE, size.coerceIn(0, 100)).apply()
+    }
+
+    override fun getSunSpeed(): Int {
+        return prefs.getInt(KEY_SUN_SPEED, DEFAULT_SUN_SPEED)
+    }
+
+    fun setSunSpeed(speed: Int) {
+        prefs.edit().putInt(KEY_SUN_SPEED, speed.coerceIn(0, 100)).apply()
+    }
+
+    override fun getSunnyTheme(): Int {
+        return prefs.getInt(KEY_SUNNY_THEME, DEFAULT_SUNNY_THEME)
+    }
+
+    fun setSunnyTheme(theme: Int) {
+        prefs.edit().putInt(KEY_SUNNY_THEME, theme.coerceIn(0, 2)).apply()
     }
 }

@@ -1,4 +1,4 @@
-package com.wolf.wallpaper
+package com.wolf.wallpaper.storm
 
 import kotlin.random.Random
 
