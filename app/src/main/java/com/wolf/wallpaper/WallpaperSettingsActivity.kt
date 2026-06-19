@@ -59,6 +59,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
 
     private lateinit var configManager: ConfigManager
 
+    private val pickImageLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        if (uri != null) {
+            saveCustomBackground(uri)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -231,12 +239,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         val backgroundModes = arrayOf(
-            "Color Oscuro (Original)",
-            "Fondo 1 (Montaña)",
-            "Fondo 2 (Valle)",
-            "Fondo 3 (Bosque)",
-            "Fondo 4 (Pico Rocoso)",
-            "Fondo 5 (Lago Nebloso)"
+            "Color Oscuro (Sin Imagen)",
+            "Montaña",
+            "Valle",
+            "Bosque",
+            "Pico Rocoso",
+            "Lago Nebloso",
+            "Picos y Pinos",
+            "Acantilado Costero",
+            "Imagen de la Galería"
         )
         setupDropdown(
             R.id.spinnerBackgroundMode,
@@ -244,7 +255,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.getBackgroundIndex()
         ) { position ->
             configManager.setBackgroundIndex(position)
+            updateCustomBackgroundViewsVisibility(position)
         }
+
+        findViewById<Button>(R.id.btnSelectCustomBg)?.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
+
+        updateCustomBackgroundViewsVisibility(configManager.getBackgroundIndex())
 
         // 4c. Setup Sunny Controls
         setupSlider(
@@ -338,6 +356,49 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             cardLightning.visibility = View.GONE
             cardBackground.visibility = View.GONE
             cardSunny.visibility = View.VISIBLE
+        }
+    }
+
+    private fun saveCustomBackground(uri: android.net.Uri) {
+        try {
+            val inputStream = contentResolver.openInputStream(uri) ?: return
+            val outputFile = java.io.File(filesDir, "custom_background.png")
+            inputStream.use { input ->
+                java.io.FileOutputStream(outputFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            configManager.setBackgroundIndex(8)
+            updateCustomBackgroundViewsVisibility(8)
+            updateSummaries()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateCustomBackgroundViewsVisibility(position: Int) {
+        val btnSelect = findViewById<Button>(R.id.btnSelectCustomBg) ?: return
+        val tvStatus = findViewById<TextView>(R.id.tvCustomBgStatus) ?: return
+
+        val parentView = btnSelect.parent as? ViewGroup
+        if (parentView != null) {
+            TransitionManager.beginDelayedTransition(parentView, AutoTransition().apply {
+                duration = 200
+            })
+        }
+
+        if (position == 8) {
+            btnSelect.visibility = View.VISIBLE
+            tvStatus.visibility = View.VISIBLE
+            val file = java.io.File(filesDir, "custom_background.png")
+            if (file.exists()) {
+                tvStatus.text = "Imagen de galería cargada correctamente"
+            } else {
+                tvStatus.text = "Ninguna imagen seleccionada"
+            }
+        } else {
+            btnSelect.visibility = View.GONE
+            tvStatus.visibility = View.GONE
         }
     }
 
@@ -522,11 +583,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         // 4. Fondo summary
         val bgModeText = when (configManager.getBackgroundIndex()) {
             0 -> "Color Oscuro"
-            1 -> "Fondo 1"
-            2 -> "Fondo 2"
-            3 -> "Fondo 3"
-            4 -> "Fondo 4"
-            5 -> "Fondo 5"
+            1 -> "Montaña"
+            2 -> "Valle"
+            3 -> "Bosque"
+            4 -> "Pico Rocoso"
+            5 -> "Lago Nebloso"
+            6 -> "Picos y Pinos"
+            7 -> "Acantilado Costero"
+            8 -> "Imagen de la Galería"
             else -> "Color Oscuro"
         }
         summaryBackground.text = Html.fromHtml(

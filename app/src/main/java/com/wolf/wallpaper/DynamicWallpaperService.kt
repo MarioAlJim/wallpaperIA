@@ -90,6 +90,12 @@ class DynamicWallpaperService : WallpaperService() {
                         currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
                     }
                 }
+            } else if (key == ConfigManager.KEY_BACKGROUND_INDEX) {
+                val holder = currentHolder
+                if (holder != null) {
+                    stopRenderThread()
+                    startRenderThread(holder)
+                }
             }
         }
 

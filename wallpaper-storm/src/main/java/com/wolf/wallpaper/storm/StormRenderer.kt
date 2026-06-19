@@ -25,7 +25,7 @@ class StormRenderer(
     private val cloudTextures = mutableListOf<Int>()
     private var rainTexture = 0
     private val lightningTextures = mutableListOf<Int>()
-    private val backgroundTextures = IntArray(5)
+    private val backgroundTextures = IntArray(8)
     
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -35,7 +35,7 @@ class StormRenderer(
 
     // Aspect ratio and scaling
     private var aspectRatio = 1.0f
-    private val backgroundAspectRatios = FloatArray(5) { 1.0f }
+    private val backgroundAspectRatios = FloatArray(8) { 1.0f }
 
     // Buffers for geometric drawing
     private lateinit var fullscreenQuadBuffer: FloatBuffer
@@ -111,11 +111,15 @@ class StormRenderer(
         }
 
         // Load background textures
+        backgroundTextures.indices.forEach { backgroundTextures[it] = 0 }
         loadBackgroundTexture(context, 0, "background/background.jpg")
         loadBackgroundTexture(context, 1, "background/background_02.png")
         loadBackgroundTexture(context, 2, "background/background_03.png")
         loadBackgroundTexture(context, 3, "background/background_04.png")
         loadBackgroundTexture(context, 4, "background/background_05.png")
+        loadBackgroundTexture(context, 5, "background/background_06.png")
+        loadBackgroundTexture(context, 6, "background/background_07.png")
+        loadCustomBackgroundTexture(context, 7)
 
         // Screen quad coordinates (for full-screen flash using identity matrix)
         val fullscreenCoords = floatArrayOf(
@@ -618,6 +622,36 @@ class StormRenderer(
                     bitmap.recycle()
                     backgroundTextures[index] = textureIds[0]
                 }
+            }
+        } catch (e: Exception) {
+            GLES30.glDeleteTextures(1, textureIds, 0)
+            e.printStackTrace()
+        }
+    }
+
+    private fun loadCustomBackgroundTexture(context: Context, index: Int) {
+        val file = java.io.File(context.filesDir, "custom_background.png")
+        if (!file.exists()) return
+
+        val textureIds = IntArray(1)
+        GLES30.glGenTextures(1, textureIds, 0)
+        if (textureIds[0] == 0) return
+
+        val options = BitmapFactory.Options().apply {
+            inScaled = false
+        }
+        try {
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
+            if (bitmap != null) {
+                backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
+                GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
+                bitmap.recycle()
+                backgroundTextures[index] = textureIds[0]
             }
         } catch (e: Exception) {
             GLES30.glDeleteTextures(1, textureIds, 0)
