@@ -315,6 +315,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         ) { value ->
             configManager.setSunMoveSpeed(value)
         }
+        setupSunStationaryCards()
         updateSunMoveSpeedSliderVisibility(configManager.getSunPathDirection())
 
         val sunnyBackgrounds = arrayOf(
@@ -506,6 +507,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     private fun updateSunMoveSpeedSliderVisibility(direction: Int) {
         val layout = findViewById<View>(R.id.layoutSunMoveSpeed) ?: return
         val slider = findViewById<View>(R.id.seekBarSunMoveSpeed) ?: return
+        val stationaryLayout = findViewById<View>(R.id.layoutSunStationaryPosition) ?: return
+        val customLayout = findViewById<View>(R.id.layoutSunCustomXY)
         val parent = layout.parent as? ViewGroup
         if (parent != null) {
             TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
@@ -515,9 +518,88 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         if (direction == 2) { // Stationary
             layout.visibility = View.GONE
             slider.visibility = View.GONE
+            stationaryLayout.visibility = View.VISIBLE
+            customLayout?.visibility = if (configManager.getSunStationaryPosition() == 5) View.VISIBLE else View.GONE
         } else {
             layout.visibility = View.VISIBLE
             slider.visibility = View.VISIBLE
+            stationaryLayout.visibility = View.GONE
+            customLayout?.visibility = View.GONE
+        }
+    }
+
+    private fun setupSunStationaryCards() {
+        val cardTopLeft = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosTopLeft)
+        val cardTopRight = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosTopRight)
+        val cardCenter = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosCenter)
+        val cardLeft = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosLeft)
+        val cardRight = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosRight)
+        val cardCustom = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosCustom)
+
+        val cards = listOf(cardTopLeft, cardTopRight, cardCenter, cardLeft, cardRight, cardCustom)
+        val customLayout = findViewById<View>(R.id.layoutSunCustomXY)
+
+        fun updateCardSelection(selectedPosition: Int) {
+            cards.forEachIndexed { index, card ->
+                if (card != null) {
+                    if (index == selectedPosition) {
+                        card.strokeColor = android.graphics.Color.parseColor("#00E5FF")
+                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(android.graphics.Color.parseColor("#2D2D3D"))
+                    } else {
+                        card.strokeColor = android.graphics.Color.parseColor("#3A3A4A")
+                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(android.graphics.Color.parseColor("#21212A"))
+                    }
+                }
+            }
+            if (customLayout != null) {
+                val parent = customLayout.parent as? ViewGroup
+                if (parent != null) {
+                    TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
+                        duration = 200
+                    })
+                }
+                customLayout.visibility = if (selectedPosition == 5) View.VISIBLE else View.GONE
+            }
+        }
+
+        // Set initial selection
+        val initialPosition = configManager.getSunStationaryPosition()
+        updateCardSelection(initialPosition)
+
+        // Set click listeners
+        cards.forEachIndexed { index, card ->
+            card?.setOnClickListener {
+                configManager.setSunStationaryPosition(index)
+                updateCardSelection(index)
+                updateSummaries()
+            }
+        }
+
+        // Setup Custom X / Y sliders
+        val sliderX = findViewById<com.google.android.material.slider.Slider>(R.id.seekBarSunCustomX)
+        val textX = findViewById<TextView>(R.id.textViewSunCustomXValue)
+        val initialX = configManager.getSunCustomX()
+        sliderX?.value = initialX.toFloat()
+        textX?.text = "$initialX%"
+        sliderX?.addOnChangeListener { _, value, _ ->
+            val intVal = value.toInt()
+            configManager.setSunCustomX(intVal)
+            textX?.text = "$intVal%"
+            updateSummaries()
+        }
+
+        val sliderY = findViewById<com.google.android.material.slider.Slider>(R.id.seekBarSunCustomY)
+        val textY = findViewById<TextView>(R.id.textViewSunCustomYValue)
+        val initialY = configManager.getSunCustomY()
+        sliderY?.value = initialY.toFloat()
+        textY?.text = "$initialY%"
+        sliderY?.addOnChangeListener { _, value, _ ->
+            val intVal = value.toInt()
+            configManager.setSunCustomY(intVal)
+            textY?.text = "$intVal%"
+            updateSummaries()
         }
     }
 
@@ -750,7 +832,18 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val sunDirText = when (configManager.getSunPathDirection()) {
             0 -> "I-D"
             1 -> "D-I"
-            2 -> "Estático"
+            2 -> {
+                val posText = when (configManager.getSunStationaryPosition()) {
+                    0 -> "Sup. Izq."
+                    1 -> "Sup. Der."
+                    2 -> "Centro"
+                    3 -> "Borde Izq."
+                    4 -> "Borde Der."
+                    5 -> "Libre (${configManager.getSunCustomX()}, ${configManager.getSunCustomY()})"
+                    else -> "Centro"
+                }
+                "Fijo ($posText)"
+            }
             else -> "Estático"
         }
         val sunnyBgText = when (configManager.getSunnyBackgroundIndex()) {

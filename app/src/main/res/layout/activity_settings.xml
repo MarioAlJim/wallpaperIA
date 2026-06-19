@@ -1336,6 +1336,346 @@
                         android:value="50"
                         app:labelBehavior="gone" />
 
+                    <!-- Sun Stationary Position Section (Horizontal Cards List) -->
+                    <LinearLayout
+                        android:id="@+id/layoutSunStationaryPosition"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="12dp"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Posición del Sol (Estático)"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="none">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp">
+
+                                <!-- Card 0: Top Left -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosTopLeft"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    android:layout_marginEnd="10dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <View
+                                                android:layout_width="12dp"
+                                                android:layout_height="12dp"
+                                                android:background="@drawable/sun_circle"
+                                                android:layout_gravity="top|start"
+                                                android:layout_margin="6dp" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Sup. Izq."
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 1: Top Right -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosTopRight"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    android:layout_marginEnd="10dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <View
+                                                android:layout_width="12dp"
+                                                android:layout_height="12dp"
+                                                android:background="@drawable/sun_circle"
+                                                android:layout_gravity="top|end"
+                                                android:layout_margin="6dp" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Sup. Der."
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 2: Center -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosCenter"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    android:layout_marginEnd="10dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <View
+                                                android:layout_width="12dp"
+                                                android:layout_height="12dp"
+                                                android:background="@drawable/sun_circle"
+                                                android:layout_gravity="center" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Centro"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 3: Left Edge -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosLeft"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    android:layout_marginEnd="10dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <View
+                                                android:layout_width="12dp"
+                                                android:layout_height="12dp"
+                                                android:background="@drawable/sun_circle"
+                                                android:layout_gravity="center_vertical|start"
+                                                android:layout_marginStart="6dp" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Borde Izq."
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 4: Right Edge -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosRight"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    android:layout_marginEnd="10dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <View
+                                                android:layout_width="12dp"
+                                                android:layout_height="12dp"
+                                                android:background="@drawable/sun_circle"
+                                                android:layout_gravity="center_vertical|end"
+                                                android:layout_marginEnd="6dp" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Borde Der."
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 5: Custom (Personalizado) -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunPosCustom"
+                                    android:layout_width="92dp"
+                                    android:layout_height="115dp"
+                                    app:cardBackgroundColor="#21212A"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="#3A3A4A"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="8dp">
+                                        <FrameLayout
+                                            android:layout_width="48dp"
+                                            android:layout_height="64dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="6dp">
+                                            <TextView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="X, Y"
+                                                android:textColor="#FFC107"
+                                                android:textSize="14sp"
+                                                android:textStyle="bold"
+                                                android:layout_gravity="center" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Personalizado"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                            </LinearLayout>
+                        </HorizontalScrollView>
+
+                        <!-- Custom X/Y Sliders for Sun (Only visible when Custom card selected) -->
+                        <LinearLayout
+                            android:id="@+id/layoutSunCustomXY"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginTop="12dp"
+                            android:visibility="gone">
+
+                            <!-- Custom Sun X Slider -->
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Posición Horizontal (X)"
+                                    android:textColor="#E0E0E6"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                                <TextView
+                                    android:id="@+id/textViewSunCustomXValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="50%"
+                                    android:textColor="#9D9DA6"
+                                    android:textSize="13sp"
+                                    android:layout_alignParentEnd="true" />
+                            </RelativeLayout>
+
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/seekBarSunCustomX"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:valueFrom="0"
+                                android:valueTo="100"
+                                android:stepSize="1"
+                                android:value="50"
+                                app:labelBehavior="gone" />
+
+                            <!-- Custom Sun Y Slider -->
+                            <RelativeLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Posición Vertical (Y)"
+                                    android:textColor="#E0E0E6"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                                <TextView
+                                    android:id="@+id/textViewSunCustomYValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="74%"
+                                    android:textColor="#9D9DA6"
+                                    android:textSize="13sp"
+                                    android:layout_alignParentEnd="true" />
+                            </RelativeLayout>
+
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/seekBarSunCustomY"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:valueFrom="0"
+                                android:valueTo="100"
+                                android:stepSize="1"
+                                android:value="74"
+                                app:labelBehavior="gone" />
+                        </LinearLayout>
+                    </LinearLayout>
+
                     <!-- Sunny Background Dropdown -->
                     <TextView
                         android:layout_width="match_parent"

@@ -208,8 +208,40 @@ class SunnyRenderer(
             sunX = sunPathX
             sunY = 0.5f - 0.7f * (sunX * sunX)
         } else { // Stationary
-            sunX = 0.35f
-            sunY = 0.45f
+            when (configProvider.getSunStationaryPosition()) {
+                0 -> { // Top Left (Esquina superior izquierda)
+                    sunX = -1.0f
+                    sunY = 1.0f / aspectRatio
+                }
+                1 -> { // Top Right (Esquina superior derecha)
+                    sunX = 1.0f
+                    sunY = 1.0f / aspectRatio
+                }
+                3 -> { // Left Edge (Borde izquierdo)
+                    sunX = -0.8f
+                    sunY = 0.25f
+                }
+                4 -> { // Right Edge (Borde derecho)
+                    sunX = 0.8f
+                    sunY = 0.25f
+                }
+                2 -> { // Center (Enmedio)
+                    sunX = 0.0f
+                    sunY = 0.45f
+                }
+                5 -> { // Custom / Free Position (Personalizado)
+                    val customXVal = configProvider.getSunCustomX()
+                    val customYVal = configProvider.getSunCustomY()
+                    sunX = -1.0f + (customXVal / 100f) * 2.0f
+                    val minY = -0.8f
+                    val maxY = 1.0f / aspectRatio
+                    sunY = minY + (customYVal / 100f) * (maxY - minY)
+                }
+                else -> { // Default / Center
+                    sunX = 0.0f
+                    sunY = 0.45f
+                }
+            }
         }
         
         // Clamp sunPathX to valid boundaries if switching directions dynamically
