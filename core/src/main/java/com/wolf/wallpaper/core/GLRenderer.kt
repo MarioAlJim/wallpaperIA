@@ -6,4 +6,5 @@ interface GLRenderer {
     fun onUpdate(deltaTime: Float)
     fun onDrawFrame()
     fun onTouchEvent(x: Float, y: Float) {}
+    fun onOffsetsChanged(xOffset: Float, yOffset: Float) {}
 }

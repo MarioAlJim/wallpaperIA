@@ -16,6 +16,8 @@ class GLRenderThread(
     @Volatile private var height = 0
     @Volatile private var surfaceChanged = false
     @Volatile private var pendingTouch: Pair<Float, Float>? = null
+    @Volatile private var xOffset = 0.5f
+    @Volatile private var yOffset = 0.5f
 
     fun setVisible(visible: Boolean) {
         synchronized(lock) {
@@ -36,6 +38,14 @@ class GLRenderThread(
     fun queueTouch(x: Float, y: Float) {
         synchronized(lock) {
             pendingTouch = Pair(x, y)
+            lock.notifyAll()
+        }
+    }
+
+    fun queueOffsets(xOffset: Float, yOffset: Float) {
+        synchronized(lock) {
+            this.xOffset = xOffset
+            this.yOffset = yOffset
             lock.notifyAll()
         }
     }
@@ -104,6 +114,14 @@ class GLRenderThread(
                     pendingTouch = null
                     renderer.onTouchEvent(touch.first, touch.second)
                 }
+
+                var localXOffset = 0.5f
+                var localYOffset = 0.5f
+                synchronized(lock) {
+                    localXOffset = xOffset
+                    localYOffset = yOffset
+                }
+                renderer.onOffsetsChanged(localXOffset, localYOffset)
 
                 val currentTime = System.nanoTime()
                 val deltaTime = (currentTime - lastTime) / 1_000_000_000f

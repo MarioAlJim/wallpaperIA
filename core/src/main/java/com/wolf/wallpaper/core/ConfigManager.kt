@@ -36,6 +36,12 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUN_STATIONARY_POSITION = "sun_stationary_position"
         const val KEY_SUN_CUSTOM_X = "sun_custom_x"
         const val KEY_SUN_CUSTOM_Y = "sun_custom_y"
+        const val KEY_SUNNY_CUSTOM_SKY_TOP_COLOR = "sunny_custom_sky_top_color"
+        const val KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = "sunny_custom_sky_bottom_color"
+        const val KEY_SUNNY_GOD_RAYS_ENABLED = "sunny_god_rays_enabled"
+        const val KEY_SUNNY_GOD_RAYS_INTENSITY = "sunny_god_rays_intensity"
+        const val KEY_SUNNY_LENS_FLARE_ENABLED = "sunny_lens_flare_enabled"
+        const val KEY_SUNNY_LENS_FLARE_INTENSITY = "sunny_lens_flare_intensity"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -65,6 +71,12 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUN_STATIONARY_POSITION = 2
         const val DEFAULT_SUN_CUSTOM_X = 50
         const val DEFAULT_SUN_CUSTOM_Y = 74
+        const val DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR = 0xFF1A0D40.toInt()
+        const val DEFAULT_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = 0xFFF2731A.toInt()
+        const val DEFAULT_SUNNY_GOD_RAYS_ENABLED = true
+        const val DEFAULT_SUNNY_GOD_RAYS_INTENSITY = 50
+        const val DEFAULT_SUNNY_LENS_FLARE_ENABLED = true
+        const val DEFAULT_SUNNY_LENS_FLARE_INTENSITY = 50
     }
 
     override fun getCloudDensity(): Int {
@@ -225,7 +237,7 @@ class ConfigManager(context: Context) : ConfigProvider {
     }
 
     fun setSunnyTheme(theme: Int) {
-        prefs.edit().putInt(KEY_SUNNY_THEME, theme.coerceIn(0, 2)).apply()
+        prefs.edit().putInt(KEY_SUNNY_THEME, theme.coerceIn(0, 3)).apply()
     }
 
     override fun getSunPathDirection(): Int {
@@ -233,7 +245,7 @@ class ConfigManager(context: Context) : ConfigProvider {
     }
 
     fun setSunPathDirection(direction: Int) {
-        prefs.edit().putInt(KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 2)).apply()
+        prefs.edit().putInt(KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 3)).apply()
     }
 
     override fun getSunMoveSpeed(): Int {
@@ -274,5 +286,53 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setSunCustomY(y: Int) {
         prefs.edit().putInt(KEY_SUN_CUSTOM_Y, y.coerceIn(0, 100)).apply()
+    }
+
+    override fun getSunnyCustomSkyTopColor(): Int {
+        return prefs.getInt(KEY_SUNNY_CUSTOM_SKY_TOP_COLOR, DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR)
+    }
+
+    fun setSunnyCustomSkyTopColor(color: Int) {
+        prefs.edit().putInt(KEY_SUNNY_CUSTOM_SKY_TOP_COLOR, color).apply()
+    }
+
+    override fun getSunnyCustomSkyBottomColor(): Int {
+        return prefs.getInt(KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR, DEFAULT_SUNNY_CUSTOM_SKY_BOTTOM_COLOR)
+    }
+
+    fun setSunnyCustomSkyBottomColor(color: Int) {
+        prefs.edit().putInt(KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR, color).apply()
+    }
+
+    override fun isSunnyGodRaysEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SUNNY_GOD_RAYS_ENABLED, DEFAULT_SUNNY_GOD_RAYS_ENABLED)
+    }
+
+    fun setSunnyGodRaysEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SUNNY_GOD_RAYS_ENABLED, enabled).apply()
+    }
+
+    override fun getSunnyGodRaysIntensity(): Int {
+        return prefs.getInt(KEY_SUNNY_GOD_RAYS_INTENSITY, DEFAULT_SUNNY_GOD_RAYS_INTENSITY)
+    }
+
+    fun setSunnyGodRaysIntensity(intensity: Int) {
+        prefs.edit().putInt(KEY_SUNNY_GOD_RAYS_INTENSITY, intensity.coerceIn(0, 100)).apply()
+    }
+
+    override fun isSunnyLensFlareEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SUNNY_LENS_FLARE_ENABLED, DEFAULT_SUNNY_LENS_FLARE_ENABLED)
+    }
+
+    fun setSunnyLensFlareEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SUNNY_LENS_FLARE_ENABLED, enabled).apply()
+    }
+
+    override fun getSunnyLensFlareIntensity(): Int {
+        return prefs.getInt(KEY_SUNNY_LENS_FLARE_INTENSITY, DEFAULT_SUNNY_LENS_FLARE_INTENSITY)
+    }
+
+    fun setSunnyLensFlareIntensity(intensity: Int) {
+        prefs.edit().putInt(KEY_SUNNY_LENS_FLARE_INTENSITY, intensity.coerceIn(0, 100)).apply()
     }
 }

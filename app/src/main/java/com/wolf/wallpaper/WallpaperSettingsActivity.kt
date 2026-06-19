@@ -16,6 +16,10 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import android.widget.EditText
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.content.res.ColorStateList
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.google.android.material.tabs.TabLayout
@@ -289,24 +293,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setSunSpeed(value)
         }
 
-        val sunnyThemes = arrayOf("Mediodía Celeste", "Atardecer Dorado", "Anochecer Púrpura")
-        setupDropdown(
-            R.id.spinnerSunnyTheme,
-            sunnyThemes,
-            configManager.getSunnyTheme()
-        ) { position ->
-            configManager.setSunnyTheme(position)
-        }
+        setupSunnyThemeCards()
 
-        val sunDirections = arrayOf("De Izquierda a Derecha", "De Derecha a Izquierda", "Estático")
-        setupDropdown(
-            R.id.spinnerSunPathDirection,
-            sunDirections,
-            configManager.getSunPathDirection()
-        ) { position ->
-            configManager.setSunPathDirection(position)
-            updateSunMoveSpeedSliderVisibility(position)
-        }
+        setupSunDirectionCards()
 
         setupSlider(
             R.id.seekBarSunMoveSpeed,
@@ -341,6 +330,48 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             pickSunnyImageLauncher.launch("image/*")
         }
         updateCustomSunnyBackgroundViewsVisibility(configManager.getSunnyBackgroundIndex())
+
+        // Setup Sunny God Rays
+        val switchSunnyGodRays = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchSunnyGodRays)
+        val layoutSunnyGodRaysIntensity = findViewById<android.view.View>(R.id.layoutSunnyGodRaysIntensity)
+        if (switchSunnyGodRays != null) {
+            val isEnabled = configManager.isSunnyGodRaysEnabled()
+            switchSunnyGodRays.isChecked = isEnabled
+            layoutSunnyGodRaysIntensity?.visibility = if (isEnabled) android.view.View.VISIBLE else android.view.View.GONE
+            switchSunnyGodRays.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setSunnyGodRaysEnabled(isChecked)
+                layoutSunnyGodRaysIntensity?.visibility = if (isChecked) android.view.View.VISIBLE else android.view.View.GONE
+                updateSummaries()
+            }
+        }
+        setupSlider(
+            R.id.seekBarSunnyGodRaysIntensity,
+            R.id.textViewSunnyGodRaysIntensityValue,
+            configManager.getSunnyGodRaysIntensity()
+        ) { value ->
+            configManager.setSunnyGodRaysIntensity(value)
+        }
+
+        // Setup Sunny Lens Flare
+        val switchSunnyLensFlare = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchSunnyLensFlare)
+        val layoutSunnyLensFlareIntensity = findViewById<android.view.View>(R.id.layoutSunnyLensFlareIntensity)
+        if (switchSunnyLensFlare != null) {
+            val isEnabled = configManager.isSunnyLensFlareEnabled()
+            switchSunnyLensFlare.isChecked = isEnabled
+            layoutSunnyLensFlareIntensity?.visibility = if (isEnabled) android.view.View.VISIBLE else android.view.View.GONE
+            switchSunnyLensFlare.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setSunnyLensFlareEnabled(isChecked)
+                layoutSunnyLensFlareIntensity?.visibility = if (isChecked) android.view.View.VISIBLE else android.view.View.GONE
+                updateSummaries()
+            }
+        }
+        setupSlider(
+            R.id.seekBarSunnyLensFlareIntensity,
+            R.id.textViewSunnyLensFlareIntensityValue,
+            configManager.getSunnyLensFlareIntensity()
+        ) { value ->
+            configManager.setSunnyLensFlareIntensity(value)
+        }
 
         // 4d. Setup TabLayout Weather Selector
         val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
@@ -528,6 +559,45 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSunDirectionCards() {
+        val cardL2R = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunDirL2R)
+        val cardR2L = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunDirR2L)
+        val cardStationary = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunDirStationary)
+        val cardRandom = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunDirRandom)
+
+        val cards = listOf(cardL2R, cardR2L, cardStationary, cardRandom)
+
+        fun updateCardSelection(selectedDir: Int) {
+            cards.forEachIndexed { index, card ->
+                if (card != null) {
+                    if (index == selectedDir) {
+                        card.strokeColor = Color.parseColor("#00E5FF")
+                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    } else {
+                        card.strokeColor = Color.parseColor("#3A3A4A")
+                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    }
+                }
+            }
+            updateSunMoveSpeedSliderVisibility(selectedDir)
+        }
+
+        // Set initial selection
+        val initialDir = configManager.getSunPathDirection()
+        updateCardSelection(initialDir)
+
+        // Set click listeners
+        cards.forEachIndexed { index, card ->
+            card?.setOnClickListener {
+                configManager.setSunPathDirection(index)
+                updateCardSelection(index)
+                updateSummaries()
+            }
+        }
+    }
+
     private fun setupSunStationaryCards() {
         val cardTopLeft = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosTopLeft)
         val cardTopRight = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunPosTopRight)
@@ -601,6 +671,235 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             textY?.text = "$intVal%"
             updateSummaries()
         }
+    }
+
+    private fun setCardGradientPreview(view: View?, topColor: Int, bottomColor: Int) {
+        view ?: return
+        val drawable = GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            intArrayOf(topColor, bottomColor)
+        ).apply {
+            cornerRadius = 8 * resources.displayMetrics.density
+        }
+        view.background = drawable
+    }
+
+    private fun setCircleColorPreview(view: View?, color: Int) {
+        view ?: return
+        val drawable = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(color)
+        }
+        view.background = drawable
+    }
+
+    private fun setupSunnyThemeCards() {
+        val cardNoon = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunnyThemeNoon)
+        val cardSunset = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunnyThemeSunset)
+        val cardDusk = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunnyThemeDusk)
+        val cardCustom = findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardSunnyThemeCustom)
+
+        val cards = listOf(cardNoon, cardSunset, cardDusk, cardCustom)
+        val customLayout = findViewById<View>(R.id.layoutSunnyCustomGradient)
+
+        // Set static preview gradients for the 3 presets
+        setCardGradientPreview(findViewById(R.id.viewThemeNoonPreview), 0xFF0566D9.toInt(), 0xFF8DCCEF.toInt())
+        setCardGradientPreview(findViewById(R.id.viewThemeSunsetPreview), 0xFF1A0D40.toInt(), 0xFFF2731A.toInt())
+        setCardGradientPreview(findViewById(R.id.viewThemeDuskPreview), 0xFF261A59.toInt(), 0xFFE6808C.toInt())
+
+        fun updateThemeSelection(selectedTheme: Int) {
+            cards.forEachIndexed { index, card ->
+                if (card != null) {
+                    if (index == selectedTheme) {
+                        card.strokeColor = Color.parseColor("#00E5FF")
+                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    } else {
+                        card.strokeColor = Color.parseColor("#3A3A4A")
+                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                        card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    }
+                }
+            }
+            if (customLayout != null) {
+                val parent = customLayout.parent as? ViewGroup
+                if (parent != null) {
+                    TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
+                        duration = 200
+                    })
+                }
+                customLayout.visibility = if (selectedTheme == 3) View.VISIBLE else View.GONE
+            }
+            updateSunnyThemePreviews()
+        }
+
+        // Set initial theme selection
+        val initialTheme = configManager.getSunnyTheme()
+        updateThemeSelection(initialTheme)
+
+        // Set click listeners for the theme cards
+        cards.forEachIndexed { index, card ->
+            card?.setOnClickListener {
+                configManager.setSunnyTheme(index)
+                updateThemeSelection(index)
+                updateSummaries()
+            }
+        }
+
+        // Set click listeners for custom color picker buttons
+        findViewById<View>(R.id.btnCustomSkyTopColor)?.setOnClickListener {
+            showColorPickerDialog(true)
+        }
+        findViewById<View>(R.id.btnCustomSkyBottomColor)?.setOnClickListener {
+            showColorPickerDialog(false)
+        }
+    }
+
+    private fun updateSunnyThemePreviews() {
+        val top = configManager.getSunnyCustomSkyTopColor()
+        val bottom = configManager.getSunnyCustomSkyBottomColor()
+        
+        // Custom preview card gradient
+        setCardGradientPreview(findViewById(R.id.viewThemeCustomPreview), top, bottom)
+        
+        // Circle color pickers previews
+        setCircleColorPreview(findViewById(R.id.viewCustomSkyTopColorPreview), top)
+        setCircleColorPreview(findViewById(R.id.viewCustomSkyBottomColorPreview), bottom)
+        
+        // Hex text codes
+        findViewById<TextView>(R.id.textViewCustomSkyTopColorCode)?.text = String.format("#%06X", 0xFFFFFF and top)
+        findViewById<TextView>(R.id.textViewCustomSkyBottomColorCode)?.text = String.format("#%06X", 0xFFFFFF and bottom)
+    }
+
+    private fun showColorPickerDialog(isTopColor: Boolean) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
+        
+        val previewView = dialogView.findViewById<View>(R.id.dialogColorPreview)
+        val hexInput = dialogView.findViewById<EditText>(R.id.dialogColorHexInput)
+        
+        val sliderR = dialogView.findViewById<Slider>(R.id.sliderR)
+        val sliderG = dialogView.findViewById<Slider>(R.id.sliderG)
+        val sliderB = dialogView.findViewById<Slider>(R.id.sliderB)
+        
+        val labelR = dialogView.findViewById<TextView>(R.id.labelR)
+        val labelG = dialogView.findViewById<TextView>(R.id.labelG)
+        val labelB = dialogView.findViewById<TextView>(R.id.labelB)
+        
+        val initialColor = if (isTopColor) {
+            configManager.getSunnyCustomSkyTopColor()
+        } else {
+            configManager.getSunnyCustomSkyBottomColor()
+        }
+        
+        var currentColor = initialColor
+        
+        fun updateDialogColor(color: Int, updateHexText: Boolean = true, updateSliders: Boolean = true) {
+            currentColor = color
+            
+            val previewDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+            }
+            previewView?.background = previewDrawable
+            
+            val r = Color.red(color)
+            val g = Color.green(color)
+            val b = Color.blue(color)
+            
+            if (updateHexText) {
+                val hexStr = String.format("#%06X", 0xFFFFFF and color)
+                hexInput?.setText(hexStr)
+            }
+            
+            if (updateSliders) {
+                sliderR?.value = r.toFloat()
+                sliderG?.value = g.toFloat()
+                sliderB?.value = b.toFloat()
+            }
+            
+            labelR?.text = "R: $r"
+            labelG?.text = "G: $g"
+            labelB?.text = "B: $b"
+        }
+        
+        val sliderListener = {
+            val r = sliderR?.value?.toInt() ?: 0
+            val g = sliderG?.value?.toInt() ?: 0
+            val b = sliderB?.value?.toInt() ?: 0
+            val color = Color.rgb(r, g, b)
+            updateDialogColor(color, updateHexText = true, updateSliders = false)
+        }
+        
+        sliderR?.addOnChangeListener { _, _, _ -> sliderListener() }
+        sliderG?.addOnChangeListener { _, _, _ -> sliderListener() }
+        sliderB?.addOnChangeListener { _, _, _ -> sliderListener() }
+        
+        hexInput?.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val str = s?.toString() ?: ""
+                if (str.length == 7 && str.startsWith("#")) {
+                    try {
+                        val parsed = Color.parseColor(str)
+                        updateDialogColor(parsed, updateHexText = false, updateSliders = true)
+                    } catch (e: Exception) {
+                        // Ignore
+                    }
+                }
+            }
+        })
+        
+        val presets = intArrayOf(
+            0xFF0566D9.toInt(),
+            0xFF8DCCEF.toInt(),
+            0xFF1A0D40.toInt(),
+            0xFFF2731A.toInt(),
+            0xFFE6808C.toInt(),
+            0xFF261A59.toInt(),
+            0xFFE53935.toInt(),
+            0xFF8E24AA.toInt(),
+            0xFF00ACC1.toInt(),
+            0xFF43A047.toInt(),
+            0xFFFFB300.toInt(),
+            0xFFFFFFFF.toInt()
+        )
+        
+        for (i in 0..11) {
+            val presetId = resources.getIdentifier("presetColor$i", "id", packageName)
+            val presetView = dialogView.findViewById<View>(presetId)
+            if (presetView != null) {
+                val circle = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(presets[i])
+                    setStroke(
+                        (1 * resources.displayMetrics.density).toInt(),
+                        Color.parseColor("#3A3A4A")
+                    )
+                }
+                presetView.background = circle
+                presetView.setOnClickListener {
+                    updateDialogColor(presets[i], updateHexText = true, updateSliders = true)
+                }
+            }
+        }
+        
+        updateDialogColor(initialColor, updateHexText = true, updateSliders = true)
+        
+        val builder = com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setPositiveButton("Aceptar") { _, _ ->
+                if (isTopColor) {
+                    configManager.setSunnyCustomSkyTopColor(currentColor)
+                } else {
+                    configManager.setSunnyCustomSkyBottomColor(currentColor)
+                }
+                updateSunnyThemePreviews()
+                updateSummaries()
+            }
+            .setNegativeButton("Cancelar", null)
+            
+        builder.show()
     }
 
     private fun setupDropdown(
@@ -827,11 +1126,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             0 -> "Celeste"
             1 -> "Dorado"
             2 -> "Púrpura"
+            3 -> "Personalizado"
             else -> "Celeste"
         }
         val sunDirText = when (configManager.getSunPathDirection()) {
-            0 -> "I-D"
-            1 -> "D-I"
+            0 -> "Izq a Der"
+            1 -> "Der a Izq"
+            3 -> "Aleatorio"
             2 -> {
                 val posText = when (configManager.getSunStationaryPosition()) {
                     0 -> "Sup. Izq."
@@ -857,8 +1158,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             7 -> "Galería"
             else -> "Degradado"
         }
+        val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) "Activo" else "Inactivo"
+        val lensFlareStatus = if (configManager.isSunnyLensFlareEnabled()) "Activo" else "Inactivo"
         summarySunny.text = Html.fromHtml(
-            "Tema: <font color='$accentColor'>$sunnyThemeText</font> • Sol: <font color='$accentColor'>$sunDirText</font> • Fondo: <font color='$accentColor'>$sunnyBgText</font>",
+            "Tema: <font color='$accentColor'>$sunnyThemeText</font> • Sol: <font color='$accentColor'>$sunDirText</font> • Fondo: <font color='$accentColor'>$sunnyBgText</font><br/>Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
     }

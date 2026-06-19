@@ -1243,25 +1243,265 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp">
+
+                            <!-- Card 0: Noon Blue -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunnyThemeNoon"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <View
+                                        android:id="@+id/viewThemeNoonPreview"
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:layout_marginBottom="6dp" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Celeste"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 1: Sunset Orange -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunnyThemeSunset"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <View
+                                        android:id="@+id/viewThemeSunsetPreview"
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:layout_marginBottom="6dp" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Atardecer"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 2: Purple Dusk -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunnyThemeDusk"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <View
+                                        android:id="@+id/viewThemeDuskPreview"
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:layout_marginBottom="6dp" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Anochecer"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 3: Custom Gradient -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunnyThemeCustom"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <View
+                                        android:id="@+id/viewThemeCustomPreview"
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:layout_marginBottom="6dp" />
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Personalizado"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
+
+                    <!-- Collapsible Custom Gradient Color Selectors -->
+                    <LinearLayout
+                        android:id="@+id/layoutSunnyCustomGradient"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
                         android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
-                            android:id="@+id/spinnerSunnyTheme"
+                        android:visibility="gone">
+
+                        <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:text="Colores del Degradado"
+                            android:textColor="#6C6C75"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:weightSum="2">
+
+                            <!-- Top Color Selection Button -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/btnCustomSkyTopColor"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginEnd="6dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="10dp">
+                                    <View
+                                        android:id="@+id/viewCustomSkyTopColorPreview"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginEnd="8dp" />
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Superior"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:textStyle="bold" />
+                                        <TextView
+                                            android:id="@+id/textViewCustomSkyTopColorCode"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="#1A0D40"
+                                            android:textColor="#6C6C75"
+                                            android:textSize="10sp" />
+                                    </LinearLayout>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Bottom Color Selection Button -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/btnCustomSkyBottomColor"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:layout_marginStart="6dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="10dp">
+                                    <View
+                                        android:id="@+id/viewCustomSkyBottomColorPreview"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginEnd="8dp" />
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Inferior"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="11sp"
+                                            android:textStyle="bold" />
+                                        <TextView
+                                            android:id="@+id/textViewCustomSkyBottomColorCode"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="#F2731A"
+                                            android:textColor="#6C6C75"
+                                            android:textSize="10sp" />
+                                    </LinearLayout>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -1282,25 +1522,181 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
-                            android:id="@+id/spinnerSunPathDirection"
-                            android:layout_width="match_parent"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp">
+
+                            <!-- Card 0: Left to Right -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunDirL2R"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <FrameLayout
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:background="@drawable/mini_screen_bg"
+                                        android:layout_marginBottom="6dp">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="→"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="24sp"
+                                            android:textStyle="bold"
+                                            android:layout_gravity="center" />
+                                    </FrameLayout>
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Izq a Der"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 1: Right to Left -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunDirR2L"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <FrameLayout
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:background="@drawable/mini_screen_bg"
+                                        android:layout_marginBottom="6dp">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="←"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="24sp"
+                                            android:textStyle="bold"
+                                            android:layout_gravity="center" />
+                                    </FrameLayout>
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Der a Izq"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 2: Stationary -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunDirStationary"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <FrameLayout
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:background="@drawable/mini_screen_bg"
+                                        android:layout_marginBottom="6dp">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="●"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="22sp"
+                                            android:layout_gravity="center" />
+                                    </FrameLayout>
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Estático"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Card 3: Random -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardSunDirRandom"
+                                android:layout_width="92dp"
+                                android:layout_height="115dp"
+                                android:layout_marginEnd="10dp"
+                                app:cardBackgroundColor="#21212A"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="#3A3A4A"
+                                app:strokeWidth="1dp">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:orientation="vertical"
+                                    android:gravity="center"
+                                    android:padding="8dp">
+                                    <FrameLayout
+                                        android:layout_width="48dp"
+                                        android:layout_height="64dp"
+                                        android:background="@drawable/mini_screen_bg"
+                                        android:layout_marginBottom="6dp">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="🎲"
+                                            android:textColor="#E0E0E6"
+                                            android:textSize="22sp"
+                                            android:layout_gravity="center" />
+                                    </FrameLayout>
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Aleatorio"
+                                        android:textColor="#E0E0E6"
+                                        android:textSize="11sp"
+                                        android:gravity="center" />
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+
+                        </LinearLayout>
+                    </HorizontalScrollView>
 
                     <!-- Sun Move Speed Slider -->
                     <RelativeLayout
@@ -1731,6 +2127,164 @@
                         android:textSize="12sp"
                         android:gravity="center"
                         android:visibility="gone" />
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#2E2E33"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Section Title: Advanced Effects -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Efectos Visuales Avanzados (Sol Bajo)"
+                        android:textColor="#F2731A"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- God Rays Switch -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Haces de Luz (God Rays)"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyGodRays"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="true" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Genera haces de luz desde detrás del fondo y las nubes cuando el sol está bajo."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- God Rays Intensity Slider (Collapsible) -->
+                    <LinearLayout
+                        android:id="@+id/layoutSunnyGodRaysIntensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Intensidad de Rayos"
+                                android:textColor="#E0E0E6"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/textViewSunnyGodRaysIntensityValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="50%"
+                                android:textColor="#9D9DA6"
+                                android:textSize="13sp"
+                                android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekBarSunnyGodRaysIntensity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="0"
+                            android:valueTo="100"
+                            android:stepSize="1"
+                            android:value="50"
+                            app:labelBehavior="gone" />
+                    </LinearLayout>
+
+                    <!-- Lens Flare Switch -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Destellos de Lente (Lens Flare)"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyLensFlare"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="true" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Añade reflejos dinámicos que se mueven en dirección opuesta al sol cuando deslizas el launcher."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp" />
+
+                    <!-- Lens Flare Intensity Slider (Collapsible) -->
+                    <LinearLayout
+                        android:id="@+id/layoutSunnyLensFlareIntensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="12dp">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Intensidad de Destellos"
+                                android:textColor="#E0E0E6"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/textViewSunnyLensFlareIntensityValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="50%"
+                                android:textColor="#9D9DA6"
+                                android:textSize="13sp"
+                                android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekBarSunnyLensFlareIntensity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="0"
+                            android:valueTo="100"
+                            android:stepSize="1"
+                            android:value="50"
+                            app:labelBehavior="gone" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </LinearLayout>

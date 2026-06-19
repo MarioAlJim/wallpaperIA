@@ -39,11 +39,51 @@ class DynamicWallpaperService : WallpaperService() {
                 .registerOnSharedPreferenceChangeListener(this)
         }
 
+        private var isDragging = false
+        private var startX = 0f
+        private var virtualXOffset = 0.5f
+        private var startOffset = 0.5f
+
         override fun onTouchEvent(event: MotionEvent?) {
             super.onTouchEvent(event)
-            if (event != null && event.action == MotionEvent.ACTION_DOWN) {
-                renderThread?.queueTouch(event.x, event.y)
+            if (event != null) {
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        isDragging = true
+                        startX = event.x
+                        startOffset = virtualXOffset
+                        renderThread?.queueTouch(event.x, event.y)
+                    }
+                    MotionEvent.ACTION_MOVE -> {
+                        if (isDragging) {
+                            val diffX = event.x - startX
+                            val screenWidth = currentWidth.toFloat()
+                            if (screenWidth > 0f) {
+                                val deltaOffset = -diffX / screenWidth
+                                virtualXOffset = (startOffset + deltaOffset).coerceIn(0f, 1f)
+                                renderThread?.queueOffsets(virtualXOffset, 0.5f)
+                            }
+                        }
+                    }
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                        isDragging = false
+                    }
+                }
             }
+        }
+
+        override fun onOffsetsChanged(
+            xOffset: Float,
+            yOffset: Float,
+            xStep: Float,
+            yStep: Float,
+            xPixels: Int,
+            yPixels: Int
+        ) {
+            super.onOffsetsChanged(xOffset, yOffset, xStep, yStep, xPixels, yPixels)
+            val clampedX = xOffset.coerceIn(0f, 1f)
+            virtualXOffset = clampedX // Keep touch simulation state synchronized with launcher state
+            renderThread?.queueOffsets(clampedX, yOffset)
         }
 
         override fun onDestroy() {

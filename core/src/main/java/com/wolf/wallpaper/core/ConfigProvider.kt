@@ -29,4 +29,12 @@ interface ConfigProvider {
     fun getSunStationaryPosition(): Int // 0: Top Left, 1: Top Right, 2: Center, 3: Left Edge, 4: Right Edge
     fun getSunCustomX(): Int // 0-100
     fun getSunCustomY(): Int // 0-100
+    fun getSunnyCustomSkyTopColor(): Int
+    fun getSunnyCustomSkyBottomColor(): Int
+    
+    fun isSunnyGodRaysEnabled(): Boolean
+    fun getSunnyGodRaysIntensity(): Int // 0-100
+    fun isSunnyLensFlareEnabled(): Boolean
+    fun getSunnyLensFlareIntensity(): Int // 0-100
 }
+

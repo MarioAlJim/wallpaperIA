@@ -9,6 +9,8 @@ uniform int uTheme;
 uniform vec2 uSunPos;
 uniform float uAspectRatio;
 uniform int uIsCustom; // 1 if custom image, 0 if asset image
+uniform vec3 uSkyTop;
+uniform vec3 uSkyBottom;
 
 out vec4 fragColor;
 
@@ -51,10 +53,17 @@ void main() {
         fgColor = vec3(0.18, 0.04, 0.10);       // Deep warm plum/burgundy
         bgColor = vec3(0.55, 0.20, 0.12);       // Warm terracotta/orange
         highlightColor = vec3(1.0, 0.70, 0.25);  // Golden orange sun highlight
-    } else { // Purple Dusk (Theme 2)
+    } else if (uTheme == 2) { // Purple Dusk (Theme 2)
         fgColor = vec3(0.12, 0.06, 0.20);       // Deep indigo/violet
         bgColor = vec3(0.50, 0.28, 0.44);       // Soft misty mauve/pink
         highlightColor = vec3(1.0, 0.75, 0.85);  // Pale lavender-pink sun highlight
+    } else { // Custom (Theme 3)
+        // Silhouette foreground: very dark, slightly tinted with sky bottom color
+        fgColor = mix(uSkyBottom * 0.12, vec3(0.04, 0.04, 0.06), 0.4);
+        // Silhouette background/haze: desaturated, darkened bottom sky color
+        bgColor = mix(uSkyBottom, vec3(0.25, 0.25, 0.3), 0.35) * 0.65;
+        // Glare highlight: blend warm white-yellow with sky bottom color
+        highlightColor = mix(vec3(1.0, 0.95, 0.82), uSkyBottom, 0.4);
     }
     
     vec3 finalHillColor;

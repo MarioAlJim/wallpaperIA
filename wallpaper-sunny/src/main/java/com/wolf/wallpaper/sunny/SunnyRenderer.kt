@@ -21,6 +21,7 @@ class SunnyRenderer(
     private var program = 0
     private var cloudProgram = 0
     private var backgroundProgram = 0
+    private var lensFlareProgram = 0
 
     // Handles for sunny.frag
     private var timeHandle = -1
@@ -29,20 +30,42 @@ class SunnyRenderer(
     private var sunSpeedHandle = -1
     private var themeHandle = -1
     private var sunPosHandle = -1
+    private var skyTopHandle = -1
+    private var skyBottomHandle = -1
+    private var godRaysIntensityHandle = -1
+    private var sunFadeFactorHandle = -1
 
     // Handles for sunny_background.frag
     private var bgThemeHandle = -1
     private var bgSunPosHandle = -1
     private var bgAspectHandle = -1
     private var bgIsCustomHandle = -1
+    private var bgSkyTopHandle = -1
+    private var bgSkyBottomHandle = -1
+
+    // Handles for lens_flare.frag
+    private var lfSunPosHandle = -1
+    private var lfAspectHandle = -1
+    private var lfSwipeOffsetHandle = -1
+    private var lfIntensityHandle = -1
     
     private var time = 0f
     private var aspectRatio = 1.0f
+    private var swipeOffset = 0f
+    private var pathFadeFactor = 1.0f
 
     // Sun movement state
     private var sunX = 0.35f
     private var sunY = 0.45f
     private var sunPathX = 0f
+    
+    // Random path movement state
+    private var randomStartX = 0f
+    private var randomStartY = 0f
+    private var randomEndX = 0f
+    private var randomEndY = 0f
+    private var randomProgress = 0f
+    private var isRandomPathInitialized = false
 
     // Clouds
     private val clouds = mutableListOf<Cloud>()
@@ -81,6 +104,24 @@ class SunnyRenderer(
         sunSpeedHandle = GLES30.glGetUniformLocation(program, "uSunSpeed")
         themeHandle = GLES30.glGetUniformLocation(program, "uTheme")
         sunPosHandle = GLES30.glGetUniformLocation(program, "uSunPos")
+        skyTopHandle = GLES30.glGetUniformLocation(program, "uSkyTop")
+        skyBottomHandle = GLES30.glGetUniformLocation(program, "uSkyBottom")
+        godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
+        sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
+
+        // Compile and link lens flare shader
+        try {
+            val lfVert = readAssetFile(context, "shaders/sunny.vert")
+            val lfFrag = readAssetFile(context, "shaders/lens_flare.frag")
+            lensFlareProgram = createProgram(lfVert, lfFrag)
+
+            lfSunPosHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uSunPos")
+            lfAspectHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uAspectRatio")
+            lfSwipeOffsetHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uSwipeOffset")
+            lfIntensityHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uIntensity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         // Compile and link cloud shader
         val cloudVert = readAssetFile(context, "shaders/cloud.vert")
@@ -96,6 +137,8 @@ class SunnyRenderer(
         bgSunPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSunPos")
         bgAspectHandle = GLES30.glGetUniformLocation(backgroundProgram, "uAspectRatio")
         bgIsCustomHandle = GLES30.glGetUniformLocation(backgroundProgram, "uIsCustom")
+        bgSkyTopHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSkyTop")
+        bgSkyBottomHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSkyBottom")
 
         // Initialize sun path
         val dir = configProvider.getSunPathDirection()
@@ -189,8 +232,12 @@ class SunnyRenderer(
     }
 
     override fun onUpdate(deltaTime: Float) {
-        // 1. Sun translation along the parabola
+        // 1. Sun translation along the path
         val direction = configProvider.getSunPathDirection()
+        if (direction != 3) {
+            isRandomPathInitialized = false
+        }
+
         if (direction == 0) { // Left-to-Right
             val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
             sunPathX += deltaTime * moveSpeed
@@ -198,7 +245,7 @@ class SunnyRenderer(
                 sunPathX = -1.3f
             }
             sunX = sunPathX
-            sunY = 0.5f - 0.7f * (sunX * sunX)
+            sunY = 1.2f - 1.5f * (sunX * sunX)
         } else if (direction == 1) { // Right-to-Left
             val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
             sunPathX -= deltaTime * moveSpeed
@@ -206,8 +253,19 @@ class SunnyRenderer(
                 sunPathX = 1.3f
             }
             sunX = sunPathX
-            sunY = 0.5f - 0.7f * (sunX * sunX)
-        } else { // Stationary
+            sunY = 1.2f - 1.5f * (sunX * sunX)
+        } else if (direction == 3) { // Random (Aleatorio)
+            if (!isRandomPathInitialized) {
+                generateRandomPath()
+            }
+            val moveSpeed = 0.05f + (configProvider.getSunMoveSpeed() / 100f) * 0.45f
+            randomProgress += deltaTime * moveSpeed
+            if (randomProgress >= 1.0f) {
+                generateRandomPath()
+            }
+            sunX = randomStartX + (randomEndX - randomStartX) * randomProgress
+            sunY = randomStartY + (randomEndY - randomStartY) * randomProgress
+        } else { // Stationary (2)
             when (configProvider.getSunStationaryPosition()) {
                 0 -> { // Top Left (Esquina superior izquierda)
                     sunX = -1.0f
@@ -285,6 +343,62 @@ class SunnyRenderer(
             }
         }
         clouds.removeAll { it.isFadingOut && it.opacity <= 0f }
+
+        // Calculate pathFadeFactor to smoothly fade sun elements at the start/end of paths
+        pathFadeFactor = when (direction) {
+            0, 1 -> {
+                if (kotlin.math.abs(sunPathX) > 1.1f) {
+                    smoothstep(1.3f, 1.1f, kotlin.math.abs(sunPathX))
+                } else {
+                    1.0f
+                }
+            }
+            3 -> {
+                if (randomProgress < 0.1f) {
+                    smoothstep(0f, 0.1f, randomProgress)
+                } else if (randomProgress > 0.9f) {
+                    smoothstep(1.0f, 0.9f, randomProgress)
+                } else {
+                    1.0f
+                }
+            }
+            else -> 1.0f
+        }
+    }
+
+    private fun generateRandomPath() {
+        val random = kotlin.random.Random
+        
+        // Choose start edge (0: Left, 1: Right, 2: Top, 3: Bottom)
+        val startEdge = random.nextInt(4)
+        
+        // Choose end edge (different from start)
+        var endEdge = random.nextInt(4)
+        while (endEdge == startEdge) {
+            endEdge = random.nextInt(4)
+        }
+
+        // Helper to get coordinates on an edge
+        fun getEdgeCoordinates(edge: Int): Pair<Float, Float> {
+            val maxTopY = 1.2f / aspectRatio
+            return when (edge) {
+                0 -> Pair(-1.5f, random.nextFloat() * (maxTopY - (-0.8f)) + (-0.8f)) // Left edge
+                1 -> Pair(1.5f, random.nextFloat() * (maxTopY - (-0.8f)) + (-0.8f)) // Right edge
+                2 -> Pair(random.nextFloat() * 2.4f - 1.2f, maxTopY) // Top edge
+                else -> Pair(random.nextFloat() * 2.4f - 1.2f, -1.2f) // Bottom edge
+            }
+        }
+
+        val start = getEdgeCoordinates(startEdge)
+        randomStartX = start.first
+        randomStartY = start.second
+
+        val end = getEdgeCoordinates(endEdge)
+        randomEndX = end.first
+        randomEndY = end.second
+        
+        randomProgress = 0f
+        isRandomPathInitialized = true
     }
 
     override fun onDrawFrame() {
@@ -305,8 +419,27 @@ class SunnyRenderer(
         val mappedSpeed = 0.5f + (speedConfig / 100f) * 1.5f // Pulsate frequency scaling factor
         GLES30.glUniform1f(sunSpeedHandle, mappedSpeed * 0.4f)
         
-        GLES30.glUniform1i(themeHandle, configProvider.getSunnyTheme())
+        val theme = configProvider.getSunnyTheme()
+        GLES30.glUniform1i(themeHandle, theme)
         GLES30.glUniform2f(sunPosHandle, sunX, sunY)
+
+        val godRaysRaw = if (configProvider.isSunnyGodRaysEnabled()) configProvider.getSunnyGodRaysIntensity() / 100f else 0f
+        val lowSunFactor = (1.0f - smoothstep(0.3f, 0.7f, sunY)) * smoothstep(-0.6f, -0.2f, sunY)
+        GLES30.glUniform1f(godRaysIntensityHandle, godRaysRaw * lowSunFactor)
+        GLES30.glUniform1f(sunFadeFactorHandle, pathFadeFactor)
+
+        if (theme == 3) {
+            val topColor = configProvider.getSunnyCustomSkyTopColor()
+            val bottomColor = configProvider.getSunnyCustomSkyBottomColor()
+            val tr = android.graphics.Color.red(topColor) / 255f
+            val tg = android.graphics.Color.green(topColor) / 255f
+            val tb = android.graphics.Color.blue(topColor) / 255f
+            val br = android.graphics.Color.red(bottomColor) / 255f
+            val bg = android.graphics.Color.green(bottomColor) / 255f
+            val bb = android.graphics.Color.blue(bottomColor) / 255f
+            GLES30.glUniform3f(skyTopHandle, tr, tg, tb)
+            GLES30.glUniform3f(skyBottomHandle, br, bg, bb)
+        }
 
         fullscreenQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
@@ -321,6 +454,9 @@ class SunnyRenderer(
 
         // 3. Capa del frente: Nubes activas (sobrevolando el paisaje)
         drawClouds()
+
+        // 4. Capa superior de post-procesado óptico: Destellos de lente
+        drawLensFlare()
     }
 
     private fun drawClouds() {
@@ -339,7 +475,14 @@ class SunnyRenderer(
         val (cloudR, cloudG, cloudB) = when (theme) {
             0 -> Triple(1.0f, 1.0f, 1.0f) // Mediodía (Pure White)
             1 -> Triple(1.0f, 0.94f, 0.88f) // Atardecer (Whiter warm peach)
-            else -> Triple(0.98f, 0.92f, 0.96f) // Anochecer (Whiter lavender / pinkish magenta)
+            2 -> Triple(0.98f, 0.92f, 0.96f) // Anochecer (Whiter lavender / pinkish magenta)
+            else -> { // Custom (Theme 3)
+                val bottomColor = configProvider.getSunnyCustomSkyBottomColor()
+                val r = android.graphics.Color.red(bottomColor) / 255f
+                val g = android.graphics.Color.green(bottomColor) / 255f
+                val b = android.graphics.Color.blue(bottomColor) / 255f
+                Triple(0.85f + r * 0.15f, 0.85f + g * 0.15f, 0.85f + b * 0.15f)
+            }
         }
         GLES30.glUniform3f(cloudColorHandle, cloudR, cloudG, cloudB)
 
@@ -393,10 +536,24 @@ class SunnyRenderer(
         val textureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
 
         // Pass theme, sun position, aspect ratio, and custom image flag to the shader
-        GLES30.glUniform1i(bgThemeHandle, configProvider.getSunnyTheme())
+        val theme = configProvider.getSunnyTheme()
+        GLES30.glUniform1i(bgThemeHandle, theme)
         GLES30.glUniform2f(bgSunPosHandle, sunX, sunY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 7) 1 else 0)
+
+        if (theme == 3) {
+            val topColor = configProvider.getSunnyCustomSkyTopColor()
+            val bottomColor = configProvider.getSunnyCustomSkyBottomColor()
+            val tr = android.graphics.Color.red(topColor) / 255f
+            val tg = android.graphics.Color.green(topColor) / 255f
+            val tb = android.graphics.Color.blue(topColor) / 255f
+            val br = android.graphics.Color.red(bottomColor) / 255f
+            val bg = android.graphics.Color.green(bottomColor) / 255f
+            val bb = android.graphics.Color.blue(bottomColor) / 255f
+            GLES30.glUniform3f(bgSkyTopHandle, tr, tg, tb)
+            GLES30.glUniform3f(bgSkyBottomHandle, br, bg, bb)
+        }
 
         backgroundQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, backgroundQuadBuffer)
@@ -425,6 +582,11 @@ class SunnyRenderer(
             scaleX = bgAspect
             scaleY = 1.0f
         }
+
+        // Parallax background scrolling based on swipeOffset
+        val maxShiftX = (scaleX - screenAspect).coerceAtLeast(0f)
+        val shiftX = -swipeOffset * maxShiftX * 0.5f
+        Matrix.translateM(modelMatrix, 0, shiftX, 0f, 0f)
 
         Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
 
@@ -486,6 +648,42 @@ class SunnyRenderer(
 
     override fun onTouchEvent(x: Float, y: Float) {
         // Interactive sun positioning or ray burst effects on touch coordinates could go here
+    }
+
+    override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {
+        val clampedX = xOffset.coerceIn(0f, 1f)
+        swipeOffset = (clampedX - 0.5f) * 2.0f
+    }
+
+    private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float {
+        val t = ((x - edge0) / (edge1 - edge0)).coerceIn(0f, 1f)
+        return t * t * (3f - 2f * t)
+    }
+
+    private fun drawLensFlare() {
+        if (lensFlareProgram == 0) return
+        val enabled = configProvider.isSunnyLensFlareEnabled()
+        if (!enabled) return
+
+        val rawIntensity = configProvider.getSunnyLensFlareIntensity() / 100f
+        val lowSunFactor = (1.0f - smoothstep(0.3f, 0.7f, sunY)) * smoothstep(-0.6f, -0.2f, sunY)
+        val finalIntensity = rawIntensity * lowSunFactor * pathFadeFactor
+
+        if (finalIntensity <= 0.0f) return
+
+        GLES30.glUseProgram(lensFlareProgram)
+        GLES30.glUniform2f(lfSunPosHandle, sunX, sunY)
+        GLES30.glUniform1f(lfAspectHandle, aspectRatio)
+        GLES30.glUniform1f(lfSwipeOffsetHandle, swipeOffset)
+        GLES30.glUniform1f(lfIntensityHandle, finalIntensity)
+
+        fullscreenQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+        GLES30.glDisableVertexAttribArray(0)
     }
 
     private fun readAssetFile(context: Context, path: String): String {
