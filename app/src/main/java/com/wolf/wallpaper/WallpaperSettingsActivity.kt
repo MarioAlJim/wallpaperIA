@@ -312,9 +312,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             "Montañas",
             "Campos de Trigo",
             "Lago y Bosque",
-            "Desierto y Dunas",
+            "Bosque y Río (Color)",
             "Silueta de Ciudad",
-            "Playa y Palmeras",
+            "Valle de Flores (Color)",
+            "Cascada y Acantilado (Color)",
             "Imagen de la Galería"
         )
         setupDropdown(
@@ -521,8 +522,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     input.copyTo(output)
                 }
             }
-            configManager.setSunnyBackgroundIndex(7)
-            updateCustomSunnyBackgroundViewsVisibility(7)
+            configManager.setSunnyBackgroundIndex(8)
+            updateCustomSunnyBackgroundViewsVisibility(8)
             updateSummaries()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -540,7 +541,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             })
         }
 
-        if (position == 7) {
+        if (position == 8) {
             btnSelect.visibility = View.VISIBLE
             tvStatus.visibility = View.VISIBLE
             val file = java.io.File(filesDir, "custom_sunny_background.png")
@@ -1190,10 +1191,11 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             1 -> "Montañas"
             2 -> "Campos"
             3 -> "Lago/Bosque"
-            4 -> "Desierto"
+            4 -> "Bosque/Río"
             5 -> "Ciudad"
-            6 -> "Playa"
-            7 -> "Galería"
+            6 -> "Valle Flores"
+            7 -> "Cascada"
+            8 -> "Galería"
             else -> "Degradado"
         }
         val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) "Activo" else "Inactivo"

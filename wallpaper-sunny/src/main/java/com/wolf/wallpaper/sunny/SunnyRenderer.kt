@@ -107,8 +107,8 @@ class SunnyRenderer(
     private val cloudTextures = mutableListOf<Int>()
 
     // Backgrounds
-    private val backgroundTextures = IntArray(7)
-    private val backgroundAspectRatios = FloatArray(7) { 1.0f }
+    private val backgroundTextures = IntArray(8)
+    private val backgroundAspectRatios = FloatArray(8) { 1.0f }
 
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -225,7 +225,8 @@ class SunnyRenderer(
         loadBackgroundTexture(context, 3, "background/sunny_background_04.png")
         loadBackgroundTexture(context, 4, "background/sunny_background_05.png")
         loadBackgroundTexture(context, 5, "background/sunny_background_06.png")
-        loadCustomBackgroundTexture(context, 6)
+        loadBackgroundTexture(context, 6, "background/sunny_background_07.png")
+        loadCustomBackgroundTexture(context, 7)
 
         // Screen quad coordinates (standard fullscreen pass)
         val fullscreenCoords = floatArrayOf(
@@ -673,7 +674,7 @@ class SunnyRenderer(
     }
 
     private fun drawBackground(backgroundIndex: Int) {
-        if (backgroundIndex <= 0 || backgroundIndex > 7) return
+        if (backgroundIndex <= 0 || backgroundIndex > 8) return
         val texIndex = backgroundIndex - 1
         val textureId = backgroundTextures[texIndex]
         if (textureId == 0) return
@@ -689,7 +690,7 @@ class SunnyRenderer(
         val bgGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
         GLES30.glUniform2f(bgSunPosHandle, sunX + bgGyroX, sunY + bgGyroY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
-        GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 7) 1 else 0)
+        GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
 
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()

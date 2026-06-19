@@ -72,16 +72,28 @@ void main() {
         // For custom gallery background, preserve its original colors but apply the sun glare
         finalHillColor = mix(texColor.rgb, highlightColor, glare * 0.40);
     } else {
-        // For our minimalist backgrounds, apply flat vector shading:
-        // Silhouette textures have multiple levels of brightness (foreground hills are darker, background hills are lighter).
-        // Let's normalize luma of the silhouette pixels (originally <= 0.9) to a [0.0, 1.0] range.
-        float normLuma = clamp(luma / 0.9, 0.0, 1.0);
-        
-        // Blend between foreground and background hill colors
-        vec3 baseHillColor = mix(fgColor, bgColor, normLuma);
-        
-        // Add sun glare/illumination dynamically
-        finalHillColor = mix(baseHillColor, highlightColor, glare * 0.50);
+        // Detect if the asset is colored (chrominance is significant)
+        float maxVal = max(texColor.r, max(texColor.g, texColor.b));
+        float minVal = min(texColor.r, min(texColor.g, texColor.b));
+        bool isColored = (maxVal - minVal) > 0.04;
+
+        if (isColored) {
+            // Apply theme tint to colored assets
+            vec3 tintedColor = mix(texColor.rgb, bgColor, 0.40);
+            // Add sun glare/illumination dynamically
+            finalHillColor = mix(tintedColor, highlightColor, glare * 0.45);
+        } else {
+            // For our monochrome backgrounds, apply flat vector shading:
+            // Silhouette textures have multiple levels of brightness (foreground hills are darker, background hills are lighter).
+            // Let's normalize luma of the silhouette pixels (originally <= 0.9) to a [0.0, 1.0] range.
+            float normLuma = clamp(luma / 0.9, 0.0, 1.0);
+            
+            // Blend between foreground and background hill colors
+            vec3 baseHillColor = mix(fgColor, bgColor, normLuma);
+            
+            // Add sun glare/illumination dynamically
+            finalHillColor = mix(baseHillColor, highlightColor, glare * 0.50);
+        }
     }
     
     fragColor = vec4(finalHillColor, finalAlpha);
