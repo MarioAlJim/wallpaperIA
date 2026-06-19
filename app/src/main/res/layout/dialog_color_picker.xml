@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#1D1D26">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Seleccionar Color"
+        android:textColor="#E0E0E6"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Live Preview Card -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardBackgroundColor="#252530"
+        app:cardCornerRadius="12dp"
+        app:strokeColor="#3A3A4A"
+        app:strokeWidth="1dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="12dp">
+
+            <View
+                android:id="@+id/dialogColorPreview"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Código Hexadecimal"
+                    android:textColor="#6C6C75"
+                    android:textSize="11sp" />
+
+                <EditText
+                    android:id="@+id/dialogColorHexInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:text="#FFFFFF"
+                    android:textColor="#E0E0E6"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLength="7"
+                    android:singleLine="true"
+                    android:inputType="textCapCharacters" />
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Preset Palette -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Paleta Rápida"
+        android:textColor="#6C6C75"
+        android:textSize="12sp"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <!-- Row 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
+
+            <View android:id="@+id/presetColor0" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor1" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor2" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor3" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor4" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor5" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+        </LinearLayout>
+
+        <!-- Row 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <View android:id="@+id/presetColor6" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor7" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor8" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor9" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor10" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+            <View android:id="@+id/presetColor11" android:layout_width="32dp" android:layout_height="32dp" android:layout_margin="4dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- RGB Sliders -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Ajuste Manual (RGB)"
+        android:textColor="#6C6C75"
+        android:textSize="12sp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Red -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/labelR"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:text="R: 255"
+            android:textColor="#E0E0E6"
+            android:textSize="12sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderR"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0"
+            android:valueTo="255"
+            android:stepSize="1"
+            app:thumbColor="#FF4A4A"
+            app:trackColorActive="#FF4A4A" />
+    </LinearLayout>
+
+    <!-- Green -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
+
+        <TextView
+            android:id="@+id/labelG"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:text="G: 255"
+            android:textColor="#E0E0E6"
+            android:textSize="12sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderG"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0"
+            android:valueTo="255"
+            android:stepSize="1"
+            app:thumbColor="#4AFF4A"
+            app:trackColorActive="#4AFF4A" />
+    </LinearLayout>
+
+    <!-- Blue -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/labelB"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:text="B: 255"
+            android:textColor="#E0E0E6"
+            android:textSize="12sp" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/sliderB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:valueFrom="0"
+            android:valueTo="255"
+            android:stepSize="1"
+            app:thumbColor="#4A4AFF"
+            app:trackColorActive="#4A4AFF" />
+    </LinearLayout>
+
+</LinearLayout>

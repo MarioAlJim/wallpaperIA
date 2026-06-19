@@ -1035,6 +1035,24 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 }
                 textView.text = "$value% • $desc"
             }
+            R.id.seekBarSunnyGodRaysIntensity -> {
+                val desc = when {
+                    value <= 20 -> "Sutil"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Intenso"
+                    else -> "Cegador"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarSunnyLensFlareIntensity -> {
+                val desc = when {
+                    value <= 20 -> "Tenue"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Brillante"
+                    else -> "Cinematográfico"
+                }
+                textView.text = "$value% • $desc"
+            }
         }
     }
 
