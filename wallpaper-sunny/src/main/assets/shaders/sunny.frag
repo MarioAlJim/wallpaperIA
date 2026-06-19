@@ -14,6 +14,7 @@ uniform vec3 uSkyTop;
 uniform vec3 uSkyBottom;
 uniform float uGodRaysIntensity;
 uniform float uSunFadeFactor;
+uniform float uSunPulse;
 
 void main() {
     // 1. Sky Gradient based on Theme
@@ -55,14 +56,14 @@ void main() {
     
     // Pulsating radius based on uSunSize and uSunSpeed
     float pulse = sin(uTime * uSunSpeed) * 0.02 * (uSunSize / 0.20);
-    float radius = uSunSize + pulse;
+    float radius = uSunSize + pulse + uSunPulse * 0.08;
     
     // Smooth sun edge
     float sunMask = smoothstep(radius, radius - 0.008, dist);
     
     // Soft outer glow extending further
-    float glowMask = smoothstep(radius * 3.5, radius, dist);
-    vec3 finalGlow = sunGlowColor * (glowMask * 0.65);
+    float glowMask = smoothstep(radius * (3.5 + uSunPulse * 1.5), radius, dist);
+    vec3 finalGlow = sunGlowColor * (glowMask * (0.65 + uSunPulse * 0.5));
 
     // Dynamic God Rays (Crepuscular Rays)
     if (uGodRaysIntensity > 0.0) {

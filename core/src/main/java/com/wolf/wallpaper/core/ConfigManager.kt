@@ -42,6 +42,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUNNY_GOD_RAYS_INTENSITY = "sunny_god_rays_intensity"
         const val KEY_SUNNY_LENS_FLARE_ENABLED = "sunny_lens_flare_enabled"
         const val KEY_SUNNY_LENS_FLARE_INTENSITY = "sunny_lens_flare_intensity"
+        const val KEY_SUNNY_GYRO_ENABLED = "sunny_gyro_enabled"
+        const val KEY_SUNNY_TOUCH_BURST_ENABLED = "sunny_touch_burst_enabled"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -77,6 +79,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUNNY_GOD_RAYS_INTENSITY = 50
         const val DEFAULT_SUNNY_LENS_FLARE_ENABLED = true
         const val DEFAULT_SUNNY_LENS_FLARE_INTENSITY = 50
+        const val DEFAULT_SUNNY_GYRO_ENABLED = true
+        const val DEFAULT_SUNNY_TOUCH_BURST_ENABLED = true
     }
 
     override fun getCloudDensity(): Int {
@@ -334,5 +338,21 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setSunnyLensFlareIntensity(intensity: Int) {
         prefs.edit().putInt(KEY_SUNNY_LENS_FLARE_INTENSITY, intensity.coerceIn(0, 100)).apply()
+    }
+
+    override fun isSunnyGyroEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SUNNY_GYRO_ENABLED, DEFAULT_SUNNY_GYRO_ENABLED)
+    }
+
+    fun setSunnyGyroEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SUNNY_GYRO_ENABLED, enabled).apply()
+    }
+
+    override fun isSunnyTouchBurstEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SUNNY_TOUCH_BURST_ENABLED, DEFAULT_SUNNY_TOUCH_BURST_ENABLED)
+    }
+
+    fun setSunnyTouchBurstEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SUNNY_TOUCH_BURST_ENABLED, enabled).apply()
     }
 }

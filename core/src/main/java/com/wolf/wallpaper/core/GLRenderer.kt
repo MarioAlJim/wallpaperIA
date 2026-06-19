@@ -7,4 +7,5 @@ interface GLRenderer {
     fun onDrawFrame()
     fun onTouchEvent(x: Float, y: Float) {}
     fun onOffsetsChanged(xOffset: Float, yOffset: Float) {}
+    fun onSensorValuesChanged(tiltX: Float, tiltY: Float) {}
 }

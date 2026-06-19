@@ -18,6 +18,8 @@ class GLRenderThread(
     @Volatile private var pendingTouch: Pair<Float, Float>? = null
     @Volatile private var xOffset = 0.5f
     @Volatile private var yOffset = 0.5f
+    @Volatile private var tiltX = 0f
+    @Volatile private var tiltY = 0f
 
     fun setVisible(visible: Boolean) {
         synchronized(lock) {
@@ -46,6 +48,14 @@ class GLRenderThread(
         synchronized(lock) {
             this.xOffset = xOffset
             this.yOffset = yOffset
+            lock.notifyAll()
+        }
+    }
+
+    fun queueSensorValues(tiltX: Float, tiltY: Float) {
+        synchronized(lock) {
+            this.tiltX = tiltX
+            this.tiltY = tiltY
             lock.notifyAll()
         }
     }
@@ -122,6 +132,14 @@ class GLRenderThread(
                     localYOffset = yOffset
                 }
                 renderer.onOffsetsChanged(localXOffset, localYOffset)
+
+                var localTiltX = 0f
+                var localTiltY = 0f
+                synchronized(lock) {
+                    localTiltX = tiltX
+                    localTiltY = tiltY
+                }
+                renderer.onSensorValuesChanged(localTiltX, localTiltY)
 
                 val currentTime = System.nanoTime()
                 val deltaTime = (currentTime - lastTime) / 1_000_000_000f

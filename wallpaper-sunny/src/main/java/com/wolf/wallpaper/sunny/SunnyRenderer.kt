@@ -22,6 +22,7 @@ class SunnyRenderer(
     private var cloudProgram = 0
     private var backgroundProgram = 0
     private var lensFlareProgram = 0
+    private var particleProgram = 0
 
     // Handles for sunny.frag
     private var timeHandle = -1
@@ -34,6 +35,12 @@ class SunnyRenderer(
     private var skyBottomHandle = -1
     private var godRaysIntensityHandle = -1
     private var sunFadeFactorHandle = -1
+    private var sunPulseHandle = -1
+
+    // Handles for particle.frag
+    private var pMVPMatrixHandle = -1
+    private var pColorHandle = -1
+    private var pOpacityHandle = -1
 
     // Handles for sunny_background.frag
     private var bgThemeHandle = -1
@@ -53,6 +60,34 @@ class SunnyRenderer(
     private var aspectRatio = 1.0f
     private var swipeOffset = 0f
     private var pathFadeFactor = 1.0f
+
+    // Gyro tilt state
+    private var targetTiltX = 0f
+    private var targetTiltY = 0f
+    private var sensorTiltX = 0f
+    private var sensorTiltY = 0f
+
+    // Screen dimensions
+    private var screenWidth = 1
+    private var screenHeight = 1
+
+    // Sun touch pulse and particles
+    private var sunPulseTime = 0f
+    private val particles = mutableListOf<SunnyParticle>()
+
+    private class SunnyParticle(
+        var x: Float,
+        var y: Float,
+        var vx: Float,
+        var vy: Float,
+        var size: Float,
+        var alpha: Float,
+        var life: Float,
+        val maxLife: Float,
+        val r: Float,
+        val g: Float,
+        val b: Float
+    )
 
     // Sun movement state
     private var sunX = 0.35f
@@ -119,6 +154,22 @@ class SunnyRenderer(
             lfAspectHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uAspectRatio")
             lfSwipeOffsetHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uSwipeOffset")
             lfIntensityHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uIntensity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Get uSunPulse handle from main shader
+        sunPulseHandle = GLES30.glGetUniformLocation(program, "uSunPulse")
+
+        // Compile and link particle shader
+        try {
+            val pVert = readAssetFile(context, "shaders/particle.vert")
+            val pFrag = readAssetFile(context, "shaders/particle.frag")
+            particleProgram = createProgram(pVert, pFrag)
+
+            pMVPMatrixHandle = GLES30.glGetUniformLocation(particleProgram, "uMVPMatrix")
+            pColorHandle = GLES30.glGetUniformLocation(particleProgram, "uColor")
+            pOpacityHandle = GLES30.glGetUniformLocation(particleProgram, "uOpacity")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -221,13 +272,15 @@ class SunnyRenderer(
 
     override fun onSurfaceChanged(width: Int, height: Int) {
         GLES30.glViewport(0, 0, width, height)
+        screenWidth = width
+        screenHeight = height
         aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
         
         Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         
         // Adjust and align cloud positions for new aspect ratio
         for (cloud in clouds) {
-            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
+            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, isSunny = true)
         }
     }
 
@@ -330,7 +383,7 @@ class SunnyRenderer(
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
-                cloud.reset(0f, aspectRatio)
+                cloud.reset(0f, aspectRatio, isSunny = true)
                 val newHalfWidth = cloud.scale * 1.2f
                 val windThreshold = 0.1f
                 val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -363,6 +416,32 @@ class SunnyRenderer(
                 }
             }
             else -> 1.0f
+        }
+
+        // Smoothly interpolate sensor tilt values to prevent jitter
+        val lerpFactor = (deltaTime * 10.0f).coerceIn(0f, 1f)
+        sensorTiltX += (targetTiltX - sensorTiltX) * lerpFactor
+        sensorTiltY += (targetTiltY - sensorTiltY) * lerpFactor
+
+        // Decay sun pulse time
+        if (sunPulseTime > 0f) {
+            sunPulseTime = (sunPulseTime - deltaTime * 2.0f).coerceAtLeast(0f)
+        }
+
+        // Update active particles
+        val pIterator = particles.iterator()
+        while (pIterator.hasNext()) {
+            val p = pIterator.next()
+            p.life -= deltaTime
+            if (p.life <= 0f) {
+                pIterator.remove()
+            } else {
+                p.x += p.vx * deltaTime
+                p.y += p.vy * deltaTime
+                p.alpha = (p.life / p.maxLife).coerceIn(0f, 1f)
+                p.vx *= (1.0f - deltaTime * 0.5f)
+                p.vy *= (1.0f - deltaTime * 0.5f)
+            }
         }
     }
 
@@ -421,10 +500,16 @@ class SunnyRenderer(
         
         val theme = configProvider.getSunnyTheme()
         GLES30.glUniform1i(themeHandle, theme)
-        GLES30.glUniform2f(sunPosHandle, sunX, sunY)
+
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
+        GLES30.glUniform2f(sunPosHandle, sunX + gyroX, sunY + gyroY)
+
+        // Pass touch interactive sun pulse value
+        GLES30.glUniform1f(sunPulseHandle, sunPulseTime)
 
         val godRaysRaw = if (configProvider.isSunnyGodRaysEnabled()) configProvider.getSunnyGodRaysIntensity() / 100f else 0f
-        val lowSunFactor = (1.0f - smoothstep(0.3f, 0.7f, sunY)) * smoothstep(-0.6f, -0.2f, sunY)
+        val lowSunFactor = (1.0f - smoothstep(0.3f, 0.7f, sunY + gyroY)) * smoothstep(-0.6f, -0.2f, sunY + gyroY)
         GLES30.glUniform1f(godRaysIntensityHandle, godRaysRaw * lowSunFactor)
         GLES30.glUniform1f(sunFadeFactorHandle, pathFadeFactor)
 
@@ -455,7 +540,10 @@ class SunnyRenderer(
         // 3. Capa del frente: Nubes activas (sobrevolando el paisaje)
         drawClouds()
 
-        // 4. Capa superior de post-procesado óptico: Destellos de lente
+        // 4. Partículas (Ráfaga solar)
+        drawParticles()
+
+        // 5. Capa superior de post-procesado óptico: Destellos de lente
         drawLensFlare()
     }
 
@@ -503,10 +591,13 @@ class SunnyRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glUniform1i(textureHandle, 0)
 
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
+
         for (cloud in clouds.sortedBy { it.z }) {
             val modelMatrix = FloatArray(16)
             Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, cloud.positionX, cloud.positionY, 0f)
+            Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
             Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
 
             val modelViewProjection = FloatArray(16)
@@ -525,6 +616,62 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(1)
     }
 
+    private fun drawParticles() {
+        if (particles.isEmpty() || particleProgram == 0) return
+
+        GLES30.glUseProgram(particleProgram)
+
+        // Save current blend configuration
+        val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
+        val prevSrcFunc = IntArray(1)
+        val prevDstFunc = IntArray(1)
+        GLES30.glGetIntegerv(GLES30.GL_BLEND_SRC_RGB, prevSrcFunc, 0)
+        GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
+
+        // Enable additive blending for glow effect
+        GLES30.glEnable(GLES30.GL_BLEND)
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
+
+        // Bind positions attribute (location 0)
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        // Bind UV coordinates attribute (location 1)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
+
+        for (p in particles) {
+            val modelMatrix = FloatArray(16)
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, p.x + gyroX, p.y + gyroY, 0f)
+            Matrix.scaleM(modelMatrix, 0, p.size, p.size, 1.0f)
+
+            val modelViewProjection = FloatArray(16)
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+
+            GLES30.glUniformMatrix4fv(pMVPMatrixHandle, 1, false, modelViewProjection, 0)
+            GLES30.glUniform3f(pColorHandle, p.r, p.g, p.b)
+            GLES30.glUniform1f(pOpacityHandle, p.alpha)
+
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        }
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+
+        // Restore blend function to default to avoid breaking subsequent renders
+        if (!blendEnabled) {
+            GLES30.glDisable(GLES30.GL_BLEND)
+        } else {
+            GLES30.glBlendFunc(prevSrcFunc[0], prevDstFunc[0])
+        }
+    }
+
     private fun drawBackground(backgroundIndex: Int) {
         if (backgroundIndex <= 0 || backgroundIndex > 7) return
         val texIndex = backgroundIndex - 1
@@ -538,7 +685,9 @@ class SunnyRenderer(
         // Pass theme, sun position, aspect ratio, and custom image flag to the shader
         val theme = configProvider.getSunnyTheme()
         GLES30.glUniform1i(bgThemeHandle, theme)
-        GLES30.glUniform2f(bgSunPosHandle, sunX, sunY)
+        val bgGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
+        val bgGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
+        GLES30.glUniform2f(bgSunPosHandle, sunX + bgGyroX, sunY + bgGyroY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 7) 1 else 0)
 
@@ -583,10 +732,13 @@ class SunnyRenderer(
             scaleY = 1.0f
         }
 
+        val bgShiftX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.05f else 0f
+        val bgShiftY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.05f else 0f
+
         // Parallax background scrolling based on swipeOffset
         val maxShiftX = (scaleX - screenAspect).coerceAtLeast(0f)
         val shiftX = -swipeOffset * maxShiftX * 0.5f
-        Matrix.translateM(modelMatrix, 0, shiftX, 0f, 0f)
+        Matrix.translateM(modelMatrix, 0, shiftX + bgShiftX, bgShiftY, 0f)
 
         Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
 
@@ -630,7 +782,7 @@ class SunnyRenderer(
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
                 val textureIndex = kotlin.random.Random.nextInt(textureCount)
                 val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
+                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, isSunny = true)
                 cloud.opacity = 0f
                 clouds.add(cloud)
                 needed--
@@ -646,8 +798,87 @@ class SunnyRenderer(
         }
     }
 
+    override fun onSensorValuesChanged(tiltX: Float, tiltY: Float) {
+        if (configProvider.isSunnyGyroEnabled()) {
+            targetTiltX = tiltX
+            targetTiltY = tiltY
+        } else {
+            targetTiltX = 0f
+            targetTiltY = 0f
+        }
+    }
+
     override fun onTouchEvent(x: Float, y: Float) {
-        // Interactive sun positioning or ray burst effects on touch coordinates could go here
+        if (!configProvider.isSunnyTouchBurstEnabled()) return
+
+        // Proyectar coordenadas a espacio ortográfico del shader (uv space)
+        val ndcX = -1f + (x / screenWidth) * 2f
+        val ndcY = 1f - (y / screenHeight) * 2f
+
+        val uvX = ndcX * aspectRatio
+        val uvY = ndcY
+
+        val sunUvX = sunX * aspectRatio
+        val sunUvY = sunY * aspectRatio
+
+        val dx = uvX - sunUvX
+        val dy = uvY - sunUvY
+        val dist = kotlin.math.sqrt(dx * dx + dy * dy)
+
+        // Comprobar si el toque cae dentro del disco solar (con buffer de tolerancia)
+        val sizeConfig = configProvider.getSunSize()
+        val mappedSize = 0.05f + (sizeConfig / 100f) * 0.30f
+        val touchRadius = mappedSize + 0.12f
+
+        if (dist <= touchRadius) {
+            // Activar pulsación
+            sunPulseTime = 1.0f
+
+            // Generar ráfaga de 35 partículas radiales
+            val random = kotlin.random.Random
+            val theme = configProvider.getSunnyTheme()
+
+            for (i in 0 until 35) {
+                val angle = random.nextFloat() * 2.0f * Math.PI.toFloat()
+                val speed = 0.3f + random.nextFloat() * 1.5f
+                val vx = kotlin.math.cos(angle) * speed
+                val vy = kotlin.math.sin(angle) * speed
+                val pSize = 0.04f + random.nextFloat() * 0.08f
+                val maxLife = 0.5f + random.nextFloat() * 0.7f
+
+                // Asignar colores según el tema activo
+                val (r, g, b) = when (theme) {
+                    0 -> { // Mediodía (Blanco/Amarillo brillante)
+                        Triple(1.0f, 0.9f + random.nextFloat() * 0.1f, 0.5f + random.nextFloat() * 0.4f)
+                    }
+                    1 -> { // Atardecer (Naranja/Rojo cálido)
+                        Triple(1.0f, 0.25f + random.nextFloat() * 0.45f, 0.0f + random.nextFloat() * 0.15f)
+                    }
+                    2 -> { // Anochecer (Rosa/Lavanda/Púrpura)
+                        Triple(0.9f + random.nextFloat() * 0.1f, 0.3f + random.nextFloat() * 0.4f, 0.7f + random.nextFloat() * 0.3f)
+                    }
+                    else -> { // Personalizado (Dorado/Fuego)
+                        Triple(1.0f, 0.65f + random.nextFloat() * 0.25f, 0.15f + random.nextFloat() * 0.35f)
+                    }
+                }
+
+                particles.add(
+                    SunnyParticle(
+                        x = sunUvX,
+                        y = sunUvY,
+                        vx = vx,
+                        vy = vy,
+                        size = pSize,
+                        alpha = 1.0f,
+                        life = maxLife,
+                        maxLife = maxLife,
+                        r = r,
+                        g = g,
+                        b = b
+                    )
+                )
+            }
+        }
     }
 
     override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {

@@ -373,6 +373,26 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setSunnyLensFlareIntensity(value)
         }
 
+        // Setup Sunny Gyroscope Parallax
+        val switchSunnyGyro = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchSunnyGyro)
+        if (switchSunnyGyro != null) {
+            switchSunnyGyro.isChecked = configManager.isSunnyGyroEnabled()
+            switchSunnyGyro.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setSunnyGyroEnabled(isChecked)
+                updateSummaries()
+            }
+        }
+
+        // Setup Sunny Touch Burst
+        val switchSunnyTouchBurst = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchSunnyTouchBurst)
+        if (switchSunnyTouchBurst != null) {
+            switchSunnyTouchBurst.isChecked = configManager.isSunnyTouchBurstEnabled()
+            switchSunnyTouchBurst.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setSunnyTouchBurstEnabled(isChecked)
+                updateSummaries()
+            }
+        }
+
         // 4d. Setup TabLayout Weather Selector
         val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
         val initialActiveEffect = configManager.getActiveEffect()
@@ -1178,8 +1198,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
         val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) "Activo" else "Inactivo"
         val lensFlareStatus = if (configManager.isSunnyLensFlareEnabled()) "Activo" else "Inactivo"
+        val gyroStatus = if (configManager.isSunnyGyroEnabled()) "Activo" else "Inactivo"
+        val touchBurstStatus = if (configManager.isSunnyTouchBurstEnabled()) "Activo" else "Inactivo"
         summarySunny.text = Html.fromHtml(
-            "Tema: <font color='$accentColor'>$sunnyThemeText</font> • Sol: <font color='$accentColor'>$sunDirText</font> • Fondo: <font color='$accentColor'>$sunnyBgText</font><br/>Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font>",
+            "Tema: <font color='$accentColor'>$sunnyThemeText</font> • Sol: <font color='$accentColor'>$sunDirText</font> • Fondo: <font color='$accentColor'>$sunnyBgText</font><br/>Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font> • Giroscopio: <font color='$accentColor'>$gyroStatus</font> • Ráfaga: <font color='$accentColor'>$touchBurstStatus</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
     }

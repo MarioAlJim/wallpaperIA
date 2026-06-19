@@ -8,6 +8,11 @@ import com.wolf.wallpaper.core.ConfigManager
 import com.wolf.wallpaper.core.GLRenderThread
 import com.wolf.wallpaper.core.GLRenderer
 import com.wolf.wallpaper.core.WeatherType
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 
 class DynamicWallpaperService : WallpaperService() {
 
@@ -15,7 +20,7 @@ class DynamicWallpaperService : WallpaperService() {
         return DynamicEngine()
     }
 
-    inner class DynamicEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener {
+    inner class DynamicEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
         private var renderThread: GLRenderThread? = null
         private lateinit var configManager: ConfigManager
         private lateinit var rendererFactory: AppWallpaperRendererFactory
@@ -24,6 +29,12 @@ class DynamicWallpaperService : WallpaperService() {
         private var currentHolder: SurfaceHolder? = null
         private var currentWidth = 0
         private var currentHeight = 0
+
+        // Sensor variables for 3D tilt
+        private var sensorManager: SensorManager? = null
+        private var accelerometer: Sensor? = null
+        private var smoothedTiltX = 0f
+        private var smoothedTiltY = 0f
 
         override fun onCreate(surfaceHolder: SurfaceHolder?) {
             super.onCreate(surfaceHolder)
@@ -37,6 +48,9 @@ class DynamicWallpaperService : WallpaperService() {
             
             applicationContext.getSharedPreferences(ConfigManager.PREFS_NAME, MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this)
+
+            sensorManager = applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+            accelerometer = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
         }
 
         private var isDragging = false
@@ -90,12 +104,21 @@ class DynamicWallpaperService : WallpaperService() {
             super.onDestroy()
             applicationContext.getSharedPreferences(ConfigManager.PREFS_NAME, MODE_PRIVATE)
                 .unregisterOnSharedPreferenceChangeListener(this)
+            sensorManager?.unregisterListener(this)
             stopRenderThread()
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
             renderThread?.setVisible(visible)
+            if (visible) {
+                val acc = accelerometer
+                if (acc != null) {
+                    sensorManager?.registerListener(this, acc, SensorManager.SENSOR_DELAY_GAME)
+                }
+            } else {
+                sensorManager?.unregisterListener(this)
+            }
         }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
@@ -159,5 +182,35 @@ class DynamicWallpaperService : WallpaperService() {
             }
             renderThread = null
         }
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            if (event == null) return
+            if (event.sensor.type == Sensor.TYPE_ACCELEROMETER) {
+                if (!configManager.isSunnyGyroEnabled()) {
+                    smoothedTiltX = 0f
+                    smoothedTiltY = 0f
+                    renderThread?.queueSensorValues(0f, 0f)
+                    return
+                }
+
+                val ax = event.values[0]
+                val ay = event.values[1]
+
+                // Standardize range: ax maps approx to [-1.0, 1.0]
+                val targetTiltX = (ax / 9.8f).coerceIn(-1f, 1f)
+                // When device is vertical, ay is ~9.8. When flat, ay is ~0.
+                // Map ay ~ 4.9m/s^2 (45 degrees tilt) to 0.0
+                val targetTiltY = ((ay - 4.9f) / 4.9f).coerceIn(-1f, 1f)
+
+                // Low-pass filter to smooth movement
+                val alpha = 0.1f
+                smoothedTiltX = smoothedTiltX + alpha * (targetTiltX - smoothedTiltX)
+                smoothedTiltY = smoothedTiltY + alpha * (targetTiltY - smoothedTiltY)
+
+                renderThread?.queueSensorValues(smoothedTiltX, smoothedTiltY)
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
     }
 }
