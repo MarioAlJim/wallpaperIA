@@ -259,7 +259,7 @@ class SunnyRenderer(
         GLES30.glClearColor(0f, 0f, 0f, 1f)
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
-        // 1. Draw procedural sky and sun
+        // 1. Capa de atrás: Cielo procedural y sol
         GLES30.glUseProgram(program)
         GLES30.glUniform1f(timeHandle, time)
         GLES30.glUniform1f(aspectHandle, aspectRatio)
@@ -283,12 +283,12 @@ class SunnyRenderer(
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         GLES30.glDisableVertexAttribArray(0)
 
-        // 2. Draw active clouds (behind foreground landscapes)
-        drawClouds()
-
-        // 3. Draw foreground layout (keyed out white sky)
+        // 2. Capa intermedia: Fondo seleccionado (siluetas con calado de cielo)
         val bgIndex = configProvider.getSunnyBackgroundIndex()
         drawBackground(bgIndex)
+
+        // 3. Capa del frente: Nubes activas (sobrevolando el paisaje)
+        drawClouds()
     }
 
     private fun drawClouds() {
@@ -407,16 +407,16 @@ class SunnyRenderer(
     }
 
     private fun adjustClouds(density: Int) {
-        // Map 0-100 density to custom cloud count: 0, 2, 5, 10, 13, 15
+        // Map 0-100 density to custom cloud count: 0, 1, 3, 6, 8, 10
         val targetCount = when (density) {
             0 -> 0
-            25 -> 2
-            50 -> 5
-            75 -> 10
-            90 -> 13
-            100 -> 15
-            else -> (density / 100f * 15).toInt()
-        }.coerceIn(0, 15)
+            25 -> 1
+            50 -> 3
+            75 -> 6
+            90 -> 8
+            100 -> 10
+            else -> (density / 100f * 10).toInt()
+        }.coerceIn(0, 10)
 
         val textureCount = cloudTextures.size
         if (textureCount == 0) return

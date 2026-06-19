@@ -408,6 +408,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             cardBackground.visibility = View.GONE
             cardSunny.visibility = View.VISIBLE
         }
+
+        // Refresh mode-dependent labels
+        val slider = findViewById<Slider>(R.id.seekBarCloudDensity)
+        val label = findViewById<TextView>(R.id.textViewCloudDensityValue)
+        if (slider != null && label != null) {
+            updateTextView(R.id.seekBarCloudDensity, label, slider.value.toInt())
+        }
     }
 
     private fun saveCustomBackground(uri: android.net.Uri) {
@@ -547,15 +554,29 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
         when (sliderId) {
             R.id.seekBarCloudDensity -> {
-                val count = when (value) {
-                    0 -> 0
-                    25 -> 2
-                    50 -> 5
-                    75 -> 10
-                    90 -> 13
-                    100 -> 15
-                    else -> (value / 100f * 15).toInt()
-                }.coerceIn(0, 15)
+                val isSunny = configManager.getActiveEffect() == 1
+                val maxClouds = if (isSunny) 10 else 15
+                val count = if (isSunny) {
+                    when (value) {
+                        0 -> 0
+                        25 -> 1
+                        50 -> 3
+                        75 -> 6
+                        90 -> 8
+                        100 -> 10
+                        else -> (value / 100f * 10).toInt()
+                    }
+                } else {
+                    when (value) {
+                        0 -> 0
+                        25 -> 2
+                        50 -> 5
+                        75 -> 10
+                        90 -> 13
+                        100 -> 15
+                        else -> (value / 100f * 15).toInt()
+                    }
+                }.coerceIn(0, maxClouds)
                 textView.text = "$value% • $count nubes"
             }
             R.id.seekBarLightningFrequency -> {
