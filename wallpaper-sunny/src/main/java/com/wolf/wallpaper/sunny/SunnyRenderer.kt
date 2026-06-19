@@ -49,8 +49,8 @@ class SunnyRenderer(
     private val cloudTextures = mutableListOf<Int>()
 
     // Backgrounds
-    private val backgroundTextures = IntArray(4)
-    private val backgroundAspectRatios = FloatArray(4) { 1.0f }
+    private val backgroundTextures = IntArray(7)
+    private val backgroundAspectRatios = FloatArray(7) { 1.0f }
 
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -128,7 +128,10 @@ class SunnyRenderer(
         loadBackgroundTexture(context, 0, "background/sunny_background_01.png")
         loadBackgroundTexture(context, 1, "background/sunny_background_02.png")
         loadBackgroundTexture(context, 2, "background/sunny_background_03.png")
-        loadCustomBackgroundTexture(context, 3)
+        loadBackgroundTexture(context, 3, "background/sunny_background_04.png")
+        loadBackgroundTexture(context, 4, "background/sunny_background_05.png")
+        loadBackgroundTexture(context, 5, "background/sunny_background_06.png")
+        loadCustomBackgroundTexture(context, 6)
 
         // Screen quad coordinates (standard fullscreen pass)
         val fullscreenCoords = floatArrayOf(
@@ -302,9 +305,9 @@ class SunnyRenderer(
         // In Sunny mode, warm color tinting matching the active sky theme
         val theme = configProvider.getSunnyTheme()
         val (cloudR, cloudG, cloudB) = when (theme) {
-            0 -> Triple(0.98f, 0.98f, 0.96f) // Mediodía
-            1 -> Triple(0.98f, 0.72f, 0.58f) // Atardecer (Warm peach)
-            else -> Triple(0.85f, 0.65f, 0.78f) // Anochecer (Lavender / pinkish magenta)
+            0 -> Triple(1.0f, 1.0f, 1.0f) // Mediodía (Pure White)
+            1 -> Triple(1.0f, 0.94f, 0.88f) // Atardecer (Whiter warm peach)
+            else -> Triple(0.98f, 0.92f, 0.96f) // Anochecer (Whiter lavender / pinkish magenta)
         }
         GLES30.glUniform3f(cloudColorHandle, cloudR, cloudG, cloudB)
 
@@ -348,7 +351,7 @@ class SunnyRenderer(
     }
 
     private fun drawBackground(backgroundIndex: Int) {
-        if (backgroundIndex <= 0 || backgroundIndex > 4) return
+        if (backgroundIndex <= 0 || backgroundIndex > 7) return
         val texIndex = backgroundIndex - 1
         val textureId = backgroundTextures[texIndex]
         if (textureId == 0) return
@@ -361,7 +364,7 @@ class SunnyRenderer(
         GLES30.glUniform1i(bgThemeHandle, configProvider.getSunnyTheme())
         GLES30.glUniform2f(bgSunPosHandle, sunX, sunY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
-        GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 4) 1 else 0)
+        GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 7) 1 else 0)
 
         backgroundQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, backgroundQuadBuffer)

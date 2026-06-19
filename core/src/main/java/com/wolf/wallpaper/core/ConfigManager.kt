@@ -243,6 +243,6 @@ class ConfigManager(context: Context) : ConfigProvider {
     }
 
     fun setSunnyBackgroundIndex(index: Int) {
-        prefs.edit().putInt(KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 4)).apply()
+        prefs.edit().putInt(KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 7)).apply()
     }
 }

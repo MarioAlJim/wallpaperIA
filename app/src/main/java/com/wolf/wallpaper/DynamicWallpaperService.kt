@@ -22,6 +22,8 @@ class DynamicWallpaperService : WallpaperService() {
         private var currentRenderer: GLRenderer? = null
         private var activeWeatherType = WeatherType.STORM
         private var currentHolder: SurfaceHolder? = null
+        private var currentWidth = 0
+        private var currentHeight = 0
 
         override fun onCreate(surfaceHolder: SurfaceHolder?) {
             super.onCreate(surfaceHolder)
@@ -64,6 +66,8 @@ class DynamicWallpaperService : WallpaperService() {
 
         override fun onSurfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             super.onSurfaceChanged(holder, format, width, height)
+            currentWidth = width
+            currentHeight = height
             renderThread?.onSurfaceChanged(width, height)
         }
 
@@ -83,18 +87,11 @@ class DynamicWallpaperService : WallpaperService() {
                     // Detener e inicializar con el nuevo renderizador en caliente
                     val holder = currentHolder
                     if (holder != null) {
-                        stopRenderThread()
                         currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
                         startRenderThread(holder)
                     } else {
                         currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
                     }
-                }
-            } else if (key == ConfigManager.KEY_BACKGROUND_INDEX) {
-                val holder = currentHolder
-                if (holder != null) {
-                    stopRenderThread()
-                    startRenderThread(holder)
                 }
             }
         }
@@ -104,6 +101,9 @@ class DynamicWallpaperService : WallpaperService() {
             val renderer = currentRenderer ?: return
             renderThread = GLRenderThread(holder, renderer).apply {
                 setVisible(isVisible)
+                if (currentWidth > 0 && currentHeight > 0) {
+                    onSurfaceChanged(currentWidth, currentHeight)
+                }
                 start()
             }
         }

@@ -317,7 +317,16 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
         updateSunMoveSpeedSliderVisibility(configManager.getSunPathDirection())
 
-        val sunnyBackgrounds = arrayOf("Solo degradado", "Montañas", "Campos de Trigo", "Lago y Bosque", "Imagen de la Galería")
+        val sunnyBackgrounds = arrayOf(
+            "Solo degradado",
+            "Montañas",
+            "Campos de Trigo",
+            "Lago y Bosque",
+            "Desierto y Dunas",
+            "Silueta de Ciudad",
+            "Playa y Palmeras",
+            "Imagen de la Galería"
+        )
         setupDropdown(
             R.id.spinnerSunnyBackground,
             sunnyBackgrounds,
@@ -453,8 +462,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                     input.copyTo(output)
                 }
             }
-            configManager.setSunnyBackgroundIndex(4)
-            updateCustomSunnyBackgroundViewsVisibility(4)
+            configManager.setSunnyBackgroundIndex(7)
+            updateCustomSunnyBackgroundViewsVisibility(7)
             updateSummaries()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -472,7 +481,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             })
         }
 
-        if (position == 4) {
+        if (position == 7) {
             btnSelect.visibility = View.VISIBLE
             tvStatus.visibility = View.VISIBLE
             val file = java.io.File(filesDir, "custom_sunny_background.png")
@@ -728,7 +737,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             1 -> "Montañas"
             2 -> "Campos"
             3 -> "Lago/Bosque"
-            4 -> "Galería"
+            4 -> "Desierto"
+            5 -> "Ciudad"
+            6 -> "Playa"
+            7 -> "Galería"
             else -> "Degradado"
         }
         summarySunny.text = Html.fromHtml(
