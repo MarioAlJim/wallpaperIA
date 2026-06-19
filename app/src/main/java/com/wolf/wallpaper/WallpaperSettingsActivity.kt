@@ -67,6 +67,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
     }
 
+    private val pickSunnyImageLauncher = registerForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        if (uri != null) {
+            saveCustomSunnyBackground(uri)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
@@ -290,6 +298,40 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setSunnyTheme(position)
         }
 
+        val sunDirections = arrayOf("De Izquierda a Derecha", "De Derecha a Izquierda", "Estático")
+        setupDropdown(
+            R.id.spinnerSunPathDirection,
+            sunDirections,
+            configManager.getSunPathDirection()
+        ) { position ->
+            configManager.setSunPathDirection(position)
+            updateSunMoveSpeedSliderVisibility(position)
+        }
+
+        setupSlider(
+            R.id.seekBarSunMoveSpeed,
+            R.id.textViewSunMoveSpeedValue,
+            configManager.getSunMoveSpeed()
+        ) { value ->
+            configManager.setSunMoveSpeed(value)
+        }
+        updateSunMoveSpeedSliderVisibility(configManager.getSunPathDirection())
+
+        val sunnyBackgrounds = arrayOf("Solo degradado", "Montañas", "Campos de Trigo", "Lago y Bosque", "Imagen de la Galería")
+        setupDropdown(
+            R.id.spinnerSunnyBackground,
+            sunnyBackgrounds,
+            configManager.getSunnyBackgroundIndex()
+        ) { position ->
+            configManager.setSunnyBackgroundIndex(position)
+            updateCustomSunnyBackgroundViewsVisibility(position)
+        }
+
+        findViewById<Button>(R.id.btnSelectCustomSunnyBg)?.setOnClickListener {
+            pickSunnyImageLauncher.launch("image/*")
+        }
+        updateCustomSunnyBackgroundViewsVisibility(configManager.getSunnyBackgroundIndex())
+
         // 4d. Setup TabLayout Weather Selector
         val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
         val initialActiveEffect = configManager.getActiveEffect()
@@ -351,7 +393,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             cardBackground.visibility = View.VISIBLE
             cardSunny.visibility = View.GONE
         } else { // Sunny
-            cardCloudsWind.visibility = View.GONE
+            cardCloudsWind.visibility = View.VISIBLE
             cardRain.visibility = View.GONE
             cardLightning.visibility = View.GONE
             cardBackground.visibility = View.GONE
@@ -399,6 +441,67 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         } else {
             btnSelect.visibility = View.GONE
             tvStatus.visibility = View.GONE
+        }
+    }
+
+    private fun saveCustomSunnyBackground(uri: android.net.Uri) {
+        try {
+            val inputStream = contentResolver.openInputStream(uri) ?: return
+            val outputFile = java.io.File(filesDir, "custom_sunny_background.png")
+            inputStream.use { input ->
+                java.io.FileOutputStream(outputFile).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            configManager.setSunnyBackgroundIndex(4)
+            updateCustomSunnyBackgroundViewsVisibility(4)
+            updateSummaries()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun updateCustomSunnyBackgroundViewsVisibility(position: Int) {
+        val btnSelect = findViewById<Button>(R.id.btnSelectCustomSunnyBg) ?: return
+        val tvStatus = findViewById<TextView>(R.id.tvCustomSunnyBgStatus) ?: return
+
+        val parentView = btnSelect.parent as? ViewGroup
+        if (parentView != null) {
+            TransitionManager.beginDelayedTransition(parentView, AutoTransition().apply {
+                duration = 200
+            })
+        }
+
+        if (position == 4) {
+            btnSelect.visibility = View.VISIBLE
+            tvStatus.visibility = View.VISIBLE
+            val file = java.io.File(filesDir, "custom_sunny_background.png")
+            if (file.exists()) {
+                tvStatus.text = "Imagen de galería cargada correctamente"
+            } else {
+                tvStatus.text = "Ninguna imagen seleccionada"
+            }
+        } else {
+            btnSelect.visibility = View.GONE
+            tvStatus.visibility = View.GONE
+        }
+    }
+
+    private fun updateSunMoveSpeedSliderVisibility(direction: Int) {
+        val layout = findViewById<View>(R.id.layoutSunMoveSpeed) ?: return
+        val slider = findViewById<View>(R.id.seekBarSunMoveSpeed) ?: return
+        val parent = layout.parent as? ViewGroup
+        if (parent != null) {
+            TransitionManager.beginDelayedTransition(parent, AutoTransition().apply {
+                duration = 200
+            })
+        }
+        if (direction == 2) { // Stationary
+            layout.visibility = View.GONE
+            slider.visibility = View.GONE
+        } else {
+            layout.visibility = View.VISIBLE
+            slider.visibility = View.VISIBLE
         }
     }
 
@@ -512,6 +615,15 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 }
                 textView.text = "$value% • $desc"
             }
+            R.id.seekBarSunMoveSpeed -> {
+                val desc = when {
+                    value <= 20 -> "Lento"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Rápido"
+                    else -> "Extremo"
+                }
+                textView.text = "$value% • $desc"
+            }
         }
     }
 
@@ -599,16 +711,28 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         )
 
         // 5. Sunny summary
-        val sunSize = configManager.getSunSize()
-        val sunSpeed = configManager.getSunSpeed()
         val sunnyThemeText = when (configManager.getSunnyTheme()) {
-            0 -> "Mediodía Celeste"
-            1 -> "Atardecer Dorado"
-            2 -> "Anochecer Púrpura"
-            else -> "Mediodía Celeste"
+            0 -> "Celeste"
+            1 -> "Dorado"
+            2 -> "Púrpura"
+            else -> "Celeste"
+        }
+        val sunDirText = when (configManager.getSunPathDirection()) {
+            0 -> "I-D"
+            1 -> "D-I"
+            2 -> "Estático"
+            else -> "Estático"
+        }
+        val sunnyBgText = when (configManager.getSunnyBackgroundIndex()) {
+            0 -> "Degradado"
+            1 -> "Montañas"
+            2 -> "Campos"
+            3 -> "Lago/Bosque"
+            4 -> "Galería"
+            else -> "Degradado"
         }
         summarySunny.text = Html.fromHtml(
-            "Tamaño: <font color='$accentColor'>$sunSize%</font> • Pulso: <font color='$accentColor'>$sunSpeed%</font> • Tema: <font color='$accentColor'>$sunnyThemeText</font>",
+            "Tema: <font color='$accentColor'>$sunnyThemeText</font> • Sol: <font color='$accentColor'>$sunDirText</font> • Fondo: <font color='$accentColor'>$sunnyBgText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
     }

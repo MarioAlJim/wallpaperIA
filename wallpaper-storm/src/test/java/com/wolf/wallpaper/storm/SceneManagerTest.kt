@@ -2,6 +2,7 @@ package com.wolf.wallpaper.storm
 
 import android.content.Context
 import com.wolf.wallpaper.core.ConfigProvider
+import com.wolf.wallpaper.core.Cloud
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -31,6 +32,9 @@ class SceneManagerTest {
         var mockSunSize = 50
         var mockSunSpeed = 50
         var mockSunnyTheme = 0
+        var mockSunPathDirection = 0
+        var mockSunMoveSpeed = 50
+        var mockSunnyBackgroundIndex = 0
  
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -52,6 +56,9 @@ class SceneManagerTest {
         override fun getSunSize(): Int = mockSunSize
         override fun getSunSpeed(): Int = mockSunSpeed
         override fun getSunnyTheme(): Int = mockSunnyTheme
+        override fun getSunPathDirection(): Int = mockSunPathDirection
+        override fun getSunMoveSpeed(): Int = mockSunMoveSpeed
+        override fun getSunnyBackgroundIndex(): Int = mockSunnyBackgroundIndex
     }
 
     @Test
@@ -545,8 +552,10 @@ class SceneManagerTest {
             assertTrue("Clouds should be marked as fading out", c.isFadingOut)
         }
 
-        // Simulate time to finish fading out (6.0 seconds now since fadeSpeed is 90% slower)
-        sceneManager.update(6.0f)
+        // Simulate time to finish fading out (6.0 seconds total, in smaller steps of 0.1s to avoid boundary teleports)
+        for (i in 0 until 60) {
+            sceneManager.update(0.1f)
+        }
         // They should be removed from the sceneManager's list entirely
         assertTrue("Faded out clouds should be removed from list", sceneManager.getClouds().isEmpty())
     }

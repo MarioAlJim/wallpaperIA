@@ -6,6 +6,8 @@ import android.opengl.GLES30
 import android.opengl.GLUtils
 import android.opengl.Matrix
 import com.wolf.wallpaper.core.GLRenderer
+import com.wolf.wallpaper.core.Cloud
+import com.wolf.wallpaper.core.StormObject
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -256,6 +258,8 @@ class StormRenderer(
         val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
         val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
+        val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
 
         var maxIntensity = 0f
         var resolvedColor = floatArrayOf(0f, 0f, 0f)

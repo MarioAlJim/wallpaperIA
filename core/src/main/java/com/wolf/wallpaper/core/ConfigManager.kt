@@ -30,6 +30,9 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUN_SIZE = "sun_size"
         const val KEY_SUN_SPEED = "sun_speed"
         const val KEY_SUNNY_THEME = "sunny_theme"
+        const val KEY_SUN_PATH_DIRECTION = "sun_path_direction"
+        const val KEY_SUN_MOVE_SPEED = "sun_move_speed"
+        const val KEY_SUNNY_BACKGROUND_INDEX = "sunny_background_index"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -53,6 +56,9 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUN_SIZE = 50
         const val DEFAULT_SUN_SPEED = 50
         const val DEFAULT_SUNNY_THEME = 0
+        const val DEFAULT_SUN_PATH_DIRECTION = 0
+        const val DEFAULT_SUN_MOVE_SPEED = 50
+        const val DEFAULT_SUNNY_BACKGROUND_INDEX = 0
     }
 
     override fun getCloudDensity(): Int {
@@ -214,5 +220,29 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setSunnyTheme(theme: Int) {
         prefs.edit().putInt(KEY_SUNNY_THEME, theme.coerceIn(0, 2)).apply()
+    }
+
+    override fun getSunPathDirection(): Int {
+        return prefs.getInt(KEY_SUN_PATH_DIRECTION, DEFAULT_SUN_PATH_DIRECTION)
+    }
+
+    fun setSunPathDirection(direction: Int) {
+        prefs.edit().putInt(KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 2)).apply()
+    }
+
+    override fun getSunMoveSpeed(): Int {
+        return prefs.getInt(KEY_SUN_MOVE_SPEED, DEFAULT_SUN_MOVE_SPEED)
+    }
+
+    fun setSunMoveSpeed(speed: Int) {
+        prefs.edit().putInt(KEY_SUN_MOVE_SPEED, speed.coerceIn(0, 100)).apply()
+    }
+
+    override fun getSunnyBackgroundIndex(): Int {
+        return prefs.getInt(KEY_SUNNY_BACKGROUND_INDEX, DEFAULT_SUNNY_BACKGROUND_INDEX)
+    }
+
+    fun setSunnyBackgroundIndex(index: Int) {
+        prefs.edit().putInt(KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 4)).apply()
     }
 }

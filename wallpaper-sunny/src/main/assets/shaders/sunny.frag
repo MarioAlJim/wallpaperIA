@@ -9,6 +9,7 @@ uniform float uAspectRatio;
 uniform float uSunSize; // 0.1 to 0.35
 uniform float uSunSpeed; // speed coefficient
 uniform int uTheme; // 0: Noon Blue, 1: Sunset Orange, 2: Purple Dusk
+uniform vec2 uSunPos;
 
 void main() {
     // 1. Sky Gradient based on Theme
@@ -39,10 +40,9 @@ void main() {
     vec3 skyColor = mix(skyBottom, skyTop, tSky);
 
     // 2. Sun setup
-    vec2 sunPos = vec2(0.35, 0.45);
     vec2 uv = vec2(vPosition.x * uAspectRatio, vPosition.y);
     
-    float dist = distance(uv, sunPos * uAspectRatio);
+    float dist = distance(uv, uSunPos * uAspectRatio);
     
     // Pulsating radius based on uSunSize and uSunSpeed
     float pulse = sin(uTime * uSunSpeed) * 0.02 * (uSunSize / 0.20);

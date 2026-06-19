@@ -23,4 +23,7 @@ interface ConfigProvider {
     fun getSunSize(): Int // 0-100
     fun getSunSpeed(): Int // 0-100
     fun getSunnyTheme(): Int // 0: Noon Blue, 1: Sunset Orange, 2: Purple Dusk
+    fun getSunPathDirection(): Int // 0: Left-to-Right, 1: Right-to-Left, 2: Stationary
+    fun getSunMoveSpeed(): Int // 0-100
+    fun getSunnyBackgroundIndex(): Int // 0: None, 1: Mountains, 2: Fields, 3: Lake/Forest, 4: Gallery
 }

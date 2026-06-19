@@ -1,6 +1,7 @@
 package com.wolf.wallpaper.storm
 
 import kotlin.random.Random
+import com.wolf.wallpaper.core.StormObject
 
 class RainDrop(
     var positionX: Float,
