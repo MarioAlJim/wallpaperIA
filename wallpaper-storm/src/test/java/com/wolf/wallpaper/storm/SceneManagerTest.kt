@@ -59,6 +59,17 @@ class SceneManagerTest {
         override fun getSunPathDirection(): Int = mockSunPathDirection
         override fun getSunMoveSpeed(): Int = mockSunMoveSpeed
         override fun getSunnyBackgroundIndex(): Int = mockSunnyBackgroundIndex
+        override fun getSunStationaryPosition(): Int = 0
+        override fun getSunCustomX(): Int = 0
+        override fun getSunCustomY(): Int = 0
+        override fun getSunnyCustomSkyTopColor(): Int = 0
+        override fun getSunnyCustomSkyBottomColor(): Int = 0
+        override fun isSunnyGodRaysEnabled(): Boolean = false
+        override fun getSunnyGodRaysIntensity(): Int = 0
+        override fun isSunnyLensFlareEnabled(): Boolean = false
+        override fun getSunnyLensFlareIntensity(): Int = 0
+        override fun isSunnyGyroEnabled(): Boolean = false
+        override fun isSunnyTouchBurstEnabled(): Boolean = false
     }
 
     @Test
@@ -381,10 +392,10 @@ class SceneManagerTest {
             assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
             
             // 2. Length should be scaled by z
-            // Base length formula: (Random.nextFloat() * 0.05f + 0.03f) * z
-            // Min base length = 0.03f, Max base length = 0.08f
-            val minExpectedLength = 0.03f * drop.z - 0.001f
-            val maxExpectedLength = 0.08f * drop.z + 0.001f
+            // Base length formula: (Random.nextFloat() * 0.07f + 0.05f) * z
+            // Min base length = 0.05f, Max base length = 0.12f
+            val minExpectedLength = 0.05f * drop.z - 0.001f
+            val maxExpectedLength = 0.12f * drop.z + 0.001f
             assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
             
             // 3. Velocity should be scaled by z

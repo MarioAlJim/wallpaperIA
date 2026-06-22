@@ -59,7 +59,7 @@ class RainDrop(
         updateVelocity(windAngle, rainSpeed)
         
         // Random length scaled by z to simulate motion blur variety with depth
-        length = (Random.nextFloat() * 0.05f + 0.03f) * z
+        length = (Random.nextFloat() * 0.07f + 0.05f) * z
         
         // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
         val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
