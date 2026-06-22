@@ -22,6 +22,7 @@ class StormRenderer(
     private var rainProgram = 0
     private var lightningProgram = 0
     private var backgroundProgram = 0
+    private var elapsedTime = 0f
 
     // Texture IDs
     private val cloudTextures = mutableListOf<Int>()
@@ -189,6 +190,7 @@ class StormRenderer(
     }
 
     override fun onUpdate(deltaTime: Float) {
+        elapsedTime += deltaTime
         sceneManager.update(deltaTime)
     }
 
@@ -698,6 +700,11 @@ class StormRenderer(
         val flashIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashIntensity")
         val flashColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashColor")
         val textureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
+        val timeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
+        val aspectHandle = GLES30.glGetUniformLocation(backgroundProgram, "uAspectRatio")
+        val dropletsEnabledHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsEnabled")
+        val dropletsSizeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsSize")
+        val rainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
 
         backgroundQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, backgroundQuadBuffer)
@@ -758,6 +765,13 @@ class StormRenderer(
 
         GLES30.glUniform1f(flashIntensityHandle, maxIntensity)
         GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
+        GLES30.glUniform1f(timeHandle, elapsedTime)
+        GLES30.glUniform1f(aspectHandle, screenAspect)
+        GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
+        val sizeFactor = sceneManager.getScreenDropletsSize() / 100f
+        GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
+        val rainColor = getRainColor(sceneManager.getRainColorIndex())
+        GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 

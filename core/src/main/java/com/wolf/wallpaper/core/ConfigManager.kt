@@ -44,6 +44,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUNNY_LENS_FLARE_INTENSITY = "sunny_lens_flare_intensity"
         const val KEY_SUNNY_GYRO_ENABLED = "sunny_gyro_enabled"
         const val KEY_SUNNY_TOUCH_BURST_ENABLED = "sunny_touch_burst_enabled"
+        const val KEY_SCREEN_DROPLETS_ENABLED = "screen_droplets_enabled"
+        const val KEY_SCREEN_DROPLETS_SIZE = "screen_droplets_size"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -81,6 +83,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUNNY_LENS_FLARE_INTENSITY = 50
         const val DEFAULT_SUNNY_GYRO_ENABLED = true
         const val DEFAULT_SUNNY_TOUCH_BURST_ENABLED = true
+        const val DEFAULT_SCREEN_DROPLETS_ENABLED = true
+        const val DEFAULT_SCREEN_DROPLETS_SIZE = 100
     }
 
     override fun getCloudDensity(): Int {
@@ -354,5 +358,21 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setSunnyTouchBurstEnabled(enabled: Boolean) {
         prefs.edit().putBoolean(KEY_SUNNY_TOUCH_BURST_ENABLED, enabled).apply()
+    }
+
+    override fun isScreenDropletsEnabled(): Boolean {
+        return prefs.getBoolean(KEY_SCREEN_DROPLETS_ENABLED, DEFAULT_SCREEN_DROPLETS_ENABLED)
+    }
+
+    fun setScreenDropletsEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_SCREEN_DROPLETS_ENABLED, enabled).apply()
+    }
+
+    override fun getScreenDropletsSize(): Int {
+        return prefs.getInt(KEY_SCREEN_DROPLETS_SIZE, DEFAULT_SCREEN_DROPLETS_SIZE)
+    }
+
+    fun setScreenDropletsSize(size: Int) {
+        prefs.edit().putInt(KEY_SCREEN_DROPLETS_SIZE, size.coerceIn(10, 200)).apply()
     }
 }

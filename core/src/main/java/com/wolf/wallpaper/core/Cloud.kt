@@ -11,7 +11,7 @@ class Cloud(
     var speedFactor: Float,
     var scale: Float,
     var opacity: Float,
-    val textureIndex: Int
+    var textureIndex: Int
 ) : StormObject {
 
     var z: Float = 1.0f
@@ -68,7 +68,7 @@ class Cloud(
         // Rendering is coordinated by StormRenderer using the Cloud attributes
     }
 
-    fun reset(startX: Float, aspectRatio: Float, isSunny: Boolean = false) {
+    fun reset(startX: Float, aspectRatio: Float, isSunny: Boolean = false, textureCount: Int = 0) {
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
@@ -92,5 +92,9 @@ class Cloud(
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
         onlyGrows = Random.nextBoolean()
+
+        if (textureCount > 1) {
+            textureIndex = Random.nextInt(textureCount)
+        }
     }
 }

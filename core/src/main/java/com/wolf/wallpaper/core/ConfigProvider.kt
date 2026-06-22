@@ -39,5 +39,8 @@ interface ConfigProvider {
     
     fun isSunnyGyroEnabled(): Boolean
     fun isSunnyTouchBurstEnabled(): Boolean
+    
+    fun isScreenDropletsEnabled(): Boolean
+    fun getScreenDropletsSize(): Int
 }
 

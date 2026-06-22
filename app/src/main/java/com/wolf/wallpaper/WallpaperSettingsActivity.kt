@@ -180,6 +180,27 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setRainColorIndex(position)
         }
 
+        val switchScreenDroplets = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchScreenDroplets)
+        val layoutScreenDropletsSize = findViewById<android.view.View>(R.id.layoutScreenDropletsSize)
+        if (switchScreenDroplets != null) {
+            val isEnabled = configManager.isScreenDropletsEnabled()
+            switchScreenDroplets.isChecked = isEnabled
+            layoutScreenDropletsSize?.visibility = if (isEnabled) android.view.View.VISIBLE else android.view.View.GONE
+            switchScreenDroplets.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setScreenDropletsEnabled(isChecked)
+                layoutScreenDropletsSize?.visibility = if (isChecked) android.view.View.VISIBLE else android.view.View.GONE
+                updateSummaries()
+            }
+        }
+
+        setupSlider(
+            R.id.seekBarScreenDropletsSize,
+            R.id.textViewScreenDropletsSizeValue,
+            configManager.getScreenDropletsSize()
+        ) { value ->
+            configManager.setScreenDropletsSize(value)
+        }
+
         // 4. Setup Rayos Controls
         setupSlider(
             R.id.seekBarLightningFrequency,
@@ -1005,6 +1026,16 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.seekBarRainSpeed -> {
                 textView.text = "$value%"
             }
+            R.id.seekBarScreenDropletsSize -> {
+                val desc = when {
+                    value < 50 -> "Pequeñas"
+                    value < 90 -> "Medianas"
+                    value <= 110 -> "Estándar"
+                    value <= 160 -> "Grandes"
+                    else -> "Gigantes"
+                }
+                textView.text = "$value% • $desc"
+            }
             R.id.seekBarLightningDuration -> {
                 val desc = when {
                     value <= 20 -> "Corto"
@@ -1119,8 +1150,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Azul"
         }
         val rainSpeed = configManager.getRainSpeed()
+        val screenDropletsText = if (configManager.isScreenDropletsEnabled()) {
+            "Activas (${configManager.getScreenDropletsSize()}%)"
+        } else {
+            "Desactivadas"
+        }
         summaryRain.text = Html.fromHtml(
-            "Intensidad: <font color='$accentColor'>$rainIntName</font> • Color: <font color='$accentColor'>$rainColorText</font> • Vel: <font color='$accentColor'>$rainSpeed%</font>",
+            "Intensidad: <font color='$accentColor'>$rainIntName</font> • Color: <font color='$accentColor'>$rainColorText</font> • Vel: <font color='$accentColor'>$rainSpeed%</font> • Gotas Pantalla: <font color='$accentColor'>$screenDropletsText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 

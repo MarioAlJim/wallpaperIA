@@ -51,8 +51,9 @@ class SceneManager(
         aspectRatio = if (height > 0) width.toFloat() / height.toFloat() else 1.0f
         
         // Re-align objects to new aspect ratio coordinates
+        val textureCount = getCloudTextureCount()
         for (cloud in clouds) {
-            cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
+            cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
         }
         for (drop in rainDrops) {
             drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
@@ -85,7 +86,7 @@ class SceneManager(
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
-                cloud.reset(0f, aspectRatio)
+                cloud.reset(0f, aspectRatio, textureCount = getCloudTextureCount())
                 val newHalfWidth = cloud.scale * 1.2f
                 val windThreshold = 0.1f
                 val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -176,6 +177,8 @@ class SceneManager(
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
     fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()
     fun isCloudFlashEnabled(): Boolean = configProvider.isCloudFlashEnabled()
+    fun isScreenDropletsEnabled(): Boolean = configProvider.isScreenDropletsEnabled()
+    fun getScreenDropletsSize(): Int = configProvider.getScreenDropletsSize()
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1
@@ -270,7 +273,7 @@ class SceneManager(
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
                 val textureIndex = Random.nextInt(textureCount)
                 val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-                cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
+                cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
                 needed--
