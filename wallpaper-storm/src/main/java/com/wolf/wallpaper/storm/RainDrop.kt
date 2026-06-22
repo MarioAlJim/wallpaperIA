@@ -67,7 +67,7 @@ class RainDrop(
         
         if (spawnCloud != null) {
             val halfWidth = spawnCloud.scale * 1.2f
-            val maxOffset = halfWidth * 0.85f // Keep spawn strictly inside horizontal bounds (85% of half-width)
+            val maxOffset = halfWidth * 0.80f // Spawns only in the middle 80% of the cloud (leaves 10% margin on each side)
             spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * maxOffset
             spawnY = (spawnCloud.positionY - spawnCloud.scale * 0.45f).coerceAtMost(1.05f) // Spawn closer to the lower cloud body
         } else {
