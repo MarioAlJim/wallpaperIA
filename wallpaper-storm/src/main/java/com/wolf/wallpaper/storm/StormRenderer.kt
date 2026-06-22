@@ -244,11 +244,16 @@ class StormRenderer(
         GLES30.glClearColor(clearR, clearG, clearB, 1.0f)
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
-        // Render layered elements in order: Fondo -> Lluvia -> Rayos -> Nubes
+        // Render layered elements in order: Fondo -> Gotas de Nube -> Rayos -> Nubes -> Gotas de Borde
+        val allRain = sceneManager.getRainDrops()
+        val cloudRain = allRain.filter { it.spawnFromCloud }
+        val edgeRain = allRain.filter { !it.spawnFromCloud }
+
         drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, lightningFlashEnabled)
-        drawRain(sceneManager.getRainDrops(), sceneManager.getRainColorIndex())
+        drawRain(cloudRain, sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings, lightningFlashEnabled)
         drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
+        drawRain(edgeRain, sceneManager.getRainColorIndex())
     }
 
     private fun drawClouds(clouds: List<Cloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {

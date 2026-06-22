@@ -19,6 +19,7 @@ class RainDrop(
     var isActive = false
     var spawnX: Float = 0f
     var spawnY: Float = 1.05f
+    var spawnFromCloud: Boolean = false
     private var baseSpeed: Float = 0f
     private var angleOffset: Float = 0f
 
@@ -65,11 +66,12 @@ class RainDrop(
         // Random length scaled by z to simulate motion blur variety with depth
         length = (Random.nextFloat() * 0.07f + 0.05f) * z
         
+        spawnFromCloud = spawnCloud != null
         if (spawnCloud != null) {
             val halfWidth = spawnCloud.scale * 1.2f
             val maxOffset = halfWidth * 0.80f // Spawns only in the middle 80% of the cloud (leaves 10% margin on each side)
             spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * maxOffset
-            spawnY = (spawnCloud.positionY - spawnCloud.scale * 0.45f).coerceAtMost(1.05f) // Spawn closer to the lower cloud body
+            spawnY = spawnCloud.positionY.coerceAtMost(1.05f) // Spawn from the center of the cloud
         } else {
             // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
             val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
@@ -90,7 +92,7 @@ class RainDrop(
             isActive = true
             if (spawnCloud != null) {
                 val minY = -1.05f
-                val maxY = spawnCloud.positionY - spawnCloud.scale * 0.45f
+                val maxY = spawnCloud.positionY
                 positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else -1.05f
                 positionX = spawnX
                 if (dirY != 0f) {
