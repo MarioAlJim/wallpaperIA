@@ -46,6 +46,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUNNY_TOUCH_BURST_ENABLED = "sunny_touch_burst_enabled"
         const val KEY_SCREEN_DROPLETS_ENABLED = "screen_droplets_enabled"
         const val KEY_SCREEN_DROPLETS_SIZE = "screen_droplets_size"
+        const val KEY_RAIN_SPAWN_MODE = "rain_spawn_mode"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -85,6 +86,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUNNY_TOUCH_BURST_ENABLED = true
         const val DEFAULT_SCREEN_DROPLETS_ENABLED = true
         const val DEFAULT_SCREEN_DROPLETS_SIZE = 100
+        const val DEFAULT_RAIN_SPAWN_MODE = 0
     }
 
     override fun getCloudDensity(): Int {
@@ -374,5 +376,13 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setScreenDropletsSize(size: Int) {
         prefs.edit().putInt(KEY_SCREEN_DROPLETS_SIZE, size.coerceIn(10, 200)).apply()
+    }
+
+    override fun getRainSpawnMode(): Int {
+        return prefs.getInt(KEY_RAIN_SPAWN_MODE, DEFAULT_RAIN_SPAWN_MODE)
+    }
+
+    fun setRainSpawnMode(mode: Int) {
+        prefs.edit().putInt(KEY_RAIN_SPAWN_MODE, mode.coerceIn(0, 2)).apply()
     }
 }

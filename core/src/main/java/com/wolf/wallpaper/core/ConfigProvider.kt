@@ -42,5 +42,6 @@ interface ConfigProvider {
     
     fun isScreenDropletsEnabled(): Boolean
     fun getScreenDropletsSize(): Int
+    fun getRainSpawnMode(): Int // 0: Top Edge, 1: Clouds, 2: Everywhere
 }
 

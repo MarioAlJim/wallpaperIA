@@ -56,7 +56,7 @@ class SceneManager(
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
         }
         for (drop in rainDrops) {
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop())
         }
     }
 
@@ -110,7 +110,7 @@ class SceneManager(
             if (drop.positionY < -1.05f || 
                 (drop.velocityX < 0f && drop.positionX < -aspectRatio - 0.1f) ||
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f)) {
-                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false)
+                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop())
             }
         }
 
@@ -302,7 +302,7 @@ class SceneManager(
         
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true)
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop())
             rainDrops.add(drop)
         }
         
@@ -414,6 +414,20 @@ class SceneManager(
                 configProvider.getLightningDuration(),
                 isInternalOnly = false
             )
+        }
+    }
+
+    private fun getSpawnCloudForDrop(): Cloud? {
+        val activeClouds = clouds.filter { !it.isFadingOut }
+        if (activeClouds.isEmpty()) return null
+        
+        val mode = configProvider.getRainSpawnMode() // 0: Top Edge, 1: Clouds, 2: Everywhere
+        return when (mode) {
+            1 -> activeClouds.random()
+            2 -> {
+                if (Random.nextBoolean()) activeClouds.random() else null
+            }
+            else -> null
         }
     }
 }

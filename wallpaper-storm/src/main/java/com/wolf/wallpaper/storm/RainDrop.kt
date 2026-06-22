@@ -2,6 +2,7 @@ package com.wolf.wallpaper.storm
 
 import kotlin.random.Random
 import com.wolf.wallpaper.core.StormObject
+import com.wolf.wallpaper.core.Cloud
 
 class RainDrop(
     var positionX: Float,
@@ -16,6 +17,8 @@ class RainDrop(
 
     var z: Float = 1.0f
     var isActive = false
+    var spawnX: Float = 0f
+    var spawnY: Float = 1.05f
     private var baseSpeed: Float = 0f
     private var angleOffset: Float = 0f
 
@@ -27,7 +30,8 @@ class RainDrop(
         }
         if (!isActive) {
             isActive = true
-            positionY = 1.05f // Spawn just above the screen
+            positionX = spawnX
+            positionY = spawnY
         }
         positionX += velocityX * deltaTime
         positionY += velocityY * deltaTime
@@ -51,7 +55,7 @@ class RainDrop(
         dirY = if (dirLength > 0f) velocityY / dirLength else -1f
     }
 
-    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false) {
+    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: Cloud? = null) {
         z = Random.nextFloat() * 0.8f + 0.2f
         baseSpeed = Random.nextFloat() * 1.5f + 3.0f
         angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f // +/- 2.5 degrees deviation
@@ -61,27 +65,46 @@ class RainDrop(
         // Random length scaled by z to simulate motion blur variety with depth
         length = (Random.nextFloat() * 0.07f + 0.05f) * z
         
-        // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
-        val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
-        
-        // Spawn at the top with proper horizontal offset depending on velocity direction
-        if (velocityX < 0f) {
-            positionX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - aspectRatio
-        } else if (velocityX > 0f) {
-            positionX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - (aspectRatio + absHorizontalTravel)
+        if (spawnCloud != null) {
+            val halfWidth = spawnCloud.scale * 1.2f
+            spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * halfWidth
+            spawnY = (spawnCloud.positionY - spawnCloud.scale * 0.4f).coerceAtMost(1.05f)
         } else {
-            positionX = Random.nextFloat() * 2f * aspectRatio - aspectRatio
+            // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
+            val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
+            
+            // Spawn at the top with proper horizontal offset depending on velocity direction
+            if (velocityX < 0f) {
+                spawnX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - aspectRatio
+            } else if (velocityX > 0f) {
+                spawnX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - (aspectRatio + absHorizontalTravel)
+            } else {
+                spawnX = Random.nextFloat() * 2f * aspectRatio - aspectRatio
+            }
+            spawnY = 1.05f
         }
         
         if (startOnScreen) {
             spawnDelay = 0f
             isActive = true
-            // Stagger position Y across the screen height
-            positionY = Random.nextFloat() * 2.1f - 1.05f
-            // Adjust positionX based on current positionY to keep it in the diagonal flow
-            if (dirY != 0f) {
-                val distanceFallen = 1.05f - positionY
-                positionX -= distanceFallen * (dirX / dirY)
+            if (spawnCloud != null) {
+                val minY = -1.05f
+                val maxY = spawnCloud.positionY - spawnCloud.scale * 0.4f
+                positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else -1.05f
+                positionX = spawnX
+                if (dirY != 0f) {
+                    val distanceFallen = spawnY - positionY
+                    positionX -= distanceFallen * (dirX / dirY)
+                }
+            } else {
+                // Stagger position Y across the screen height
+                positionY = Random.nextFloat() * 2.1f - 1.05f
+                positionX = spawnX
+                // Adjust positionX based on current positionY to keep it in the diagonal flow
+                if (dirY != 0f) {
+                    val distanceFallen = 1.05f - positionY
+                    positionX -= distanceFallen * (dirX / dirY)
+                }
             }
         } else {
             spawnDelay = Random.nextFloat() * 2.0f // up to 2 seconds delay

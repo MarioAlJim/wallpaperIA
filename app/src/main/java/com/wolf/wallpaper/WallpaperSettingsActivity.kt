@@ -178,6 +178,17 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.getRainColorIndex()
         ) { position ->
             configManager.setRainColorIndex(position)
+            updateSummaries()
+        }
+
+        val rainSpawnModes = arrayOf("Borde Superior", "Debajo de las Nubes", "Todos Lados")
+        setupDropdown(
+            R.id.spinnerRainSpawnMode,
+            rainSpawnModes,
+            configManager.getRainSpawnMode()
+        ) { position ->
+            configManager.setRainSpawnMode(position)
+            updateSummaries()
         }
 
         val switchScreenDroplets = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchScreenDroplets)
@@ -1150,13 +1161,19 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             else -> "Azul"
         }
         val rainSpeed = configManager.getRainSpeed()
+        val rainSpawnModeText = when (configManager.getRainSpawnMode()) {
+            0 -> "Borde"
+            1 -> "Nubes"
+            2 -> "Todos Lados"
+            else -> "Borde"
+        }
         val screenDropletsText = if (configManager.isScreenDropletsEnabled()) {
             "Activas (${configManager.getScreenDropletsSize()}%)"
         } else {
             "Desactivadas"
         }
         summaryRain.text = Html.fromHtml(
-            "Intensidad: <font color='$accentColor'>$rainIntName</font> • Color: <font color='$accentColor'>$rainColorText</font> • Vel: <font color='$accentColor'>$rainSpeed%</font> • Gotas Pantalla: <font color='$accentColor'>$screenDropletsText</font>",
+            "Intensidad: <font color='$accentColor'>$rainIntName</font> • Origen: <font color='$accentColor'>$rainSpawnModeText</font> • Color: <font color='$accentColor'>$rainColorText</font> • Vel: <font color='$accentColor'>$rainSpeed%</font> • Gotas Pantalla: <font color='$accentColor'>$screenDropletsText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
