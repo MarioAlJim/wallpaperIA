@@ -90,8 +90,8 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
             
             // Double the stretching effect: it went from 2.0 (V=0.6) to 3.0 (V=0.4) as it slides down (t -> 1.0)
-            // Starts as 75% circular (V=0.9) instead of 100% circular (V=1.2) at spawn
-            float currentYScale = mix(0.9, 0.4, t);
+            // Starts as 90% circular (V=1.08) instead of 75% circular (V=0.9) at spawn
+            float currentYScale = mix(1.08, 0.4, t);
             
             // Quick distance check to prune calculations:
             // Since currentYScale >= 0.4, maximum vertical extent of the droplet is radius / 0.4 = 2.5 * radius.
