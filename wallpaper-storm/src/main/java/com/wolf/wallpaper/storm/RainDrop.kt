@@ -67,8 +67,9 @@ class RainDrop(
         
         if (spawnCloud != null) {
             val halfWidth = spawnCloud.scale * 1.2f
-            spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * halfWidth
-            spawnY = (spawnCloud.positionY - spawnCloud.scale * 0.4f).coerceAtMost(1.05f)
+            val maxOffset = halfWidth * 0.85f // Keep spawn strictly inside horizontal bounds (85% of half-width)
+            spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * maxOffset
+            spawnY = (spawnCloud.positionY - spawnCloud.scale * 0.45f).coerceAtMost(1.05f) // Spawn closer to the lower cloud body
         } else {
             // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
             val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
@@ -89,7 +90,7 @@ class RainDrop(
             isActive = true
             if (spawnCloud != null) {
                 val minY = -1.05f
-                val maxY = spawnCloud.positionY - spawnCloud.scale * 0.4f
+                val maxY = spawnCloud.positionY - spawnCloud.scale * 0.45f
                 positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else -1.05f
                 positionX = spawnX
                 if (dirY != 0f) {
