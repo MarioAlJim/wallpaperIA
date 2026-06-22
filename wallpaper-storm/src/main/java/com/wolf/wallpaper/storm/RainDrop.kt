@@ -109,6 +109,7 @@ class RainDrop(
         } else {
             spawnDelay = Random.nextFloat() * 2.0f // up to 2 seconds delay
             isActive = false
+            positionX = spawnX
             positionY = 999f
         }
     }
