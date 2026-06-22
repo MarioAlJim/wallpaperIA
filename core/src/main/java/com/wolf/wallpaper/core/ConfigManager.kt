@@ -47,6 +47,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SCREEN_DROPLETS_ENABLED = "screen_droplets_enabled"
         const val KEY_SCREEN_DROPLETS_SIZE = "screen_droplets_size"
         const val KEY_RAIN_SPAWN_MODE = "rain_spawn_mode"
+        const val KEY_WIND_LINES_ENABLED = "wind_lines_enabled"
+        const val KEY_WIND_LINES_INTENSITY = "wind_lines_intensity"
         
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -87,6 +89,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SCREEN_DROPLETS_ENABLED = true
         const val DEFAULT_SCREEN_DROPLETS_SIZE = 100
         const val DEFAULT_RAIN_SPAWN_MODE = 0
+        const val DEFAULT_WIND_LINES_ENABLED = true
+        const val DEFAULT_WIND_LINES_INTENSITY = 50
     }
 
     override fun getCloudDensity(): Int {
@@ -384,5 +388,21 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     fun setRainSpawnMode(mode: Int) {
         prefs.edit().putInt(KEY_RAIN_SPAWN_MODE, mode.coerceIn(0, 2)).apply()
+    }
+
+    override fun isWindLinesEnabled(): Boolean {
+        return prefs.getBoolean(KEY_WIND_LINES_ENABLED, DEFAULT_WIND_LINES_ENABLED)
+    }
+
+    fun setWindLinesEnabled(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_WIND_LINES_ENABLED, enabled).apply()
+    }
+
+    override fun getWindLinesIntensity(): Int {
+        return prefs.getInt(KEY_WIND_LINES_INTENSITY, DEFAULT_WIND_LINES_INTENSITY)
+    }
+
+    fun setWindLinesIntensity(intensity: Int) {
+        prefs.edit().putInt(KEY_WIND_LINES_INTENSITY, intensity.coerceIn(0, 100)).apply()
     }
 }

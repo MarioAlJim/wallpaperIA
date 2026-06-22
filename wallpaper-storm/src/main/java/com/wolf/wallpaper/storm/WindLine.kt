@@ -6,71 +6,89 @@ import com.wolf.wallpaper.core.StormObject
 class WindLine(
     var positionX: Float = 0f,
     var positionY: Float = 0f,
-    var velocityX: Float = 0f,
-    var velocityY: Float = 0f,
     var length: Float = 0f,
     var dirX: Float = 0f,
-    var dirY: Float = -1f,
-    var speed: Float = 0f
+    var dirY: Float = 0f,
+    var speed: Float = 0f,
+    var z: Float = 1f,
+    var alphaMultiplier: Float = 1f,
+    var lifetime: Float = 0f,
+    var maxLifetime: Float = 0f,
+    var isActive: Boolean = false
 ) : StormObject {
-    var z: Float = 1.0f
-    var isActive = false
-    var alphaMultiplier: Float = 0f
 
     override fun update(deltaTime: Float) {
-        positionX += velocityX * deltaTime
-        positionY += velocityY * deltaTime
+        if (!isActive) return
+        
+        lifetime += deltaTime
+        if (lifetime >= maxLifetime) {
+            isActive = false
+            return
+        }
+
+        // Move line horizontally/diagonally in wind direction
+        positionX += dirX * speed * deltaTime
+        positionY += dirY * speed * deltaTime
+
+        // Dynamic stretch: length grows at the beginning, stays, then shrinks at the end
+        val progress = lifetime / maxLifetime
+        val baseLength = 0.3f + z * 0.4f // longer lines closer to viewer
+        length = when {
+            progress < 0.2f -> baseLength * (progress / 0.2f) // stretch out
+            progress > 0.8f -> baseLength * ((1f - progress) / 0.2f) // shrink back
+            else -> baseLength
+        }
     }
 
     override fun render() {
-        // Renderizado coordinado por StormRenderer
+        // Rendered by StormRenderer
     }
 
-    fun updateVelocity(windAngle: Float, windIntensity: Float) {
-        // Las líneas de viento se mueven rápido
-        val baseSpeed = 4.0f + (windIntensity / 100f) * 4.0f
-        val speedFactor = z // Más lejos -> más lento
-        val currentSpeed = baseSpeed * speedFactor
-
+    fun reset(aspectRatio: Float, windAngle: Float, windIntensity: Int) {
+        z = Random.nextFloat() * 0.8f + 0.2f // depth layer 0.2 to 1.0
+        
+        // Spawn scattered vertically on screen, mostly in top 2/3 where nubes/rain start
+        positionY = Random.nextFloat() * 1.5f - 0.5f // from -0.5 to 1.0
+        
         val angleRad = Math.toRadians(windAngle.toDouble()).toFloat()
-        velocityY = -currentSpeed * kotlin.math.cos(angleRad)
-        velocityX = currentSpeed * kotlin.math.sin(angleRad)
+        // Direction of wind: lines are horizontal but slightly tilted following wind angle
+        dirX = kotlin.math.sin(angleRad)
+        dirY = -kotlin.math.cos(angleRad)
 
-        val dirLength = kotlin.math.sqrt(velocityX * velocityX + velocityY * velocityY)
-        dirX = if (dirLength > 0f) velocityX / dirLength else 0f
-        dirY = if (dirLength > 0f) velocityY / dirLength else -1f
-    }
-
-    fun reset(aspectRatio: Float, windAngle: Float, windIntensity: Float, startOnScreen: Boolean = false) {
-        z = Random.nextFloat() * 0.7f + 0.3f // z entre 0.3 y 1.0
-        
-        // Líneas más largas y variables que las gotas normales
-        length = (Random.nextFloat() * 0.20f + 0.15f) * z
-        
-        // Multiplicador de opacidad según profundidad para un efecto sutil
-        alphaMultiplier = z * 0.25f
-
-        updateVelocity(windAngle, windIntensity)
-
-        val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
-
-        if (velocityX < 0f) {
-            positionX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - aspectRatio
-        } else if (velocityX > 0f) {
-            positionX = Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - (aspectRatio + absHorizontalTravel)
+        // Force dirX to be horizontal (mostly) or go in wind direction
+        if (kotlin.math.abs(dirX) < 0.1f) {
+            dirX = if (Random.nextBoolean()) 1f else -1f
+            dirY = 0f
         } else {
-            positionX = Random.nextFloat() * 2f * aspectRatio - aspectRatio
-        }
-
-        if (startOnScreen) {
-            positionY = Random.nextFloat() * 2.1f - 1.05f
-            if (dirY != 0f) {
-                val distanceFallen = 1.05f - positionY
-                positionX -= distanceFallen * (dirX / dirY)
+            // Normalize to make it horizontal direction mostly
+            val len = kotlin.math.sqrt(dirX * dirX + dirY * dirY)
+            if (len > 0f) {
+                dirX /= len
+                dirY /= len
             }
-        } else {
-            positionY = 1.05f
+            // Slightly tilt lines with wind angle but keep them mostly horizontal
+            dirY = dirY * 0.2f
+            val len2 = kotlin.math.sqrt(dirX * dirX + dirY * dirY)
+            if (len2 > 0f) {
+                dirX /= len2
+                dirY /= len2
+            }
         }
+
+        // Speed depends on wind intensity and depth
+        speed = (1.5f + (windIntensity / 100f) * 3.5f) * (0.6f + 0.4f * z)
+
+        // Starting position: spawn off-screen on the opposite side of wind direction so it travels across
+        if (dirX > 0f) {
+            positionX = -aspectRatio - 0.5f
+        } else {
+            positionX = aspectRatio + 0.5f
+        }
+
+        lifetime = 0f
+        maxLifetime = 0.8f + Random.nextFloat() * 1.2f // 0.8 to 2.0 seconds
+        alphaMultiplier = 0.25f + Random.nextFloat() * 0.35f // subtle semi-transparent line
         isActive = true
+        length = 0f
     }
 }

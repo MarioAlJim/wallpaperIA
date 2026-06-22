@@ -35,6 +35,8 @@ class SceneManagerTest {
         var mockSunPathDirection = 0
         var mockSunMoveSpeed = 50
         var mockSunnyBackgroundIndex = 0
+        var mockWindLinesEnabled = true
+        var mockWindLinesIntensity = 50
  
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -70,6 +72,11 @@ class SceneManagerTest {
         override fun getSunnyLensFlareIntensity(): Int = 0
         override fun isSunnyGyroEnabled(): Boolean = false
         override fun isSunnyTouchBurstEnabled(): Boolean = false
+        override fun isScreenDropletsEnabled(): Boolean = false
+        override fun getScreenDropletsSize(): Int = 100
+        override fun getRainSpawnMode(): Int = 0
+        override fun isWindLinesEnabled(): Boolean = mockWindLinesEnabled
+        override fun getWindLinesIntensity(): Int = mockWindLinesIntensity
     }
 
     @Test
@@ -126,10 +133,10 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(31, sceneManager.getRainDrops().size)
 
-        // Case 3: Intensity 100 -> 125 rain drops
+        // Case 3: Intensity 100 -> 187 rain drops
         mockConfig.mockRainIntensity = 100
         sceneManager.update(0.016f)
-        assertEquals(125, sceneManager.getRainDrops().size)
+        assertEquals(187, sceneManager.getRainDrops().size)
     }
 
     @Test
@@ -723,5 +730,35 @@ class SceneManagerTest {
 
         assertEquals(0f, bottomX, 0.05f)
         assertEquals(0f, bottomY, 0.05f)
+    }
+
+    @Test
+    fun testWindLinesSimulation() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        // 1. Enable wind lines and check generation count
+        mockConfig.mockWindLinesEnabled = true
+        mockConfig.mockWindLinesIntensity = 50
+        sceneManager.update(0.016f)
+
+        val targetCount = (50f / 100f * 8).toInt().coerceIn(1, 15) // should be 4
+        assertEquals(targetCount, sceneManager.getWindLines().size)
+
+        // Verify properties
+        val firstLine = sceneManager.getWindLines()[0]
+        assertTrue(firstLine.isActive)
+        assertTrue(firstLine.length >= 0f)
+
+        // 2. Update to check travel movement
+        val initialX = firstLine.positionX
+        sceneManager.update(0.1f)
+        // positionX should change based on dirX and speed
+        assertTrue(firstLine.positionX != initialX)
+
+        // 3. Disable wind lines and check list is empty
+        mockConfig.mockWindLinesEnabled = false
+        sceneManager.update(0.016f)
+        assertEquals(0, sceneManager.getWindLines().size)
     }
 }

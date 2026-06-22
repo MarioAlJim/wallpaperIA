@@ -151,6 +151,27 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudDynamicsSpeed(value)
         }
 
+        val switchWindLines = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchWindLines)
+        val layoutWindLinesIntensity = findViewById<android.view.View>(R.id.layoutWindLinesIntensity)
+        if (switchWindLines != null) {
+            val isEnabled = configManager.isWindLinesEnabled()
+            switchWindLines.isChecked = isEnabled
+            layoutWindLinesIntensity?.visibility = if (isEnabled) android.view.View.VISIBLE else android.view.View.GONE
+            switchWindLines.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setWindLinesEnabled(isChecked)
+                layoutWindLinesIntensity?.visibility = if (isChecked) android.view.View.VISIBLE else android.view.View.GONE
+                updateSummaries()
+            }
+        }
+
+        setupSlider(
+            R.id.seekBarWindLinesIntensity,
+            R.id.textViewWindLinesIntensityValue,
+            configManager.getWindLinesIntensity()
+        ) { value ->
+            configManager.setWindLinesIntensity(value)
+        }
+
         // 3. Setup Lluvia Controls
         val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
         val initialRainValue = configManager.getRainIntensity()
@@ -956,16 +977,113 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     }
 
     private fun setupDropdown(
-        textViewId: Int,
+        viewId: Int,
         options: Array<String>,
         initialIndex: Int,
         onSelected: (Int) -> Unit
     ) {
-        val autoCompleteTextView = findViewById<AutoCompleteTextView>(textViewId)
-        autoCompleteTextView.setup(options, initialIndex) { position ->
-            onSelected(position)
-            updateSummaries()
+        val view = findViewById<View>(viewId)
+        if (view is LinearLayout) {
+            populateCardSelector(view, options, initialIndex, onSelected)
+        } else if (view is AutoCompleteTextView) {
+            view.setup(options, initialIndex) { position ->
+                onSelected(position)
+                updateSummaries()
+            }
         }
+    }
+
+    private fun populateCardSelector(
+        container: LinearLayout,
+        options: Array<String>,
+        initialIndex: Int,
+        onSelected: (Int) -> Unit
+    ) {
+        container.removeAllViews()
+
+        val cardViews = ArrayList<com.google.android.material.card.MaterialCardView>()
+
+        val activeColor = Color.parseColor("#00E5FF")
+        val inactiveColor = Color.parseColor("#E0E0E6")
+        
+        val activeBgColor = Color.parseColor("#2D2D3D")
+        val inactiveBgColor = Color.parseColor("#21212A")
+        
+        val strokeActiveColor = Color.parseColor("#00E5FF")
+        val strokeInactiveColor = Color.parseColor("#3A3A4A")
+
+        for (i in options.indices) {
+            val optionText = options[i]
+
+            val card = com.google.android.material.card.MaterialCardView(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply {
+                    setMargins(0, 0, 10.dpToPx(), 0)
+                }
+                radius = 12.dpToPx().toFloat()
+                strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                strokeColor = strokeInactiveColor
+                cardElevation = 0f
+                setCardBackgroundColor(inactiveBgColor)
+                isClickable = true
+                isFocusable = true
+                
+                setContentPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
+            }
+
+            val tv = TextView(this).apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+                text = optionText
+                setTextColor(inactiveColor)
+                textSize = 14f
+                typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
+                gravity = android.view.Gravity.CENTER
+            }
+
+            card.addView(tv)
+            container.addView(card)
+            cardViews.add(card)
+
+            card.setOnClickListener {
+                for (j in cardViews.indices) {
+                    val isSelected = (j == i)
+                    val c = cardViews[j]
+                    val t = c.getChildAt(0) as TextView
+                    if (isSelected) {
+                        c.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                        c.strokeColor = strokeActiveColor
+                        c.setCardBackgroundColor(activeBgColor)
+                        t.setTextColor(activeColor)
+                    } else {
+                        c.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                        c.strokeColor = strokeInactiveColor
+                        c.setCardBackgroundColor(inactiveBgColor)
+                        t.setTextColor(inactiveColor)
+                    }
+                }
+                onSelected(i)
+                updateSummaries()
+            }
+        }
+
+        if (initialIndex in options.indices) {
+            val selectedCard = cardViews[initialIndex]
+            val tv = selectedCard.getChildAt(0) as TextView
+            selectedCard.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+            selectedCard.strokeColor = strokeActiveColor
+            selectedCard.setCardBackgroundColor(activeBgColor)
+            tv.setTextColor(activeColor)
+        }
+    }
+
+    private fun Int.dpToPx(): Int {
+        val density = resources.displayMetrics.density
+        return (this * density).toInt()
     }
 
     private fun setupSlider(
@@ -1029,6 +1147,9 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 textView.text = "$value% • $desc"
             }
             R.id.seekBarWindIntensity -> {
+                textView.text = "$value%"
+            }
+            R.id.seekBarWindLinesIntensity -> {
                 textView.text = "$value%"
             }
             R.id.seekBarCloudDynamicsSpeed -> {
@@ -1137,8 +1258,10 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             2 -> "Derecha"
             else -> "Izquierda"
         }
+        val windLinesEnabled = configManager.isWindLinesEnabled()
+        val windLinesText = if (windLinesEnabled) "Sí (${configManager.getWindLinesIntensity()}%)" else "No"
         summaryCloudsWind.text = Html.fromHtml(
-            "Densidad: <font color='$accentColor'>$cloudDensity%</font> • Viento: <font color='$accentColor'>$windDirText</font> ($windIntensity%)",
+            "Densidad: <font color='$accentColor'>$cloudDensity%</font> • Viento: <font color='$accentColor'>$windDirText</font> ($windIntensity%) • Líneas: <font color='$accentColor'>$windLinesText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 

@@ -11,6 +11,7 @@ class SceneManager(
 ) {
     private val clouds = mutableListOf<Cloud>()
     private val rainDrops = mutableListOf<RainDrop>()
+    private val windLines = mutableListOf<WindLine>()
     val lightnings = List(6) { Lightning() }
     val lightning: Lightning get() = lightnings[0]
     
@@ -58,6 +59,7 @@ class SceneManager(
         for (drop in rainDrops) {
             drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop())
         }
+        windLines.clear()
     }
 
     fun update(deltaTime: Float) {
@@ -111,6 +113,30 @@ class SceneManager(
                 (drop.velocityX < 0f && drop.positionX < -aspectRatio - 0.1f) ||
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f)) {
                 drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop())
+            }
+        }
+
+        // 2b. Update Wind Lines
+        val targetWindLinesCount = if (configProvider.isWindLinesEnabled()) {
+            (configProvider.getWindLinesIntensity() / 100f * 8).toInt().coerceIn(1, 15)
+        } else {
+            0
+        }
+
+        while (windLines.size < targetWindLinesCount) {
+            val line = WindLine()
+            line.reset(aspectRatio, currentWindAngle, windIntensity)
+            line.lifetime = Random.nextFloat() * line.maxLifetime
+            windLines.add(line)
+        }
+        while (windLines.size > targetWindLinesCount) {
+            windLines.removeAt(windLines.size - 1)
+        }
+
+        for (line in windLines) {
+            line.update(deltaTime)
+            if (!line.isActive) {
+                line.reset(aspectRatio, currentWindAngle, windIntensity)
             }
         }
 
@@ -179,6 +205,8 @@ class SceneManager(
     fun isCloudFlashEnabled(): Boolean = configProvider.isCloudFlashEnabled()
     fun isScreenDropletsEnabled(): Boolean = configProvider.isScreenDropletsEnabled()
     fun getScreenDropletsSize(): Int = configProvider.getScreenDropletsSize()
+    fun getWindLines(): List<WindLine> = windLines
+    fun isWindLinesEnabled(): Boolean = configProvider.isWindLinesEnabled()
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1

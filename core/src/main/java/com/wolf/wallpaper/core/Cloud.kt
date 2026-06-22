@@ -74,7 +74,7 @@ class Cloud(
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         
         val minScale = 0.43125f
-        val maxScale = if (isSunny) 0.8f else 2.34375f
+        val maxScale = if (isSunny) 0.6f else 1.7578125f
         baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
         scale = baseScale
         

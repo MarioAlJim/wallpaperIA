@@ -22,6 +22,7 @@ class StormRenderer(
     private var rainProgram = 0
     private var lightningProgram = 0
     private var backgroundProgram = 0
+    private var windProgram = 0
     private var elapsedTime = 0f
 
     // Texture IDs
@@ -72,6 +73,10 @@ class StormRenderer(
         val backgroundVert = readAssetFile(context, "shaders/background.vert")
         val backgroundFrag = readAssetFile(context, "shaders/background.frag")
         backgroundProgram = createProgram(backgroundVert, backgroundFrag)
+
+        val windVert = readAssetFile(context, "shaders/wind.vert")
+        val windFrag = readAssetFile(context, "shaders/wind.frag")
+        windProgram = createProgram(windVert, windFrag)
 
         // Load textures from assets
         cloudTextures.clear()
@@ -252,6 +257,9 @@ class StormRenderer(
         drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, lightningFlashEnabled)
         drawRain(cloudRain, sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings, lightningFlashEnabled)
+        if (sceneManager.isWindLinesEnabled()) {
+            drawWindLines(sceneManager.getWindLines())
+        }
         drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
         drawRain(edgeRain, sceneManager.getRainColorIndex())
     }
@@ -438,6 +446,92 @@ class StormRenderer(
 
         // Draw all drops as quads using a single draw call (GL_TRIANGLES)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, sortedDrops.size * 6)
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+        GLES30.glDisableVertexAttribArray(2)
+    }
+
+    private fun drawWindLines(windLines: List<WindLine>) {
+        if (windLines.isEmpty()) return
+
+        GLES30.glUseProgram(windProgram)
+        val mvpMatrixHandle = GLES30.glGetUniformLocation(windProgram, "uMVPMatrix")
+        val colorHandle = GLES30.glGetUniformLocation(windProgram, "uWindColor")
+
+        Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
+
+        val windColor = floatArrayOf(0.85f, 0.90f, 0.98f, 0.35f)
+        GLES30.glUniform4fv(colorHandle, 1, windColor, 0)
+
+        val sortedLines = windLines.sortedBy { it.z }
+
+        val vertexData = FloatArray(sortedLines.size * 8)
+        var idx = 0
+        for (line in sortedLines) {
+            val progress = line.lifetime / line.maxLifetime
+            val fadeIn = (progress / 0.15f).coerceIn(0f, 1f)
+            val fadeOut = ((1f - progress) / 0.15f).coerceIn(0f, 1f)
+            val lineAlpha = fadeIn * fadeOut * line.alphaMultiplier
+
+            // Start vertex
+            vertexData[idx++] = line.positionX
+            vertexData[idx++] = line.positionY
+            vertexData[idx++] = line.z
+            vertexData[idx++] = lineAlpha
+
+            // End vertex
+            vertexData[idx++] = line.positionX + line.dirX * line.length
+            vertexData[idx++] = line.positionY + line.dirY * line.length
+            vertexData[idx++] = line.z
+            vertexData[idx++] = lineAlpha * 0.25f
+        }
+
+        val windBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer().apply {
+                put(vertexData)
+                position(0)
+            }
+
+        windBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, windBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        windBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 1, GLES30.GL_FLOAT, false, 16, windBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        windBuffer.position(3)
+        GLES30.glVertexAttribPointer(2, 1, GLES30.GL_FLOAT, false, 16, windBuffer)
+        GLES30.glEnableVertexAttribArray(2)
+
+        var countFar = 0
+        var countMedium = 0
+        var countNear = 0
+        for (line in sortedLines) {
+            when {
+                line.z < 0.4f -> countFar++
+                line.z < 0.7f -> countMedium++
+                else -> countNear++
+            }
+        }
+
+        if (countFar > 0) {
+            GLES30.glLineWidth(1.0f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, 0, countFar * 2)
+        }
+
+        if (countMedium > 0) {
+            GLES30.glLineWidth(2.0f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, countFar * 2, countMedium * 2)
+        }
+
+        if (countNear > 0) {
+            GLES30.glLineWidth(3.0f)
+            GLES30.glDrawArrays(GLES30.GL_LINES, (countFar + countMedium) * 2, countNear * 2)
+        }
 
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
