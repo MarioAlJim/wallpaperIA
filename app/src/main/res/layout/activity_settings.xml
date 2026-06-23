@@ -204,25 +204,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerWindDirection"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -498,25 +494,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerRainIntensity"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -577,25 +569,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerRainColor"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -615,25 +603,21 @@
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerRainSpawnMode"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -875,25 +859,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerLightningColor"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -995,25 +975,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerCloudFlashColor"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -1224,25 +1200,21 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                        android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
                             android:id="@+id/spinnerBackgroundMode"
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:inputType="none"
-                            android:textColor="#E0E0E6"
-                            android:textSize="15sp"
-                            android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <!-- Custom Gallery Selector Button -->
                     <Button

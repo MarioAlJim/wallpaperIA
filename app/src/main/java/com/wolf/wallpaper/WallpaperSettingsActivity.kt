@@ -20,6 +20,15 @@ import android.widget.EditText
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.RadialGradient
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.slider.Slider
 import com.google.android.material.tabs.TabLayout
@@ -62,6 +71,7 @@ private fun AutoCompleteTextView.setup(options: Array<String>, initialIndex: Int
 class WallpaperSettingsActivity : AppCompatActivity() {
 
     private lateinit var configManager: ConfigManager
+    private val backgroundBitmapCache = HashMap<String, Bitmap>()
 
     private val pickImageLauncher = registerForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.GetContent()
@@ -126,13 +136,14 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudDensity(value)
         }
 
-        val windDirections = arrayOf("Izquierda", "Vertical", "Derecha")
+        val windDirections = arrayOf("Izquierda", "Neutro", "Derecha")
         setupDropdown(
             R.id.spinnerWindDirection,
             windDirections,
             configManager.getWindDirection()
         ) { position ->
             configManager.setWindDirection(position)
+            refreshStormCardPreviews()
         }
 
         setupSlider(
@@ -173,16 +184,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         // 3. Setup Lluvia Controls
-        val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
-        val initialRainValue = configManager.getRainIntensity()
-        val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
-        setupDropdown(
-            R.id.spinnerRainIntensity,
-            rainIntensities,
-            initialRainProgress
-        ) { position ->
-            configManager.setRainIntensity(position * 25)
-        }
+        // Rain intensity is set up dynamically in refreshStormCardPreviews()
 
         setupSlider(
             R.id.seekBarRainSpeed,
@@ -192,25 +194,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setRainSpeed(value)
         }
 
-        val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
-        setupDropdown(
-            R.id.spinnerRainColor,
-            rainColors,
-            configManager.getRainColorIndex()
-        ) { position ->
-            configManager.setRainColorIndex(position)
-            updateSummaries()
-        }
-
-        val rainSpawnModes = arrayOf("Borde Superior", "Debajo de las Nubes", "Todos Lados")
-        setupDropdown(
-            R.id.spinnerRainSpawnMode,
-            rainSpawnModes,
-            configManager.getRainSpawnMode()
-        ) { position ->
-            configManager.setRainSpawnMode(position)
-            updateSummaries()
-        }
+        // Rain color & spawn mode are set up dynamically in refreshStormCardPreviews()
 
         val switchScreenDroplets = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchScreenDroplets)
         val layoutScreenDropletsSize = findViewById<android.view.View>(R.id.layoutScreenDropletsSize)
@@ -242,14 +226,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setLightningFrequency(value)
         }
 
-        val lightningColors = arrayOf("Blanco", "Azul", "Amarillo", "Rojo", "Verde", "Morado", "Aleatorio")
-        setupDropdown(
-            R.id.spinnerLightningColor,
-            lightningColors,
-            configManager.getLightningColorIndex()
-        ) { position ->
-            configManager.setLightningColorIndex(position)
-        }
+        // Lightning color is set up dynamically in refreshStormCardPreviews()
 
         setupSlider(
             R.id.seekBarLightningDuration,
@@ -268,13 +245,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             configManager.setCloudFlashFrequency(value)
         }
 
-        setupDropdown(
-            R.id.spinnerCloudFlashColor,
-            lightningColors,
-            configManager.getCloudFlashColorIndex()
-        ) { position ->
-            configManager.setCloudFlashColorIndex(position)
-        }
+        // Cloud flash color is set up dynamically in refreshStormCardPreviews()
 
         val switchCloudFlash = findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.switchCloudFlash)
         if (switchCloudFlash != null) {
@@ -328,6 +299,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         }
 
         updateCustomBackgroundViewsVisibility(configManager.getBackgroundIndex())
+        refreshStormCardPreviews()
 
         // 4c. Setup Sunny Controls
         setupSlider(
@@ -845,6 +817,61 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.textViewCustomSkyBottomColorCode)?.text = String.format("#%06X", 0xFFFFFF and bottom)
     }
 
+    private fun refreshStormCardPreviews() {
+        // Rain intensity
+        val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
+        val initialRainValue = configManager.getRainIntensity()
+        val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
+        setupDropdown(
+            R.id.spinnerRainIntensity,
+            rainIntensities,
+            initialRainProgress
+        ) { position ->
+            configManager.setRainIntensity(position * 25)
+        }
+
+        // Rain color
+        val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
+        setupDropdown(
+            R.id.spinnerRainColor,
+            rainColors,
+            configManager.getRainColorIndex()
+        ) { position ->
+            configManager.setRainColorIndex(position)
+            refreshStormCardPreviews() // Refresh rain intensity & spawn mode previews with new color!
+        }
+
+        // Rain spawn mode
+        val rainSpawnModes = arrayOf("Borde Superior", "Debajo de las Nubes", "Todos Lados")
+        setupDropdown(
+            R.id.spinnerRainSpawnMode,
+            rainSpawnModes,
+            configManager.getRainSpawnMode()
+        ) { position ->
+            configManager.setRainSpawnMode(position)
+        }
+
+        // Lightning color (White, Blue, Yellow, Red, Green, Purple, Random)
+        val lightningColors = arrayOf("Blanco", "Azul", "Amarillo", "Rojo", "Verde", "Morado", "Aleatorio")
+        setupDropdown(
+            R.id.spinnerLightningColor,
+            lightningColors,
+            configManager.getLightningColorIndex()
+        ) { position ->
+            configManager.setLightningColorIndex(position)
+            refreshStormCardPreviews() // Refresh cloud flash color preview with new lightning color!
+        }
+
+        // Cloud flash color
+        setupDropdown(
+            R.id.spinnerCloudFlashColor,
+            lightningColors,
+            configManager.getCloudFlashColorIndex()
+        ) { position ->
+            configManager.setCloudFlashColorIndex(position)
+        }
+    }
+
     private fun showColorPickerDialog(isTopColor: Boolean) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
         
@@ -1017,8 +1044,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
 
             val card = com.google.android.material.card.MaterialCardView(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
+                    92.dpToPx(),
+                    115.dpToPx()
                 ).apply {
                     setMargins(0, 0, 10.dpToPx(), 0)
                 }
@@ -1029,8 +1056,135 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 setCardBackgroundColor(inactiveBgColor)
                 isClickable = true
                 isFocusable = true
-                
-                setContentPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
+            }
+
+            val innerLayout = LinearLayout(this).apply {
+                layoutParams = android.widget.FrameLayout.LayoutParams(
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                )
+                orientation = LinearLayout.VERTICAL
+                gravity = android.view.Gravity.CENTER
+                setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
+            }
+
+            val previewFrame = android.widget.FrameLayout(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    48.dpToPx(),
+                    64.dpToPx()
+                ).apply {
+                    setMargins(0, 0, 0, 6.dpToPx())
+                }
+                val drawable = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 6 * resources.displayMetrics.density
+                    setColor(Color.parseColor("#15151A"))
+                    setStroke((1 * resources.displayMetrics.density).toInt(), Color.parseColor("#3A3A4A"))
+                }
+                background = drawable
+            }
+
+            // Customize preview Frame based on the parent container setting ID
+            val activeRainColorHex = when (configManager.getRainColorIndex()) {
+                0 -> "#1E90FF" // Azul
+                1 -> "#FFFFFF" // Blanco
+                2 -> "#FF3030" // Rojo
+                3 -> "#00FF7F" // Verde
+                4 -> "#FFD700" // Amarillo
+                5 -> "#8A2BE2" // Morado
+                else -> "#1E90FF"
+            }
+            val activeRainColor = Color.parseColor(activeRainColorHex)
+
+            val activeLightningColorHex = when (configManager.getLightningColorIndex()) {
+                0 -> "#FFFFFF" // Blanco
+                1 -> "#6699FF" // Azul
+                2 -> "#FFE533" // Amarillo
+                3 -> "#FF3333" // Rojo
+                4 -> "#33FF33" // Verde
+                5 -> "#CC4DFF" // Morado
+                6 -> "#FFE533" // Random
+                else -> "#FFFFFF"
+            }
+            val activeLightningColor = Color.parseColor(activeLightningColorHex)
+            val activeWindDir = configManager.getWindDirection()
+
+            if (container.id != R.id.spinnerBackgroundMode) {
+                val stormPreview = StormCardPreviewView(
+                    this,
+                    container.id,
+                    i,
+                    activeRainColor,
+                    activeWindDir,
+                    activeLightningColor
+                ).apply {
+                    layoutParams = android.widget.FrameLayout.LayoutParams(
+                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                }
+                previewFrame.addView(stormPreview)
+            } else {
+                if (i == 0) {
+                    val colors = intArrayOf(Color.parseColor("#08080C"), Color.parseColor("#12121A"))
+                    val gradient = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors).apply {
+                        cornerRadius = 6 * resources.displayMetrics.density
+                    }
+                    previewFrame.background = gradient
+                } else if (i == 8) {
+                    val file = java.io.File(filesDir, "custom_background.png")
+                    val imageView = ImageView(this).apply {
+                        layoutParams = android.widget.FrameLayout.LayoutParams(
+                            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                        )
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                    }
+                    if (file.exists()) {
+                        val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        if (bitmap != null) {
+                            imageView.setImageBitmap(bitmap)
+                        } else {
+                            imageView.setImageResource(android.R.drawable.ic_menu_gallery)
+                        }
+                    } else {
+                        imageView.setImageResource(android.R.drawable.ic_menu_gallery)
+                        imageView.setColorFilter(Color.parseColor("#6C6C75"))
+                        imageView.scaleType = ImageView.ScaleType.CENTER
+                    }
+                    previewFrame.addView(imageView)
+                } else {
+                    val assetPaths = arrayOf(
+                        "background/background.jpg",
+                        "background/background_02.png",
+                        "background/background_03.png",
+                        "background/background_04.png",
+                        "background/background_05.png",
+                        "background/background_06.png",
+                        "background/background_07.png"
+                    )
+                    val assetPath = assetPaths.getOrNull(i - 1) ?: "background/background.jpg"
+                    
+                    val imageView = ImageView(this).apply {
+                        layoutParams = android.widget.FrameLayout.LayoutParams(
+                            android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.FrameLayout.LayoutParams.MATCH_PARENT
+                        )
+                        scaleType = ImageView.ScaleType.CENTER_CROP
+                    }
+                    
+                    val cached = backgroundBitmapCache[assetPath]
+                    if (cached != null) {
+                        imageView.setImageBitmap(cached)
+                    } else {
+                        val bitmap = loadThumbnailFromAsset(this, assetPath, 48.dpToPx(), 64.dpToPx())
+                        if (bitmap != null) {
+                            backgroundBitmapCache[assetPath] = bitmap
+                            imageView.setImageBitmap(bitmap)
+                        }
+                    }
+                    previewFrame.addView(imageView)
+                }
             }
 
             val tv = TextView(this).apply {
@@ -1040,12 +1194,16 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 )
                 text = optionText
                 setTextColor(inactiveColor)
-                textSize = 14f
+                textSize = 11f
                 typeface = android.graphics.Typeface.create("sans-serif-medium", android.graphics.Typeface.NORMAL)
                 gravity = android.view.Gravity.CENTER
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
             }
 
-            card.addView(tv)
+            innerLayout.addView(previewFrame)
+            innerLayout.addView(tv)
+            card.addView(innerLayout)
             container.addView(card)
             cardViews.add(card)
 
@@ -1053,7 +1211,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 for (j in cardViews.indices) {
                     val isSelected = (j == i)
                     val c = cardViews[j]
-                    val t = c.getChildAt(0) as TextView
+                    val inner = c.getChildAt(0) as LinearLayout
+                    val t = inner.getChildAt(1) as TextView
                     if (isSelected) {
                         c.strokeWidth = (3 * resources.displayMetrics.density).toInt()
                         c.strokeColor = strokeActiveColor
@@ -1073,11 +1232,12 @@ class WallpaperSettingsActivity : AppCompatActivity() {
 
         if (initialIndex in options.indices) {
             val selectedCard = cardViews[initialIndex]
-            val tv = selectedCard.getChildAt(0) as TextView
+            val inner = selectedCard.getChildAt(0) as LinearLayout
+            val selectedText = inner.getChildAt(1) as TextView
             selectedCard.strokeWidth = (3 * resources.displayMetrics.density).toInt()
             selectedCard.strokeColor = strokeActiveColor
             selectedCard.setCardBackgroundColor(activeBgColor)
-            tv.setTextColor(activeColor)
+            selectedText.setTextColor(activeColor)
         }
     }
 
@@ -1254,7 +1414,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         val windIntensity = configManager.getWindIntensity()
         val windDirText = when (configManager.getWindDirection()) {
             0 -> "Izquierda"
-            1 -> "Vertical"
+            1 -> "Neutro"
             2 -> "Derecha"
             else -> "Izquierda"
         }
@@ -1383,4 +1543,332 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             Html.FROM_HTML_MODE_LEGACY
         )
     }
+
+    private fun loadThumbnailFromAsset(context: Context, path: String, reqWidth: Int, reqHeight: Int): Bitmap? {
+        return try {
+            context.assets.open(path).use { inputStream ->
+                val options = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                }
+                BitmapFactory.decodeStream(inputStream, null, options)
+                inputStream.close()
+                
+                options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight)
+                options.inJustDecodeBounds = false
+                
+                context.assets.open(path).use { stream ->
+                    BitmapFactory.decodeStream(stream, null, options)
+                }
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
+    }
+
+    private fun Float.dpToPx(): Float {
+        val density = resources.displayMetrics.density
+        return this * density
+    }
+
+    private inner class StormCardPreviewView(
+        context: Context,
+        val containerId: Int,
+        val optionIndex: Int,
+        val activeRainColor: Int,
+        val activeWindDir: Int,
+        val activeLightningColor: Int
+    ) : View(context) {
+
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val path = Path()
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val w = width.toFloat()
+        val h = height.toFloat()
+        if (w <= 0 || h <= 0) return
+
+        when (containerId) {
+            R.id.spinnerWindDirection -> {
+                paint.color = Color.parseColor("#8A2BE2")
+                paint.strokeWidth = 2.dpToPx().toFloat()
+                paint.style = Paint.Style.STROKE
+                paint.strokeCap = Paint.Cap.ROUND
+                
+                when (optionIndex) {
+                    0 -> { // Left (blowing left)
+                        drawWindLine(canvas, w * 0.8f, h * 0.3f, w * 0.2f, h * 0.3f)
+                        drawWindLine(canvas, w * 0.9f, h * 0.5f, w * 0.1f, h * 0.5f)
+                        drawWindLine(canvas, w * 0.7f, h * 0.7f, w * 0.3f, h * 0.7f)
+                    }
+                    1 -> { // Neutro (vertical/down)
+                        drawWindLine(canvas, w * 0.3f, h * 0.2f, w * 0.3f, h * 0.8f)
+                        drawWindLine(canvas, w * 0.5f, h * 0.1f, w * 0.5f, h * 0.9f)
+                        drawWindLine(canvas, w * 0.7f, h * 0.2f, w * 0.7f, h * 0.8f)
+                    }
+                    2 -> { // Right (blowing right)
+                        drawWindLine(canvas, w * 0.2f, h * 0.3f, w * 0.8f, h * 0.3f)
+                        drawWindLine(canvas, w * 0.1f, h * 0.5f, w * 0.9f, h * 0.5f)
+                        drawWindLine(canvas, w * 0.3f, h * 0.7f, w * 0.7f, h * 0.7f)
+                    }
+                }
+            }
+            
+            R.id.spinnerRainIntensity -> {
+                val density = when (optionIndex) {
+                    0 -> 0 // Nada
+                    1 -> 4 // Pocas
+                    2 -> 9 // Media
+                    3 -> 16 // Alta
+                    4 -> 25 // Muy alta
+                    else -> 0
+                }
+                if (density > 0) {
+                    drawRaindrops(canvas, w, h, density, activeRainColor, activeWindDir)
+                }
+                
+                if (optionIndex == 4) {
+                    drawLightningBolt(canvas, w, h, activeLightningColor)
+                } else if (optionIndex == 0) {
+                    paint.color = Color.parseColor("#FFD700")
+                    paint.style = Paint.Style.FILL
+                    canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
+                }
+            }
+
+            R.id.spinnerRainColor -> {
+                val colorHex = when (optionIndex) {
+                    0 -> "#1E90FF" // Azul
+                    1 -> "#FFFFFF" // Blanco
+                    2 -> "#FF3030" // Rojo
+                    3 -> "#00FF7F" // Verde
+                    4 -> "#FFD700" // Amarillo
+                    5 -> "#8A2BE2" // Morado
+                    else -> "#1E90FF"
+                }
+                val optionColor = Color.parseColor(colorHex)
+                drawRaindrops(canvas, w, h, 12, optionColor, activeWindDir)
+            }
+
+            R.id.spinnerRainSpawnMode -> {
+                if (optionIndex == 1 || optionIndex == 2) {
+                    drawCloudShape(canvas, w, h)
+                }
+                
+                paint.color = activeRainColor
+                paint.strokeWidth = 1.5f.dpToPx().toFloat()
+                paint.style = Paint.Style.STROKE
+                paint.strokeCap = Paint.Cap.ROUND
+                
+                val dx = when (activeWindDir) {
+                    0 -> -4.dpToPx().toFloat()
+                    2 -> 4.dpToPx().toFloat()
+                    else -> 0f
+                }
+                
+                when (optionIndex) {
+                    0 -> { // Borde superior (rain from top)
+                        for (i in 0..4) {
+                            val rx = w * 0.15f + w * 0.17f * i
+                            canvas.drawLine(rx, 4.dpToPx().toFloat(), rx + dx, 24.dpToPx().toFloat(), paint)
+                        }
+                    }
+                    1 -> { // Nubes (rain only below clouds)
+                        for (i in 0..3) {
+                            val rx = w * 0.25f + w * 0.16f * i
+                            canvas.drawLine(rx, 15.dpToPx().toFloat(), rx + dx, 35.dpToPx().toFloat(), paint)
+                        }
+                    }
+                    2 -> { // Todos lados (rain from top and clouds)
+                        for (i in 0..4) {
+                            val rx = w * 0.15f + w * 0.17f * i
+                            val startY = if (i % 2 == 0) 4.dpToPx().toFloat() else 15.dpToPx().toFloat()
+                            canvas.drawLine(rx, startY, rx + dx, startY + 20.dpToPx(), paint)
+                        }
+                    }
+                }
+            }
+
+            R.id.spinnerLightningColor -> {
+                val colorHex = when (optionIndex) {
+                    0 -> "#FFFFFF" // Blanco
+                    1 -> "#6699FF" // Azul
+                    2 -> "#FFE533" // Amarillo
+                    3 -> "#FF3333" // Rojo
+                    4 -> "#33FF33" // Verde
+                    5 -> "#CC4DFF" // Morado
+                    6 -> "#FFE533" // Random
+                    else -> "#FFFFFF"
+                }
+                val lColor = Color.parseColor(colorHex)
+                drawStylizedLightning(canvas, w, h, lColor, isRainbow = (optionIndex == 6))
+            }
+
+            R.id.spinnerCloudFlashColor -> {
+                val colorHex = when (optionIndex) {
+                    0 -> "#FFFFFF" // Blanco
+                    1 -> "#6699FF" // Azul
+                    2 -> "#FFE533" // Amarillo
+                    3 -> "#FF3333" // Rojo
+                    4 -> "#33FF33" // Verde
+                    5 -> "#CC4DFF" // Morado
+                    6 -> "#FFE533" // Random
+                    else -> "#FFFFFF"
+                }
+                val glowColor = Color.parseColor(colorHex)
+                
+                val colors = intArrayOf(
+                    adjustAlpha(glowColor, 0.7f),
+                    adjustAlpha(glowColor, 0.0f)
+                )
+                val glowRadius = w * 0.35f
+                paint.shader = RadialGradient(w/2f, h/2f, glowRadius, colors, null, Shader.TileMode.CLAMP)
+                paint.style = Paint.Style.FILL
+                canvas.drawCircle(w/2f, h/2f, glowRadius, paint)
+                paint.shader = null
+                
+                drawCloudShapeCentered(canvas, w, h)
+            }
+        }
+    }
+
+    private fun drawWindLine(canvas: Canvas, sx: Float, sy: Float, ex: Float, ey: Float) {
+        canvas.drawLine(sx, sy, ex, ey, paint)
+        val angle = Math.atan2((ey - sy).toDouble(), (ex - sx).toDouble())
+        val arrowSize = 4.dpToPx()
+        val path = Path().apply {
+            moveTo(ex, ey)
+            lineTo(
+                (ex - arrowSize * Math.cos(angle - Math.PI / 6)).toFloat(),
+                (ey - arrowSize * Math.sin(angle - Math.PI / 6)).toFloat()
+            )
+            moveTo(ex, ey)
+            lineTo(
+                (ex - arrowSize * Math.cos(angle + Math.PI / 6)).toFloat(),
+                (ey - arrowSize * Math.sin(angle + Math.PI / 6)).toFloat()
+            )
+        }
+        canvas.drawPath(path, paint)
+    }
+
+    private fun drawRaindrops(canvas: Canvas, w: Float, h: Float, count: Int, color: Int, windDir: Int) {
+        paint.color = color
+        paint.strokeWidth = 1.5f.dpToPx().toFloat()
+        paint.style = Paint.Style.STROKE
+        paint.strokeCap = Paint.Cap.ROUND
+
+        val random = java.util.Random(optionIndex * 100L + 42)
+        val dx = when (windDir) {
+            0 -> -6.dpToPx().toFloat()
+            2 -> 6.dpToPx().toFloat()
+            else -> 0f
+        }
+
+        for (i in 0 until count) {
+            val rx = random.nextFloat() * (w + Math.abs(dx)) - (if (dx > 0) dx else 0f)
+            val ry = random.nextFloat() * (h - 14.dpToPx())
+            val length = 8.dpToPx() + random.nextFloat() * 8.dpToPx()
+            canvas.drawLine(rx, ry, rx + dx * (length / h), ry + length, paint)
+        }
+    }
+
+    private fun drawLightningBolt(canvas: Canvas, w: Float, h: Float, color: Int) {
+        paint.color = color
+        paint.style = Paint.Style.FILL
+        paint.strokeCap = Paint.Cap.ROUND
+        
+        val lPath = Path().apply {
+            val cx = w * 0.75f
+            val cy = h * 0.15f
+            moveTo(cx + 2.dpToPx(), cy)
+            lineTo(cx - 3.dpToPx(), cy + 6.dpToPx())
+            lineTo(cx, cy + 6.dpToPx())
+            lineTo(cx - 2.dpToPx(), cy + 12.dpToPx())
+            lineTo(cx + 3.dpToPx(), cy + 4.dpToPx())
+            lineTo(cx - 1.dpToPx(), cy + 4.dpToPx())
+            close()
+        }
+        canvas.drawPath(lPath, paint)
+    }
+
+    private fun drawStylizedLightning(canvas: Canvas, w: Float, h: Float, color: Int, isRainbow: Boolean) {
+        if (isRainbow) {
+            val shader = LinearGradient(0f, 0f, 0f, h, 
+                intArrayOf(Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA),
+                null, Shader.TileMode.CLAMP
+            )
+            paint.shader = shader
+        } else {
+            paint.color = color
+        }
+        
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 2.dpToPx().toFloat()
+        paint.strokeJoin = Paint.Join.ROUND
+        paint.strokeCap = Paint.Cap.ROUND
+
+        val lPath = Path().apply {
+            moveTo(w * 0.5f, h * 0.1f)
+            lineTo(w * 0.35f, h * 0.45f)
+            lineTo(w * 0.6f, h * 0.45f)
+            lineTo(w * 0.4f, h * 0.9f)
+        }
+        
+        if (!isRainbow) {
+            paint.color = adjustAlpha(color, 0.3f)
+            paint.strokeWidth = 5.dpToPx().toFloat()
+            canvas.drawPath(lPath, paint)
+            
+            paint.color = color
+            paint.strokeWidth = 2.dpToPx().toFloat()
+        }
+        
+        canvas.drawPath(lPath, paint)
+        paint.shader = null
+    }
+
+    private fun drawCloudShape(canvas: Canvas, w: Float, h: Float) {
+        paint.color = Color.parseColor("#4A4A5A")
+        paint.style = Paint.Style.FILL
+        
+        canvas.drawCircle(w * 0.35f, 10.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
+        canvas.drawCircle(w * 0.65f, 10.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
+        canvas.drawCircle(w * 0.5f, 8.dpToPx().toFloat(), 10.dpToPx().toFloat(), paint)
+        canvas.drawRect(w * 0.25f, 10.dpToPx().toFloat(), w * 0.75f, 16.dpToPx().toFloat(), paint)
+    }
+
+    private fun drawCloudShapeCentered(canvas: Canvas, w: Float, h: Float) {
+        paint.color = Color.parseColor("#E0E0E6")
+        paint.style = Paint.Style.FILL
+        
+        val cy = h / 2f
+        canvas.drawCircle(w * 0.35f, cy + 2.dpToPx(), 7.dpToPx().toFloat(), paint)
+        canvas.drawCircle(w * 0.65f, cy + 2.dpToPx(), 7.dpToPx().toFloat(), paint)
+        canvas.drawCircle(w * 0.5f, cy - 1.dpToPx(), 9.dpToPx().toFloat(), paint)
+        canvas.drawRect(w * 0.3f, cy + 1.dpToPx(), w * 0.7f, cy + 9.dpToPx(), paint)
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        val red = Color.red(color)
+        val green = Color.green(color)
+        val blue = Color.blue(color)
+        return Color.argb(alpha, red, green, blue)
+    }
+}
 }
