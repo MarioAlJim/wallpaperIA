@@ -77,6 +77,16 @@ class SceneManagerTest {
         override fun getRainSpawnMode(): Int = 0
         override fun isWindLinesEnabled(): Boolean = mockWindLinesEnabled
         override fun getWindLinesIntensity(): Int = mockWindLinesIntensity
+        override fun getTimeMode(): Int = 0
+        override fun getMoonPhase(): Int = 0
+        override fun getMoonPathDirection(): Int = 0
+        override fun getMoonMoveSpeed(): Int = 0
+        override fun getMoonStationaryPosition(): Int = 0
+        override fun getStarColorIndex(): Int = 0
+        override fun getStarDensity(): Int = 0
+        override fun getStarMode(): Int = 0
+        override fun getNightCloudDensity(): Int = 0
+        override fun getGradientCycleSpeed(): Int = 0
     }
 
     @Test
@@ -399,10 +409,10 @@ class SceneManagerTest {
             assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
             
             // 2. Length should be scaled by z
-            // Base length formula: (Random.nextFloat() * 0.07f + 0.05f) * z
-            // Min base length = 0.05f, Max base length = 0.12f
-            val minExpectedLength = 0.05f * drop.z - 0.001f
-            val maxExpectedLength = 0.12f * drop.z + 0.001f
+            // Base length formula: (Random.nextFloat() * 0.04f + 0.03f) * z
+            // Min base length = 0.03f, Max base length = 0.07f
+            val minExpectedLength = 0.03f * drop.z - 0.001f
+            val maxExpectedLength = 0.07f * drop.z + 0.001f
             assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
             
             // 3. Velocity should be scaled by z

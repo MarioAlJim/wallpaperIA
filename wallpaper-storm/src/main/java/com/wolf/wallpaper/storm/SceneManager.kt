@@ -117,7 +117,7 @@ class SceneManager(
         }
 
         // 2b. Update Wind Lines
-        val targetWindLinesCount = if (configProvider.isWindLinesEnabled()) {
+        val targetWindLinesCount = if (configProvider.isWindLinesEnabled() && windIntensity >= 50) {
             (configProvider.getWindLinesIntensity() / 100f * 8).toInt().coerceIn(1, 15)
         } else {
             0
@@ -207,6 +207,7 @@ class SceneManager(
     fun getScreenDropletsSize(): Int = configProvider.getScreenDropletsSize()
     fun getWindLines(): List<WindLine> = windLines
     fun isWindLinesEnabled(): Boolean = configProvider.isWindLinesEnabled()
+    fun getWindIntensity(): Int = windIntensity
 
     fun getLightningTextureCount(): Int {
         if (context == null) return 1

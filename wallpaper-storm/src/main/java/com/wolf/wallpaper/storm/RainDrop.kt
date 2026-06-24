@@ -63,8 +63,8 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Random length scaled by z to simulate motion blur variety with depth
-        length = (Random.nextFloat() * 0.07f + 0.05f) * z
+        // Shorter drops read more clearly as teardrops rather than streaks
+        length = (Random.nextFloat() * 0.04f + 0.03f) * z
         
         spawnFromCloud = spawnCloud != null
         if (spawnCloud != null) {

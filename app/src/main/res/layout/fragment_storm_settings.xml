@@ -1167,7 +1167,7 @@
                     </HorizontalScrollView>
 
                     <!-- Custom Gallery Selector Button -->
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnSelectCustomBg"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -1178,6 +1178,9 @@
                         android:textStyle="bold"
                         android:backgroundTint="@color/accent_storm"
                         app:cornerRadius="8dp"
+                        app:icon="@drawable/ic_background"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
                         android:visibility="gone" />
 
                     <TextView

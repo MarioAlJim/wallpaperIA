@@ -10,70 +10,74 @@ in vec2 vTexCoord;
 out vec4 fragColor;
 
 void main() {
-    // Map local texture coordinate x from [0, 1] to [-1, 1]
+    // vTexCoord.x: [0,1] across width (U), mapped to [-1,1]
+    // vTexCoord.y: [0,1] along length; 0 = tail tip, 1 = head (front of travel)
     float x = vTexCoord.x * 2.0 - 1.0;
-    // Local texture coordinate y goes from 0 (tail) to 1 (head)
     float y = vTexCoord.y;
-    
-    // Parameters for the teardrop shape
-    float R = 0.40; // Radius of the circular head (adjusts thickness)
-    float y_c = 1.0 - R; // Center of the circular head
-    
+
+    // --- Teardrop shape parameters ---
+    // R: fraction of the total drop length occupied by the circular head.
+    // A larger R produces a rounder, more prominent head.
+    float R   = 0.55;
+    float y_c = 1.0 - R; // y-coordinate of the circle centre
+
     float width = 0.0;
     vec3 normal = vec3(0.0, 0.0, 1.0);
-    
+
     if (y > y_c) {
-        // 1. Semicircular head (perfect circle in texture coordinates)
+        // ---- Circular head (bulbous front) ----
         float dy = y - y_c;
         width = sqrt(max(0.0, R * R - dy * dy));
-        
-        // Spherical normal calculation for the head
+
+        // Spherical normal so lighting gives a 3-D ball appearance
         float r2 = (x * x + dy * dy) / (R * R);
         float nz = sqrt(max(0.0, 1.0 - r2));
         normal = vec3(x / R, dy / R, nz);
     } else {
-        // 2. Tapered tail (pointy, curving smoothly into the head)
-        // Uses a sinus-power taper to make it very thin and pointy at the end (y=0)
-        // while maintaining a smooth derivative transition at the head interface (y=y_c)
+        // ---- Tapered tail (sharp and transparent at tip) ----
+        // normalizedY goes from 0 (tail tip) to 1 (where tail meets head)
         float normalizedY = y / y_c;
-        width = R * sin(1.57079632679 * pow(normalizedY, 2.0));
-        
-        // Cylindrical normal calculation for the tail
+        // Power 3.0 makes the taper very aggressive – needle-thin near y=0
+        width = R * pow(normalizedY, 3.0);
+
+        // Cylindrical normal for realistic edge lighting on the tail
         float x_norm = x / max(width, 0.001);
-        float nz = sqrt(max(0.0, 1.0 - x_norm * x_norm));
+        float nz     = sqrt(max(0.0, 1.0 - x_norm * x_norm));
         normal = vec3(x_norm, 0.0, nz);
     }
-    
-    // Calculate distance from center line normalized by local width
+
+    // Discard pixels outside the teardrop silhouette
     float dist = abs(x) / max(width, 0.001);
-    
-    // Soft horizontal profile for the raindrop's edges (anti-aliased)
-    float edgeAlpha = 1.0 - smoothstep(0.7, 1.0, dist);
-    
-    // Specular highlight representing light reflection on the water droplet surface.
-    // Light is coming slightly from top-right-front.
-    vec3 lightDir = normalize(vec3(0.3, 0.5, 1.0));
-    vec3 viewDir = vec3(0.0, 0.0, 1.0);
-    vec3 halfDir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(normal, halfDir), 0.0), 20.0);
-    
-    // Fresnel reflection at grazing angles (edges of the droplet)
-    float fresnel = pow(1.0 - normal.z, 3.0);
-    
-    // Vertical gradient: tip (y=1) is saturated/opaque, tail (y=0) is transparent
-    float verticalGradient = pow(y, 0.9);
-    
-    // Combine base color, specular highlight, and fresnel reflection
-    vec3 baseColor = uRainColor.rgb;
+    if (dist > 1.0) discard;
+
+    // Anti-aliased soft edge
+    float edgeAlpha = 1.0 - smoothstep(0.75, 1.0, dist);
+
+    // --- Lighting ---
+    // Specular highlight – light from top-right-front
+    vec3 lightDir = normalize(vec3(0.3, 0.6, 1.0));
+    vec3 viewDir  = vec3(0.0, 0.0, 1.0);
+    vec3 halfDir  = normalize(lightDir + viewDir);
+    float spec    = pow(max(dot(normal, halfDir), 0.0), 32.0);
+
+    // Fresnel rim at grazing angles (edges look brighter, like water)
+    float fresnel = pow(1.0 - abs(normal.z), 2.5);
+
+    // Vertical fade: tail is nearly invisible, head is fully opaque.
+    // Power 2.5 concentrates the fade near the tip.
+    float verticalGradient = pow(y, 2.5);
+
+    // Lens glow: water converges light, so the drop centre is brightest
+    float lensGlow = 0.4 + 0.6 * normal.z;
+
+    // Combine colours
+    vec3 baseColor      = uRainColor.rgb;
     vec3 highlightColor = vec3(1.0);
-    vec3 finalColor = mix(baseColor, highlightColor, spec * 0.7) + vec3(0.3) * fresnel * baseColor;
-    
-    // Center glow: water acts as a lens, focusing light in the center (normal.z is highest at center)
-    float lensGlow = 0.5 + 0.5 * normal.z;
-    
-    // Calculate final alpha
+    vec3 finalColor     = mix(baseColor, highlightColor, spec * 0.8)
+                        + vec3(0.25) * fresnel * baseColor;
+
+    // Final alpha
     float alpha = uRainColor.a * vDepth * edgeAlpha * verticalGradient * lensGlow;
-    
-    // Output the fragment color
+
     fragColor = vec4(finalColor, alpha);
 }

@@ -257,7 +257,7 @@ class StormRenderer(
         drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, lightningFlashEnabled)
         drawRain(cloudRain, sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings, lightningFlashEnabled)
-        if (sceneManager.isWindLinesEnabled()) {
+        if (sceneManager.isWindLinesEnabled() && sceneManager.getWindIntensity() >= 50) {
             drawWindLines(sceneManager.getWindLines())
         }
         drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
@@ -365,8 +365,10 @@ class StormRenderer(
         var idx = 0
         for (drop in sortedDrops) {
             val zDepth = drop.z
-            // Varying width with depth, ensuring a minimum width for far drops
-            val halfW = (0.006f + 0.014f * zDepth) / 2f
+            // halfW must equal R * drop.length so the circular head in the shader
+            // maps to a true circle in world-space (R = 0.55 in rain.frag).
+            // A minimum clamp prevents far-depth drops from vanishing entirely.
+            val halfW = (drop.length * 0.55f * zDepth).coerceAtLeast(0.003f)
             
             val x1 = drop.positionX
             val y1 = drop.positionY
@@ -867,7 +869,7 @@ class StormRenderer(
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, screenAspect)
         GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
-        val sizeFactor = sceneManager.getScreenDropletsSize() / 100f
+        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
         GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
