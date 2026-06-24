@@ -409,20 +409,20 @@ class SceneManagerTest {
             assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
             
             // 2. Length should be scaled by z
-            // Base length formula: (Random.nextFloat() * 0.04f + 0.03f) * z
-            // Min base length = 0.03f, Max base length = 0.07f
-            val minExpectedLength = 0.03f * drop.z - 0.001f
-            val maxExpectedLength = 0.07f * drop.z + 0.001f
+            // Base length formula: (Random.nextFloat() * 0.035f + 0.020f) * z
+            // Min base length = 0.020f, Max base length = 0.055f
+            val minExpectedLength = 0.020f * drop.z - 0.001f
+            val maxExpectedLength = 0.055f * drop.z + 0.001f
             assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
             
-            // 3. Velocity should be scaled by z
+            // 3. Velocity should be constant (not scaled by z)
             // baseSpeed = Random.nextFloat() * 1.5f + 3.0f -> range [3.0, 4.5]
-            // speedFactor = (0.3f + (rainSpeed / 100f) * 1.5f) * z
-            // For rainSpeed = 50f: speedFactor = (0.3f + 0.75f) * z = 1.05f * z
+            // speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
+            // For rainSpeed = 50f: speedFactor = 0.3f + 0.75f = 1.05f
             // speed = baseSpeed * speedFactor
             val speed = kotlin.math.sqrt(drop.velocityX * drop.velocityX + drop.velocityY * drop.velocityY)
-            val expectedMinSpeed = 3.0f * 1.05f * drop.z
-            val expectedMaxSpeed = 4.5f * 1.05f * drop.z
+            val expectedMinSpeed = 3.0f * 1.05f
+            val expectedMaxSpeed = 4.5f * 1.05f
             assertTrue("Speed ($speed) should be in range [${expectedMinSpeed}, ${expectedMaxSpeed}]", speed in (expectedMinSpeed - 0.05f)..(expectedMaxSpeed + 0.05f))
         }
     }

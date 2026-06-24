@@ -56,8 +56,9 @@ class SceneManager(
         for (cloud in clouds) {
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
         }
+        val allowFallback = configProvider.getRainSpawnMode() != 1
         for (drop in rainDrops) {
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop())
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
         }
         windLines.clear()
     }
@@ -105,14 +106,17 @@ class SceneManager(
         clouds.removeAll { it.isFadingOut && it.opacity <= 0f }
 
         // 2. Update Rain
+        val allowFallback = configProvider.getRainSpawnMode() != 1
         for (drop in rainDrops) {
             drop.updateVelocity(currentWindAngle, currentRainSpeed)
             drop.update(deltaTime)
-            // Check boundaries based on direction of velocity
-            if (drop.positionY < -1.05f || 
+            // Check boundaries based on direction of velocity, or if the drop is an empty placeholder ready to check for clouds again
+            val needsReset = drop.positionY < -1.05f || 
                 (drop.velocityX < 0f && drop.positionX < -aspectRatio - 0.1f) ||
-                (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f)) {
-                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop())
+                (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f) ||
+                (drop.length == 0f && drop.spawnDelay <= 0f)
+            if (needsReset) {
+                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
             }
         }
 
@@ -329,9 +333,10 @@ class SceneManager(
             else -> (intensity / 100f * 187).toInt()
         }.coerceIn(0, 1000)
         
+        val allowFallback = configProvider.getRainSpawnMode() != 1
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop())
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
             rainDrops.add(drop)
         }
         

@@ -20,6 +20,7 @@ class RainDrop(
     var spawnX: Float = 0f
     var spawnY: Float = 1.05f
     var spawnFromCloud: Boolean = false
+    var parentCloud: Cloud? = null
     private var baseSpeed: Float = 0f
     private var angleOffset: Float = 0f
 
@@ -43,7 +44,7 @@ class RainDrop(
     }
 
     fun updateVelocity(windAngle: Float, rainSpeed: Float) {
-        val speedFactor = (0.3f + (rainSpeed / 100f) * 1.5f) * z
+        val speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
         val speed = baseSpeed * speedFactor
         
         val angleDeg = windAngle + angleOffset
@@ -56,23 +57,40 @@ class RainDrop(
         dirY = if (dirLength > 0f) velocityY / dirLength else -1f
     }
 
-    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: Cloud? = null) {
+    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: Cloud? = null, allowFallbackToEdge: Boolean = true) {
         z = Random.nextFloat() * 0.8f + 0.2f
         baseSpeed = Random.nextFloat() * 1.5f + 3.0f
         angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f // +/- 2.5 degrees deviation
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Shorter drops read more clearly as teardrops rather than streaks
-        length = (Random.nextFloat() * 0.04f + 0.03f) * z
+        // Base length for edge-rain drops: reduced to be smaller/thinner
+        length = (Random.nextFloat() * 0.035f + 0.020f) * z
         
+        parentCloud = spawnCloud
         spawnFromCloud = spawnCloud != null
         if (spawnCloud != null) {
+            // Drop size is proportional to the cloud it falls from:
+            // bigger cloud → heavier, larger drops.
+            // baseScale is used to avoid the breathing animation inflating the value.
+            // Cloud baseScale range: ~0.43 (small) to ~1.41 (large storm cloud).
+            // Multiplier 0.04 gives length ~0.017 for small clouds, ~0.056 for large.
+            length = spawnCloud.baseScale * 0.04f * z
             val halfWidth = spawnCloud.scale * 1.2f
-            val maxOffset = halfWidth * 0.80f // Spawns only in the middle 80% of the cloud (leaves 10% margin on each side)
+            val maxOffset = halfWidth * 0.80f
             spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * maxOffset
-            spawnY = spawnCloud.positionY.coerceAtMost(1.05f) // Spawn from the center of the cloud
+            spawnY = spawnCloud.positionY.coerceAtMost(1.05f)
         } else {
+            if (!allowFallbackToEdge) {
+                parentCloud = null
+                length = 0f
+                positionY = 999f
+                spawnY = 999f
+                spawnDelay = Random.nextFloat() * 0.5f + 0.1f // check again soon
+                isActive = false
+                spawnFromCloud = true
+                return
+            }
             // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
             val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
             

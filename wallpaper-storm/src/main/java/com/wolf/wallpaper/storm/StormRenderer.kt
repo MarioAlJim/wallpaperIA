@@ -359,16 +359,16 @@ class StormRenderer(
         // 1. Sort the rain drops by depth (z) ascending for layers/depth ordering
         val sortedDrops = rainDrops.sortedBy { it.z }
 
-        // 2. Construct interleaved coordinate buffer (X, Y, Depth, U, V) for all rain drop quads
-        // Each vertex has 5 floats. 6 vertices (2 triangles) per drop.
-        val vertexData = FloatArray(sortedDrops.size * 30)
+        // 2. Construct interleaved coordinate buffer (X, Y, Depth, U, V, Opacity) for all rain drop quads
+        // Each vertex has 6 floats. 6 vertices (2 triangles) per drop.
+        val vertexData = FloatArray(sortedDrops.size * 36)
         var idx = 0
         for (drop in sortedDrops) {
             val zDepth = drop.z
-            // halfW must equal R * drop.length so the circular head in the shader
-            // maps to a true circle in world-space (R = 0.55 in rain.frag).
-            // A minimum clamp prevents far-depth drops from vanishing entirely.
-            val halfW = (drop.length * 0.55f * zDepth).coerceAtLeast(0.003f)
+            // halfW is set to R * drop.length (R=0.50 in rain.frag) so the
+            // head circle maps to a round shape. Multiplier 0.20 narrows the
+            // drop significantly so it looks thin and elegant.
+            val halfW = (drop.length * 0.20f * zDepth).coerceAtLeast(0.001f)
             
             val x1 = drop.positionX
             val y1 = drop.positionY
@@ -379,6 +379,9 @@ class StormRenderer(
             val offsetX = -drop.dirY * halfW
             val offsetY = drop.dirX * halfW
             
+            // Calculate opacity based on parent cloud (if any)
+            val opacity = drop.parentCloud?.opacity ?: 1.0f
+            
             // Triangle 1: Tail Left, Tail Right, Head Left
             // Vertex 1: Tail Left
             vertexData[idx++] = x1 - offsetX
@@ -386,6 +389,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 0.0f
             vertexData[idx++] = 0.0f
+            vertexData[idx++] = opacity
             
             // Vertex 2: Tail Right
             vertexData[idx++] = x1 + offsetX
@@ -393,6 +397,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 1.0f
             vertexData[idx++] = 0.0f
+            vertexData[idx++] = opacity
             
             // Vertex 3: Head Left
             vertexData[idx++] = x2 - offsetX
@@ -400,6 +405,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 0.0f
             vertexData[idx++] = 1.0f
+            vertexData[idx++] = opacity
             
             // Triangle 2: Head Left, Tail Right, Head Right
             // Vertex 4: Head Left
@@ -408,6 +414,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 0.0f
             vertexData[idx++] = 1.0f
+            vertexData[idx++] = opacity
             
             // Vertex 5: Tail Right
             vertexData[idx++] = x1 + offsetX
@@ -415,6 +422,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 1.0f
             vertexData[idx++] = 0.0f
+            vertexData[idx++] = opacity
             
             // Vertex 6: Head Right
             vertexData[idx++] = x2 + offsetX
@@ -422,6 +430,7 @@ class StormRenderer(
             vertexData[idx++] = zDepth
             vertexData[idx++] = 1.0f
             vertexData[idx++] = 1.0f
+            vertexData[idx++] = opacity
         }
 
         val rainBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
@@ -431,20 +440,25 @@ class StormRenderer(
                 position(0)
             }
 
-        // Bind positions attribute (location 0, stride 20 bytes: 5 floats)
+        // Bind positions attribute (location 0, stride 24 bytes: 6 floats)
         rainBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 20, rainBuffer)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 24, rainBuffer)
         GLES30.glEnableVertexAttribArray(0)
 
-        // Bind depth attribute (location 1, stride 20 bytes: 5 floats)
+        // Bind depth attribute (location 1, stride 24 bytes: 6 floats)
         rainBuffer.position(2)
-        GLES30.glVertexAttribPointer(1, 1, GLES30.GL_FLOAT, false, 20, rainBuffer)
+        GLES30.glVertexAttribPointer(1, 1, GLES30.GL_FLOAT, false, 24, rainBuffer)
         GLES30.glEnableVertexAttribArray(1)
 
-        // Bind texCoord attribute (location 2, stride 20 bytes: 5 floats)
+        // Bind texCoord attribute (location 2, stride 24 bytes: 6 floats)
         rainBuffer.position(3)
-        GLES30.glVertexAttribPointer(2, 2, GLES30.GL_FLOAT, false, 20, rainBuffer)
+        GLES30.glVertexAttribPointer(2, 2, GLES30.GL_FLOAT, false, 24, rainBuffer)
         GLES30.glEnableVertexAttribArray(2)
+
+        // Bind cloudOpacity attribute (location 3, stride 24 bytes: 6 floats)
+        rainBuffer.position(5)
+        GLES30.glVertexAttribPointer(3, 1, GLES30.GL_FLOAT, false, 24, rainBuffer)
+        GLES30.glEnableVertexAttribArray(3)
 
         // Draw all drops as quads using a single draw call (GL_TRIANGLES)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, sortedDrops.size * 6)
@@ -452,6 +466,7 @@ class StormRenderer(
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
         GLES30.glDisableVertexAttribArray(2)
+        GLES30.glDisableVertexAttribArray(3)
     }
 
     private fun drawWindLines(windLines: List<WindLine>) {
