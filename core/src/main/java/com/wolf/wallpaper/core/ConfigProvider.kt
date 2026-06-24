@@ -29,6 +29,8 @@ interface ConfigProvider {
     fun getSunStationaryPosition(): Int // 0: Top Left, 1: Top Right, 2: Center, 3: Left Edge, 4: Right Edge
     fun getSunCustomX(): Int // 0-100
     fun getSunCustomY(): Int // 0-100
+    fun getMoonCustomX(): Int // 0-100
+    fun getMoonCustomY(): Int // 0-100
     fun getSunnyCustomSkyTopColor(): Int
     fun getSunnyCustomSkyBottomColor(): Int
     
@@ -47,6 +49,13 @@ interface ConfigProvider {
     fun getWindLinesIntensity(): Int // 0-100
 
     fun getTimeMode(): Int              // 0 = Día, 1 = Noche, 2 = Combinado
+    fun getCombinedSunSize(): Int       // 0–100
+    fun getCombinedMoonSize(): Int      // 0–100
+    fun getCombinedMoonPhase(): Int     // 0–7
+    fun getCombinedStarDensity(): Int   // 0–100
+    fun getCombinedStarColorIndex(): Int // 0–5
+    fun getCombinedPathDirection(): Int // 0 = L2R both, 1 = R2L both, 2 = Sun L2R Moon R2L, 3 = Sun R2L Moon L2R
+    
     fun getMoonPhase(): Int             // 0–7
     fun getMoonPathDirection(): Int     // 0 = IzqaDer, 1 = DeraIzq, 2 = Estático, 3 = Aleatorio
     fun getMoonMoveSpeed(): Int         // 0–100

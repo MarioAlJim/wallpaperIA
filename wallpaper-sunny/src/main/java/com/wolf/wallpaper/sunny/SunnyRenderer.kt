@@ -53,6 +53,7 @@ class SunnyRenderer(
     private var bgSkyTopHandle = -1
     private var bgSkyBottomHandle = -1
     private var bgNightIntensityHandle = -1
+    private var bgMoonPhaseMultiplierHandle = -1
 
     // Handles for lens_flare.frag
     private var lfSunPosHandle = -1
@@ -67,6 +68,7 @@ class SunnyRenderer(
     private var moonPhaseHandle = -1
     private var moonColorHandle = -1
     private var moonIntensityHandle = -1
+    private var moonHaloIntensityHandle = -1
 
     // stars handles
     private var starsTimeHandle = -1
@@ -93,6 +95,8 @@ class SunnyRenderer(
     private var aspectRatio = 1.0f
     private var swipeOffset = 0f
     private var pathFadeFactor = 1.0f
+    private var moonFadeFactor = 1.0f
+    private val moonPhaseMultipliers = floatArrayOf(0.025f, 0.10f, 0.25f, 0.40f, 0.50f, 0.40f, 0.25f, 0.10f)
 
     // Gyro tilt state
     private var targetTiltX = 0f
@@ -145,6 +149,7 @@ class SunnyRenderer(
     private var sunX = 0.35f
     private var sunY = 0.45f
     private var sunPathX = 0f
+    private var moonPathX = 0f
     
     // Random path movement state
     private var randomStartX = 0f
@@ -159,6 +164,9 @@ class SunnyRenderer(
     private val nightClouds = mutableListOf<Cloud>()
     private var cycleProgress = 0f
     private var prevMoonDirection = -1
+    private var isCombinedNight = false
+    private var combinedDayIntensity = 1f
+    private var combinedNightIntensity = 0f
 
     // Clouds
     private val clouds = mutableListOf<Cloud>()
@@ -249,6 +257,7 @@ class SunnyRenderer(
         bgSkyTopHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSkyTop")
         bgSkyBottomHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSkyBottom")
         bgNightIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNightIntensity")
+        bgMoonPhaseMultiplierHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMoonPhaseMultiplier")
 
 
 
@@ -261,6 +270,7 @@ class SunnyRenderer(
             moonPhaseHandle = GLES30.glGetUniformLocation(moonProgram, "uPhase")
             moonColorHandle = GLES30.glGetUniformLocation(moonProgram, "uMoonColor")
             moonIntensityHandle = GLES30.glGetUniformLocation(moonProgram, "uIntensity")
+            moonHaloIntensityHandle = GLES30.glGetUniformLocation(moonProgram, "uHaloIntensity")
         } catch (e: Exception) { e.printStackTrace() }
 
         // Stars program
@@ -402,72 +412,147 @@ class SunnyRenderer(
     }
 
     override fun onUpdate(deltaTime: Float) {
-        // 1. Sun translation along the path
-        val direction = configProvider.getSunPathDirection()
+        val timeMode = configProvider.getTimeMode()
+        val combinedDir = if (timeMode == 2) configProvider.getCombinedPathDirection() else 0
+        val direction = if (timeMode == 2) {
+            if (combinedDir == 0 || combinedDir == 2) 0 else 1
+        } else {
+            configProvider.getSunPathDirection()
+        }
+
         if (direction != 3) {
             isRandomPathInitialized = false
         }
 
-        if (direction == 0) { // Left-to-Right
-            val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
-            sunPathX += deltaTime * moveSpeed
-            if (sunPathX > 1.3f) {
-                sunPathX = -1.3f
+        if (timeMode == 2) {
+            // Speed is controlled by Combined cycle speed config
+            val moveSpeed = 0.01f + (configProvider.getGradientCycleSpeed() / 100f) * 0.49f
+            val sunL2R = (combinedDir == 0 || combinedDir == 2)
+            val moonL2R = (combinedDir == 0 || combinedDir == 3)
+
+            if (!isCombinedNight) {
+                // Day Phase: Sun is moving
+                if (sunL2R) {
+                    sunPathX += deltaTime * moveSpeed
+                    if (sunPathX > 1.3f) {
+                        isCombinedNight = true
+                        moonPathX = if (moonL2R) -1.3f else 1.3f
+                    }
+                } else {
+                    sunPathX -= deltaTime * moveSpeed
+                    if (sunPathX < -1.3f) {
+                        isCombinedNight = true
+                        moonPathX = if (moonL2R) -1.3f else 1.3f
+                    }
+                }
+                
+                // Calculate normalized progress p of the active Sun
+                val sunStart = if (sunL2R) -1.3f else 1.3f
+                val sunEnd = if (sunL2R) 1.3f else -1.3f
+                val p = ((sunPathX - sunStart) / (sunEnd - sunStart)).coerceIn(0f, 1f)
+                
+                // Sunrise transition in first 15% of path, Sunset transition in last 15% of path
+                combinedDayIntensity = if (p < 0.15f) {
+                    smoothstep(0.0f, 0.15f, p)
+                } else if (p > 0.85f) {
+                    smoothstep(1.0f, 0.85f, p)
+                } else {
+                    1.0f
+                }
+                combinedNightIntensity = 1.0f - combinedDayIntensity
+
+                // Keep inactive Moon off-screen at its start position
+                moonPathX = if (moonL2R) -1.3f else 1.3f
+            } else {
+                // Night Phase: Moon is moving
+                if (moonL2R) {
+                    moonPathX += deltaTime * moveSpeed
+                    if (moonPathX > 1.3f) {
+                        isCombinedNight = false
+                        sunPathX = if (sunL2R) -1.3f else 1.3f
+                    }
+                } else {
+                    moonPathX -= deltaTime * moveSpeed
+                    if (moonPathX < -1.3f) {
+                        isCombinedNight = false
+                        sunPathX = if (sunL2R) -1.3f else 1.3f
+                    }
+                }
+                
+                // Night phase sky is fully dark night
+                combinedDayIntensity = 0.0f
+                combinedNightIntensity = 1.0f
+
+                // Keep inactive Sun off-screen at its start position
+                sunPathX = if (sunL2R) -1.3f else 1.3f
             }
+
             sunX = sunPathX
-            sunY = 1.2f - 1.5f * (sunX * sunX)
-        } else if (direction == 1) { // Right-to-Left
-            val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
-            sunPathX -= deltaTime * moveSpeed
-            if (sunPathX < -1.3f) {
-                sunPathX = 1.3f
-            }
-            sunX = sunPathX
-            sunY = 1.2f - 1.5f * (sunX * sunX)
-        } else if (direction == 3) { // Random (Aleatorio)
-            if (!isRandomPathInitialized) {
-                generateRandomPath()
-            }
-            val moveSpeed = 0.05f + (configProvider.getSunMoveSpeed() / 100f) * 0.45f
-            randomProgress += deltaTime * moveSpeed
-            if (randomProgress >= 1.0f) {
-                generateRandomPath()
-            }
-            sunX = randomStartX + (randomEndX - randomStartX) * randomProgress
-            sunY = randomStartY + (randomEndY - randomStartY) * randomProgress
-        } else { // Stationary (2)
-            when (configProvider.getSunStationaryPosition()) {
-                0 -> { // Top Left (Esquina superior izquierda)
-                    sunX = -1.0f
-                    sunY = 1.0f / aspectRatio
+            sunY = 0.6f - 1.1f * (sunX * sunX)
+            moon.positionX = moonPathX
+            moon.positionY = 0.6f - 1.1f * (moon.positionX * moon.positionX)
+        } else {
+            if (direction == 0) { // Left-to-Right
+                val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
+                sunPathX += deltaTime * moveSpeed
+                if (sunPathX > 1.3f) {
+                    sunPathX = -1.3f
                 }
-                1 -> { // Top Right (Esquina superior derecha)
-                    sunX = 1.0f
-                    sunY = 1.0f / aspectRatio
+                sunX = sunPathX
+                sunY = 0.6f - 1.1f * (sunX * sunX)
+            } else if (direction == 1) { // Right-to-Left
+                val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
+                sunPathX -= deltaTime * moveSpeed
+                if (sunPathX < -1.3f) {
+                    sunPathX = 1.3f
                 }
-                3 -> { // Left Edge (Borde izquierdo)
-                    sunX = -0.8f
-                    sunY = 0.25f
+                sunX = sunPathX
+                sunY = 0.6f - 1.1f * (sunX * sunX)
+            } else if (direction == 3) { // Random (Aleatorio)
+                if (!isRandomPathInitialized) {
+                    generateRandomPath()
                 }
-                4 -> { // Right Edge (Borde derecho)
-                    sunX = 0.8f
-                    sunY = 0.25f
+                val moveSpeed = 0.05f + (configProvider.getSunMoveSpeed() / 100f) * 0.45f
+                randomProgress += deltaTime * moveSpeed
+                if (randomProgress >= 1.0f) {
+                    generateRandomPath()
                 }
-                2 -> { // Center (Enmedio)
-                    sunX = 0.0f
-                    sunY = 0.45f
-                }
-                5 -> { // Custom / Free Position (Personalizado)
-                    val customXVal = configProvider.getSunCustomX()
-                    val customYVal = configProvider.getSunCustomY()
-                    sunX = -1.0f + (customXVal / 100f) * 2.0f
-                    val minY = -0.8f
-                    val maxY = 1.0f / aspectRatio
-                    sunY = minY + (customYVal / 100f) * (maxY - minY)
-                }
-                else -> { // Default / Center
-                    sunX = 0.0f
-                    sunY = 0.45f
+                sunX = randomStartX + (randomEndX - randomStartX) * randomProgress
+                sunY = randomStartY + (randomEndY - randomStartY) * randomProgress
+            } else { // Stationary (2)
+                when (configProvider.getSunStationaryPosition()) {
+                    0 -> { // Top Left (Esquina superior izquierda)
+                        sunX = -aspectRatio * 0.75f
+                        sunY = 0.75f
+                    }
+                    1 -> { // Top Right (Esquina superior derecha)
+                        sunX = aspectRatio * 0.75f
+                        sunY = 0.75f
+                    }
+                    3 -> { // Left Edge (Borde izquierdo)
+                        sunX = -aspectRatio * 0.75f
+                        sunY = 0.25f
+                    }
+                    4 -> { // Right Edge (Borde derecho)
+                        sunX = aspectRatio * 0.75f
+                        sunY = 0.25f
+                    }
+                    2 -> { // Center (Enmedio)
+                        sunX = 0.0f
+                        sunY = 0.45f
+                    }
+                    5 -> { // Custom / Free Position (Personalizado)
+                        val customXVal = configProvider.getSunCustomX()
+                        val customYVal = configProvider.getSunCustomY()
+                        sunX = -aspectRatio + (customXVal / 100f) * (2.0f * aspectRatio)
+                        val minY = -0.8f
+                        val maxY = 0.8f
+                        sunY = minY + (customYVal / 100f) * (maxY - minY)
+                    }
+                    else -> { // Default / Center
+                        sunX = 0.0f
+                        sunY = 0.45f
+                    }
                 }
             }
         }
@@ -515,19 +600,25 @@ class SunnyRenderer(
         clouds.removeAll { it.isFadingOut && it.opacity <= 0f }
 
         // Night / Combined mode: update moon and night clouds
-        val timeMode = configProvider.getTimeMode()
         if (timeMode == 1 || timeMode == 2) {
-            moon.phase = configProvider.getMoonPhase()
+            moon.phase = if (timeMode == 2) configProvider.getCombinedMoonPhase() else configProvider.getMoonPhase()
             moon.moveSpeed = configProvider.getMoonMoveSpeed()
             moon.stationaryPosition = configProvider.getMoonStationaryPosition()
-            val newDir = configProvider.getMoonPathDirection()
-            if (newDir != prevMoonDirection) {
-                moon.resetPath(newDir, aspectRatio)
-                prevMoonDirection = newDir
+            moon.customX = configProvider.getMoonCustomX()
+            moon.customY = configProvider.getMoonCustomY()
+            
+            if (timeMode == 2) {
+                // Moon position is already calculated in the first block of onUpdate
+            } else {
+                val newDir = configProvider.getMoonPathDirection()
+                if (newDir != prevMoonDirection) {
+                    moon.resetPath(newDir, aspectRatio)
+                    prevMoonDirection = newDir
+                }
+                moon.update(deltaTime, aspectRatio)
             }
-            moon.update(deltaTime, aspectRatio)
 
-            adjustNightClouds(configProvider.getNightCloudDensity())
+            adjustNightClouds(configProvider.getCloudDensity())
             for (nc in nightClouds) {
                 nc.update(deltaTime, 0.02f, 0.5f)
                 val halfW = nc.scale * 1.2f
@@ -540,9 +631,13 @@ class SunnyRenderer(
             nightClouds.removeAll { it.isFadingOut && it.opacity <= 0f }
         }
         if (timeMode == 2) {
-            val speedConfig = configProvider.getGradientCycleSpeed()
-            val cycleDuration = 30f + (1f - speedConfig / 100f) * 270f
-            cycleProgress = (cycleProgress + deltaTime / cycleDuration) % 1f
+            moonFadeFactor = if (kotlin.math.abs(moonPathX) > 1.1f) {
+                smoothstep(1.3f, 1.1f, kotlin.math.abs(moonPathX))
+            } else {
+                1.0f
+            }
+        } else {
+            moonFadeFactor = 1.0f
         }
 
         // Calculate pathFadeFactor to smoothly fade sun elements at the start/end of paths
@@ -593,10 +688,11 @@ class SunnyRenderer(
         }
 
         // Stars simulation updates
-        val starDensitySetting = configProvider.getStarDensity()
+        val isCombined = configProvider.getTimeMode() == 2
+        val starDensitySetting = if (isCombined) configProvider.getCombinedStarDensity() else configProvider.getStarDensity()
         adjustStars(starDensitySetting)
 
-        val starColorSetting = configProvider.getStarColorIndex()
+        val starColorSetting = if (isCombined) configProvider.getCombinedStarColorIndex() else configProvider.getStarColorIndex()
         if (starColorSetting != lastStarColorIndex) {
             lastStarColorIndex = starColorSetting
             for (star in stars) {
@@ -649,12 +745,14 @@ class SunnyRenderer(
 
         // Helper to get coordinates on an edge
         fun getEdgeCoordinates(edge: Int): Pair<Float, Float> {
-            val maxTopY = 1.2f / aspectRatio
+            val minY = 0.0f
+            val maxY = 0.8f
+            val xMargin = 0.25f
             return when (edge) {
-                0 -> Pair(-1.5f, random.nextFloat() * (maxTopY - (-0.8f)) + (-0.8f)) // Left edge
-                1 -> Pair(1.5f, random.nextFloat() * (maxTopY - (-0.8f)) + (-0.8f)) // Right edge
-                2 -> Pair(random.nextFloat() * 2.4f - 1.2f, maxTopY) // Top edge
-                else -> Pair(random.nextFloat() * 2.4f - 1.2f, -1.2f) // Bottom edge
+                0 -> Pair(-aspectRatio - xMargin, random.nextFloat() * (maxY - minY) + minY) // Left edge
+                1 -> Pair(aspectRatio + xMargin, random.nextFloat() * (maxY - minY) + minY) // Right edge
+                2 -> Pair(random.nextFloat() * (2f * aspectRatio) - aspectRatio, 1.1f) // Top edge
+                else -> Pair(random.nextFloat() * (2f * aspectRatio) - aspectRatio, 0.0f) // Bottom edge
             }
         }
 
@@ -687,7 +785,11 @@ class SunnyRenderer(
         GLES30.glUniform1f(timeHandle, time)
         GLES30.glUniform1f(aspectHandle, aspectRatio)
 
-        val sizeConfig = configProvider.getSunSize()
+        val sizeConfig = if (configProvider.getTimeMode() == 2) {
+            configProvider.getCombinedSunSize()
+        } else {
+            configProvider.getSunSize()
+        }
         val mappedSize = 0.05f + (sizeConfig / 100f) * 0.30f
         GLES30.glUniform1f(sunSizeHandle, mappedSize)
 
@@ -748,15 +850,14 @@ class SunnyRenderer(
     private fun drawNightScene(intensity: Float) {
         drawStars(intensity)
         drawMoon(intensity)
+        drawNightClouds(intensity)
         val bgIndex = configProvider.getSunnyBackgroundIndex()
         drawBackground(bgIndex, intensity)
-        drawNightClouds(intensity)
     }
 
     private fun drawCombinedScene() {
-        val t = cycleProgress
-        val nightIntensity = smoothstep(0.35f, 0.5f, t) * (1f - smoothstep(0.85f, 1.0f, t))
-        val dayIntensity = 1f - nightIntensity
+        val dayIntensity = combinedDayIntensity
+        val nightIntensity = combinedNightIntensity
 
         // 1. Cielo (Día y/o Noche)
         if (dayIntensity > 0.01f) {
@@ -771,18 +872,18 @@ class SunnyRenderer(
             drawMoon(nightIntensity)
         }
 
-        // 3. Paisaje Silueta (Montañas/Fondo)
-        val bgIndex = configProvider.getSunnyBackgroundIndex()
-        if (bgIndex > 0) {
-            drawBackground(bgIndex, nightIntensity)
-        }
-
-        // 4. Nubes (Día y/o Noche)
+        // 3. Nubes (Día y/o Noche)
         if (dayIntensity > 0.01f) {
             drawClouds(dayIntensity)
         }
         if (nightIntensity > 0.01f) {
             drawNightClouds(nightIntensity)
+        }
+
+        // 4. Paisaje Silueta (Montañas/Fondo - Dibujado al frente)
+        val bgIndex = configProvider.getSunnyBackgroundIndex()
+        if (bgIndex > 0) {
+            drawBackground(bgIndex, nightIntensity)
         }
 
         // 5. Efectos Especiales de Día
@@ -858,18 +959,33 @@ class SunnyRenderer(
         if (moonProgram == 0) return
         GLES30.glUseProgram(moonProgram)
 
-        val moonSize = 0.12f
+        val sizeConfig = if (configProvider.getTimeMode() == 2) {
+            configProvider.getCombinedMoonSize()
+        } else {
+            50
+        }
+        val mappedMoonSize = if (configProvider.getTimeMode() == 2) {
+            0.06f + (sizeConfig / 100f) * 0.34f
+        } else {
+            0.24f
+        }
         val modelMatrix = FloatArray(16)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, moon.positionX, moon.positionY, 0f)
-        Matrix.scaleM(modelMatrix, 0, moonSize, moonSize, 1.0f)
+        Matrix.scaleM(modelMatrix, 0, mappedMoonSize, mappedMoonSize, 1.0f)
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, projectionMatrix, 0, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(moonMVPHandle, 1, false, mvp, 0)
         GLES30.glUniform1i(moonPhaseHandle, moon.phase)
         GLES30.glUniform3f(moonColorHandle, 1.0f, 0.97f, 0.88f)
-        GLES30.glUniform1f(moonIntensityHandle, intensity)
+        val horizonFade = smoothstep(-0.4f, -0.1f, moon.positionY)
+        val baseIntensity = if (configProvider.getTimeMode() == 2) intensity * moonFadeFactor else intensity
+        val finalIntensity = baseIntensity * horizonFade
+        GLES30.glUniform1f(moonIntensityHandle, finalIntensity)
+
+        val haloHorizonFade = smoothstep(-0.4f, 0.8f, moon.positionY)
+        GLES30.glUniform1f(moonHaloIntensityHandle, haloHorizonFade)
 
         cloudQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
@@ -1120,6 +1236,15 @@ class SunnyRenderer(
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
+        
+        val currentPhase = if (configProvider.getTimeMode() == 2) {
+            configProvider.getCombinedMoonPhase()
+        } else {
+            configProvider.getMoonPhase()
+        }
+        val clampedPhase = currentPhase.coerceIn(0, 7)
+        val moonPhaseMultiplier = moonPhaseMultipliers[clampedPhase]
+        GLES30.glUniform1f(bgMoonPhaseMultiplierHandle, moonPhaseMultiplier)
 
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()
@@ -1272,7 +1397,8 @@ class SunnyRenderer(
         star.vy = (random.nextFloat() * 2f - 1f) * 0.015f
 
         // Star color configuration
-        val colorIndex = configProvider.getStarColorIndex()
+        val isCombined = configProvider.getTimeMode() == 2
+        val colorIndex = if (isCombined) configProvider.getCombinedStarColorIndex() else configProvider.getStarColorIndex()
         val finalIndex = if (colorIndex == 5) random.nextInt(5) else colorIndex
         val (r, g, b) = getStarColorRGB(finalIndex)
         star.r = r
@@ -1504,6 +1630,13 @@ class SunnyRenderer(
             GLES30.glDeleteTextures(1, textureIds, 0)
             e.printStackTrace()
         }
+    }
+
+    private fun wrapPathX(x: Float): Float {
+        var v = x
+        while (v > 1.3f) v -= 2.6f
+        while (v < -1.3f) v += 2.6f
+        return v
     }
 
     private fun loadShader(type: Int, shaderCode: String): Int {

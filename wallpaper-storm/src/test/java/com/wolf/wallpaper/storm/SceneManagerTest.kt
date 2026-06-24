@@ -64,6 +64,8 @@ class SceneManagerTest {
         override fun getSunStationaryPosition(): Int = 0
         override fun getSunCustomX(): Int = 0
         override fun getSunCustomY(): Int = 0
+        override fun getMoonCustomX(): Int = 0
+        override fun getMoonCustomY(): Int = 0
         override fun getSunnyCustomSkyTopColor(): Int = 0
         override fun getSunnyCustomSkyBottomColor(): Int = 0
         override fun isSunnyGodRaysEnabled(): Boolean = false
@@ -87,6 +89,12 @@ class SceneManagerTest {
         override fun getStarMode(): Int = 0
         override fun getNightCloudDensity(): Int = 0
         override fun getGradientCycleSpeed(): Int = 0
+        override fun getCombinedSunSize(): Int = 50
+        override fun getCombinedMoonSize(): Int = 50
+        override fun getCombinedMoonPhase(): Int = 4
+        override fun getCombinedStarDensity(): Int = 60
+        override fun getCombinedStarColorIndex(): Int = 0
+        override fun getCombinedPathDirection(): Int = 0
     }
 
     @Test

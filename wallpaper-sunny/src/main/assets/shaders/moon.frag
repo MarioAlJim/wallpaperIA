@@ -5,7 +5,8 @@ in vec2 vUV;
 
 uniform int   uPhase;       // 0-7: 0=new, 4=full
 uniform vec3  uMoonColor;   // e.g. (1.0, 0.97, 0.88)
-uniform float uIntensity;   // 0-1, for combined mode fade
+uniform float uIntensity;     // 0-1, for combined mode fade
+uniform float uHaloIntensity; // Y-based halo fade
 
 out vec4 fragColor;
 
@@ -17,38 +18,48 @@ void main() {
     float moonDist = length(p);
     float moonSDF = moonDist - moonR;
 
-    // Shadow circle offset factor per phase (multiplied by moonR)
-    // Phase 0=new(shadow covers all), 4=full(no shadow), 7=waning crescent
-    float offsets[8];
-    offsets[0] = 0.0;    // New moon: shadow at center -> all dark
-    offsets[1] = -0.3;   // Waxing crescent: thin right sliver
-    offsets[2] = -1.0;   // First quarter: right half lit
-    offsets[3] = -3.0;   // Waxing gibbous: mostly lit
-    offsets[4] = -10.0;  // Full moon: shadow far left, all lit
-    offsets[5] = 3.0;    // Waning gibbous: mostly lit
-    offsets[6] = 1.0;    // Last quarter: left half lit
-    offsets[7] = 0.3;    // Waning crescent: thin left sliver
-
+    // 3D sphere normal dot product calculation for moon phases
     int ph = clamp(uPhase, 0, 7);
-    float shadowX = offsets[ph] * moonR;
-
-    float shadowDist = length(p - vec2(shadowX, 0.0));
-    float shadowSDF  = shadowDist - moonR;
-
-    // Lit region: inside moon AND outside shadow
-    float litSDF   = max(moonSDF, -shadowSDF);
-    float litAlpha = smoothstep(0.025, -0.025, litSDF);
+    const float PI = 3.14159265359;
+    float theta = float(ph) * (PI / 4.0);
+    // z is the depth of the 3D sphere surface
+    float z = sqrt(max(0.0, moonR * moonR - p.x * p.x - p.y * p.y));
+    
+    // Dot product between surface normal and sun light direction vector
+    float dotProd = p.x * sin(theta) - z * cos(theta);
+    
+    // Smooth lit phase transition
+    float phaseAlpha = smoothstep(-0.01, 0.01, dotProd);
+    
+    // Smooth circle boundary for the moon shape
+    float moonAlpha = smoothstep(0.01, -0.01, moonSDF);
+    
+    // Lit region: inside moon circle AND in the illuminated phase
+    float litAlpha = moonAlpha * phaseAlpha;
 
     // Soft halo glow (visible even for new moon)
-    float haloAlpha = smoothstep(moonR + 0.22, moonR + 0.04, moonDist) * 0.28;
-    // For new moon, halo is dimmer
-    float haloFade = (ph == 0) ? 0.35 : 1.0;
+    float baseHalo = smoothstep(moonR + 0.22, moonR + 0.04, moonDist) * 0.28;
+
+    float haloMultipliers[8];
+    haloMultipliers[0] = 0.025;  // New moon: almost no halo outside
+    haloMultipliers[1] = 0.10;
+    haloMultipliers[2] = 0.25;
+    haloMultipliers[3] = 0.40;
+    haloMultipliers[4] = 0.50;   // Full moon: max 50% halo outside
+    haloMultipliers[5] = 0.40;
+    haloMultipliers[6] = 0.25;
+    haloMultipliers[7] = 0.10;
+
+    float haloAlpha = baseHalo;
+    if (moonDist > moonR) {
+        haloAlpha = baseHalo * haloMultipliers[ph];
+    }
 
     // Limb darkening on lit surface
     float limb = moonDist / moonR;
     vec3 surfaceColor = mix(uMoonColor, uMoonColor * 0.65, limb * limb * 0.6);
 
-    float totalAlpha = (litAlpha + haloAlpha * haloFade) * uIntensity;
+    float totalAlpha = (litAlpha + haloAlpha * uHaloIntensity) * uIntensity;
     vec3  totalColor = mix(uMoonColor * 0.3, surfaceColor, litAlpha / max(totalAlpha, 0.001));
 
     fragColor = vec4(totalColor, totalAlpha);

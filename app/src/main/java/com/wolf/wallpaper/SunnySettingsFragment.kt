@@ -51,7 +51,7 @@ class SunnySettingsFragment : Fragment() {
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
         // 1. Setup Accordions
-        setupAccordion(view, R.id.headerSunnyClouds, R.id.contentSunnyClouds, R.id.dividerSunnyClouds, R.id.arrowSunnyClouds)
+        setupAccordion(view, R.id.headerSunnyEnvironment, R.id.contentSunnyEnvironment, R.id.dividerSunnyEnvironment, R.id.arrowSunnyEnvironment)
         setupAccordion(view, R.id.headerSunnySun, R.id.contentSunnySun, R.id.dividerSunnySun, R.id.arrowSunnySun)
         setupAccordion(view, R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon)
         setupAccordion(view, R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
@@ -162,6 +162,10 @@ class SunnySettingsFragment : Fragment() {
         setupStarColorCards(view)
         setupStarModeCards(view)
         setupNightAndCombinedSliders(view)
+        setupCombinedMoonPhaseCards(view)
+        setupCombinedStarColorCards(view)
+        setupCombinedTrajectory(view)
+        setupStarColorPreviews(view)
 
         // Init summaries and views
         updateSummaries(view)
@@ -244,10 +248,8 @@ class SunnySettingsFragment : Fragment() {
                 }
                 textView.text = "$value% • $desc"
             }
-            R.id.seekBarSunCustomX -> {
-                textView.text = "$value%"
-            }
-            R.id.seekBarSunCustomY -> {
+            R.id.seekBarSunCustomX, R.id.seekBarSunCustomY,
+            R.id.seekBarMoonCustomX, R.id.seekBarMoonCustomY -> {
                 textView.text = "$value%"
             }
             R.id.seekBarSunnyGodRaysIntensity -> {
@@ -286,21 +288,40 @@ class SunnySettingsFragment : Fragment() {
                 }
                 textView.text = "$value% • $desc"
             }
-            R.id.seekBarNightCloudDensity -> {
-                val desc = when {
-                    value <= 0 -> "Sin nubes"
-                    value <= 30 -> "Pocas"
-                    value <= 60 -> "Normal"
-                    else -> "Cubierto"
-                }
-                textView.text = "$value% • $desc"
-            }
+
             R.id.seekBarGradientCycleSpeed -> {
                 val desc = when {
                     value <= 20 -> "Muy lento"
                     value <= 50 -> "Normal"
                     value <= 85 -> "Rápido"
                     else -> "Muy rápido"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarCombinedSunSize -> {
+                val desc = when {
+                    value <= 20 -> "Pequeño"
+                    value <= 50 -> "Normal"
+                    value <= 80 -> "Grande"
+                    else -> "Gigante"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarCombinedMoonSize -> {
+                val desc = when {
+                    value <= 20 -> "Pequeña"
+                    value <= 50 -> "Normal"
+                    value <= 80 -> "Grande"
+                    else -> "Gigante"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarCombinedStarDensity -> {
+                val desc = when {
+                    value <= 20 -> "Pocas"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Muchas"
+                    else -> "Cielo lleno"
                 }
                 textView.text = "$value% • $desc"
             }
@@ -599,6 +620,24 @@ class SunnySettingsFragment : Fragment() {
         cardSun.visibility = if (mode == 0 || mode == 2) View.VISIBLE else View.GONE
         cardMoon.visibility = if (mode == 1 || mode == 2) View.VISIBLE else View.GONE
         cardCombined.visibility = if (mode == 2) View.VISIBLE else View.GONE
+
+        // Hide redundant individual day/night controls when Combined mode is active
+        val layoutSunSizeAndSpeed = parent.findViewById<View>(R.id.layoutSunSizeAndSpeed)
+        val layoutSunTrajectoryGroup = parent.findViewById<View>(R.id.layoutSunTrajectoryGroup)
+        val layoutMoonTrajectoryGroup = parent.findViewById<View>(R.id.layoutMoonTrajectoryGroup)
+        val layoutStarColorAndDensityGroup = parent.findViewById<View>(R.id.layoutStarColorAndDensityGroup)
+
+        if (mode == 2) {
+            layoutSunSizeAndSpeed?.visibility = View.GONE
+            layoutSunTrajectoryGroup?.visibility = View.GONE
+            layoutMoonTrajectoryGroup?.visibility = View.GONE
+            layoutStarColorAndDensityGroup?.visibility = View.GONE
+        } else {
+            layoutSunSizeAndSpeed?.visibility = View.VISIBLE
+            layoutSunTrajectoryGroup?.visibility = View.VISIBLE
+            layoutMoonTrajectoryGroup?.visibility = View.VISIBLE
+            layoutStarColorAndDensityGroup?.visibility = View.VISIBLE
+        }
     }
 
     private fun setupMoonPhaseCards(parent: View) {
@@ -686,6 +725,7 @@ class SunnySettingsFragment : Fragment() {
             R.id.cardMoonPosMidLeft, R.id.cardMoonPosMidRight, R.id.cardMoonPosCustom
         )
         val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+        val customLayout = parent.findViewById<View>(R.id.layoutMoonCustomXY)
 
         fun selectPos(pos: Int) {
             cards.forEachIndexed { i, card ->
@@ -700,9 +740,22 @@ class SunnySettingsFragment : Fragment() {
                     card.setCardBackgroundColor(Color.parseColor("#21212A"))
                 }
             }
+            if (customLayout != null) {
+                val p = customLayout.parent as? ViewGroup
+                p?.let { TransitionManager.beginDelayedTransition(it, AutoTransition().apply { duration = 200 }) }
+                customLayout.visibility = if (pos == 5) View.VISIBLE else View.GONE
+            }
         }
 
         selectPos(configManager.getMoonStationaryPosition())
+
+        // Wire sliders for custom X/Y
+        setupSlider(parent, R.id.seekBarMoonCustomX, R.id.textViewMoonCustomXValue, configManager.getMoonCustomX()) { value ->
+            configManager.setMoonCustomX(value)
+        }
+        setupSlider(parent, R.id.seekBarMoonCustomY, R.id.textViewMoonCustomYValue, configManager.getMoonCustomY()) { value ->
+            configManager.setMoonCustomY(value)
+        }
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -784,11 +837,126 @@ class SunnySettingsFragment : Fragment() {
         setupSlider(parent, R.id.seekBarStarDensity, R.id.textViewStarDensityValue, configManager.getStarDensity()) { value ->
             configManager.setStarDensity(value)
         }
-        setupSlider(parent, R.id.seekBarNightCloudDensity, R.id.textViewNightCloudDensityValue, configManager.getNightCloudDensity()) { value ->
-            configManager.setNightCloudDensity(value)
-        }
+
         setupSlider(parent, R.id.seekBarGradientCycleSpeed, R.id.textViewGradientCycleSpeedValue, configManager.getGradientCycleSpeed()) { value ->
             configManager.setGradientCycleSpeed(value)
+        }
+        setupSlider(parent, R.id.seekBarCombinedSunSize, R.id.textViewCombinedSunSizeValue, configManager.getCombinedSunSize()) { value ->
+            configManager.setCombinedSunSize(value)
+        }
+        setupSlider(parent, R.id.seekBarCombinedMoonSize, R.id.textViewCombinedMoonSizeValue, configManager.getCombinedMoonSize()) { value ->
+            configManager.setCombinedMoonSize(value)
+        }
+        setupSlider(parent, R.id.seekBarCombinedStarDensity, R.id.textViewCombinedStarDensityValue, configManager.getCombinedStarDensity()) { value ->
+            configManager.setCombinedStarDensity(value)
+        }
+    }
+
+    private fun setupCombinedMoonPhaseCards(parent: View) {
+        val ids = listOf(
+            R.id.cardCombinedMoonPhase0, R.id.cardCombinedMoonPhase1, R.id.cardCombinedMoonPhase2, R.id.cardCombinedMoonPhase3,
+            R.id.cardCombinedMoonPhase4, R.id.cardCombinedMoonPhase5, R.id.cardCombinedMoonPhase6, R.id.cardCombinedMoonPhase7
+        )
+        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+
+        fun selectPhase(phase: Int) {
+            cards.forEachIndexed { i, card ->
+                card ?: return@forEachIndexed
+                if (i == phase) {
+                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                } else {
+                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                }
+            }
+        }
+
+        selectPhase(configManager.getCombinedMoonPhase())
+
+        cards.forEachIndexed { i, card ->
+            card?.setOnClickListener {
+                configManager.setCombinedMoonPhase(i)
+                selectPhase(i)
+                updateSummaries(parent)
+            }
+        }
+    }
+
+    private fun setupCombinedStarColorCards(parent: View) {
+        val ids = listOf(
+            R.id.cardCombinedStarColorWhite, R.id.cardCombinedStarColorBlue, R.id.cardCombinedStarColorWarm,
+            R.id.cardCombinedStarColorPink, R.id.cardCombinedStarColorGreen, R.id.cardCombinedStarColorMixed
+        )
+        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+
+        fun selectColor(index: Int) {
+            cards.forEachIndexed { i, card ->
+                card ?: return@forEachIndexed
+                if (i == index) {
+                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                } else {
+                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                }
+            }
+        }
+
+        selectColor(configManager.getCombinedStarColorIndex())
+
+        cards.forEachIndexed { i, card ->
+            card?.setOnClickListener {
+                configManager.setCombinedStarColorIndex(i)
+                selectColor(i)
+                updateSummaries(parent)
+            }
+        }
+    }
+
+    private fun setupStarColorPreviews(parent: View) {
+        val whiteView = parent.findViewById<View>(R.id.viewStarColorWhitePreview)
+        val blueView = parent.findViewById<View>(R.id.viewStarColorBluePreview)
+        val warmView = parent.findViewById<View>(R.id.viewStarColorWarmPreview)
+        val pinkView = parent.findViewById<View>(R.id.viewStarColorPinkPreview)
+        val greenView = parent.findViewById<View>(R.id.viewStarColorGreenPreview)
+        val mixedView = parent.findViewById<View>(R.id.viewStarColorMixedPreview)
+
+        setCircleColorPreview(whiteView, 0xFFFFFFFF.toInt())
+        setCircleColorPreview(blueView, 0xFF99CCFF.toInt())
+        setCircleColorPreview(warmView, 0xFFFFF2B3.toInt())
+        setCircleColorPreview(pinkView, 0xFFFFB3D9.toInt())
+        setCircleColorPreview(greenView, 0xFF80FFB3.toInt())
+        setCardGradientPreview(mixedView, 0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt())
+
+        val combinedWhiteView = parent.findViewById<View>(R.id.viewCombinedStarColorWhitePreview)
+        val combinedBlueView = parent.findViewById<View>(R.id.viewCombinedStarColorBluePreview)
+        val combinedWarmView = parent.findViewById<View>(R.id.viewCombinedStarColorWarmPreview)
+        val combinedPinkView = parent.findViewById<View>(R.id.viewCombinedStarColorPinkPreview)
+        val combinedGreenView = parent.findViewById<View>(R.id.viewCombinedStarColorGreenPreview)
+        val combinedMixedView = parent.findViewById<View>(R.id.viewCombinedStarColorMixedPreview)
+
+        setCircleColorPreview(combinedWhiteView, 0xFFFFFFFF.toInt())
+        setCircleColorPreview(combinedBlueView, 0xFF99CCFF.toInt())
+        setCircleColorPreview(combinedWarmView, 0xFFFFF2B3.toInt())
+        setCircleColorPreview(combinedPinkView, 0xFFFFB3D9.toInt())
+        setCircleColorPreview(combinedGreenView, 0xFF80FFB3.toInt())
+        setCardGradientPreview(combinedMixedView, 0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt())
+    }
+
+    private fun setupCombinedTrajectory(parent: View) {
+        val combinedTrajectories = arrayOf(
+            "Mismo Sentido (Izquierda a Derecha)",
+            "Mismo Sentido (Derecha a Izquierda)",
+            "Sentidos Opuestos (Sol Izq a Der, Luna Der a Izq)",
+            "Sentidos Opuestos (Sol Der a Izq, Luna Izq a Der)"
+        )
+        setupDropdown(parent, R.id.spinnerCombinedTrajectory, combinedTrajectories, configManager.getCombinedPathDirection()) { position ->
+            configManager.setCombinedPathDirection(position)
         }
     }
 
@@ -902,14 +1070,14 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun updateSummaries(parent: View) {
-        val summarySunnyClouds = parent.findViewById<TextView>(R.id.summarySunnyClouds)
+        val summarySunnyEnvironment = parent.findViewById<TextView>(R.id.summarySunnyEnvironment)
         val summarySunnySun = parent.findViewById<TextView>(R.id.summarySunnySun)
         val summarySunnyMoon = parent.findViewById<TextView>(R.id.summarySunnyMoon)
         val summarySunnyCombined = parent.findViewById<TextView>(R.id.summarySunnyCombined)
 
         val accentColor = "#00E5FF"
 
-        if (summarySunnyClouds != null) {
+        if (summarySunnyEnvironment != null) {
             val density = configManager.getCloudDensity()
             val densityText = when {
                 density <= 0 -> "Cielo despejado"
@@ -918,8 +1086,21 @@ class SunnySettingsFragment : Fragment() {
                 density <= 75 -> "Muy nublado"
                 else -> "Cielo Cubierto"
             }
-            summarySunnyClouds.text = Html.fromHtml(
-                "Nubes: <font color='$accentColor'>$densityText ($density%)</font>",
+            val sunBg = when (configManager.getSunnyBackgroundIndex()) {
+                0 -> "Solo degradado"
+                1 -> "Montañas"
+                2 -> "Campos"
+                3 -> "Lago y Bosque"
+                4 -> "Bosque y Río"
+                5 -> "Silueta de Ciudad"
+                6 -> "Valle de Flores"
+                7 -> "Cascada"
+                8 -> "Galería"
+                else -> "Degradado"
+            }
+            val gyroStatus = if (configManager.isSunnyGyroEnabled()) "Sí" else "No"
+            summarySunnyEnvironment.text = Html.fromHtml(
+                "Nubes: <font color='$accentColor'>$densityText ($density%)</font> • Fondo: <font color='$accentColor'>$sunBg</font> • Giroscopio: <font color='$accentColor'>$gyroStatus</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -940,23 +1121,11 @@ class SunnySettingsFragment : Fragment() {
                 3 -> "Aleatorio"
                 else -> "Izquierda a Derecha"
             }
-            val sunBg = when (configManager.getSunnyBackgroundIndex()) {
-                0 -> "Solo degradado"
-                1 -> "Montañas"
-                2 -> "Campos"
-                3 -> "Lago y Bosque"
-                4 -> "Bosque y Río"
-                5 -> "Silueta de Ciudad"
-                6 -> "Valle de Flores"
-                7 -> "Cascada"
-                8 -> "Galería"
-                else -> "Degradado"
-            }
             val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) "Activo" else "Inactivo"
             val lensFlareStatus = if (configManager.isSunnyLensFlareEnabled()) "Activo" else "Inactivo"
 
             summarySunnySun.text = Html.fromHtml(
-                "Tema: <font color='$accentColor'>$themeText</font> • Sol: <font color='$accentColor'>$sunDir</font><br/>Fondo: <font color='$accentColor'>$sunBg</font> • Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font>",
+                "Tema: <font color='$accentColor'>$themeText</font> • Sol: <font color='$accentColor'>$sunDir</font><br/>Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -998,8 +1167,38 @@ class SunnySettingsFragment : Fragment() {
                 speed <= 85 -> "Rápido"
                 else -> "Muy rápido"
             }
+            val sunSize = configManager.getCombinedSunSize()
+            val moonSize = configManager.getCombinedMoonSize()
+            val phaseText = when (configManager.getCombinedMoonPhase()) {
+                0 -> "Luna Nueva"
+                1 -> "Creciente Cóncava"
+                2 -> "Cuarto Creciente"
+                3 -> "Creciente Convexa"
+                4 -> "Luna Llena"
+                5 -> "Menguante Convexa"
+                6 -> "Cuarto Menguante"
+                7 -> "Menguante Cóncava"
+                else -> "Luna Llena"
+            }
+            val starDensity = configManager.getCombinedStarDensity()
+            val starColorText = when (configManager.getCombinedStarColorIndex()) {
+                0 -> "Blanco"
+                1 -> "Azul"
+                2 -> "Cálido"
+                3 -> "Rosa"
+                4 -> "Verde"
+                5 -> "Mixto"
+                else -> "Blanco"
+            }
+            val trajectoryText = when (configManager.getCombinedPathDirection()) {
+                0 -> "Mismo Sentido (Izq a Der)"
+                1 -> "Mismo Sentido (Der a Izq)"
+                2 -> "Opuestos (Sol Izq, Luna Der)"
+                3 -> "Opuestos (Sol Der, Luna Izq)"
+                else -> "Mismo Sentido"
+            }
             summarySunnyCombined.text = Html.fromHtml(
-                "Ciclo: <font color='$accentColor'>$speedText ($speed%)</font>",
+                "Ciclo: <font color='$accentColor'>$speedText ($speed%)</font> • Sol: <font color='$accentColor'>$sunSize%</font> • Luna: <font color='$accentColor'>$moonSize% ($phaseText)</font><br/>Estrellas: <font color='$accentColor'>$starColorText ($starDensity%)</font> • Trayecto: <font color='$accentColor'>$trajectoryText</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }

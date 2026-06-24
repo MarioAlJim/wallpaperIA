@@ -12,6 +12,7 @@ uniform int uIsCustom; // 1 if custom image, 0 if asset image
 uniform vec3 uSkyTop;
 uniform vec3 uSkyBottom;
 uniform float uNightIntensity;
+uniform float uMoonPhaseMultiplier;
 
 out vec4 fragColor;
 
@@ -39,8 +40,12 @@ void main() {
     // Smooth glare/illumination based on distance to the sun
     float glare = smoothstep(0.75, 0.05, distToSun);
     
+    // Scale glare at night by moon phase multiplier
+    float phaseMultiplier = mix(1.0, uMoonPhaseMultiplier, uNightIntensity);
+    glare *= phaseMultiplier;
+    
     // Fade out glare when the sun is below or near the horizon
-    glare *= smoothstep(-0.6, -0.1, uSunPos.y);
+    glare *= smoothstep(-0.4, -0.1, uSunPos.y);
     
     vec3 fgColor;
     vec3 bgColor;

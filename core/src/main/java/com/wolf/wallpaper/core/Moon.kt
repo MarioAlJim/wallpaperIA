@@ -11,6 +11,8 @@ class Moon {
     var pathDirection = 0 // 0=L2R, 1=R2L, 2=Static, 3=Random
     var moveSpeed = 30   // 0-100
     var stationaryPosition = 2 // 0-5
+    var customX = 50     // 0-100
+    var customY = 74     // 0-100
 
     // For L2R/R2L movement
     private var pathX = -1.3f
@@ -31,13 +33,13 @@ class Moon {
                 pathX += deltaTime * speed
                 if (pathX > 1.3f) pathX = -1.3f
                 positionX = pathX
-                positionY = 0.9f - 1.2f * (positionX * positionX)
+                positionY = 0.6f - 1.1f * (positionX * positionX)
             }
             1 -> { // Right to Left
                 pathX -= deltaTime * speed
                 if (pathX < -1.3f) pathX = 1.3f
                 positionX = pathX
-                positionY = 0.9f - 1.2f * (positionX * positionX)
+                positionY = 0.6f - 1.1f * (positionX * positionX)
             }
             2 -> { // Stationary
                 applyStationary(aspectRatio)
@@ -62,11 +64,17 @@ class Moon {
 
     private fun applyStationary(aspectRatio: Float) {
         when (stationaryPosition) {
-            0 -> { positionX = -0.9f; positionY = 0.85f / aspectRatio }
-            1 -> { positionX = 0.9f;  positionY = 0.85f / aspectRatio }
-            3 -> { positionX = -0.75f; positionY = 0.3f }
-            4 -> { positionX = 0.75f;  positionY = 0.3f }
-            else -> { positionX = 0f; positionY = 0.5f } // Center (2 and default)
+            0 -> { positionX = -aspectRatio * 0.75f; positionY = 0.75f }
+            1 -> { positionX = aspectRatio * 0.75f;  positionY = 0.75f }
+            3 -> { positionX = -aspectRatio * 0.75f; positionY = 0.3f }
+            4 -> { positionX = aspectRatio * 0.75f;  positionY = 0.3f }
+            5 -> { // Custom / Free Position (Personalizado)
+                positionX = -aspectRatio + (customX / 100f) * (2.0f * aspectRatio)
+                val minY = -0.8f
+                val maxY = 0.8f
+                positionY = minY + (customY / 100f) * (maxY - minY)
+            }
+            else -> { positionX = 0f; positionY = 0.45f } // Center (2 and default)
         }
     }
 
@@ -76,12 +84,14 @@ class Moon {
         while (endEdge == startEdge) endEdge = Random.nextInt(4)
 
         fun edgeCoords(edge: Int): Pair<Float, Float> {
-            val maxY = 1.0f / aspectRatio
+            val minY = 0.0f
+            val maxY = 0.8f
+            val xMargin = 0.25f
             return when (edge) {
-                0 -> Pair(-1.5f, Random.nextFloat() * (maxY + 0.8f) - 0.8f)
-                1 -> Pair(1.5f,  Random.nextFloat() * (maxY + 0.8f) - 0.8f)
-                2 -> Pair(Random.nextFloat() * 2.4f - 1.2f, maxY + 0.1f)
-                else -> Pair(Random.nextFloat() * 2.4f - 1.2f, -1.2f)
+                0 -> Pair(-aspectRatio - xMargin, Random.nextFloat() * (maxY - minY) + minY)
+                1 -> Pair(aspectRatio + xMargin, Random.nextFloat() * (maxY - minY) + minY)
+                2 -> Pair(Random.nextFloat() * (2f * aspectRatio) - aspectRatio, 1.1f)
+                else -> Pair(Random.nextFloat() * (2f * aspectRatio) - aspectRatio, 0.0f)
             }
         }
 

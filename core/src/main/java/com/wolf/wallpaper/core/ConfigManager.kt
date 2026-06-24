@@ -36,6 +36,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUN_STATIONARY_POSITION = "sun_stationary_position"
         const val KEY_SUN_CUSTOM_X = "sun_custom_x"
         const val KEY_SUN_CUSTOM_Y = "sun_custom_y"
+        const val KEY_MOON_CUSTOM_X = "moon_custom_x"
+        const val KEY_MOON_CUSTOM_Y = "moon_custom_y"
         const val KEY_SUNNY_CUSTOM_SKY_TOP_COLOR = "sunny_custom_sky_top_color"
         const val KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = "sunny_custom_sky_bottom_color"
         const val KEY_SUNNY_GOD_RAYS_ENABLED = "sunny_god_rays_enabled"
@@ -59,6 +61,14 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_STAR_MODE = "star_mode"
         const val KEY_NIGHT_CLOUD_DENSITY = "night_cloud_density"
         const val KEY_GRADIENT_CYCLE_SPEED = "gradient_cycle_speed"
+        
+        // New keys for Combined Mode
+        const val KEY_COMBINED_SUN_SIZE = "combined_sun_size"
+        const val KEY_COMBINED_MOON_SIZE = "combined_moon_size"
+        const val KEY_COMBINED_MOON_PHASE = "combined_moon_phase"
+        const val KEY_COMBINED_STAR_DENSITY = "combined_star_density"
+        const val KEY_COMBINED_STAR_COLOR_INDEX = "combined_star_color_index"
+        const val KEY_COMBINED_PATH_DIRECTION = "combined_path_direction"
 
         const val DEFAULT_TIME_MODE = 0
         const val DEFAULT_MOON_PHASE = 4
@@ -70,6 +80,13 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_STAR_MODE = 0
         const val DEFAULT_NIGHT_CLOUD_DENSITY = 40
         const val DEFAULT_GRADIENT_CYCLE_SPEED = 30
+        
+        const val DEFAULT_COMBINED_SUN_SIZE = 50
+        const val DEFAULT_COMBINED_MOON_SIZE = 50
+        const val DEFAULT_COMBINED_MOON_PHASE = 4
+        const val DEFAULT_COMBINED_STAR_DENSITY = 60
+        const val DEFAULT_COMBINED_STAR_COLOR_INDEX = 0
+        const val DEFAULT_COMBINED_PATH_DIRECTION = 0
 
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -99,6 +116,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUN_STATIONARY_POSITION = 2
         const val DEFAULT_SUN_CUSTOM_X = 50
         const val DEFAULT_SUN_CUSTOM_Y = 74
+        const val DEFAULT_MOON_CUSTOM_X = 50
+        const val DEFAULT_MOON_CUSTOM_Y = 74
         const val DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR = 0xFF1A0D40.toInt()
         const val DEFAULT_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = 0xFFF2731A.toInt()
         const val DEFAULT_SUNNY_GOD_RAYS_ENABLED = true
@@ -323,6 +342,22 @@ class ConfigManager(context: Context) : ConfigProvider {
         prefs.edit().putInt(KEY_SUN_CUSTOM_Y, y.coerceIn(0, 100)).apply()
     }
 
+    override fun getMoonCustomX(): Int {
+        return prefs.getInt(KEY_MOON_CUSTOM_X, DEFAULT_MOON_CUSTOM_X)
+    }
+
+    fun setMoonCustomX(x: Int) {
+        prefs.edit().putInt(KEY_MOON_CUSTOM_X, x.coerceIn(0, 100)).apply()
+    }
+
+    override fun getMoonCustomY(): Int {
+        return prefs.getInt(KEY_MOON_CUSTOM_Y, DEFAULT_MOON_CUSTOM_Y)
+    }
+
+    fun setMoonCustomY(y: Int) {
+        prefs.edit().putInt(KEY_MOON_CUSTOM_Y, y.coerceIn(0, 100)).apply()
+    }
+
     override fun getSunnyCustomSkyTopColor(): Int {
         return prefs.getInt(KEY_SUNNY_CUSTOM_SKY_TOP_COLOR, DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR)
     }
@@ -456,4 +491,22 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getGradientCycleSpeed(): Int = prefs.getInt(KEY_GRADIENT_CYCLE_SPEED, DEFAULT_GRADIENT_CYCLE_SPEED)
     fun setGradientCycleSpeed(speed: Int) { prefs.edit().putInt(KEY_GRADIENT_CYCLE_SPEED, speed.coerceIn(0, 100)).apply() }
+
+    override fun getCombinedSunSize(): Int = prefs.getInt(KEY_COMBINED_SUN_SIZE, DEFAULT_COMBINED_SUN_SIZE)
+    fun setCombinedSunSize(size: Int) { prefs.edit().putInt(KEY_COMBINED_SUN_SIZE, size.coerceIn(0, 100)).apply() }
+
+    override fun getCombinedMoonSize(): Int = prefs.getInt(KEY_COMBINED_MOON_SIZE, DEFAULT_COMBINED_MOON_SIZE)
+    fun setCombinedMoonSize(size: Int) { prefs.edit().putInt(KEY_COMBINED_MOON_SIZE, size.coerceIn(0, 100)).apply() }
+
+    override fun getCombinedMoonPhase(): Int = prefs.getInt(KEY_COMBINED_MOON_PHASE, DEFAULT_COMBINED_MOON_PHASE)
+    fun setCombinedMoonPhase(phase: Int) { prefs.edit().putInt(KEY_COMBINED_MOON_PHASE, phase.coerceIn(0, 7)).apply() }
+
+    override fun getCombinedStarDensity(): Int = prefs.getInt(KEY_COMBINED_STAR_DENSITY, DEFAULT_COMBINED_STAR_DENSITY)
+    fun setCombinedStarDensity(density: Int) { prefs.edit().putInt(KEY_COMBINED_STAR_DENSITY, density.coerceIn(0, 100)).apply() }
+
+    override fun getCombinedStarColorIndex(): Int = prefs.getInt(KEY_COMBINED_STAR_COLOR_INDEX, DEFAULT_COMBINED_STAR_COLOR_INDEX)
+    fun setCombinedStarColorIndex(index: Int) { prefs.edit().putInt(KEY_COMBINED_STAR_COLOR_INDEX, index.coerceIn(0, 5)).apply() }
+
+    override fun getCombinedPathDirection(): Int = prefs.getInt(KEY_COMBINED_PATH_DIRECTION, DEFAULT_COMBINED_PATH_DIRECTION)
+    fun setCombinedPathDirection(dir: Int) { prefs.edit().putInt(KEY_COMBINED_PATH_DIRECTION, dir.coerceIn(0, 3)).apply() }
 }
