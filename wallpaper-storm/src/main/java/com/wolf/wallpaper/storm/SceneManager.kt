@@ -67,7 +67,9 @@ class SceneManager(
         val touch = pendingTouch
         if (touch != null) {
             pendingTouch = null
-            triggerInteractiveLightning(touch.first, touch.second)
+            if (configProvider.isInteractiveLightningEnabled()) {
+                triggerInteractiveLightning(touch.first, touch.second)
+            }
         }
 
         updateFromConfig()

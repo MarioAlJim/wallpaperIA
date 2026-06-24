@@ -85,19 +85,22 @@ class Lightning(
             1 -> { // Left border
                 startX = -aspectRatio
                 startY = kotlin.random.Random.nextFloat() * 0.6f + 0.3f // upper part: 0.3 to 0.9
-                rotationAngle = kotlin.random.Random.nextFloat() * 25f + 20f // +20 to +45 degrees (shoots down-right)
+                rotationAngle = kotlin.random.Random.nextFloat() * 15f + 5f // +5 to +20 degrees (shoots down-right)
             }
             else -> { // Right border
                 startX = aspectRatio
                 startY = kotlin.random.Random.nextFloat() * 0.6f + 0.3f // upper part: 0.3 to 0.9
-                rotationAngle = -(kotlin.random.Random.nextFloat() * 25f + 20f) // -20 to -45 degrees (shoots down-left)
+                rotationAngle = -(kotlin.random.Random.nextFloat() * 15f + 5f) // -5 to -20 degrees (shoots down-left)
             }
         }
 
         val minHeight = 2.0f * 0.225f // 22.5% of screen height (0.45f)
         val maxHeight = 2.0f * 1.125f // 112.5% of screen height (2.25f, increased by 50% from 1.5f)
         scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
-        scaleX = kotlin.random.Random.nextFloat() * 1.125f + 0.45f // width of the bolt: 0.45 to 1.575 (max increased by 75% from 0.9)
+        
+        // Proportional width to avoid deformed, squashed look
+        val widthRatio = kotlin.random.Random.nextFloat() * 0.15f + 0.30f // 0.30 to 0.45
+        scaleX = (scaleY * widthRatio).coerceIn(0.45f, 0.90f)
 
         positionX = startX
         positionY = startY - scaleY * 0.5f
@@ -149,14 +152,14 @@ class Lightning(
                 startY = 1.0f
             }
             1 -> { // Left border
-                rotationAngle = kotlin.random.Random.nextFloat() * 25f + 20f // +20 to +45 degrees (shoots down-right)
+                rotationAngle = kotlin.random.Random.nextFloat() * 15f + 10f // +10 to +25 degrees (shoots down-right)
                 val rad = Math.toRadians(rotationAngle.toDouble()).toFloat()
                 scaleY = ((touchX + aspectRatio) / kotlin.math.sin(rad)).coerceIn(minHeight, maxHeight)
                 startY = (touchY + scaleY * kotlin.math.cos(rad)).coerceIn(0.3f, 1.0f)
                 startX = -aspectRatio
             }
             else -> { // Right border
-                rotationAngle = -(kotlin.random.Random.nextFloat() * 25f + 20f) // -20 to -45 degrees (shoots down-left)
+                rotationAngle = -(kotlin.random.Random.nextFloat() * 15f + 10f) // -10 to -25 degrees (shoots down-left)
                 val rad = Math.toRadians(rotationAngle.toDouble()).toFloat()
                 scaleY = ((touchX - aspectRatio) / kotlin.math.sin(rad)).coerceIn(minHeight, maxHeight)
                 startY = (touchY + scaleY * kotlin.math.cos(rad)).coerceIn(0.3f, 1.0f)
@@ -164,7 +167,9 @@ class Lightning(
             }
         }
 
-        scaleX = kotlin.random.Random.nextFloat() * 1.125f + 0.45f // width of the bolt: 0.45 to 1.575
+        // Proportional width to avoid deformed, squashed look
+        val widthRatio = kotlin.random.Random.nextFloat() * 0.15f + 0.30f // 0.30 to 0.45
+        scaleX = (scaleY * widthRatio).coerceIn(0.45f, 0.90f)
 
         positionX = startX
         positionY = startY - scaleY * 0.5f
