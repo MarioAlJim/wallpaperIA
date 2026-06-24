@@ -49,7 +49,28 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_RAIN_SPAWN_MODE = "rain_spawn_mode"
         const val KEY_WIND_LINES_ENABLED = "wind_lines_enabled"
         const val KEY_WIND_LINES_INTENSITY = "wind_lines_intensity"
-        
+        const val KEY_TIME_MODE = "time_mode"
+        const val KEY_MOON_PHASE = "moon_phase"
+        const val KEY_MOON_PATH_DIRECTION = "moon_path_direction"
+        const val KEY_MOON_MOVE_SPEED = "moon_move_speed"
+        const val KEY_MOON_STATIONARY_POSITION = "moon_stationary_position"
+        const val KEY_STAR_COLOR_INDEX = "star_color_index"
+        const val KEY_STAR_DENSITY = "star_density"
+        const val KEY_STAR_MODE = "star_mode"
+        const val KEY_NIGHT_CLOUD_DENSITY = "night_cloud_density"
+        const val KEY_GRADIENT_CYCLE_SPEED = "gradient_cycle_speed"
+
+        const val DEFAULT_TIME_MODE = 0
+        const val DEFAULT_MOON_PHASE = 4
+        const val DEFAULT_MOON_PATH_DIRECTION = 0
+        const val DEFAULT_MOON_MOVE_SPEED = 30
+        const val DEFAULT_MOON_STATIONARY_POSITION = 2
+        const val DEFAULT_STAR_COLOR_INDEX = 0
+        const val DEFAULT_STAR_DENSITY = 60
+        const val DEFAULT_STAR_MODE = 0
+        const val DEFAULT_NIGHT_CLOUD_DENSITY = 40
+        const val DEFAULT_GRADIENT_CYCLE_SPEED = 30
+
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
         const val DEFAULT_LIGHTNING_FREQUENCY = 50
@@ -405,4 +426,34 @@ class ConfigManager(context: Context) : ConfigProvider {
     fun setWindLinesIntensity(intensity: Int) {
         prefs.edit().putInt(KEY_WIND_LINES_INTENSITY, intensity.coerceIn(0, 100)).apply()
     }
+
+    override fun getTimeMode(): Int = prefs.getInt(KEY_TIME_MODE, DEFAULT_TIME_MODE)
+    fun setTimeMode(mode: Int) { prefs.edit().putInt(KEY_TIME_MODE, mode.coerceIn(0, 2)).apply() }
+
+    override fun getMoonPhase(): Int = prefs.getInt(KEY_MOON_PHASE, DEFAULT_MOON_PHASE)
+    fun setMoonPhase(phase: Int) { prefs.edit().putInt(KEY_MOON_PHASE, phase.coerceIn(0, 7)).apply() }
+
+    override fun getMoonPathDirection(): Int = prefs.getInt(KEY_MOON_PATH_DIRECTION, DEFAULT_MOON_PATH_DIRECTION)
+    fun setMoonPathDirection(dir: Int) { prefs.edit().putInt(KEY_MOON_PATH_DIRECTION, dir.coerceIn(0, 3)).apply() }
+
+    override fun getMoonMoveSpeed(): Int = prefs.getInt(KEY_MOON_MOVE_SPEED, DEFAULT_MOON_MOVE_SPEED)
+    fun setMoonMoveSpeed(speed: Int) { prefs.edit().putInt(KEY_MOON_MOVE_SPEED, speed.coerceIn(0, 100)).apply() }
+
+    override fun getMoonStationaryPosition(): Int = prefs.getInt(KEY_MOON_STATIONARY_POSITION, DEFAULT_MOON_STATIONARY_POSITION)
+    fun setMoonStationaryPosition(pos: Int) { prefs.edit().putInt(KEY_MOON_STATIONARY_POSITION, pos.coerceIn(0, 5)).apply() }
+
+    override fun getStarColorIndex(): Int = prefs.getInt(KEY_STAR_COLOR_INDEX, DEFAULT_STAR_COLOR_INDEX)
+    fun setStarColorIndex(index: Int) { prefs.edit().putInt(KEY_STAR_COLOR_INDEX, index.coerceIn(0, 5)).apply() }
+
+    override fun getStarDensity(): Int = prefs.getInt(KEY_STAR_DENSITY, DEFAULT_STAR_DENSITY)
+    fun setStarDensity(density: Int) { prefs.edit().putInt(KEY_STAR_DENSITY, density.coerceIn(0, 100)).apply() }
+
+    override fun getStarMode(): Int = prefs.getInt(KEY_STAR_MODE, DEFAULT_STAR_MODE)
+    fun setStarMode(mode: Int) { prefs.edit().putInt(KEY_STAR_MODE, mode.coerceIn(0, 1)).apply() }
+
+    override fun getNightCloudDensity(): Int = prefs.getInt(KEY_NIGHT_CLOUD_DENSITY, DEFAULT_NIGHT_CLOUD_DENSITY)
+    fun setNightCloudDensity(density: Int) { prefs.edit().putInt(KEY_NIGHT_CLOUD_DENSITY, density.coerceIn(0, 100)).apply() }
+
+    override fun getGradientCycleSpeed(): Int = prefs.getInt(KEY_GRADIENT_CYCLE_SPEED, DEFAULT_GRADIENT_CYCLE_SPEED)
+    fun setGradientCycleSpeed(speed: Int) { prefs.edit().putInt(KEY_GRADIENT_CYCLE_SPEED, speed.coerceIn(0, 100)).apply() }
 }

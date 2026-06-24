@@ -45,5 +45,16 @@ interface ConfigProvider {
     fun getRainSpawnMode(): Int // 0: Top Edge, 1: Clouds, 2: Everywhere
     fun isWindLinesEnabled(): Boolean
     fun getWindLinesIntensity(): Int // 0-100
+
+    fun getTimeMode(): Int              // 0 = Día, 1 = Noche, 2 = Combinado
+    fun getMoonPhase(): Int             // 0–7
+    fun getMoonPathDirection(): Int     // 0 = IzqaDer, 1 = DeraIzq, 2 = Estático, 3 = Aleatorio
+    fun getMoonMoveSpeed(): Int         // 0–100
+    fun getMoonStationaryPosition(): Int // 0–5
+    fun getStarColorIndex(): Int        // 0–5
+    fun getStarDensity(): Int           // 0–100
+    fun getStarMode(): Int              // 0: Static, 1: Random
+    fun getNightCloudDensity(): Int     // 0–100
+    fun getGradientCycleSpeed(): Int    // 0–100
 }
 

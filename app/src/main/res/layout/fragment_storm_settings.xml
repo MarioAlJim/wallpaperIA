@@ -1,0 +1,1205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp">
+        <!-- Accordion 1: Nubes y Viento -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardCloudsWind"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header (Always Visible) -->
+                <RelativeLayout
+                    android:id="@+id/headerCloudsWind"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/iconCloudsWind"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_cloud"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#8A2BE2" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/iconCloudsWind"
+                        android:layout_toStartOf="@id/arrowCloudsWind"
+                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Nubes y Viento"
+                            android:textColor="#E0E0E6"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/summaryCloudsWind"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cargando..."
+                            android:textColor="#9D9DA6"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/arrowCloudsWind"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#E0E0E6" />
+
+                </RelativeLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/dividerCloudsWind"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2E33"
+                    android:visibility="gone" />
+
+                <!-- Content Area (Expandable) -->
+                <LinearLayout
+                    android:id="@+id/contentCloudsWind"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <!-- Cloud Density -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Densidad de Nubes"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewCloudDensityValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarCloudDensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ajusta el porcentaje de nubes en el cielo (0% = despejado, 100% = cielo cubierto)."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Wind Direction -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Dirección del Viento (Lluvia/Nubes)"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerWindDirection"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Establece la dirección en la que sopla el viento, afectando el ángulo de caída de la lluvia y nubes."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Wind Intensity -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fuerza del Viento"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewWindIntensityValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarWindIntensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Modifica la velocidad y el ángulo de inclinación máximo del viento y la lluvia."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp" />
+
+                    <!-- Modo de Viento / Líneas de Viento Switch -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@id/switchWindLines"
+                            android:layout_marginEnd="16dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Líneas de Viento"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Muestra líneas horizontales ocasionales que van en dirección del viento."
+                                android:textColor="#6C6C75"
+                                android:textSize="12sp"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchWindLines"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true" />
+                    </RelativeLayout>
+
+                    <!-- Intensidad de Líneas de Viento Slider -->
+                    <LinearLayout
+                        android:id="@+id/layoutWindLinesIntensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Intensidad de Líneas de Viento"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/textViewWindLinesIntensityValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="50%"
+                                android:textColor="#9D9DA6"
+                                android:textSize="14sp"
+                                android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekBarWindLinesIntensity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="0"
+                            android:valueTo="100"
+                            android:stepSize="1"
+                            android:value="50"
+                            app:labelBehavior="gone" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Ajusta la cantidad y frecuencia de las líneas de viento."
+                            android:textColor="#6C6C75"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <!-- Cloud Dynamics / Breathing Effect -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Respiración y Opacidad"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewCloudDynamicsSpeedValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="100%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarCloudDynamicsSpeed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="100"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ajusta la velocidad del efecto de respiración de tamaño y transiciones de opacidad en las nubes (0% para desactivar)."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Accordion 2: Lluvia -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardRain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header (Always Visible) -->
+                <RelativeLayout
+                    android:id="@+id/headerRain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/iconRain"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_rain"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#1E90FF" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/iconRain"
+                        android:layout_toStartOf="@id/arrowRain"
+                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Lluvia"
+                            android:textColor="#E0E0E6"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/summaryRain"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cargando..."
+                            android:textColor="#9D9DA6"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/arrowRain"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#E0E0E6" />
+
+                </RelativeLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/dividerRain"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2E33"
+                    android:visibility="gone" />
+
+                <!-- Content Area (Expandable) -->
+                <LinearLayout
+                    android:id="@+id/contentRain"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <!-- Rain Intensity (Spinner) -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Densidad de Lluvia"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerRainIntensity"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Controla la cantidad de gotas simultáneas mostradas en la pantalla."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Rain Speed -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Velocidad de la Lluvia"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewRainSpeedValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarRainSpeed"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ajusta qué tan rápido caen las gotas en su trayectoria descendente."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Rain Color -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Color de la Lluvia"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerRainColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Elige la tonalidad cromática de las gotas de lluvia."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp" />
+
+                    <!-- Rain Spawn Mode -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Origen de la Lluvia"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerRainSpawnMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Elige si las gotas de lluvia se originan en el borde superior de la pantalla, debajo de las nubes o una mezcla de ambas."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp" />
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#2E2E33"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Gotas en Pantalla Switch -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@id/switchScreenDroplets"
+                            android:layout_marginEnd="16dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Gotas en Pantalla"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Habilita el efecto de gotas de agua chocando y deslizándose en la pantalla."
+                                android:textColor="#6C6C75"
+                                android:textSize="12sp"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchScreenDroplets"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true" />
+                    </RelativeLayout>
+
+                    <!-- Gotas en Pantalla Size Slider -->
+                    <LinearLayout
+                        android:id="@+id/layoutScreenDropletsSize"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tamaño de las Gotas en Pantalla"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/textViewScreenDropletsSizeValue"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="100%"
+                                android:textColor="#9D9DA6"
+                                android:textSize="14sp"
+                                android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekBarScreenDropletsSize"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:valueFrom="10"
+                            android:valueTo="200"
+                            android:stepSize="1"
+                            android:value="100"
+                            app:labelBehavior="gone" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Ajusta el diámetro del efecto lente de las gotas sobre el cristal."
+                            android:textColor="#6C6C75"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Accordion 3: Rayos y Tormenta -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardLightning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header (Always Visible) -->
+                <RelativeLayout
+                    android:id="@+id/headerLightning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/iconLightning"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_lightning"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#FFD700" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/iconLightning"
+                        android:layout_toStartOf="@id/arrowLightning"
+                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Rayos y Tormenta"
+                            android:textColor="#E0E0E6"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/summaryLightning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cargando..."
+                            android:textColor="#9D9DA6"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/arrowLightning"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#E0E0E6" />
+
+                </RelativeLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/dividerLightning"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2E33"
+                    android:visibility="gone" />
+
+                <!-- Content Area (Expandable) -->
+                <LinearLayout
+                    android:id="@+id/contentLightning"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <!-- Lightning Frequency -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Frecuencia de Rayos"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewLightningFrequencyValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarLightningFrequency"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Define la frecuencia con la que aparecen los relámpagos y rayos en la pantalla."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Lightning Color -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Color de los Rayos"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerLightningColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Configura el tono cromático de los destellos y ramificaciones de los rayos."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Lightning Duration -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Duración de los Rayos"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewLightningDurationValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarLightningDuration"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Ajusta el tiempo de permanencia de la animación completa de cada rayo."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp" />
+
+                    <!-- Cloud Flash Frequency -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Frecuencia de Destellos en Nubes"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewCloudFlashFrequencyValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="50%"
+                            android:textColor="#9D9DA6"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/seekBarCloudFlashFrequency"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="100"
+                        android:stepSize="1"
+                        android:value="50"
+                        app:labelBehavior="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Define la frecuencia con la que ocurren los relámpagos internos dentro de las nubes (independiente de los rayos externos)."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Cloud Flash Color -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Color de Destellos en Nubes"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerCloudFlashColor"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Configura el tono cromático de los destellos internos en las nubes."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Cloud Flash Toggle -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Destellos en las Nubes"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchCloudFlash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="true" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activa o desactiva los destellos y la iluminación interna de las nubes."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Lightning Flash Toggle -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Destellos de los Rayos"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchLightningFlash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="true" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Activa o desactiva los destellos y la iluminación en pantalla completa producidos por los rayos."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Interactive Lightning Toggle -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="Rayos Interactivos (Táctil)"
+                            android:textColor="#E0E0E6"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchInteractiveLightning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="true" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Permite invocar rayos al tocar la pantalla. El rayo caerá cerca del punto tocado."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Accordion 4: Fondo -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardBackground"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="#2E2E33"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="#17171A">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Header (Always Visible) -->
+                <RelativeLayout
+                    android:id="@+id/headerBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:id="@+id/iconBackground"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_background"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#00FF7F" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/iconBackground"
+                        android:layout_toStartOf="@id/arrowBackground"
+                        android:layout_marginStart="16dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Fondo"
+                            android:textColor="#E0E0E6"
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/summaryBackground"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Cargando..."
+                            android:textColor="#9D9DA6"
+                            android:textSize="12sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/arrowBackground"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="#E0E0E6" />
+
+                </RelativeLayout>
+
+                <!-- Divider -->
+                <View
+                    android:id="@+id/dividerBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#2E2E33"
+                    android:visibility="gone" />
+
+                <!-- Content Area (Expandable) -->
+                <LinearLayout
+                    android:id="@+id/contentBackground"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:visibility="gone">
+
+                    <!-- Background Mode (Spinner) -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Modo de Fondo"
+                        android:textColor="#E0E0E6"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerBackgroundMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <!-- Custom Gallery Selector Button -->
+                    <Button
+                        android:id="@+id/btnSelectCustomBg"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="Seleccionar Imagen de la Galería"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:backgroundTint="@color/accent_storm"
+                        app:cornerRadius="8dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/tvCustomBgStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="No se ha seleccionado ninguna imagen"
+                        android:textColor="#9D9DA6"
+                        android:textSize="12sp"
+                        android:gravity="center"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Elige si se muestra la imagen de fondo de la tormenta (background.jpg) o se mantiene el color oscuro sólido original."
+                        android:textColor="#6C6C75"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

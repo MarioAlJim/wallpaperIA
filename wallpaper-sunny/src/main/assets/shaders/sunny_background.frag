@@ -11,6 +11,7 @@ uniform float uAspectRatio;
 uniform int uIsCustom; // 1 if custom image, 0 if asset image
 uniform vec3 uSkyTop;
 uniform vec3 uSkyBottom;
+uniform float uNightIntensity;
 
 out vec4 fragColor;
 
@@ -66,11 +67,18 @@ void main() {
         highlightColor = mix(vec3(1.0, 0.95, 0.82), uSkyBottom, 0.4);
     }
     
+    // Interpolate colors to night values
+    fgColor = mix(fgColor, vec3(0.005, 0.01, 0.02), uNightIntensity * 0.9);
+    bgColor = mix(bgColor, vec3(0.02, 0.03, 0.07), uNightIntensity * 0.85);
+    highlightColor = mix(highlightColor, vec3(0.9, 0.95, 1.0), uNightIntensity);
+
     vec3 finalHillColor;
     
     if (uIsCustom == 1) {
-        // For custom gallery background, preserve its original colors but apply the sun glare
-        finalHillColor = mix(texColor.rgb, highlightColor, glare * 0.40);
+        // For custom gallery background, preserve its original colors but apply the sun glare and night darkening
+        vec3 nightColor = texColor.rgb * 0.15;
+        vec3 baseColor = mix(texColor.rgb, nightColor, uNightIntensity);
+        finalHillColor = mix(baseColor, highlightColor, glare * 0.40);
     } else {
         // Detect if the asset is colored (chrominance is significant)
         float maxVal = max(texColor.r, max(texColor.g, texColor.b));
@@ -80,6 +88,8 @@ void main() {
         if (isColored) {
             // Apply theme tint to colored assets
             vec3 tintedColor = mix(texColor.rgb, bgColor, 0.40);
+            // Darken it at night
+            tintedColor = mix(tintedColor, tintedColor * 0.15, uNightIntensity);
             // Add sun glare/illumination dynamically
             finalHillColor = mix(tintedColor, highlightColor, glare * 0.45);
         } else {
