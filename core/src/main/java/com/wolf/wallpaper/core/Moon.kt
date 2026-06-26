@@ -33,13 +33,13 @@ class Moon {
                 pathX += deltaTime * speed
                 if (pathX > 1.3f) pathX = -1.3f
                 positionX = pathX
-                positionY = 0.6f - 1.1f * (positionX * positionX)
+                positionY = 1.0f - 1.3f * (positionX * positionX)
             }
             1 -> { // Right to Left
                 pathX -= deltaTime * speed
                 if (pathX < -1.3f) pathX = 1.3f
                 positionX = pathX
-                positionY = 0.6f - 1.1f * (positionX * positionX)
+                positionY = 1.0f - 1.3f * (positionX * positionX)
             }
             2 -> { // Stationary
                 applyStationary(aspectRatio)

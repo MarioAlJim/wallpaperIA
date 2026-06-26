@@ -17,12 +17,20 @@ Este plan abarca dos correcciones críticas implementadas en el proyecto:
 
 ---
 
+### Componente Core (`core`)
+
+#### [MODIFY] [Moon.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Moon.kt)
+- Modificar la fórmula del eje Y para la trayectoria parabólica L2R y R2L de la luna a `positionY = 1.0f - 1.3f * (positionX * positionX)` para que alcance la cima de la pantalla.
+
+---
+
 ### Componente Soleado (`wallpaper-sunny`)
 
 #### [MODIFY] [SunnyRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/java/com/wolf/wallpaper/sunny/SunnyRenderer.kt)
 - Condicionar la densidad de nubes de día y de noche según el `timeMode` activo en `onUpdate()`. Si el modo no está activo, su densidad se reduce a 0 para que se desvanezcan suavemente y se limpien de la lista.
 - Sincronizar las nubes de noche (`nightClouds`) con las variables del viento y velocidad dinámica en lugar de usar valores fijos.
 - Resolver el bug de reinicio infinito de posición (`positionX`) de las nubes de noche con velocidad negativa, reubicándolas al borde derecho (`aspectRatio + newHalfW`) al salir por la izquierda.
+- Modificar la fórmula parabólica del sol (en modo día y modo combinado) y la luna (en modo combinado) a `y = 1.0f - 1.3f * (x * x)` para alcanzar el punto más alto del visor (`Y = 1.0f`) en su cenit.
 
 ## Verification Plan
 

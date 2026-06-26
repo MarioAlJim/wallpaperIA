@@ -488,9 +488,9 @@ class SunnyRenderer(
             }
 
             sunX = sunPathX
-            sunY = 0.6f - 1.1f * (sunX * sunX)
+            sunY = 1.0f - 1.3f * (sunX * sunX)
             moon.positionX = moonPathX
-            moon.positionY = 0.6f - 1.1f * (moon.positionX * moon.positionX)
+            moon.positionY = 1.0f - 1.3f * (moon.positionX * moon.positionX)
         } else {
             if (direction == 0) { // Left-to-Right
                 val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
@@ -499,7 +499,7 @@ class SunnyRenderer(
                     sunPathX = -1.3f
                 }
                 sunX = sunPathX
-                sunY = 0.6f - 1.1f * (sunX * sunX)
+                sunY = 1.0f - 1.3f * (sunX * sunX)
             } else if (direction == 1) { // Right-to-Left
                 val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
                 sunPathX -= deltaTime * moveSpeed
@@ -507,7 +507,7 @@ class SunnyRenderer(
                     sunPathX = 1.3f
                 }
                 sunX = sunPathX
-                sunY = 0.6f - 1.1f * (sunX * sunX)
+                sunY = 1.0f - 1.3f * (sunX * sunX)
             } else if (direction == 3) { // Random (Aleatorio)
                 if (!isRandomPathInitialized) {
                     generateRandomPath()
@@ -567,10 +567,6 @@ class SunnyRenderer(
         val speedFactor = 0.1f + (speedConfig / 100f) * 3.9f // Range 0.1 to 4.0
         time += deltaTime * speedFactor
 
-        // 3. Clouds simulation updates
-        val targetDensity = configProvider.getCloudDensity()
-        adjustClouds(targetDensity)
-
         val windDirection = configProvider.getWindDirection()
         val windIntensity = configProvider.getWindIntensity()
         val windSpeed = when (windDirection) {
@@ -579,6 +575,11 @@ class SunnyRenderer(
             else -> 0f
         }
         val dynamicsSpeed = configProvider.getCloudDynamicsSpeed() / 100f
+
+        // 3. Clouds simulation updates (Day/Combined)
+        val dayCloudsActive = (timeMode == 0 || timeMode == 2)
+        val dayDensity = if (dayCloudsActive) configProvider.getCloudDensity() else 0
+        adjustClouds(dayDensity)
 
         for (cloud in clouds) {
             cloud.update(deltaTime, windSpeed, dynamicsSpeed)
@@ -617,15 +618,29 @@ class SunnyRenderer(
                 }
                 moon.update(deltaTime, aspectRatio)
             }
+        }
 
-            adjustNightClouds(configProvider.getCloudDensity())
+        // Night clouds simulation updates (Night/Combined)
+        val nightCloudsActive = (timeMode == 1 || timeMode == 2)
+        val nightDensity = if (nightCloudsActive) configProvider.getCloudDensity() else 0
+        adjustNightClouds(nightDensity)
+
+        if (nightCloudsActive || nightClouds.isNotEmpty()) {
             for (nc in nightClouds) {
-                nc.update(deltaTime, 0.02f, 0.5f)
+                nc.update(deltaTime, windSpeed, dynamicsSpeed)
                 val halfW = nc.scale * 1.2f
                 val maxB = aspectRatio + halfW
                 if (nc.positionX > maxB || nc.positionX < -maxB) {
                     nc.reset(0f, aspectRatio, textureCount = cloudTextures.size)
-                    nc.positionX = -aspectRatio - nc.scale * 1.2f
+                    val newHalfW = nc.scale * 1.2f
+                    val windThreshold = 0.1f
+                    val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
+                    val netSpeed = windSpeed + (nc.driftSpeed * driftInfluence)
+                    if (netSpeed >= 0f) {
+                        nc.positionX = -aspectRatio - newHalfW
+                    } else {
+                        nc.positionX = aspectRatio + newHalfW
+                    }
                 }
             }
             nightClouds.removeAll { it.isFadingOut && it.opacity <= 0f }
