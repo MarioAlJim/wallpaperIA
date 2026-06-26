@@ -33,6 +33,20 @@ void main() {
     // Seed based on the variation uniform
     float seed = uVariation;
 
+    // --- Weights to dynamically enable/disable ellipses (adding more or fewer ellipses) ---
+    float w1 = 1.0; // Main body (always present)
+    float w2 = 1.0; // Left body (always present)
+    float w3 = 1.0; // Right body (always present)
+    
+    // Ellipses 4 & 5 are optional (present in ~70% and ~65% of clouds respectively)
+    float w4 = hash(seed + 40.0) > 0.3 ? 1.0 : 0.0;
+    float w5 = hash(seed + 50.0) > 0.35 ? 1.0 : 0.0;
+    
+    // Ellipses 6, 7 & 8 are extra optional domes to add complexity to some clouds
+    float w6 = hash(seed + 60.0) > 0.6 ? 1.0 : 0.0; // Extra far-left dome (~40% chance)
+    float w7 = hash(seed + 70.0) > 0.6 ? 1.0 : 0.0; // Extra far-right dome (~40% chance)
+    float w8 = hash(seed + 80.0) > 0.7 ? 1.0 : 0.0; // Extra upper-center dome (~30% chance)
+
     // --- Dynamic variations based on uVariation ---
     // Ellipse 1 (Main body)
     vec2 c1 = vec2(0.0, 0.0);
@@ -54,13 +68,28 @@ void main() {
     vec2 c5 = vec2(0.1875 + 0.04 * hash(seed + 11.15), 0.15 + 0.04 * hash(seed + 12.25));
     vec2 r5 = vec2(0.30, 0.23125) * (0.85 + 0.3 * hash(seed + 13.35));
 
+    // Ellipse 6 (Extra far-left dome)
+    vec2 c6 = vec2(-0.45 - 0.03 * hash(seed + 61.15), -0.05 + 0.03 * hash(seed + 62.25));
+    vec2 r6 = vec2(0.24, 0.18) * (0.8 + 0.3 * hash(seed + 63.35));
+
+    // Ellipse 7 (Extra far-right dome)
+    vec2 c7 = vec2(0.45 + 0.03 * hash(seed + 71.15), -0.05 + 0.03 * hash(seed + 72.25));
+    vec2 r7 = vec2(0.24, 0.18) * (0.8 + 0.3 * hash(seed + 73.35));
+
+    // Ellipse 8 (Extra upper-center dome)
+    vec2 c8 = vec2(0.0 + 0.05 * (hash(seed + 81.15) - 0.5), 0.22 + 0.03 * hash(seed + 82.25));
+    vec2 r8 = vec2(0.28, 0.20) * (0.8 + 0.3 * hash(seed + 83.35));
+
     // --- Body Ellipses ---
     float bodyAlpha = 0.0;
-    bodyAlpha = max(bodyAlpha, ellipseAlpha(p, c1, r1));
-    bodyAlpha = max(bodyAlpha, ellipseAlpha(p, c2, r2));
-    bodyAlpha = max(bodyAlpha, ellipseAlpha(p, c3, r3));
-    bodyAlpha = max(bodyAlpha, ellipseAlpha(p, c4, r4));
-    bodyAlpha = max(bodyAlpha, ellipseAlpha(p, c5, r5));
+    bodyAlpha = max(bodyAlpha, w1 * ellipseAlpha(p, c1, r1));
+    bodyAlpha = max(bodyAlpha, w2 * ellipseAlpha(p, c2, r2));
+    bodyAlpha = max(bodyAlpha, w3 * ellipseAlpha(p, c3, r3));
+    bodyAlpha = max(bodyAlpha, w4 * ellipseAlpha(p, c4, r4));
+    bodyAlpha = max(bodyAlpha, w5 * ellipseAlpha(p, c5, r5));
+    bodyAlpha = max(bodyAlpha, w6 * ellipseAlpha(p, c6, r6));
+    bodyAlpha = max(bodyAlpha, w7 * ellipseAlpha(p, c7, r7));
+    bodyAlpha = max(bodyAlpha, w8 * ellipseAlpha(p, c8, r8));
 
     // --- Shadow Ellipses ---
     // The shadow is shifted by vec2(0.0, -0.0625) and is slightly larger by vec2(0.0125, 0.0125)
@@ -68,11 +97,14 @@ void main() {
     vec2 sGrow = vec2(0.0125, 0.0125);
 
     float shadowAlpha = 0.0;
-    shadowAlpha = max(shadowAlpha, ellipseAlpha(p, c1 + sShift, r1 + sGrow));
-    shadowAlpha = max(shadowAlpha, ellipseAlpha(p, c2 + sShift, r2 + sGrow));
-    shadowAlpha = max(shadowAlpha, ellipseAlpha(p, c3 + sShift, r3 + sGrow));
-    shadowAlpha = max(shadowAlpha, ellipseAlpha(p, c4 + sShift, r4 + sGrow));
-    shadowAlpha = max(shadowAlpha, ellipseAlpha(p, c5 + sShift, r5 + sGrow));
+    shadowAlpha = max(shadowAlpha, w1 * ellipseAlpha(p, c1 + sShift, r1 + sGrow));
+    shadowAlpha = max(shadowAlpha, w2 * ellipseAlpha(p, c2 + sShift, r2 + sGrow));
+    shadowAlpha = max(shadowAlpha, w3 * ellipseAlpha(p, c3 + sShift, r3 + sGrow));
+    shadowAlpha = max(shadowAlpha, w4 * ellipseAlpha(p, c4 + sShift, r4 + sGrow));
+    shadowAlpha = max(shadowAlpha, w5 * ellipseAlpha(p, c5 + sShift, r5 + sGrow));
+    shadowAlpha = max(shadowAlpha, w6 * ellipseAlpha(p, c6 + sShift, r6 + sGrow));
+    shadowAlpha = max(shadowAlpha, w7 * ellipseAlpha(p, c7 + sShift, r7 + sGrow));
+    shadowAlpha = max(shadowAlpha, w8 * ellipseAlpha(p, c8 + sShift, r8 + sGrow));
 
     // --- Color Blending ---
     // Shadow color in JS: rgb(160, 195, 230). Tinted by cloud color to adapt to night/day transitions.

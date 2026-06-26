@@ -11,9 +11,9 @@ Hemos completado la implementación del motor de nubes procedurales para los mod
 
 #### [NEW] [procedural_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/assets/shaders/procedural_cloud.frag)
 - Fragment shader procedural que calcula la forma tridimensional de las nubes usando la fórmula matemática de la elipse con anti-aliasing (`smoothstep`).
-- Dibuja 5 elipses para el cuerpo de la nube y 5 elipses para la sombra desplazada y translúcida (color `rgb(160, 195, 230)`).
+- Dibuja hasta 8 elipses (3 fijas y 5 opcionales dinámicas por semilla) para el cuerpo de la nube y sus respectivas sombras desplazadas y translúcidas (color `rgb(160, 195, 230)`).
 - **Corrección de Orientación**: Se invirtió el mapeo vertical del eje Y (`0.5 - vTexCoord.y`) para evitar que las nubes se muestren invertidas ("al revés").
-- **Variaciones de Forma**: Se introdujo generación pseudo-aleatoria (hash) basada en la semilla `uVariation` para cambiar ligeramente los centros y tamaños de las elipses de cada nube, resultando en formas orgánicas y únicas para cada elemento.
+- **Variaciones de Forma y Cantidad de Elipses**: Se introdujo generación pseudo-aleatoria (hash) basada en la semilla `uVariation` no solo para distorsionar la posición y el radio de las elipses, sino también para habilitar/deshabilitar de forma condicional 5 elipses opcionales (incluyendo 3 nuevas cúpulas: far-left, far-right, y top-center). Esto permite que las nubes varíen dinámicamente entre 3 y 8 elipses, logrando siluetas sumamente variadas (redondeadas, alargadas o de múltiples cúpulas).
 - La sombra se adapta y tiñe dinámicamente con la luz ambiente (`uCloudColor`) para que los amaneceres, atardeceres y noches se muestren con colores correctos y armoniosos.
 - Realiza el mezclado y la mezcla de transparencias (alfa) de forma nativa en la GPU para optimizar el rendimiento.
 
