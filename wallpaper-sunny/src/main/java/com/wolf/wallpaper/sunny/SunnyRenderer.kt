@@ -1004,7 +1004,27 @@ class SunnyRenderer(
         val haloHorizonFade = smoothstep(-0.4f, 0.8f, moon.positionY)
         GLES30.glUniform1f(moonHaloIntensityHandle, haloHorizonFade)
 
-        val ringFade = (1.0f - (kotlin.math.abs(moon.positionX) / 1.3f)).coerceIn(0f, 1f)
+        val moonDir = if (configProvider.getTimeMode() == 2) {
+            val combinedDir = configProvider.getCombinedPathDirection()
+            if (combinedDir == 0 || combinedDir == 3) 0 else 1
+        } else {
+            moon.pathDirection
+        }
+
+        val t = if (moonDir == 0) { // Left-to-Right
+            (moon.positionX + 1.3f) / 2.6f
+        } else if (moonDir == 1) { // Right-to-Left
+            (1.3f - moon.positionX) / 2.6f
+        } else {
+            0.5f // Stationary / Random (fully visible)
+        }
+
+        val ringFade = when {
+            t < 0.35f || t > 0.75f -> 0f
+            t in 0.35f..0.40f -> (t - 0.35f) / 0.05f
+            t in 0.70f..0.75f -> (0.75f - t) / 0.05f
+            else -> 1.0f
+        }
         GLES30.glUniform1f(moonRingFadeHandle, ringFade)
 
         cloudQuadBuffer.position(0)
