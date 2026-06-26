@@ -68,18 +68,18 @@ class Cloud(
         // Rendering is coordinated by StormRenderer using the Cloud attributes
     }
 
-    fun reset(startX: Float, aspectRatio: Float, isSunny: Boolean = false, textureCount: Int = 0) {
+    fun reset(startX: Float, aspectRatio: Float, textureCount: Int = 0) {
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         
         val minScale = 0.43125f
-        val maxScale = if (isSunny) 0.6f else 1.40625f
+        val maxScale = 0.6f
         baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
         scale = baseScale
         
-        // Calculate Y range to keep the entire cloud body in the upper half (storm) or top 1/3 (sunny)
-        val minLimitY = if (isSunny) 0.33f else 0.0f
+        // Calculate Y range to keep the entire cloud body in the top 1/3 (sunny)
+        val minLimitY = 0.33f
         val minY = minLimitY + scale * 0.5f
         val maxY = 1.0f - scale * 0.5f
         positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else (minLimitY + 1.0f) * 0.5f

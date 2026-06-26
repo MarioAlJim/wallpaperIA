@@ -2,14 +2,14 @@ package com.wolf.wallpaper.storm
 
 import android.content.Context
 import com.wolf.wallpaper.core.ConfigProvider
-import com.wolf.wallpaper.core.Cloud
+import com.wolf.wallpaper.storm.StormCloud
 import kotlin.random.Random
 
 class SceneManager(
     private val context: Context?,
     private val configProvider: ConfigProvider
 ) {
-    private val clouds = mutableListOf<Cloud>()
+    private val clouds = mutableListOf<StormCloud>()
     private val rainDrops = mutableListOf<RainDrop>()
     private val windLines = mutableListOf<WindLine>()
     val lightnings = List(6) { Lightning() }
@@ -203,7 +203,7 @@ class SceneManager(
         }
     }
 
-    fun getClouds(): List<Cloud> = clouds
+    fun getClouds(): List<StormCloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
@@ -281,15 +281,19 @@ class SceneManager(
     }
 
     private fun adjustClouds(density: Int) {
-        // Map 0-100 density to custom cloud count: 0, 2, 5, 10, 13, 15
-        val targetCount = when (density) {
-            0 -> 0
-            25 -> 2
-            50 -> 5
-            75 -> 10
-            90 -> 13
-            100 -> 15
-            else -> (density / 100f * 15).toInt()
+        val targetCount = if (density in 0..15) {
+            density
+        } else {
+            // Map 0-100 density percentage to custom cloud count
+            when (density) {
+                0 -> 0
+                25 -> 2
+                50 -> 5
+                75 -> 10
+                90 -> 13
+                100 -> 15
+                else -> (density / 100f * 15).toInt()
+            }
         }.coerceIn(0, 15)
         val textureCount = getCloudTextureCount()
         
@@ -307,7 +311,7 @@ class SceneManager(
             while (needed > 0) {
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
                 val textureIndex = Random.nextInt(textureCount)
-                val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
+                val cloud = StormCloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
                 cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
@@ -453,7 +457,7 @@ class SceneManager(
         }
     }
 
-    private fun getSpawnCloudForDrop(): Cloud? {
+    private fun getSpawnCloudForDrop(): StormCloud? {
         val activeClouds = clouds.filter { !it.isFadingOut }
         if (activeClouds.isEmpty()) return null
         

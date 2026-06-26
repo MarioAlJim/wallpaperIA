@@ -407,7 +407,7 @@ class SunnyRenderer(
         
         // Adjust and align cloud positions for new aspect ratio
         for (cloud in clouds) {
-            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, isSunny = true, textureCount = cloudTextures.size)
+            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = cloudTextures.size)
         }
     }
 
@@ -585,7 +585,7 @@ class SunnyRenderer(
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
-                cloud.reset(0f, aspectRatio, isSunny = true, textureCount = cloudTextures.size)
+                cloud.reset(0f, aspectRatio, textureCount = cloudTextures.size)
                 val newHalfWidth = cloud.scale * 1.2f
                 val windThreshold = 0.1f
                 val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -624,7 +624,7 @@ class SunnyRenderer(
                 val halfW = nc.scale * 1.2f
                 val maxB = aspectRatio + halfW
                 if (nc.positionX > maxB || nc.positionX < -maxB) {
-                    nc.reset(0f, aspectRatio, isSunny = true, textureCount = cloudTextures.size)
+                    nc.reset(0f, aspectRatio, textureCount = cloudTextures.size)
                     nc.positionX = -aspectRatio - nc.scale * 1.2f
                 }
             }
@@ -1077,7 +1077,7 @@ class SunnyRenderer(
                 val id = if (nightClouds.isNotEmpty()) nightClouds.maxOf { it.id } + 1 else 0
                 val nc = Cloud(id, 0f, 0f, 0f, 0f, 0f, 0)
                 nc.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio,
-                    aspectRatio, isSunny = true, textureCount = textureCount)
+                    aspectRatio, textureCount = textureCount)
                 nc.opacity = 0f
                 nightClouds.add(nc)
                 needed--
@@ -1337,7 +1337,7 @@ class SunnyRenderer(
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
                 val textureIndex = kotlin.random.Random.nextInt(textureCount)
                 val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, isSunny = true, textureCount = textureCount)
+                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
                 needed--

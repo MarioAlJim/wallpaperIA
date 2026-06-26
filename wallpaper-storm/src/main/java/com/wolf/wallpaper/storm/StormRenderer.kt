@@ -6,7 +6,7 @@ import android.opengl.GLES30
 import android.opengl.GLUtils
 import android.opengl.Matrix
 import com.wolf.wallpaper.core.GLRenderer
-import com.wolf.wallpaper.core.Cloud
+import com.wolf.wallpaper.storm.StormCloud
 import com.wolf.wallpaper.core.StormObject
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -264,7 +264,7 @@ class StormRenderer(
         drawRain(edgeRain, sceneManager.getRainColorIndex())
     }
 
-    private fun drawClouds(clouds: List<Cloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {
+    private fun drawClouds(clouds: List<StormCloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)

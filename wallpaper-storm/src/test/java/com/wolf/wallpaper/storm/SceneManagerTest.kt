@@ -2,7 +2,7 @@ package com.wolf.wallpaper.storm
 
 import android.content.Context
 import com.wolf.wallpaper.core.ConfigProvider
-import com.wolf.wallpaper.core.Cloud
+import com.wolf.wallpaper.storm.StormCloud
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -417,10 +417,10 @@ class SceneManagerTest {
             assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
             
             // 2. Length should be scaled by z
-            // Base length formula: (Random.nextFloat() * 0.035f + 0.020f) * z
-            // Min base length = 0.020f, Max base length = 0.055f
-            val minExpectedLength = 0.020f * drop.z - 0.001f
-            val maxExpectedLength = 0.055f * drop.z + 0.001f
+            // Base length formula: (Random.nextFloat() * 0.0525f + 0.030f) * z
+            // Min base length = 0.030f, Max base length = 0.0825f
+            val minExpectedLength = 0.030f * drop.z - 0.001f
+            val maxExpectedLength = 0.0825f * drop.z + 0.001f
             assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
             
             // 3. Velocity should be constant (not scaled by z)
@@ -460,7 +460,7 @@ class SceneManagerTest {
 
     @Test
     fun testCloudDepthAndParallax() {
-        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
+        val cloud = StormCloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
         
         // Before reset, z defaults to 1.0f
         assertEquals(1.0f, cloud.z)
@@ -531,12 +531,12 @@ class SceneManagerTest {
 
     @Test
     fun testCloudSpeedBasedOnDepth() {
-        val cloudNear = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
+        val cloudNear = StormCloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
         cloudNear.z = 1.0f
         // When z = 1.0f, speedZFactor must be exactly 1.25f (25% increase)
         assertEquals(1.25f, cloudNear.speedZFactor, 0.001f)
 
-        val cloudFar = Cloud(id = 2, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
+        val cloudFar = StormCloud(id = 2, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
         cloudFar.z = 0.3f
         // When z = 0.3f, speedZFactor must be exactly 0.225f (25% decrease of 0.3f)
         assertEquals(0.225f, cloudFar.speedZFactor, 0.001f)
@@ -598,7 +598,7 @@ class SceneManagerTest {
 
     @Test
     fun testCloudDriftAndScaleOscillation() {
-        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
+        val cloud = StormCloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
         cloud.reset(0f, 1.0f)
         
         // 1. Verify drift speed is initialized in range [-0.03f, 0.03f]
@@ -673,7 +673,7 @@ class SceneManagerTest {
 
     @Test
     fun testCloudDynamicsSpeedConfig() {
-        val cloud = Cloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
+        val cloud = StormCloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 0.5f, textureIndex = 0)
         cloud.reset(0f, 1.0f)
         
         // 1. With dynamicsSpeed = 0f (0% speed)

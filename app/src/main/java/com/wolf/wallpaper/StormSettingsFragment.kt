@@ -65,8 +65,18 @@ class StormSettingsFragment : Fragment() {
         setupAccordion(view, R.id.headerBackground, R.id.contentBackground, R.id.dividerBackground, R.id.arrowBackground)
 
         // 2. Setup Nubes y Viento Controls
-        setupSlider(view, R.id.seekBarCloudDensity, R.id.textViewCloudDensityValue, configManager.getCloudDensity()) { value ->
-            configManager.setCloudDensity(value)
+        val cloudOptions = arrayOf("0 nubes", "1 nube", "3 nubes", "5 nubes", "7 nubes", "9 nubes", "11 nubes", "13 nubes", "15 nubes")
+        val cloudCounts = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
+        val initialCloudIndex = getClosestCloudOptionIndex(configManager.getCloudDensity())
+
+        val textViewCloudDensityValue = view.findViewById<TextView>(R.id.textViewCloudDensityValue)
+        textViewCloudDensityValue?.text = cloudOptions.getOrNull(initialCloudIndex) ?: "5 nubes"
+
+        setupDropdown(view, R.id.spinnerCloudDensity, cloudOptions, initialCloudIndex) { position ->
+            val count = cloudCounts[position]
+            configManager.setCloudDensity(count)
+            textViewCloudDensityValue?.text = cloudOptions[position]
+            updateSummaries(view)
         }
 
         val windDirections = arrayOf("Izquierda", "Neutro", "Derecha")
@@ -228,16 +238,7 @@ class StormSettingsFragment : Fragment() {
 
     private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
         when (sliderId) {
-            R.id.seekBarCloudDensity -> {
-                val desc = when {
-                    value <= 0 -> "Cielo despejado"
-                    value <= 25 -> "Pocas nubes"
-                    value <= 50 -> "Nublado"
-                    value <= 75 -> "Muy nublado"
-                    else -> "Cubierto"
-                }
-                textView.text = "$value% • $desc"
-            }
+
             R.id.seekBarWindIntensity -> {
                 val desc = when {
                     value <= 10 -> "Calma"
@@ -312,6 +313,32 @@ class StormSettingsFragment : Fragment() {
                 textView.text = "$value% • $desc"
             }
         }
+    }
+
+    private fun getClosestCloudOptionIndex(density: Int): Int {
+        val targets = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
+        val actualClouds = if (density > 15) {
+            when (density) {
+                25 -> 2
+                50 -> 5
+                75 -> 10
+                90 -> 13
+                100 -> 15
+                else -> (density / 100f * 15).toInt()
+            }
+        } else {
+            density
+        }
+        var closestIndex = 0
+        var minDiff = Int.MAX_VALUE
+        for (i in targets.indices) {
+            val diff = kotlin.math.abs(actualClouds - targets[i])
+            if (diff < minDiff) {
+                minDiff = diff
+                closestIndex = i
+            }
+        }
+        return closestIndex
     }
 
     private fun setupDropdown(parent: View, viewId: Int, options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
@@ -589,12 +616,20 @@ class StormSettingsFragment : Fragment() {
         val accentColor = "#00E5FF"
 
         val density = configManager.getCloudDensity()
-        val densityText = when {
-            density <= 0 -> "Despejado"
-            density <= 25 -> "Pocas nubes"
-            density <= 50 -> "Nublado"
-            density <= 75 -> "Muy nublado"
-            else -> "Cielo Cubierto"
+        val densityText = if (density <= 15) {
+            when (density) {
+                0 -> "Despejado"
+                1 -> "1 nube"
+                else -> "$density nubes"
+            }
+        } else {
+            when {
+                density <= 0 -> "Despejado"
+                density <= 25 -> "Pocas nubes"
+                density <= 50 -> "Nublado"
+                density <= 75 -> "Muy nublado"
+                else -> "Cielo Cubierto"
+            }
         }
         val windDir = when (configManager.getWindDirection()) {
             0 -> "Izquierda"
@@ -602,8 +637,9 @@ class StormSettingsFragment : Fragment() {
             else -> "Calma"
         }
         val windSpeed = configManager.getWindIntensity()
+        val densityLabel = if (density <= 15) densityText else "$densityText ($density%)"
         summaryCloudsWind.text = Html.fromHtml(
-            "Nubes: <font color='$accentColor'>$densityText ($density%)</font> • Viento: <font color='$accentColor'>$windDir (${windSpeed}%)</font>",
+            "Nubes: <font color='$accentColor'>$densityLabel</font> • Viento: <font color='$accentColor'>$windDir (${windSpeed}%)</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
@@ -735,6 +771,19 @@ class StormSettingsFragment : Fragment() {
             if (w <= 0 || h <= 0) return
 
             when (containerId) {
+                R.id.spinnerCloudDensity -> {
+                    val cloudCounts = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
+                    val count = cloudCounts.getOrElse(optionIndex) { 0 }
+                    if (count > 0) {
+                        drawStylizedClouds(canvas, w, h, count)
+                    } else {
+                        paint.color = Color.parseColor("#444455")
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 1.dpToPx().toFloat()
+                        canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
+                    }
+                }
+
                 R.id.spinnerWindDirection -> {
                     paint.color = Color.parseColor("#8A2BE2")
                     paint.strokeWidth = 2.dpToPx().toFloat()
@@ -990,6 +1039,22 @@ class StormSettingsFragment : Fragment() {
             canvas.drawCircle(w * 0.65f, cy + 2.dpToPx(), 7.dpToPx().toFloat(), paint)
             canvas.drawCircle(w * 0.5f, cy - 1.dpToPx(), 9.dpToPx().toFloat(), paint)
             canvas.drawRect(w * 0.3f, cy + 1.dpToPx(), w * 0.7f, cy + 9.dpToPx(), paint)
+        }
+
+        private fun drawStylizedClouds(canvas: Canvas, w: Float, h: Float, count: Int) {
+            paint.color = Color.parseColor("#4A4A5A")
+            paint.style = Paint.Style.FILL
+            
+            val random = java.util.Random(count * 100L)
+            for (i in 0 until count.coerceAtMost(6)) {
+                val cx = w * 0.2f + random.nextFloat() * w * 0.6f
+                val cy = h * 0.25f + random.nextFloat() * h * 0.5f
+                val r = 5.dpToPx().toFloat() + random.nextFloat() * 4.dpToPx()
+                canvas.drawCircle(cx, cy, r, paint)
+                canvas.drawCircle(cx - r * 0.6f, cy + r * 0.2f, r * 0.7f, paint)
+                canvas.drawCircle(cx + r * 0.6f, cy + r * 0.2f, r * 0.7f, paint)
+                canvas.drawRect(cx - r * 0.6f, cy + r * 0.2f, cx + r * 0.6f, cy + r * 0.9f, paint)
+            }
         }
 
         private fun adjustAlpha(color: Int, factor: Float): Int {
