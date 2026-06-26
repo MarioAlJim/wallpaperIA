@@ -1020,9 +1020,9 @@ class SunnyRenderer(
         }
 
         val ringFade = when {
-            t < 0.35f || t > 0.75f -> 0f
-            t in 0.35f..0.40f -> (t - 0.35f) / 0.05f
-            t in 0.70f..0.75f -> (0.75f - t) / 0.05f
+            t < 0.40f || t > 0.60f -> 0f
+            t in 0.40f..0.43f -> (t - 0.40f) / 0.03f
+            t in 0.57f..0.60f -> (0.60f - t) / 0.03f
             else -> 1.0f
         }
         GLES30.glUniform1f(moonRingFadeHandle, ringFade)
