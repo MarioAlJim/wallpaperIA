@@ -241,8 +241,8 @@ class SunnyRenderer(
         }
 
         // Compile and link cloud shader
-        val cloudVert = readAssetFile(context, "shaders/cloud.vert")
-        val cloudFrag = readAssetFile(context, "shaders/cloud.frag")
+        val cloudVert = readAssetFile(context, "shaders/procedural_cloud.vert")
+        val cloudFrag = readAssetFile(context, "shaders/procedural_cloud.frag")
         cloudProgram = createProgram(cloudVert, cloudFrag)
 
         // Compile and link background shader
