@@ -7,12 +7,13 @@ uniform int   uPhase;       // 0-7: 0=new, 4=full
 uniform vec3  uMoonColor;   // e.g. (1.0, 0.97, 0.88)
 uniform float uIntensity;     // 0-1, for combined mode fade
 uniform float uHaloIntensity; // Y-based halo fade
+uniform float uRingFade;      // Path-progress based fade for the halo ring
 
 out vec4 fragColor;
 
 void main() {
-    // Center p in [-1,1]
-    vec2 p = vec2((vUV.x - 0.5) * 2.0, (0.5 - vUV.y) * 2.0);
+    // Center p in [-1,1] and scale by 3.0 because the quad is scaled by 3.0
+    vec2 p = vec2((vUV.x - 0.5) * 2.0, (0.5 - vUV.y) * 2.0) * 3.0;
 
     float moonR = 0.44;
     float moonDist = length(p);
@@ -63,12 +64,13 @@ void main() {
     vec3  totalColor = mix(uMoonColor * 0.3, surfaceColor, litAlpha / max(totalAlpha, 0.001));
 
     // Thin, slightly transparent halo ring around the moon at full moon (ph == 4)
-    float ringR = 0.62;
-    float ringThickness = 0.008;
+    // Scale the ring radius by 3.0 (from 0.62 to 1.86) to match the larger quad size
+    float ringR = 1.86;
+    float ringThickness = 0.024;
     float ringSDF = abs(moonDist - ringR);
-    float ringAlpha = smoothstep(ringThickness + 0.008, ringThickness - 0.008, ringSDF);
+    float ringAlpha = smoothstep(ringThickness + 0.024, ringThickness - 0.024, ringSDF);
     float wRing = (ph == 4) ? 1.0 : 0.0;
-    float finalRingAlpha = ringAlpha * 0.35 * wRing * uHaloIntensity * uIntensity;
+    float finalRingAlpha = ringAlpha * 0.35 * wRing * uHaloIntensity * uIntensity * uRingFade;
 
     // Alpha blend the ring on top of the moon color
     totalColor = mix(totalColor, uMoonColor, finalRingAlpha / max(totalAlpha + finalRingAlpha, 0.001));

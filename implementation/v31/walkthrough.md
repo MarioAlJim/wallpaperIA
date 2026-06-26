@@ -21,9 +21,13 @@ Hemos completado la implementación del motor de nubes procedurales para los mod
 - Se actualizó el motor de renderizado para cargar `shaders/procedural_cloud.vert` y `shaders/procedural_cloud.frag` en lugar de los shaders compartidos rasterizados del módulo `core`.
 - Se configuró el envío del uniform `uVariation` pasando el `cloud.id` para inicializar el generador de formas aleatorias único de cada nube.
 - Se ajustó la trayectoria de la luna en modo combinado a la nueva fórmula `y = 0.85f - 1.15f * (x * x)` para evitar desbordamientos.
+- **Tamaño del Quad e Integración de Halo**: Se multiplicó la escala del quad de renderizado de la luna por `3.0f` (`mappedMoonSize * 3.0f`) para dotar de suficiente lienzo a la GPU y evitar el recorte del anillo de halo expandido. Se añadió y envió el uniform `uRingFade` que atenúa progresivamente la opacidad del anillo del halo conforme la luna inicia/termina su trayectoria lateral (basado en `moon.positionX`).
 
 #### [MODIFY] [moon.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/assets/shaders/moon.frag)
-- **Halo Lunar en Luna Llena**: Se agregó un delgado anillo/halo de luz alrededor de la luna (`ringR = 0.62`, `ringThickness = 0.008`) con un factor de transparencia del 35%. Este anillo solo es visible cuando la luna está en fase llena (`uPhase == 4`), y se atenúa de forma natural por la intensidad ambiental (`uHaloIntensity` y `uIntensity`).
+- **Halo Lunar Expandido y Desvanecimiento en Trayecto**:
+  - Se escalaron las coordenadas locales de dibujo por `3.0f` para mantener el tamaño real del cuerpo de la luna intacto frente al incremento de escala del quad.
+  - Se incrementó el radio del anillo de halo en un 200% (`ringR = 1.86` en coordenadas de sombreador escaladas, equivalente a `0.62 * 3.0`) y se aumentó el grosor proporcionalmente (`ringThickness = 0.024`).
+  - Se introdujo el uniform `uRingFade` en la ecuación de transparencia del anillo de halo para que se desvanezca suavemente (alfa `0.0`) en el inicio/final del trayecto (`X = ±1.3f`) y alcance el 100% en el cenit (`X = 0f`).
 
 #### [MODIFY] [Moon.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Moon.kt)
 - **Ajuste de Altura Máxima**: Se modificó la ecuación parabólica a `y = 0.85f - 1.15f * (x * x)` en las trayectorias de lado a lado (L2R y R2L) para rebajar levemente el cenit de la luna (de `1.0f` a `0.85f`), evitando que se recorte en el borde superior de la pantalla debido a su radio/escala, mientras que sigue poniéndose completamente bajo el horizonte en los extremos (`Y = -1.09f`).

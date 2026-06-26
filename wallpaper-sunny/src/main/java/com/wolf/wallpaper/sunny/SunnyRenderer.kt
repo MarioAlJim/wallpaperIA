@@ -69,6 +69,7 @@ class SunnyRenderer(
     private var moonColorHandle = -1
     private var moonIntensityHandle = -1
     private var moonHaloIntensityHandle = -1
+    private var moonRingFadeHandle = -1
 
     // stars handles
     private var starsTimeHandle = -1
@@ -271,6 +272,7 @@ class SunnyRenderer(
             moonColorHandle = GLES30.glGetUniformLocation(moonProgram, "uMoonColor")
             moonIntensityHandle = GLES30.glGetUniformLocation(moonProgram, "uIntensity")
             moonHaloIntensityHandle = GLES30.glGetUniformLocation(moonProgram, "uHaloIntensity")
+            moonRingFadeHandle = GLES30.glGetUniformLocation(moonProgram, "uRingFade")
         } catch (e: Exception) { e.printStackTrace() }
 
         // Stars program
@@ -987,7 +989,7 @@ class SunnyRenderer(
         val modelMatrix = FloatArray(16)
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, moon.positionX, moon.positionY, 0f)
-        Matrix.scaleM(modelMatrix, 0, mappedMoonSize, mappedMoonSize, 1.0f)
+        Matrix.scaleM(modelMatrix, 0, mappedMoonSize * 3.0f, mappedMoonSize * 3.0f, 1.0f)
 
         val mvp = FloatArray(16)
         Matrix.multiplyMM(mvp, 0, projectionMatrix, 0, modelMatrix, 0)
@@ -1001,6 +1003,9 @@ class SunnyRenderer(
 
         val haloHorizonFade = smoothstep(-0.4f, 0.8f, moon.positionY)
         GLES30.glUniform1f(moonHaloIntensityHandle, haloHorizonFade)
+
+        val ringFade = (1.0f - (kotlin.math.abs(moon.positionX) / 1.3f)).coerceIn(0f, 1f)
+        GLES30.glUniform1f(moonRingFadeHandle, ringFade)
 
         cloudQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
