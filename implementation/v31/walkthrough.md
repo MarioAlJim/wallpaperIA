@@ -22,6 +22,9 @@ Hemos completado la implementación del motor de nubes procedurales para los mod
 - Se configuró el envío del uniform `uVariation` pasando el `cloud.id` para inicializar el generador de formas aleatorias único de cada nube.
 - Se ajustó la trayectoria de la luna en modo combinado a la nueva fórmula `y = 0.85f - 1.15f * (x * x)` para evitar desbordamientos.
 
+#### [MODIFY] [moon.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/assets/shaders/moon.frag)
+- **Halo Lunar en Luna Llena**: Se agregó un delgado anillo/halo de luz alrededor de la luna (`ringR = 0.62`, `ringThickness = 0.008`) con un factor de transparencia del 35%. Este anillo solo es visible cuando la luna está en fase llena (`uPhase == 4`), y se atenúa de forma natural por la intensidad ambiental (`uHaloIntensity` y `uIntensity`).
+
 #### [MODIFY] [Moon.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Moon.kt)
 - **Ajuste de Altura Máxima**: Se modificó la ecuación parabólica a `y = 0.85f - 1.15f * (x * x)` en las trayectorias de lado a lado (L2R y R2L) para rebajar levemente el cenit de la luna (de `1.0f` a `0.85f`), evitando que se recorte en el borde superior de la pantalla debido a su radio/escala, mientras que sigue poniéndose completamente bajo el horizonte en los extremos (`Y = -1.09f`).
 

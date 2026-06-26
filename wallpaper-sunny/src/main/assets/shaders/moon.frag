@@ -62,5 +62,17 @@ void main() {
     float totalAlpha = (litAlpha + haloAlpha * uHaloIntensity) * uIntensity;
     vec3  totalColor = mix(uMoonColor * 0.3, surfaceColor, litAlpha / max(totalAlpha, 0.001));
 
+    // Thin, slightly transparent halo ring around the moon at full moon (ph == 4)
+    float ringR = 0.62;
+    float ringThickness = 0.008;
+    float ringSDF = abs(moonDist - ringR);
+    float ringAlpha = smoothstep(ringThickness + 0.008, ringThickness - 0.008, ringSDF);
+    float wRing = (ph == 4) ? 1.0 : 0.0;
+    float finalRingAlpha = ringAlpha * 0.35 * wRing * uHaloIntensity * uIntensity;
+
+    // Alpha blend the ring on top of the moon color
+    totalColor = mix(totalColor, uMoonColor, finalRingAlpha / max(totalAlpha + finalRingAlpha, 0.001));
+    totalAlpha = totalAlpha + finalRingAlpha * (1.0 - totalAlpha);
+
     fragColor = vec4(totalColor, totalAlpha);
 }
