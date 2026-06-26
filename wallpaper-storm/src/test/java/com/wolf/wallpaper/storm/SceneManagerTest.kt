@@ -247,12 +247,41 @@ class SceneManagerTest {
     }
 
     @Test
+    fun testLightningTextureAlternation() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        val textureCount = 5
+        
+        // 1. Check standard trigger alternation
+        val indices = mutableListOf<Int>()
+        for (i in 0 until 10) {
+            sceneManager.lightning.trigger(1.0f, textureCount, 0)
+            indices.add(sceneManager.lightning.selectedTextureIndex)
+        }
+        
+        for (i in 0 until 9) {
+            assertEquals((indices[i] + 1) % textureCount, indices[i + 1])
+        }
+
+        // 2. Check interactive trigger (triggerAt) alternation
+        val interactiveIndices = mutableListOf<Int>()
+        for (i in 0 until 10) {
+            sceneManager.lightning.triggerAt(0f, 0f, 1.0f, textureCount, 0)
+            interactiveIndices.add(sceneManager.lightning.selectedTextureIndex)
+        }
+        
+        for (i in 0 until 9) {
+            assertEquals((interactiveIndices[i] + 1) % textureCount, interactiveIndices[i + 1])
+        }
+    }
+
+    @Test
     fun testDiagonalLightningTrigger() {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
             assertTrue("ScaleY should be in range [0.45f, 2.25f]", sceneManager.lightning.scaleY in 0.45f..2.26f)
-            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.45f..1.576f)
+            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.33f..1.69f)
+            assertEquals("Aspect ratio should be exactly 3:4 (0.75)", 0.75f, sceneManager.lightning.scaleX / sceneManager.lightning.scaleY, 1e-4f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }

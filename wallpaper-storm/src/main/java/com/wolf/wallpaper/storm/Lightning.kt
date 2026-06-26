@@ -68,8 +68,8 @@ class Lightning(
         val baseMax = baseMin + 0.15f
         duration = kotlin.random.Random.nextFloat() * (baseMax - baseMin) + baseMin
         
-        // Select random texture index
-        selectedTextureIndex = if (textureCount > 0) kotlin.random.Random.nextInt(textureCount) else 0
+        // Select alternating texture index
+        selectedTextureIndex = getNextTextureIndex(textureCount)
         selectedColorIndex = colorIndex
         
         val startX: Float
@@ -98,11 +98,16 @@ class Lightning(
         val maxHeight = 2.0f * 1.125f // 112.5% of screen height (2.25f, increased by 50% from 1.5f)
         scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
         
-        // Proportional width to avoid deformed, squashed look
-        val widthRatio = kotlin.random.Random.nextFloat() * 0.15f + 0.30f // 0.30 to 0.45
-        scaleX = (scaleY * widthRatio).coerceIn(0.45f, 0.90f)
+        // Maintain strict 3:4 aspect ratio (width:height = 3:4)
+        scaleX = scaleY * 0.75f
 
-        positionX = startX
+        // Adjust positionX so that the lightning is cut off but always visible
+        val maxOffset = scaleX * 0.25f
+        positionX = when (borderType) {
+            1 -> -aspectRatio + maxOffset // Left border
+            2 -> aspectRatio - maxOffset // Right border
+            else -> startX.coerceIn(-aspectRatio + maxOffset, aspectRatio - maxOffset) // Top border
+        }
         positionY = startY - scaleY * 0.5f
     }
 
@@ -121,7 +126,7 @@ class Lightning(
         val baseMax = baseMin + 0.15f
         duration = kotlin.random.Random.nextFloat() * (baseMax - baseMin) + baseMin
         
-        selectedTextureIndex = if (textureCount > 0) kotlin.random.Random.nextInt(textureCount) else 0
+        selectedTextureIndex = getNextTextureIndex(textureCount)
         selectedColorIndex = colorIndex
 
         val minHeight = 2.0f * 0.225f // 0.45f
@@ -167,11 +172,28 @@ class Lightning(
             }
         }
 
-        // Proportional width to avoid deformed, squashed look
-        val widthRatio = kotlin.random.Random.nextFloat() * 0.15f + 0.30f // 0.30 to 0.45
-        scaleX = (scaleY * widthRatio).coerceIn(0.45f, 0.90f)
+        // Maintain strict 3:4 aspect ratio (width:height = 3:4)
+        scaleX = scaleY * 0.75f
 
-        positionX = startX
+        // Adjust positionX so that the lightning is cut off but always visible
+        val maxOffset = scaleX * 0.25f
+        positionX = when (borderType) {
+            1 -> -aspectRatio + maxOffset // Left border
+            2 -> aspectRatio - maxOffset // Right border
+            else -> startX.coerceIn(-aspectRatio + maxOffset, aspectRatio - maxOffset) // Top border
+        }
         positionY = startY - scaleY * 0.5f
+    }
+
+    companion object {
+        private var nextTextureIndex = 0
+
+        @Synchronized
+        fun getNextTextureIndex(textureCount: Int): Int {
+            if (textureCount <= 0) return 0
+            val index = nextTextureIndex
+            nextTextureIndex = (nextTextureIndex + 1) % textureCount
+            return index
+        }
     }
 }
