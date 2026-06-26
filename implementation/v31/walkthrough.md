@@ -20,6 +20,10 @@ Hemos completado la implementación del motor de nubes procedurales para los mod
 #### [MODIFY] [SunnyRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/java/com/wolf/wallpaper/sunny/SunnyRenderer.kt)
 - Se actualizó el motor de renderizado para cargar `shaders/procedural_cloud.vert` y `shaders/procedural_cloud.frag` en lugar de los shaders compartidos rasterizados del módulo `core`.
 - Se configuró el envío del uniform `uVariation` pasando el `cloud.id` para inicializar el generador de formas aleatorias único de cada nube.
+- Se ajustó la trayectoria de la luna en modo combinado a la nueva fórmula `y = 0.85f - 1.15f * (x * x)` para evitar desbordamientos.
+
+#### [MODIFY] [Moon.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Moon.kt)
+- **Ajuste de Altura Máxima**: Se modificó la ecuación parabólica a `y = 0.85f - 1.15f * (x * x)` en las trayectorias de lado a lado (L2R y R2L) para rebajar levemente el cenit de la luna (de `1.0f` a `0.85f`), evitando que se recorte en el borde superior de la pantalla debido a su radio/escala, mientras que sigue poniéndose completamente bajo el horizonte en los extremos (`Y = -1.09f`).
 
 #### [MODIFY] [Cloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Cloud.kt)
 - **Disminución del Tamaño Máximo**: Se redujo el tamaño máximo de las nubes (`maxScale`) en un 20% (de `0.6f` a `0.48f`).

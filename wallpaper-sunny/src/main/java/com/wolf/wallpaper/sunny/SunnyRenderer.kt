@@ -490,7 +490,7 @@ class SunnyRenderer(
             sunX = sunPathX
             sunY = 1.0f - 1.3f * (sunX * sunX)
             moon.positionX = moonPathX
-            moon.positionY = 1.0f - 1.3f * (moon.positionX * moon.positionX)
+            moon.positionY = 0.85f - 1.15f * (moon.positionX * moon.positionX)
         } else {
             if (direction == 0) { // Left-to-Right
                 val moveSpeed = 0.01f + (configProvider.getSunMoveSpeed() / 100f) * 0.49f
