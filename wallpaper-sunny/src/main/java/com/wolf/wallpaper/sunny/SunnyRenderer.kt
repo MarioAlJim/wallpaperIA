@@ -1024,6 +1024,7 @@ class SunnyRenderer(
         val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
 
         // Night clouds color: slightly darker/cooler/blue-ish gray tint
         GLES30.glUniform3f(cloudColorHandle, 0.35f, 0.42f, 0.55f)
@@ -1057,6 +1058,7 @@ class SunnyRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
+            GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
 
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
@@ -1115,6 +1117,7 @@ class SunnyRenderer(
         val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
 
         // In Sunny mode, warm color tinting matching the active sky theme
         val theme = configProvider.getSunnyTheme()
@@ -1163,6 +1166,7 @@ class SunnyRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
+            GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
 
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])

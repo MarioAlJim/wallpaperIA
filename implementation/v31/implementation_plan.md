@@ -23,6 +23,8 @@ El objetivo es actualizar el motor de nubes del modo día y noche en `wallpaper-
 - Crear el Fragment Shader que dibuja las elipses:
   - Definir la función `ellipseAlpha(vec2 p, vec2 center, vec2 r)` para calcular el factor de forma y suavizado de cada elipse.
   - Implementar las 5 elipses de cuerpo y las 5 elipses de sombra con las proporciones y desplazamientos exactos trasladados del código de referencia JS.
+  - Invertir la orientación del eje Y (`0.5 - vTexCoord.y`) para corregir la visualización y evitar que parezcan estar al revés debido al origen de coordenadas de textura en OpenGL.
+  - Introducir variaciones dinámicas en la forma de cada nube usando un hash pseudo-aleatorio basado en la semilla `uVariation`.
   - Aplicar el color de la sombra (`vec3(0.627, 0.765, 0.902)`) atenuado/multiplicado por la iluminación ambiente (`uCloudColor`) y el color del cuerpo de la nube (`uCloudColor`).
   - Mezclar el color del cuerpo y de la sombra según sus respectivos factores de cobertura y aplicar la opacidad global (`uOpacity`).
 
@@ -30,6 +32,11 @@ El objetivo es actualizar el motor de nubes del modo día y noche en `wallpaper-
 - Modificar la carga de los archivos de sombreadores para las nubes:
   - Cambiar `shaders/cloud.vert` a `shaders/procedural_cloud.vert`.
   - Cambiar `shaders/cloud.frag` a `shaders/procedural_cloud.frag`.
+- Obtener y enlazar la variable uniforme `uVariation` pasando el `cloud.id` para que cada nube tenga una variación de forma única y estable.
+
+#### [MODIFY] [Cloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/core/src/main/java/com/wolf/wallpaper/core/Cloud.kt)
+- Disminuir el tamaño máximo de las nubes (`maxScale`) en un 20% (de `0.6f` a `0.48f`).
+- Incrementar el límite superior de altura (`maxY` en el método `reset()`) de `1.0f - scale * 0.5f` a `1.1f - scale * 0.5f` para permitir que las nubes se posicionen más alto en la pantalla.
 
 ## Verification Plan
 
