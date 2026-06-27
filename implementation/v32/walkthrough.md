@@ -19,7 +19,7 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
 *   **Alineamiento y Corrección de Dirección**:
     *   En [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag), corregimos la orientación del eje vertical de `bgTexCoord` invirtiendo su valor: `bgTexCoord.y = 0.5 - (ndc.y / uBgScale.y) * 0.5`.
     *   Esto hace que tanto la textura de fondo como la de las nubes compartan exactamente la misma orientación espacial de texturas de arriba a abajo (donde Y=0 es la parte superior y Y=1 es la inferior).
-    *   Al estar alineados, ambos shaders ejecutan el desplazamiento de gotas hacia abajo con el mismo efecto síncrono físico, **sin que haya refracciones ni deslizamientos en direcciones opuestas**.
+    *   Al estar alinados, ambos shaders ejecutan el desplazamiento de gotas hacia abajo con el mismo efecto síncrono físico, **sin que haya refracciones ni deslizamientos en direcciones opuestas**.
 
 ### 4. Rayos de Sombra (Dark God Rays)
 *   **[MODIFY] [background.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/background.frag)** & **[NEW] [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag)**:
@@ -33,21 +33,27 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   Detecta si el pixel actual está en la silueta y el pixel desplazado está en el cielo para identificar los bordes superiores expuestos a la luz del flash.
     *   Aplica un golpe de luz de borde (Rim Light) brillante del color del relámpago que dura únicamente los milisegundos del flash.
 
-### 6. Tormenta Variable (Ciclos de Ráfagas)
+### 6. Tormenta Variable (Ciclos de Ráfagas) - ¡Transición Suave!
+*   **Aumento de Duración de los Ciclos**: Se ampliaron los tiempos de ciclo para evitar oscilaciones climáticas muy rápidas y artificiales:
+    *   **Calma**: `60 segundos` de duración.
+    *   **Ráfaga**: `30 segundos` de duración.
+*   **Interpolador de Transición Suave**:
+    *   Se introdujo una variable de control `stormTransitionFactor` (de `0.0f` a `1.0f`) que cambia gradualmente a una tasa de `0.1f` por segundo.
+    *   Esto define una **transición de 10 segundos** al cambiar entre calma y ráfagas.
+    *   Todos los parámetros (densidad de nubes, intensidad/velocidad de lluvia, frecuencia de rayos y destellos en nubes, e intensidad de viento) se interpolan linealmente usando la función `mixInt()`, previniendo saltos instantáneos o cambios bruscos en pantalla.
 *   **Modelo de Datos y Prefs (`ConfigProvider`, `ConfigManager`)**:
     *   Añadida la clave `"storm_variable_enabled"` para guardar la preferencia en el dispositivo.
-    *   Se declararon los métodos `isStormVariableEnabled()` y `setStormVariableEnabled(Boolean)` en la API del sistema de configuraciones.
+    *   Se declararon los métodos `isStormVariableEnabled()` and `setStormVariableEnabled(Boolean)` en la API del sistema de configuraciones.
 *   **Simulación por Ciclos (`SceneManager`)**:
     *   Se implementó un temporizador de ciclos en el motor de físicas de la tormenta (`stormCycleTime`).
-    *   El ciclo transiciona automáticamente entre **Periodo de Calma** (20 segundos con lluvia fina, poco viento y pocos rayos) y **Periodo de Ráfaga** (10 segundos con lluvia torrencial, viento huracanado de dirección aleatoria y relámpagos constantes).
-    *   Cuando el modo está activo, se anula la lectura estática de SharedPreferences y se sobreescriben dinámicamente en tiempo real los targets de densidad, lluvia, viento y relámpagos.
+    *   Cuando el modo está activo, se anula la lectura estática de SharedPreferences y se sobreescriben dinámicamente en tiempo real los targets.
 *   **Diseño de la Interfaz (`fragment_storm_settings.xml`)**:
     *   Se agregó una tarjeta premium de configuración de color verde brillante al inicio de la pantalla con un switch (`switchStormVariable`) para encender o apagar el modo de tormenta variable.
 *   **Control y Bloqueo Dinámico de la UI (`StormSettingsFragment.kt`)**:
-    *   Se implementó `updateControlsLockState` que bloquea (con `isEnabled = false` y opacidad reducida `0.4f`) todos los controles individuales cuando el modo tormenta variable se activa.
-    *   Los resúmenes de secciones en los acordeones se actualizan automáticamente para mostrar `"Ciclo Activo"` para todos los parámetros bloqueados.
+    *   Se implementó `updateControlsLockState` que bloquea todos los controles individuales cuando el modo tormenta variable se activa.
+    *   Los resúmenes de secciones en los acordeones se actualizan automáticamente para mostrar `"Ciclo Activo"`.
 *   **Pruebas Unitarias (`SceneManagerTest.kt`)**:
-    *   Se añadió la prueba `testVariableStormCycle()` que valida con precisión la simulación temporal y el correcto override de las variables físicas durante la calma y la ráfaga.
+    *   Se adaptó la prueba `testVariableStormCycle()` para validar la transición suave de 10 segundos y las nuevas duraciones del ciclo (60s/30s).
 
 ---
 

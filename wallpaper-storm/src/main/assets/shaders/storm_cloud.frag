@@ -56,7 +56,7 @@ float fbm(vec2 p) {
     return value;
 }
 
-// Computes lens distortion, specular highlight, and border shading for raindrops on screen
+// Computes lens distortion, specular highlight, border shading, and trails for raindrops on screen
 vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     vec2 distortion = vec2(0.0, 0.0);
     float spec = 0.0;
@@ -127,9 +127,8 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             // Starts as 90% circular (V=1.08) instead of 75% circular (V=0.9) at spawn
             float currentYScale = mix(1.08, 0.4, t);
             
-            // Quick distance check to prune calculations:
-            // Since currentYScale >= 0.4, maximum vertical extent of the droplet is radius / 0.4 = 2.5 * radius.
-            if (abs(pos.x) > radius || abs(pos.y) > radius * 3.0) continue;
+            // Quick distance check to prune calculations
+            if (abs(pos.x) > radius || pos.y > radius * 3.0 || pos.y < -slideDist - radius) continue;
             
             vec2 ovalScale = vec2(1.2, currentYScale);
             vec2 ovalPos = pos * ovalScale;
@@ -153,6 +152,25 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
                     border = smoothstep(0.0, 0.15, nz);
                     dropMask = 1.0;
                     finalFade = fade;
+                }
+            } else {
+                // Trail refraction (thickness is 75% of the droplet size)
+                float trailWidth = radius * 0.75;
+                if (pos.y < 0.0 && pos.y > -t * slideDist) {
+                    float trailDist = abs(pos.x);
+                    if (trailDist < trailWidth) {
+                        float trailFade = 1.0 + (pos.y / (t * slideDist));
+                        float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
+                        
+                        // Wiggle refraction offset for the trail
+                        vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.007, 0.002) * trailMask;
+                        
+                        if (minR > 0.99) {
+                            distortion = trailDistortion;
+                            dropMask = 0.4;
+                            finalFade = fade * trailFade;
+                        }
+                    }
                 }
             }
         }
