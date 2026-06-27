@@ -15,6 +15,32 @@ uniform vec3 uSkyBottom;
 uniform float uGodRaysIntensity;
 uniform float uSunFadeFactor;
 uniform float uSunPulse;
+uniform float uNightIntensity; // 0.0 for full day, 1.0 for full night
+
+// Pseudo-random noise for procedural nebula
+float hash(vec2 p) {
+    p = fract(p * vec2(127.1, 311.7));
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm(vec2 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < 4; i++) {
+        value += amplitude * noise(p);
+        p *= 2.0;
+        amplitude *= 0.5;
+    }
+    return value;
+}
 
 void main() {
     // 1. Sky Gradient based on Theme
@@ -48,6 +74,44 @@ void main() {
     }
 
     vec3 skyColor = mix(skyBottom, skyTop, tSky);
+
+    // Transition to Night Sky Colors if uNightIntensity > 0.0
+    if (uNightIntensity > 0.001) {
+        vec3 nightSkyTop = vec3(0.005, 0.005, 0.02);    // Very dark blue
+        vec3 nightSkyBottom = vec3(0.015, 0.01, 0.035); // Slightly lighter indigo
+        vec3 nightSkyColor = mix(nightSkyBottom, nightSkyTop, tSky);
+
+        // --- Procedural Nebulae (Vía Láctea / Polvo Galáctico) ---
+        vec2 uvCoords = vec2(vPosition.x * uAspectRatio, vPosition.y);
+        vec2 nebulaUV = uvCoords * 1.6;
+        // Ultra-slow movement over time
+        nebulaUV.x += uTime * 0.0012;
+        nebulaUV.y += uTime * 0.0006;
+        
+        float nebulaNoiseVal = fbm(nebulaUV);
+        float nebulaMask = smoothstep(0.35, 0.75, nebulaNoiseVal);
+        
+        // Deep purple-magenta colors for nebulae
+        vec3 nebulaColor1 = vec3(0.16, 0.03, 0.28); // Dark purple
+        vec3 nebulaColor2 = vec3(0.08, 0.02, 0.18); // Dark violet
+        vec3 mixedNebula = mix(nebulaColor2, nebulaColor1, smoothstep(0.45, 0.70, nebulaNoiseVal));
+        
+        // Blend nebulae sutilmente (subtly, max 0.22 opacity) into night sky color
+        nightSkyColor = mix(nightSkyColor, mixedNebula, nebulaMask * 0.22);
+
+        // --- Night Haze (Bruma Nocturna) ---
+        // Soft fog band near the horizon (around y = -0.45)
+        float hazeMask = smoothstep(-0.85, -0.42, vPosition.y) * (1.0 - smoothstep(-0.42, 0.08, vPosition.y));
+        // Slow movement for the haze
+        float hazeOffset = sin(uvCoords.x * 2.5 + uTime * 0.03) * 0.03 * cos(uvCoords.x * 0.9 + uTime * 0.02);
+        float animatedHaze = smoothstep(-0.85 + hazeOffset, -0.42 + hazeOffset, vPosition.y) * (1.0 - smoothstep(-0.42 + hazeOffset, 0.08 + hazeOffset, vPosition.y));
+        
+        // Very subtle horizon glow at night (soft blue-gray mist)
+        vec3 hazeColor = vec3(0.08, 0.09, 0.16); 
+        nightSkyColor = mix(nightSkyColor, hazeColor, animatedHaze * 0.16);
+
+        skyColor = mix(skyColor, nightSkyColor, uNightIntensity);
+    }
 
     // 2. Sun setup
     vec2 uv = vec2(vPosition.x * uAspectRatio, vPosition.y);

@@ -123,20 +123,57 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/seekBarCloudDensity"
+                    <LinearLayout
+                        android:id="@+id/layoutCloudDensityCards"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:valueFrom="0"
-                        android:valueTo="100"
-                        android:stepSize="1"
-                        android:value="50"
-                        app:labelBehavior="gone" />
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardCloudDensityPoco"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            app:cardCornerRadius="8dp"
+                            app:strokeWidth="1dp">
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Poco" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardCloudDensityMedio"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            app:cardCornerRadius="8dp"
+                            app:strokeWidth="1dp">
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Medio" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardCloudDensityAlto"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            app:cardCornerRadius="8dp"
+                            app:strokeWidth="1dp">
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Alto" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardCloudDensityMuyAlto"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            app:cardCornerRadius="8dp"
+                            app:strokeWidth="1dp">
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Muy Alto" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta el porcentaje de nubes en el cielo (0% = despejado, 100% = cielo cubierto)."
+                        android:text="Ajusta la densidad de nubes en el cielo (Poco, Medio, Alto o Muy Alto)."
                         android:textColor="#6C6C75"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp"
@@ -2887,6 +2924,76 @@
                                 <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Aleatorio" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
                             </com.google.android.material.card.MaterialCardView>
                         </LinearLayout>
+
+                        <!-- Shooting Stars Title/Toggle -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:text="Estrellas Fugaces"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchShootingStars"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="true" />
+                        </RelativeLayout>
+
+                        <!-- Shooting Stars Density -->
+                        <LinearLayout
+                            android:id="@+id/layoutShootingStarsDensityGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas Fugaces" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:id="@+id/textViewShootingStarsDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            </RelativeLayout>
+                            <com.google.android.material.slider.Slider
+                                android:id="@+id/seekBarShootingStarsDensity"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:valueFrom="0"
+                                android:valueTo="100"
+                                android:stepSize="1"
+                                android:value="50"
+                                app:labelBehavior="gone"
+                                android:layout_marginBottom="8dp" />
+                        </LinearLayout>
+
+                        <!-- Fireflies Title/Toggle -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:text="Luciérnagas"
+                                android:textColor="#E0E0E6"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchFireflies"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="true" />
+                        </RelativeLayout>
 
 
 

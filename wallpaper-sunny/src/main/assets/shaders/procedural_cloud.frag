@@ -10,6 +10,10 @@ uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
 uniform vec3 uCloudColor;
 uniform float uVariation; // Seed for cloud shape variation
+uniform vec2 uMoonPos;
+uniform vec2 uCloudPos;
+uniform float uCloudScale;
+uniform float uSilverLiningIntensity; // 0.0 for day, > 0.0 for night
 
 out vec4 fragColor;
 
@@ -123,6 +127,34 @@ void main() {
     // Normal alpha blending: body on top of shadow
     float combinedAlpha = bA + sA * (1.0 - bA);
     vec3 mixedColor = mix(shadowColor, bodyColor, bA / max(combinedAlpha, 0.001));
+
+    // --- Silver Lining (Moonlight edge glow) ---
+    if (uSilverLiningIntensity > 0.001) {
+        // Calculate the world position of the current pixel
+        vec2 pixelWorldPos = uCloudPos + p * uCloudScale;
+        
+        // Distance from this pixel to the moon
+        float distToMoon = distance(pixelWorldPos, uMoonPos);
+        
+        // Moon influence: starts glowing at distance 0.75, peaks at 0.20
+        float moonInfluence = smoothstep(0.75, 0.20, distToMoon);
+        
+        // Bell-shaped curve around the cloud body edge (peaks at bodyAlpha = 0.25)
+        float edge = smoothstep(0.01, 0.25, bodyAlpha) * (1.0 - smoothstep(0.25, 0.95, bodyAlpha));
+        
+        float liningStrength = edge * moonInfluence * uSilverLiningIntensity;
+        
+        if (liningStrength > 0.0) {
+            // Bright white/silver light (rgb 0.95, 0.98, 1.0)
+            vec3 silverLiningColor = vec3(0.95, 0.98, 1.0);
+            
+            // Mix the silver lining color onto the edge of the cloud
+            mixedColor = mix(mixedColor, silverLiningColor, liningStrength * 0.95);
+            
+            // Ensure the glowing edge is opaque enough to stand out
+            combinedAlpha = max(combinedAlpha, liningStrength * uOpacity);
+        }
+    }
 
     fragColor = vec4(mixedColor, combinedAlpha);
 }

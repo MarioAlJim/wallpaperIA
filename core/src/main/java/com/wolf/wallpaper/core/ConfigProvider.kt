@@ -65,5 +65,9 @@ interface ConfigProvider {
     fun getStarMode(): Int              // 0: Static, 1: Random
     fun getNightCloudDensity(): Int     // 0–100
     fun getGradientCycleSpeed(): Int    // 0–100
+    
+    fun isShootingStarsEnabled(): Boolean
+    fun getShootingStarsDensity(): Int   // 0–100
+    fun isFirefliesEnabled(): Boolean
 }
 

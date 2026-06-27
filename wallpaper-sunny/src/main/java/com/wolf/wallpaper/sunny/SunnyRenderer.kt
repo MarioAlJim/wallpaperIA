@@ -23,6 +23,7 @@ class SunnyRenderer(
     private var cloudProgram = 0
     private var backgroundProgram = 0
     private var lensFlareProgram = 0
+    private var moonLensFlareProgram = 0
     private var particleProgram = 0
     private var moonProgram = 0
     private var starsProgram = 0
@@ -61,7 +62,11 @@ class SunnyRenderer(
     private var lfSwipeOffsetHandle = -1
     private var lfIntensityHandle = -1
 
-
+    // Handles for moon_lens_flare.frag
+    private var mlfMoonPosHandle = -1
+    private var mlfAspectHandle = -1
+    private var mlfSwipeOffsetHandle = -1
+    private var mlfIntensityHandle = -1
 
     // moon handles
     private var moonMVPHandle = -1
@@ -97,6 +102,7 @@ class SunnyRenderer(
     private var swipeOffset = 0f
     private var pathFadeFactor = 1.0f
     private var moonFadeFactor = 1.0f
+    private var moonRingFadeValue = 0f
     private val moonPhaseMultipliers = floatArrayOf(0.025f, 0.10f, 0.25f, 0.40f, 0.50f, 0.40f, 0.25f, 0.10f)
 
     // Gyro tilt state
@@ -145,6 +151,46 @@ class SunnyRenderer(
 
     private val stars = mutableListOf<Star>()
     private var lastStarColorIndex = -1
+
+    // Shooting Star state and handles
+    private class ShootingStar(
+        var x: Float,
+        var y: Float,
+        var vx: Float,
+        var vy: Float,
+        var length: Float,
+        var opacity: Float,
+        var life: Float, // duration in seconds
+        var age: Float, // current age in seconds
+        val r: Float,
+        val g: Float,
+        val b: Float
+    )
+    private var shootingStar: ShootingStar? = null
+    private var shootingStarProgram = 0
+    private var ssTailHandle = -1
+    private var ssHeadHandle = -1
+    private var ssOpacityHandle = -1
+    private var ssAspectHandle = -1
+    private var ssColorHandle = -1
+
+    // Firefly state
+    private class Firefly(
+        var x: Float,
+        var y: Float,
+        var baseX: Float,
+        var baseY: Float,
+        var noiseSeedX: Float,
+        var noiseSeedY: Float,
+        var speed: Float,
+        var size: Float,
+        var alpha: Float,
+        var targetAlpha: Float,
+        val r: Float,
+        val g: Float,
+        val b: Float
+    )
+    private val fireflies = mutableListOf<Firefly>()
 
     // Sun movement state
     private var sunX = 0.35f
@@ -221,6 +267,20 @@ class SunnyRenderer(
             lfAspectHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uAspectRatio")
             lfSwipeOffsetHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uSwipeOffset")
             lfIntensityHandle = GLES30.glGetUniformLocation(lensFlareProgram, "uIntensity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Compile and link moon lens flare shader
+        try {
+            val mlfVert = readAssetFile(context, "shaders/sunny.vert")
+            val mlfFrag = readAssetFile(context, "shaders/moon_lens_flare.frag")
+            moonLensFlareProgram = createProgram(mlfVert, mlfFrag)
+
+            mlfMoonPosHandle = GLES30.glGetUniformLocation(moonLensFlareProgram, "uMoonPos")
+            mlfAspectHandle = GLES30.glGetUniformLocation(moonLensFlareProgram, "uAspectRatio")
+            mlfSwipeOffsetHandle = GLES30.glGetUniformLocation(moonLensFlareProgram, "uSwipeOffset")
+            mlfIntensityHandle = GLES30.glGetUniformLocation(moonLensFlareProgram, "uIntensity")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -397,6 +457,20 @@ class SunnyRenderer(
         starColorBuffer = ByteBuffer.allocateDirect(300 * 4 * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
+
+        // Compile and link shooting star shader
+        try {
+            val ssVert = readAssetFile(context, "shaders/shooting_star.vert")
+            val ssFrag = readAssetFile(context, "shaders/shooting_star.frag")
+            shootingStarProgram = createProgram(ssVert, ssFrag)
+            ssTailHandle = GLES30.glGetUniformLocation(shootingStarProgram, "uTail")
+            ssHeadHandle = GLES30.glGetUniformLocation(shootingStarProgram, "uHead")
+            ssOpacityHandle = GLES30.glGetUniformLocation(shootingStarProgram, "uOpacity")
+            ssAspectHandle = GLES30.glGetUniformLocation(shootingStarProgram, "uAspect")
+            ssColorHandle = GLES30.glGetUniformLocation(shootingStarProgram, "uColor")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -439,12 +513,14 @@ class SunnyRenderer(
                     if (sunPathX > 1.3f) {
                         isCombinedNight = true
                         moonPathX = if (moonL2R) -1.3f else 1.3f
+                        moon.hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
                     }
                 } else {
                     sunPathX -= deltaTime * moveSpeed
                     if (sunPathX < -1.3f) {
                         isCombinedNight = true
                         moonPathX = if (moonL2R) -1.3f else 1.3f
+                        moon.hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
                     }
                 }
                 
@@ -746,6 +822,64 @@ class SunnyRenderer(
                 }
             }
         }
+
+        // Shooting Star simulation update
+        val currentStarIntensity = when (timeMode) {
+            1 -> 1.0f
+            2 -> combinedNightIntensity
+            else -> 0.0f
+        }
+
+        if (currentStarIntensity < 0.12f || !configProvider.isShootingStarsEnabled()) {
+            shootingStar = null
+        } else {
+            val activeStar = shootingStar
+            if (activeStar != null) {
+                activeStar.age += deltaTime
+                if (activeStar.age >= activeStar.life) {
+                    shootingStar = null
+                } else {
+                    activeStar.x += activeStar.vx * deltaTime
+                    activeStar.y += activeStar.vy * deltaTime
+                    activeStar.opacity = 1.0f - (activeStar.age / activeStar.life)
+                }
+            } else {
+                val density = configProvider.getShootingStarsDensity()
+                val spawnRate = 0.2f + (density / 100f) * 1.4f
+                if (kotlin.random.Random.nextFloat() < spawnRate * deltaTime) {
+                    val rand = kotlin.random.Random
+                    val startX = rand.nextFloat() * (aspectRatio * 1.6f) - (aspectRatio * 0.8f)
+                    val startY = rand.nextFloat() * (0.95f - 0.5f) + 0.5f
+                    val vxVal = (rand.nextFloat() * -0.9f - 0.9f) * aspectRatio
+                    val vyVal = rand.nextFloat() * -0.45f - 0.45f
+                    val lengthVal = rand.nextFloat() * 0.12f + 0.12f
+                    val lifeVal = rand.nextFloat() * 0.35f + 0.4f
+                    
+                    val isCombined = configProvider.getTimeMode() == 2
+                    val starColorSetting = if (isCombined) configProvider.getCombinedStarColorIndex() else configProvider.getStarColorIndex()
+                    val finalColorIndex = if (starColorSetting == 5) rand.nextInt(5) else starColorSetting
+                    val (rVal, gVal, bVal) = getStarColorRGB(finalColorIndex)
+
+                    shootingStar = ShootingStar(
+                        x = startX,
+                        y = startY,
+                        vx = vxVal,
+                        vy = vyVal,
+                        length = lengthVal,
+                        opacity = 1.0f,
+                        life = lifeVal,
+                        age = 0f,
+                        r = rVal,
+                        g = gVal,
+                        b = bVal
+                    )
+                }
+            }
+        }
+
+        // Fireflies simulation update
+        val firefliesActive = configProvider.isFirefliesEnabled() && (timeMode == 1 || (timeMode == 2 && combinedNightIntensity > 0.01f))
+        updateFireflies(deltaTime, firefliesActive)
     }
 
     private fun generateRandomPath() {
@@ -796,7 +930,7 @@ class SunnyRenderer(
         }
     }
 
-    private fun drawDaySky(intensity: Float) {
+    private fun drawDaySky(intensity: Float, nightIntensity: Float = 0f) {
         // 1. Cielo procedural y sol
         GLES30.glUseProgram(program)
         GLES30.glUniform1f(timeHandle, time)
@@ -827,6 +961,10 @@ class SunnyRenderer(
         GLES30.glUniform1f(godRaysIntensityHandle, godRaysRaw * lowSunFactor)
         GLES30.glUniform1f(sunFadeFactorHandle, pathFadeFactor * intensity)
 
+        // Pass night intensity uniform to sky shader
+        val nightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
+        GLES30.glUniform1f(nightIntensityHandle, nightIntensity)
+
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()
             val bottomColor = configProvider.getSunnyCustomSkyBottomColor()
@@ -848,7 +986,7 @@ class SunnyRenderer(
     }
 
     private fun drawDayScene() {
-        drawDaySky(1f)
+        drawDaySky(1f, 0f)
 
         // 2. Fondo seleccionado
         val bgIndex = configProvider.getSunnyBackgroundIndex()
@@ -865,21 +1003,24 @@ class SunnyRenderer(
     }
 
     private fun drawNightScene(intensity: Float) {
+        // Draw the night sky background with nebulae and horizon haze
+        drawDaySky(0f, intensity)
+        
         drawStars(intensity)
         drawMoon(intensity)
         drawNightClouds(intensity)
         val bgIndex = configProvider.getSunnyBackgroundIndex()
         drawBackground(bgIndex, intensity)
+        drawFireflies(intensity) // Draw fireflies in front of background
+        drawMoonLensFlare(intensity)
     }
 
     private fun drawCombinedScene() {
         val dayIntensity = combinedDayIntensity
         val nightIntensity = combinedNightIntensity
 
-        // 1. Cielo (Día y/o Noche)
-        if (dayIntensity > 0.01f) {
-            drawDaySky(dayIntensity)
-        }
+        // 1. Cielo (Día y Noche combinados en un solo renderizado)
+        drawDaySky(dayIntensity, nightIntensity)
         if (nightIntensity > 0.01f) {
             drawStars(nightIntensity)
         }
@@ -903,10 +1044,18 @@ class SunnyRenderer(
             drawBackground(bgIndex, nightIntensity)
         }
 
+        // Draw fireflies in front of silhouettes if night mode is active in combined scene
+        if (nightIntensity > 0.01f) {
+            drawFireflies(nightIntensity)
+        }
+
         // 5. Efectos Especiales de Día
         if (dayIntensity > 0.01f) {
             drawParticles(dayIntensity)
             drawLensFlare(dayIntensity)
+        }
+        if (nightIntensity > 0.01f) {
+            drawMoonLensFlare(nightIntensity)
         }
     }
 
@@ -970,9 +1119,46 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
         GLES30.glDisableVertexAttribArray(2)
+
+        // Draw shooting star if active
+        val star = shootingStar
+        if (star != null && shootingStarProgram != 0) {
+            GLES30.glUseProgram(shootingStarProgram)
+            
+            // Enable blending for transparency
+            val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
+            if (!blendEnabled) GLES30.glEnable(GLES30.GL_BLEND)
+            GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
+
+            // Pass uniforms
+            GLES30.glUniform1f(ssOpacityHandle, star.opacity * intensity)
+            GLES30.glUniform1f(ssAspectHandle, aspectRatio)
+            GLES30.glUniform3f(ssColorHandle, star.r, star.g, star.b)
+
+            val speed = kotlin.math.sqrt(star.vx * star.vx + star.vy * star.vy)
+            val ux = if (speed > 0.0001f) star.vx / speed else -0.8f
+            val uy = if (speed > 0.0001f) star.vy / speed else -0.6f
+            val tailX = star.x - ux * star.length
+            val tailY = star.y - uy * star.length
+
+            GLES30.glUniform2f(ssHeadHandle, star.x, star.y)
+            GLES30.glUniform2f(ssTailHandle, tailX, tailY)
+
+            // Bind fullscreen quad coordinates
+            fullscreenQuadBuffer.position(0)
+            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
+            GLES30.glEnableVertexAttribArray(0)
+
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+            GLES30.glDisableVertexAttribArray(0)
+
+            if (!blendEnabled) GLES30.glDisable(GLES30.GL_BLEND)
+        }
     }
 
     private fun drawMoon(intensity: Float) {
+        moonRingFadeValue = 0f
         if (moonProgram == 0) return
         GLES30.glUseProgram(moonProgram)
 
@@ -1020,11 +1206,13 @@ class SunnyRenderer(
         }
 
         val ringFade = when {
+            !moon.hasHaloRing -> 0f
             t < 0.40f || t > 0.60f -> 0f
             t in 0.40f..0.43f -> (t - 0.40f) / 0.03f
             t in 0.57f..0.60f -> (0.60f - t) / 0.03f
             else -> 1.0f
         }
+        moonRingFadeValue = ringFade
         GLES30.glUniform1f(moonRingFadeHandle, ringFade)
 
         cloudQuadBuffer.position(0)
@@ -1050,11 +1238,17 @@ class SunnyRenderer(
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
         val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
+        val moonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
+        val cloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
+        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+        val silverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
 
         // Night clouds color: slightly darker/cooler/blue-ish gray tint
         GLES30.glUniform3f(cloudColorHandle, 0.35f, 0.42f, 0.55f)
         GLES30.glUniform1f(flashIntensityHandle, 0f)
         GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
+        GLES30.glUniform2f(moonPosHandle, moon.positionX, moon.positionY)
+        GLES30.glUniform1f(silverLiningIntensityHandle, intensity)
 
         // Bind positions attribute (location 0)
         cloudQuadBuffer.position(0)
@@ -1084,6 +1278,8 @@ class SunnyRenderer(
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
             GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
+            GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
+            GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
 
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
@@ -1097,14 +1293,12 @@ class SunnyRenderer(
 
     private fun adjustNightClouds(density: Int) {
         val targetCount = when (density) {
-            0 -> 0
             25 -> 1
-            50 -> 2
-            75 -> 4
-            90 -> 6
-            100 -> 8
-            else -> (density / 100f * 8).toInt()
-        }.coerceIn(0, 8)
+            50 -> 3
+            75 -> 6
+            100 -> 10
+            else -> if (density <= 25) 1 else if (density <= 50) 3 else if (density <= 75) 6 else 10
+        }
 
         val textureCount = cloudTextures.size.coerceAtLeast(1)
         val activeClouds = nightClouds.filter { !it.isFadingOut }
@@ -1143,6 +1337,13 @@ class SunnyRenderer(
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
         val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
+        val moonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
+        val cloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
+        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+        val silverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
+
+        GLES30.glUniform2f(moonPosHandle, 0f, 0f)
+        GLES30.glUniform1f(silverLiningIntensityHandle, 0f) // Disabled during day
 
         // In Sunny mode, warm color tinting matching the active sky theme
         val theme = configProvider.getSunnyTheme()
@@ -1192,6 +1393,8 @@ class SunnyRenderer(
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
             GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
+            GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
+            GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
 
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
@@ -1252,6 +1455,105 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(1)
 
         // Restore blend function to default to avoid breaking subsequent renders
+        if (!blendEnabled) {
+            GLES30.glDisable(GLES30.GL_BLEND)
+        } else {
+            GLES30.glBlendFunc(prevSrcFunc[0], prevDstFunc[0])
+        }
+    }
+
+    private fun updateFireflies(deltaTime: Float, active: Boolean) {
+        val targetCount = if (active) 35 else 0
+        if (fireflies.size < targetCount) {
+            val needed = targetCount - fireflies.size
+            for (i in 0 until needed) {
+                fireflies.add(createRandomFirefly())
+            }
+        }
+        val iterator = fireflies.iterator()
+        while (iterator.hasNext()) {
+            val f = iterator.next()
+            if (!active) {
+                f.alpha -= deltaTime * 2.0f
+                if (f.alpha <= 0f) {
+                    iterator.remove()
+                    continue
+                }
+            } else {
+                if (f.alpha < f.targetAlpha) {
+                    f.alpha = (f.alpha + deltaTime * 1.5f).coerceAtMost(f.targetAlpha)
+                }
+            }
+            f.noiseSeedX += deltaTime * f.speed
+            f.noiseSeedY += deltaTime * f.speed
+            val dx = (kotlin.math.sin(f.noiseSeedX * 1.6f) * 0.12f + kotlin.math.cos(f.noiseSeedX * 3.3f) * 0.06f)
+            val dy = (kotlin.math.cos(f.noiseSeedY * 1.1f) * 0.08f + kotlin.math.sin(f.noiseSeedY * 2.6f) * 0.04f)
+            f.baseY += deltaTime * 0.04f
+            f.baseX += deltaTime * 0.02f
+            if (f.baseY > -0.2f) {
+                f.baseY = -1.0f - kotlin.random.Random.nextFloat() * 0.1f
+                f.baseX = kotlin.random.Random.nextFloat() * (aspectRatio * 2.2f) - (aspectRatio * 1.1f)
+            }
+            if (f.baseX > aspectRatio * 1.1f) {
+                f.baseX = -aspectRatio * 1.1f
+            } else if (f.baseX < -aspectRatio * 1.1f) {
+                f.baseX = aspectRatio * 1.1f
+            }
+            f.x = f.baseX + dx
+            f.y = f.baseY + dy
+        }
+    }
+
+    private fun createRandomFirefly(): Firefly {
+        val rand = kotlin.random.Random
+        val startX = rand.nextFloat() * (aspectRatio * 2.2f) - (aspectRatio * 1.1f)
+        val startY = rand.nextFloat() * 0.7f - 1.0f
+        val seedX = rand.nextFloat() * 1000f
+        val seedY = rand.nextFloat() * 1000f
+        val speed = 0.5f + rand.nextFloat() * 1.0f
+        val size = 0.012f + rand.nextFloat() * 0.012f
+        val targetAlpha = 0.6f + rand.nextFloat() * 0.4f
+        val r = 0.6f + rand.nextFloat() * 0.25f
+        val g = 0.9f + rand.nextFloat() * 0.1f
+        val b = 0.05f + rand.nextFloat() * 0.15f
+        return Firefly(
+            x = startX, y = startY, baseX = startX, baseY = startY,
+            noiseSeedX = seedX, noiseSeedY = seedY, speed = speed, size = size,
+            alpha = 0f, targetAlpha = targetAlpha, r = r, g = g, b = b
+        )
+    }
+
+    private fun drawFireflies(intensity: Float) {
+        if (fireflies.isEmpty() || particleProgram == 0) return
+        val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
+        val prevSrcFunc = IntArray(1)
+        val prevDstFunc = IntArray(1)
+        GLES30.glGetIntegerv(GLES30.GL_BLEND_SRC_RGB, prevSrcFunc, 0)
+        GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
+        GLES30.glEnable(GLES30.GL_BLEND)
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
+        for (f in fireflies) {
+            val modelMatrix = FloatArray(16)
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, f.x + gyroX, f.y + gyroY, 0f)
+            Matrix.scaleM(modelMatrix, 0, f.size, f.size, 1.0f)
+            val modelViewProjection = FloatArray(16)
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+            GLES30.glUniformMatrix4fv(pMVPMatrixHandle, 1, false, modelViewProjection, 0)
+            GLES30.glUniform3f(pColorHandle, f.r, f.g, f.b)
+            GLES30.glUniform1f(pOpacityHandle, f.alpha * intensity)
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        }
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
         if (!blendEnabled) {
             GLES30.glDisable(GLES30.GL_BLEND)
         } else {
@@ -1352,16 +1654,13 @@ class SunnyRenderer(
     }
 
     private fun adjustClouds(density: Int) {
-        // Map 0-100 density to custom cloud count: 0, 1, 3, 6, 8, 10
         val targetCount = when (density) {
-            0 -> 0
-            25 -> 1
-            50 -> 3
-            75 -> 6
-            90 -> 8
-            100 -> 10
-            else -> (density / 100f * 10).toInt()
-        }.coerceIn(0, 10)
+            25 -> 2
+            50 -> 5
+            75 -> 9
+            100 -> 14
+            else -> if (density <= 25) 2 else if (density <= 50) 5 else if (density <= 75) 9 else 14
+        }
 
         val textureCount = cloudTextures.size
         if (textureCount == 0) return
@@ -1569,6 +1868,32 @@ class SunnyRenderer(
         GLES30.glUniform1f(lfAspectHandle, aspectRatio)
         GLES30.glUniform1f(lfSwipeOffsetHandle, swipeOffset)
         GLES30.glUniform1f(lfIntensityHandle, finalIntensity)
+
+        fullscreenQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+        GLES30.glDisableVertexAttribArray(0)
+    }
+
+    private fun drawMoonLensFlare(intensity: Float) {
+        if (moonLensFlareProgram == 0) return
+        val enabled = configProvider.isSunnyLensFlareEnabled()
+        if (!enabled) return
+        if (moon.phase != 4) return
+        if (moonRingFadeValue <= 0.0f) return
+
+        val finalIntensity = 0.6f * moonRingFadeValue * intensity
+
+        if (finalIntensity <= 0.0f) return
+
+        GLES30.glUseProgram(moonLensFlareProgram)
+        GLES30.glUniform2f(mlfMoonPosHandle, moon.positionX, moon.positionY)
+        GLES30.glUniform1f(mlfAspectHandle, aspectRatio)
+        GLES30.glUniform1f(mlfSwipeOffsetHandle, swipeOffset)
+        GLES30.glUniform1f(mlfIntensityHandle, finalIntensity)
 
         fullscreenQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)

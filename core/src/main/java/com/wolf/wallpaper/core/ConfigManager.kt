@@ -131,6 +131,16 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_RAIN_SPAWN_MODE = 0
         const val DEFAULT_WIND_LINES_ENABLED = true
         const val DEFAULT_WIND_LINES_INTENSITY = 50
+
+        // Shooting Stars
+        const val KEY_SHOOTING_STARS_ENABLED = "shooting_stars_enabled"
+        const val KEY_SHOOTING_STARS_DENSITY = "shooting_stars_density"
+        const val DEFAULT_SHOOTING_STARS_ENABLED = true
+        const val DEFAULT_SHOOTING_STARS_DENSITY = 50
+
+        // Fireflies
+        const val KEY_FIREFLIES_ENABLED = "fireflies_enabled"
+        const val DEFAULT_FIREFLIES_ENABLED = true
     }
 
     override fun getCloudDensity(): Int {
@@ -509,4 +519,13 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getCombinedPathDirection(): Int = prefs.getInt(KEY_COMBINED_PATH_DIRECTION, DEFAULT_COMBINED_PATH_DIRECTION)
     fun setCombinedPathDirection(dir: Int) { prefs.edit().putInt(KEY_COMBINED_PATH_DIRECTION, dir.coerceIn(0, 3)).apply() }
+
+    override fun isShootingStarsEnabled(): Boolean = prefs.getBoolean(KEY_SHOOTING_STARS_ENABLED, DEFAULT_SHOOTING_STARS_ENABLED)
+    fun setShootingStarsEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_SHOOTING_STARS_ENABLED, enabled).apply() }
+
+    override fun getShootingStarsDensity(): Int = prefs.getInt(KEY_SHOOTING_STARS_DENSITY, DEFAULT_SHOOTING_STARS_DENSITY)
+    fun setShootingStarsDensity(density: Int) { prefs.edit().putInt(KEY_SHOOTING_STARS_DENSITY, density.coerceIn(0, 100)).apply() }
+
+    override fun isFirefliesEnabled(): Boolean = prefs.getBoolean(KEY_FIREFLIES_ENABLED, DEFAULT_FIREFLIES_ENABLED)
+    fun setFirefliesEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_FIREFLIES_ENABLED, enabled).apply() }
 }

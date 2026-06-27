@@ -63,16 +63,31 @@ void main() {
     float totalAlpha = (litAlpha + haloAlpha * uHaloIntensity) * uIntensity;
     vec3  totalColor = mix(uMoonColor * 0.3, surfaceColor, litAlpha / max(totalAlpha, 0.001));
 
-    // Thin, slightly transparent halo ring around the moon at full moon (ph == 4)
-    // Scale the ring radius by 3.0 (from 0.62 to 1.86) to match the larger quad size
+    // Three concentric rings around the moon at full moon (ph == 4)
+    // Scale the middle ring radius by 3.0 (from 0.62 to 1.86) to match the larger quad size
     float ringR = 1.86;
-    float ringThickness = 0.024;
+    float ringThickness = 0.036;
+    
+    // Middle ring
     float ringSDF = abs(moonDist - ringR);
-    float ringAlpha = smoothstep(ringThickness + 0.024, ringThickness - 0.024, ringSDF);
+    float ringAlpha = smoothstep(ringThickness + 0.036, ringThickness - 0.036, ringSDF);
+    
+    // Inner ring (radius smaller by 0.25)
+    float innerR = ringR - 0.25;
+    float innerSDF = abs(moonDist - innerR);
+    float innerAlpha = smoothstep(ringThickness + 0.036, ringThickness - 0.036, innerSDF);
+    
+    // Outer ring (radius larger by 0.25)
+    float outerR = ringR + 0.25;
+    float outerSDF = abs(moonDist - outerR);
+    float outerAlpha = smoothstep(ringThickness + 0.036, ringThickness - 0.036, outerSDF);
+    
     float wRing = (ph == 4) ? 1.0 : 0.0;
-    float finalRingAlpha = ringAlpha * 0.35 * wRing * uHaloIntensity * uIntensity * uRingFade;
+    
+    // Opacities: middle ring 50% more transparent (0.15 * 0.5 = 0.075), inner/outer 75% more transparent (0.15 * 0.25 = 0.0375)
+    float finalRingAlpha = (ringAlpha * 0.075 + innerAlpha * 0.0375 + outerAlpha * 0.0375) * wRing * uHaloIntensity * uIntensity * uRingFade;
 
-    // Alpha blend the ring on top of the moon color
+    // Alpha blend the rings on top of the moon color
     totalColor = mix(totalColor, uMoonColor, finalRingAlpha / max(totalAlpha + finalRingAlpha, 0.001));
     totalAlpha = totalAlpha + finalRingAlpha * (1.0 - totalAlpha);
 

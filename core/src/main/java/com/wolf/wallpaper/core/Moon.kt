@@ -14,6 +14,8 @@ class Moon {
     var customX = 50     // 0-100
     var customY = 74     // 0-100
 
+    var hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
+
     // For L2R/R2L movement
     private var pathX = -1.3f
 
@@ -31,13 +33,19 @@ class Moon {
         when (pathDirection) {
             0 -> { // Left to Right
                 pathX += deltaTime * speed
-                if (pathX > 1.3f) pathX = -1.3f
+                if (pathX > 1.3f) {
+                    pathX = -1.3f
+                    hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
+                }
                 positionX = pathX
                 positionY = 0.85f - 1.15f * (positionX * positionX)
             }
             1 -> { // Right to Left
                 pathX -= deltaTime * speed
-                if (pathX < -1.3f) pathX = 1.3f
+                if (pathX < -1.3f) {
+                    pathX = 1.3f
+                    hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
+                }
                 positionX = pathX
                 positionY = 0.85f - 1.15f * (positionX * positionX)
             }
@@ -48,7 +56,10 @@ class Moon {
                 if (!isRandomInitialized) generateRandomPath(aspectRatio)
                 val rSpeed = 0.04f + (moveSpeed / 100f) * 0.40f
                 randomProgress += deltaTime * rSpeed
-                if (randomProgress >= 1.0f) generateRandomPath(aspectRatio)
+                if (randomProgress >= 1.0f) {
+                    generateRandomPath(aspectRatio)
+                    hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
+                }
                 positionX = randomStartX + (randomEndX - randomStartX) * randomProgress
                 positionY = randomStartY + (randomEndY - randomStartY) * randomProgress
             }
@@ -60,6 +71,7 @@ class Moon {
         isRandomInitialized = false
         pathX = if (direction == 1) 1.3f else -1.3f
         if (direction == 2) applyStationary(aspectRatio)
+        hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
     }
 
     private fun applyStationary(aspectRatio: Float) {

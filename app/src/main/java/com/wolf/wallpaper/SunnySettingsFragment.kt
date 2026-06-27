@@ -56,10 +56,8 @@ class SunnySettingsFragment : Fragment() {
         setupAccordion(view, R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon)
         setupAccordion(view, R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
 
-        // 2. Setup Cloud Density Slider (Sunny clouds)
-        setupSlider(view, R.id.seekBarCloudDensity, R.id.textViewCloudDensityValue, configManager.getCloudDensity()) { value ->
-            configManager.setCloudDensity(value)
-        }
+        // 2. Setup Cloud Density Cards (Sunny clouds)
+        setupCloudDensityCards(view)
 
         // 3. Setup Sunny Main controls
         setupSlider(view, R.id.seekBarSunSize, R.id.textViewSunSizeValue, configManager.getSunSize()) { value ->
@@ -211,16 +209,6 @@ class SunnySettingsFragment : Fragment() {
 
     private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
         when (sliderId) {
-            R.id.seekBarCloudDensity -> {
-                val desc = when {
-                    value <= 0 -> "Cielo despejado"
-                    value <= 25 -> "Pocas nubes"
-                    value <= 50 -> "Nublado"
-                    value <= 75 -> "Muy nublado"
-                    else -> "Cubierto"
-                }
-                textView.text = "$value% • $desc"
-            }
             R.id.seekBarSunSize -> {
                 val desc = when {
                     value <= 20 -> "Pequeño"
@@ -285,6 +273,15 @@ class SunnySettingsFragment : Fragment() {
                     value <= 50 -> "Normal"
                     value <= 85 -> "Muchas"
                     else -> "Cielo lleno"
+                }
+                textView.text = "$value% • $desc"
+            }
+            R.id.seekBarShootingStarsDensity -> {
+                val desc = when {
+                    value <= 20 -> "Pocas"
+                    value <= 50 -> "Normal"
+                    value <= 85 -> "Muchas"
+                    else -> "Lluvia de estrellas"
                 }
                 textView.text = "$value% • $desc"
             }
@@ -555,6 +552,79 @@ class SunnySettingsFragment : Fragment() {
             btnSelect?.visibility = View.GONE
             container?.visibility = View.GONE
         }
+    }
+
+    private fun setupCloudDensityCards(parent: View) {
+        val cardPoco = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityPoco) ?: return
+        val cardMedio = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityMedio) ?: return
+        val cardAlto = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityAlto) ?: return
+        val cardMuyAlto = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityMuyAlto) ?: return
+        val cards = listOf(cardPoco, cardMedio, cardAlto, cardMuyAlto)
+
+        val textPoco = cardPoco.getChildAt(0) as? TextView
+        val textMedio = cardMedio.getChildAt(0) as? TextView
+        val textAlto = cardAlto.getChildAt(0) as? TextView
+        val textMuyAlto = cardMuyAlto.getChildAt(0) as? TextView
+        val texts = listOf(textPoco, textMedio, textAlto, textMuyAlto)
+
+        val activeColor = Color.parseColor("#00E5FF")
+        val inactiveColor = Color.parseColor("#B0B0BA")
+        val activeBgColor = Color.parseColor("#2D2D3D")
+        val inactiveBgColor = Color.parseColor("#21212A")
+        val strokeActiveColor = Color.parseColor("#00E5FF")
+        val strokeInactiveColor = Color.parseColor("#3A3A4A")
+
+        fun selectDensity(densityValue: Int) {
+            val index = when (densityValue) {
+                25 -> 0
+                50 -> 1
+                75 -> 2
+                100 -> 3
+                else -> 1 // Default to Medio (50)
+            }
+            cards.forEachIndexed { i, card ->
+                val text = texts[i]
+                if (i == index) {
+                    card.strokeColor = strokeActiveColor
+                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(activeBgColor)
+                    text?.setTextColor(activeColor)
+                } else {
+                    card.strokeColor = strokeInactiveColor
+                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(inactiveBgColor)
+                    text?.setTextColor(inactiveColor)
+                }
+            }
+            val valueText = when (index) {
+                0 -> "Poco"
+                1 -> "Medio"
+                2 -> "Alto"
+                3 -> "Muy Alto"
+                else -> "Medio"
+            }
+            parent.findViewById<TextView>(R.id.textViewCloudDensityValue)?.text = valueText
+            updateSummaries(parent)
+        }
+
+        cardPoco.setOnClickListener {
+            configManager.setCloudDensity(25)
+            selectDensity(25)
+        }
+        cardMedio.setOnClickListener {
+            configManager.setCloudDensity(50)
+            selectDensity(50)
+        }
+        cardAlto.setOnClickListener {
+            configManager.setCloudDensity(75)
+            selectDensity(75)
+        }
+        cardMuyAlto.setOnClickListener {
+            configManager.setCloudDensity(100)
+            selectDensity(100)
+        }
+
+        selectDensity(configManager.getCloudDensity())
     }
 
     private fun setupTimeModeCards(parent: View) {
@@ -850,6 +920,34 @@ class SunnySettingsFragment : Fragment() {
         setupSlider(parent, R.id.seekBarCombinedStarDensity, R.id.textViewCombinedStarDensityValue, configManager.getCombinedStarDensity()) { value ->
             configManager.setCombinedStarDensity(value)
         }
+
+        // Setup Shooting Stars switch and slider
+        val switchShootingStars = parent.findViewById<SwitchMaterial>(R.id.switchShootingStars)
+        val layoutDensityGroup = parent.findViewById<View>(R.id.layoutShootingStarsDensityGroup)
+        if (switchShootingStars != null) {
+            val enabled = configManager.isShootingStarsEnabled()
+            switchShootingStars.isChecked = enabled
+            layoutDensityGroup?.visibility = if (enabled) View.VISIBLE else View.GONE
+            switchShootingStars.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setShootingStarsEnabled(isChecked)
+                layoutDensityGroup?.visibility = if (isChecked) View.VISIBLE else View.GONE
+                updateSummaries(parent)
+            }
+        }
+
+        setupSlider(parent, R.id.seekBarShootingStarsDensity, R.id.textViewShootingStarsDensityValue, configManager.getShootingStarsDensity()) { value ->
+            configManager.setShootingStarsDensity(value)
+        }
+
+        // Setup Fireflies switch
+        val switchFireflies = parent.findViewById<SwitchMaterial>(R.id.switchFireflies)
+        if (switchFireflies != null) {
+            switchFireflies.isChecked = configManager.isFirefliesEnabled()
+            switchFireflies.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setFirefliesEnabled(isChecked)
+                updateSummaries(parent)
+            }
+        }
     }
 
     private fun setupCombinedMoonPhaseCards(parent: View) {
@@ -1079,12 +1177,12 @@ class SunnySettingsFragment : Fragment() {
 
         if (summarySunnyEnvironment != null) {
             val density = configManager.getCloudDensity()
-            val densityText = when {
-                density <= 0 -> "Cielo despejado"
-                density <= 25 -> "Pocas nubes"
-                density <= 50 -> "Nublado"
-                density <= 75 -> "Muy nublado"
-                else -> "Cielo Cubierto"
+            val densityText = when (density) {
+                25 -> "Poco"
+                50 -> "Medio"
+                75 -> "Alto"
+                100 -> "Muy Alto"
+                else -> "Medio"
             }
             val sunBg = when (configManager.getSunnyBackgroundIndex()) {
                 0 -> "Solo degradado"
@@ -1100,7 +1198,7 @@ class SunnySettingsFragment : Fragment() {
             }
             val gyroStatus = if (configManager.isSunnyGyroEnabled()) "Sí" else "No"
             summarySunnyEnvironment.text = Html.fromHtml(
-                "Nubes: <font color='$accentColor'>$densityText ($density%)</font> • Fondo: <font color='$accentColor'>$sunBg</font> • Giroscopio: <font color='$accentColor'>$gyroStatus</font>",
+                "Nubes: <font color='$accentColor'>$densityText</font> • Fondo: <font color='$accentColor'>$sunBg</font> • Giroscopio: <font color='$accentColor'>$gyroStatus</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -1153,8 +1251,14 @@ class SunnySettingsFragment : Fragment() {
                 else -> "Blanco"
             }
             val starModeText = if (configManager.getStarMode() == 1) "Aleatorio" else "Estático"
+            val shootingStarsText = if (configManager.isShootingStarsEnabled()) {
+                "Sí (${configManager.getShootingStarsDensity()}%)"
+            } else {
+                "No"
+            }
+            val firefliesText = if (configManager.isFirefliesEnabled()) "Sí" else "No"
             summarySunnyMoon.text = Html.fromHtml(
-                "Fase: <font color='$accentColor'>$phaseText</font> • Estrellas: <font color='$accentColor'>$starColorText ($starDensity%)</font> • Modo: <font color='$accentColor'>$starModeText</font>",
+                "Fase: <font color='$accentColor'>$phaseText</font> • Estrellas: <font color='$accentColor'>$starColorText ($starDensity%)</font> • Modo: <font color='$accentColor'>$starModeText</font><br/>Fugaces: <font color='$accentColor'>$shootingStarsText</font> • Luciérnagas: <font color='$accentColor'>$firefliesText</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
