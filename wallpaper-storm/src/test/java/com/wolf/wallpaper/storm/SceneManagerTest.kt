@@ -122,10 +122,10 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
         assertEquals(5, sceneManager.getClouds().filter { !it.isFadingOut }.size)
 
-        // Case 4: Density 100 -> 15 clouds
+        // Case 4: Density 100 -> 10 clouds
         mockConfig.mockCloudDensity = 100
         sceneManager.update(0.016f)
-        assertEquals(15, sceneManager.getClouds().filter { !it.isFadingOut }.size)
+        assertEquals(10, sceneManager.getClouds().filter { !it.isFadingOut }.size)
     }
 
     @Test

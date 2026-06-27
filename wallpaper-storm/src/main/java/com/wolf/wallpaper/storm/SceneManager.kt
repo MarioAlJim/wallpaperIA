@@ -7,7 +7,7 @@ import kotlin.random.Random
 
 class SceneManager(
     private val context: Context?,
-    private val configProvider: ConfigProvider
+    val configProvider: ConfigProvider
 ) {
     private val clouds = mutableListOf<StormCloud>()
     private val rainDrops = mutableListOf<RainDrop>()
@@ -362,20 +362,20 @@ class SceneManager(
     }
 
     private fun adjustClouds(density: Int) {
-        val targetCount = if (density in 0..15) {
+        val targetCount = if (density in 0..10) {
             density
         } else {
-            // Map 0-100 density percentage to custom cloud count
+            // Map 0-100 density percentage to custom cloud count (max 10)
             when (density) {
                 0 -> 0
                 25 -> 2
                 50 -> 5
-                75 -> 10
-                90 -> 13
-                100 -> 15
-                else -> (density / 100f * 15).toInt()
+                75 -> 8
+                90 -> 9
+                100 -> 10
+                else -> (density / 100f * 10).toInt()
             }
-        }.coerceIn(0, 15)
+        }.coerceIn(0, 10)
         val textureCount = getCloudTextureCount()
         
         val activeClouds = clouds.filter { !it.isFadingOut }

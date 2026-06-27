@@ -14,11 +14,12 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
 *   **[NEW] [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag)**: Fragment shader local que mapea coordenadas NDC, calcula distorsión refractiva síncrona con rastros en pantalla y aplica el ensombrecimiento volumétrico de los Dark God Rays.
 *   **[MODIFY] [StormRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/StormRenderer.kt)**: Se modificó para cargar `storm_cloud.vert` y `storm_cloud.frag` en lugar de los shaders compartidos de `:core`, protegiendo el modo Soleado de regresiones.
 
-### 3. Gotas de Pantalla (Refraction) - ¡Colisiones, Fusión y Rastros Potenciados!
-*   **Fusión de Gotas en Colisión (Snap Merge)**:
-    *   Se implementó una estructura local `ActiveDrop` para reunir y registrar las n gotas activas antes de renderizarlas.
-    *   Se añadió un paso de colisiones ("Merging pass") en el shader. Si dos gotas se aproximan a una distancia menor que la suma de sus radios (`dist < mergeThreshold`), **se fusionan de forma instantánea**.
-    *   La gota resultante conserva la masa conjunta de ambas (calculando su nuevo radio mediante `radius = sqrt(rI^2 + rJ^2) * 1.25` para hacerla un 25% más grande y vistosa) y su centro físico se desplaza al promedio ponderado de ambos centros. La gota absorbida se desactiva.
+### 3. Gotas de Pantalla (Refraction) - ¡Fusión Orgánica Metaball y Rastros Potenciados!
+*   **Fusión de Gotas Metaball (Smooth Blending)**:
+    *   Para corregir las deformaciones extrañas y saltos visuales al colisionar, reemplazamos el snap-merge array con un modelo físico de **campo de distancias y mezcla metaball**.
+    *   En la función `GetDropletEffects` de [background.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/background.frag) y [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag), calculamos la altura (`h_height = radius - r`) de cada gota de forma procedural dentro del loop principal.
+    *   Cuando dos gotas se superponen, sus campos de altura se acumulan y todas las propiedades de refracción (normales de distorsión, especularidad, máscara de gota y desvanecimiento) se promedian ponderadamente según su altura local (`h_height`).
+    *   Esto permite que las gotas se atraigan y se fusionen de forma 100% fluida, orgánica y continua (como mercurio o agua real), **eliminando cualquier forma extraña, desconexión o glitch visual**.
 *   **Efecto de Rastro Potenciado**:
     *   Se incrementó la amplitud del rastro de refracción ondulante a `0.015` en horizontal y `0.004` en vertical (un aumento del doble frente a la versión previa) para hacer el rastro mojado mucho más perceptible y realista.
     *   El grosor mínimo del rastro se mantiene al 75% del tamaño de la gota (`radius * 0.75`).

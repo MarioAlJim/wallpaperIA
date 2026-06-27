@@ -65,8 +65,8 @@ class StormSettingsFragment : Fragment() {
         setupAccordion(view, R.id.headerBackground, R.id.contentBackground, R.id.dividerBackground, R.id.arrowBackground)
 
         // 2. Setup Nubes y Viento Controls
-        val cloudOptions = arrayOf("0 nubes", "1 nube", "3 nubes", "5 nubes", "7 nubes", "9 nubes", "11 nubes", "13 nubes", "15 nubes")
-        val cloudCounts = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
+        val cloudOptions = arrayOf("0 nubes", "1 nube", "2 nubes", "4 nubes", "6 nubes", "8 nubes", "10 nubes")
+        val cloudCounts = intArrayOf(0, 1, 2, 4, 6, 8, 10)
         val initialCloudIndex = getClosestCloudOptionIndex(configManager.getCloudDensity())
 
         val textViewCloudDensityValue = view.findViewById<TextView>(R.id.textViewCloudDensityValue)
@@ -328,15 +328,14 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun getClosestCloudOptionIndex(density: Int): Int {
-        val targets = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
-        val actualClouds = if (density > 15) {
+        val targets = intArrayOf(0, 1, 2, 4, 6, 8, 10)
+        val actualClouds = if (density > 10) {
             when (density) {
                 25 -> 2
                 50 -> 5
-                75 -> 10
-                90 -> 13
-                100 -> 15
-                else -> (density / 100f * 15).toInt()
+                75 -> 8
+                100 -> 10
+                else -> (density / 100f * 10).toInt()
             }
         } else {
             density
