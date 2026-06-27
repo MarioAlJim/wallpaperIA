@@ -14,9 +14,14 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
 *   **[NEW] [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag)**: Fragment shader local que mapea coordenadas NDC, calcula distorsión refractiva síncrona con rastros en pantalla y aplica el ensombrecimiento volumétrico de los Dark God Rays.
 *   **[MODIFY] [StormRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/StormRenderer.kt)**: Se modificó para cargar `storm_cloud.vert` y `storm_cloud.frag` en lugar de los shaders compartidos de `:core`, protegiendo el modo Soleado de regresiones.
 
-### 3. Gotas de Pantalla (Refraction) - ¡Lente Original y Dirección Síncrona!
-*   **Restauración del Efecto de Lente Original**: Se revirtió la lógica matemática de `GetDropletEffects` al estado original (restaurando el bucle Y de `-9` a `1`, `pos.y -= (t * slideDist - 0.5)` y el chequeo de límites `abs(pos.x) > radius`). Esto restaura la transparencia alta, la magnificación convexa y el comportamiento original exacto de las lentes de refracción.
-*   **Alineamiento y Corrección de Dirección**:
+### 3. Gotas de Pantalla (Refraction) - ¡Lente Original, Dirección Síncrona y Rastros!
+*   **Efecto de Lente Original**: Se mantiene la lógica de lente convexa de la gota de agua para conservar la transparencia alta y la refracción nítida original.
+*   **Rastros de Agua Mojada (Wet Trails)**:
+    *   Se reintrodujo el cálculo de rastros en la función `GetDropletEffects`.
+    *   El grosor del rastro se ha configurado para ser de **al menos el 75% del tamaño de la gota** (`float trailWidth = radius * 0.75`).
+    *   Para dar paso a la renderización del rastro sin recortes, se amplió el límite vertical de descarte de fragmentos a `pos.y < -slideDist - radius`.
+    *   El rastro aplica un efecto de refracción ondulante y se difumina gradualmente conforme se aleja de la gota hacia arriba (`trailFade`).
+*   **Dirección Síncrona hacia Abajo**:
     *   En [storm_cloud.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/storm_cloud.frag), corregimos la orientación del eje vertical de `bgTexCoord` invirtiendo su valor: `bgTexCoord.y = 0.5 - (ndc.y / uBgScale.y) * 0.5`.
     *   Esto hace que tanto la textura de fondo como la de las nubes compartan exactamente la misma orientación espacial de texturas de arriba a abajo (donde Y=0 es la parte superior y Y=1 es la inferior).
     *   Al estar alinados, ambos shaders ejecutan el desplazamiento de gotas hacia abajo con el mismo efecto síncrono físico, **sin que haya refracciones ni deslizamientos en direcciones opuestas**.
@@ -40,10 +45,10 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
 *   **Interpolador de Transición Suave**:
     *   Se introdujo una variable de control `stormTransitionFactor` (de `0.0f` a `1.0f`) que cambia gradualmente a una tasa de `0.1f` por segundo.
     *   Esto define una **transición de 10 segundos** al cambiar entre calma y ráfagas.
-    *   Todos los parámetros (densidad de nubes, intensidad/velocidad de lluvia, frecuencia de rayos y destellos en nubes, e intensidad de viento) se interpolan linealmente usando la función `mixInt()`, previniendo saltos instantáneos o cambios bruscos en pantalla.
+    *   Todos los parámetros se interpolan linealmente usando la función `mixInt()`, previniendo saltos instantáneos o cambios bruscos en pantalla.
 *   **Modelo de Datos y Prefs (`ConfigProvider`, `ConfigManager`)**:
     *   Añadida la clave `"storm_variable_enabled"` para guardar la preferencia en el dispositivo.
-    *   Se declararon los métodos `isStormVariableEnabled()` and `setStormVariableEnabled(Boolean)` en la API del sistema de configuraciones.
+    *   Se declararon los métodos `isStormVariableEnabled()` y `setStormVariableEnabled(Boolean)` en la API del sistema de configuraciones.
 *   **Simulación por Ciclos (`SceneManager`)**:
     *   Se implementó un temporizador de ciclos en el motor de físicas de la tormenta (`stormCycleTime`).
     *   Cuando el modo está activo, se anula la lectura estática de SharedPreferences y se sobreescriben dinámicamente en tiempo real los targets.

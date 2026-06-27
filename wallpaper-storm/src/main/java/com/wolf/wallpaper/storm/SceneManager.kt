@@ -94,9 +94,9 @@ class SceneManager(
                 }
             }
 
-            // Smoothly interpolate transition factor (takes 10 seconds: rate = 0.1f)
+            // Smoothly interpolate transition factor (takes 15 seconds: rate = 0.0667f)
             val targetTransition = if (isBurstActive) 1.0f else 0.0f
-            val transitionRate = 0.1f
+            val transitionRate = 1.0f / 15.0f
             if (stormTransitionFactor < targetTransition) {
                 stormTransitionFactor = (stormTransitionFactor + transitionRate * deltaTime).coerceAtMost(targetTransition)
             } else if (stormTransitionFactor > targetTransition) {
@@ -276,47 +276,52 @@ class SceneManager(
         return (start + (end - start) * fraction).toInt()
     }
 
+    private fun smoothstep(x: Float): Float {
+        return x * x * (3.0f - 2.0f * x)
+    }
+
     private fun updateFromConfig() {
         val isVariable = configProvider.isStormVariableEnabled()
+        val smoothFactor = smoothstep(stormTransitionFactor)
 
         val targetDensity = if (isVariable) {
-            mixInt(40, 90, stormTransitionFactor)
+            mixInt(40, 90, smoothFactor)
         } else {
             configProvider.getCloudDensity()
         }
 
         val targetRain = if (isVariable) {
-            mixInt(15, 95, stormTransitionFactor)
+            mixInt(15, 95, smoothFactor)
         } else {
             configProvider.getRainIntensity()
         }
 
         val targetLightning = if (isVariable) {
-            mixInt(10, 85, stormTransitionFactor)
+            mixInt(10, 85, smoothFactor)
         } else {
             configProvider.getLightningFrequency()
         }
 
         val targetCloudFlashFreq = if (isVariable) {
-            mixInt(10, 80, stormTransitionFactor)
+            mixInt(10, 80, smoothFactor)
         } else {
             configProvider.getCloudFlashFrequency()
         }
 
         val targetWind = if (isVariable) {
-            if (stormTransitionFactor > 0.01f) currentBurstWindDirection else 0
+            if (smoothFactor > 0.01f) currentBurstWindDirection else 0
         } else {
             configProvider.getWindDirection()
         }
 
         val targetWindIntensity = if (isVariable) {
-            mixInt(15, 95, stormTransitionFactor)
+            mixInt(15, 95, smoothFactor)
         } else {
             configProvider.getWindIntensity()
         }
 
         val targetRainSpeedVal = if (isVariable) {
-            mixInt(35, 85, stormTransitionFactor)
+            mixInt(35, 85, smoothFactor)
         } else {
             configProvider.getRainSpeed()
         }

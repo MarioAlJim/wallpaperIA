@@ -839,8 +839,8 @@ class SceneManagerTest {
         // At 60s, isBurstActive becomes true, and transition starts increasing
         sceneManager.update(61.0f)
         
-        // After another 10 seconds of transition update, transition factor should be 1.0f (fully burst)
-        sceneManager.update(10.0f)
+        // After another 15 seconds of transition update, transition factor should be 1.0f (fully burst)
+        sceneManager.update(15.0f)
 
         // It should enter full burst state (overrides density=90, rain=95, wind=95, lightning=85)
         assertEquals(90, densityField.get(sceneManager) as Int)
@@ -852,8 +852,8 @@ class SceneManagerTest {
         // isBurstActive becomes false, and transition starts decreasing
         sceneManager.update(31.0f)
         
-        // After another 10 seconds of transition update, transition factor should be 0.0f (fully calm)
-        sceneManager.update(10.0f)
+        // After another 15 seconds of transition update, transition factor should be 0.0f (fully calm)
+        sceneManager.update(15.0f)
 
         // It should return to calm state
         assertEquals(40, densityField.get(sceneManager) as Int)
