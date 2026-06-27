@@ -51,7 +51,7 @@ float fbm(vec2 p) {
     return value;
 }
 
-// Computes lens distortion, specular highlight, border shading, and trails for raindrops on screen
+// Computes lens distortion, specular highlight, and border shading for raindrops on screen
 vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     vec2 distortion = vec2(0.0, 0.0);
     float spec = 0.0;
@@ -67,8 +67,7 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
     
     float minR = 1.0; // Track closest drop
     
-    // Loop checking cells above (Y: -1 to 9) to simulate falling downwards
-    for (int y = -1; y <= 9; y++) {
+    for (int y = -9; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             vec2 neighbor = vec2(float(x), float(y));
             vec2 cell = ip + neighbor;
@@ -81,12 +80,15 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             float wrappedLoopId = 0.0;
             float t = 0.0;
             
-            // Calculate randomized sliding distance
+            // Calculate randomized sliding distance (1/4 to 3/4 of screen height)
+            // Screen height is 12 cells, so distance is between 3.0 and 9.0 cells.
             float slideDist = mix(3.0, 9.0, Hash(cell + vec2(12.3, 45.6)));
             
-            // Droplet sliding velocity
+            // Droplet sliding velocity (cells per second)
             float velocity = (0.108 + 0.644 * Hash(cell + vec2(4.4, 4.4))) / 3.0;
             
+            // Speed (rate of fract progression per second) is velocity / distance,
+            // so lifetime (duration of one cycle) is proportional to distance (T = slideDist / velocity).
             float speed = velocity / slideDist;
             
             float slideTime = time * speed + h * 20.0;
@@ -108,18 +110,21 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             float h_render = Hash(cell + vec2(wrappedLoopId * 1.3, wrappedLoopId * 1.3));
             if (h_render < 0.45) continue;
             
-            // Size of droplet
+            // Size of droplet (increased base size to mix(0.06, 0.13), scaled by uniform)
             float radius = mix(0.06, 0.13, Hash(cell + vec2(wrappedLoopId * 2.3, wrappedLoopId * 2.3))) * sizeFactor;
-            radius *= 0.85;
+            radius *= 0.85; // moving drop size scaling
             radius *= fade;
             
             vec2 pos = fp - neighbor - offset;
-            pos.y += (t * slideDist - 0.5); // Slide down (plus sign moves droplets downwards in UV coords)
+            pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
             
+            // Double the stretching effect: it went from 2.0 (V=0.6) to 3.0 (V=0.4) as it slides down (t -> 1.0)
+            // Starts as 90% circular (V=1.08) instead of 75% circular (V=0.9) at spawn
             float currentYScale = mix(1.08, 0.4, t);
             
-            // Quick distance check to prune calculations
-            if (abs(pos.x) > radius * 3.0 || abs(pos.y) > radius * 3.0 + slideDist) continue;
+            // Quick distance check to prune calculations:
+            // Since currentYScale >= 0.4, maximum vertical extent of the droplet is radius / 0.4 = 2.5 * radius.
+            if (abs(pos.x) > radius || abs(pos.y) > radius * 3.0) continue;
             
             vec2 ovalScale = vec2(1.2, currentYScale);
             vec2 ovalPos = pos * ovalScale;
@@ -143,25 +148,6 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
                     border = smoothstep(0.0, 0.15, nz);
                     dropMask = 1.0;
                     finalFade = fade;
-                }
-            } else {
-                // Trail refraction
-                float trailWidth = radius * 0.38;
-                if (pos.y > 0.0 && pos.y < t * slideDist) {
-                    float trailDist = abs(pos.x);
-                    if (trailDist < trailWidth) {
-                        float trailFade = 1.0 - (pos.y / (t * slideDist));
-                        float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
-                        
-                        // Wiggle refraction offset for the trail
-                        vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.007, 0.002) * trailMask;
-                        
-                        if (minR > 0.99) {
-                            distortion = trailDistortion;
-                            dropMask = 0.4;
-                            finalFade = fade * trailFade;
-                        }
-                    }
                 }
             }
         }
