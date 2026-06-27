@@ -58,8 +58,8 @@ class StormRenderer(
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
 
         // Compile and link shaders
-        val cloudVert = readAssetFile(context, "shaders/cloud.vert")
-        val cloudFrag = readAssetFile(context, "shaders/cloud.frag")
+        val cloudVert = readAssetFile(context, "shaders/storm_cloud.vert")
+        val cloudFrag = readAssetFile(context, "shaders/storm_cloud.frag")
         cloudProgram = createProgram(cloudVert, cloudFrag)
 
         val rainVert = readAssetFile(context, "shaders/rain.vert")
@@ -307,6 +307,48 @@ class StormRenderer(
         GLES30.glUniform1f(flashIntensityHandle, maxIntensity)
         GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
 
+        // Bind additional uniforms for refraction and dark god rays
+        val timeHandle = GLES30.glGetUniformLocation(cloudProgram, "uTime")
+        val aspectHandle = GLES30.glGetUniformLocation(cloudProgram, "uAspectRatio")
+        val dropletsEnabledHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsEnabled")
+        val dropletsSizeHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsSize")
+        val rainColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uRainColor")
+        val lightningPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uLightningPos")
+        val bgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
+        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+
+        GLES30.glUniform1f(timeHandle, elapsedTime)
+        GLES30.glUniform1f(aspectHandle, aspectRatio)
+        GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
+        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
+        GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
+        val rainColor = getRainColor(sceneManager.getRainColorIndex())
+        GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
+
+        val brightestLightning = activeLightnings.maxByOrNull { it.intensity }
+        val lightningPos = if (brightestLightning != null) {
+            floatArrayOf(brightestLightning.positionX, brightestLightning.positionY)
+        } else {
+            floatArrayOf(0f, 1f)
+        }
+        GLES30.glUniform2f(lightningPosHandle, lightningPos[0], lightningPos[1])
+
+        // Pass background scale to keep coordinates matched
+        val bgIndex = sceneManager.getBackgroundIndex()
+        val texIndex = (bgIndex - 1).coerceIn(0, backgroundAspectRatios.size - 1)
+        val bgAspect = backgroundAspectRatios[texIndex]
+        val screenAspect = aspectRatio
+        var scaleX = 1.0f
+        var scaleY = 1.0f
+        if (screenAspect > bgAspect) {
+            scaleX = screenAspect
+            scaleY = screenAspect / bgAspect
+        } else {
+            scaleX = bgAspect
+            scaleY = 1.0f
+        }
+        GLES30.glUniform2f(bgScaleHandle, scaleX, scaleY)
+
         // Bind positions attribute (location 0)
         cloudQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
@@ -332,6 +374,7 @@ class StormRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity)
+            GLES30.glUniform2f(cloudScaleHandle, cloud.scale * 2.4f, cloud.scale)
 
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
@@ -888,6 +931,16 @@ class StormRenderer(
         GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
+
+        // Pass lightning position for Rim Lighting and Dark God Rays
+        val brightestLightning = activeLightnings.maxByOrNull { it.intensity }
+        val lightningPos = if (brightestLightning != null) {
+            floatArrayOf(brightestLightning.positionX, brightestLightning.positionY)
+        } else {
+            floatArrayOf(0f, 1f)
+        }
+        val lightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
+        GLES30.glUniform2f(lightningPosHandle, lightningPos[0], lightningPos[1])
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 

@@ -2,6 +2,8 @@
 precision highp float;
 
 in vec2 vTexCoord;
+in vec2 vScreenPos; // Screen coordinates from vertex shader
+
 uniform sampler2D uTexture;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
@@ -13,6 +15,9 @@ uniform float uScreenDropletsEnabled;
 uniform float uScreenDropletsSize;
 uniform vec3 uRainColor;
 
+// New uniform for lightning position (Dark God Rays and Rim Lighting)
+uniform vec2 uLightningPos;
+
 out vec4 fragColor;
 
 // A simple pseudo-random hash function
@@ -22,7 +27,31 @@ float Hash(vec2 p) {
     return fract(p.x * p.y);
 }
 
-// Computes lens distortion, specular highlight, and border shading for raindrops on screen
+float hash(vec2 p) {
+    p = fract(p * vec2(127.1, 311.7));
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
+               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+float fbm(vec2 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+    for (int i = 0; i < 3; i++) {
+        value += amplitude * noise(p);
+        p *= 2.0;
+        amplitude *= 0.5;
+    }
+    return value;
+}
+
+// Computes lens distortion, specular highlight, border shading, and trails for raindrops on screen
 vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     vec2 distortion = vec2(0.0, 0.0);
     float spec = 0.0;
@@ -38,28 +67,26 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
     
     float minR = 1.0; // Track closest drop
     
-    for (int y = -9; y <= 1; y++) {
+    // Loop checking cells above (Y: -1 to 9) to simulate falling downwards
+    for (int y = -1; y <= 9; y++) {
         for (int x = -1; x <= 1; x++) {
             vec2 neighbor = vec2(float(x), float(y));
             vec2 cell = ip + neighbor;
             float h = Hash(cell);
             
-            // 45% density check
+            // 55% density check
             if (h < 0.55) continue;
             
             float loopId = 0.0;
             float wrappedLoopId = 0.0;
             float t = 0.0;
             
-            // Calculate randomized sliding distance (1/4 to 3/4 of screen height)
-            // Screen height is 12 cells, so distance is between 3.0 and 9.0 cells.
+            // Calculate randomized sliding distance
             float slideDist = mix(3.0, 9.0, Hash(cell + vec2(12.3, 45.6)));
             
-            // Droplet sliding velocity (cells per second)
+            // Droplet sliding velocity
             float velocity = (0.108 + 0.644 * Hash(cell + vec2(4.4, 4.4))) / 3.0;
             
-            // Speed (rate of fract progression per second) is velocity / distance,
-            // so lifetime (duration of one cycle) is proportional to distance (T = slideDist / velocity).
             float speed = velocity / slideDist;
             
             float slideTime = time * speed + h * 20.0;
@@ -81,21 +108,18 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             float h_render = Hash(cell + vec2(wrappedLoopId * 1.3, wrappedLoopId * 1.3));
             if (h_render < 0.45) continue;
             
-            // Size of droplet (increased base size to mix(0.06, 0.13), scaled by uniform)
+            // Size of droplet
             float radius = mix(0.06, 0.13, Hash(cell + vec2(wrappedLoopId * 2.3, wrappedLoopId * 2.3))) * sizeFactor;
-            radius *= 0.85; // moving drop size scaling
+            radius *= 0.85;
             radius *= fade;
             
             vec2 pos = fp - neighbor - offset;
-            pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
+            pos.y += (t * slideDist - 0.5); // Slide down (plus sign moves droplets downwards in UV coords)
             
-            // Double the stretching effect: it went from 2.0 (V=0.6) to 3.0 (V=0.4) as it slides down (t -> 1.0)
-            // Starts as 90% circular (V=1.08) instead of 75% circular (V=0.9) at spawn
             float currentYScale = mix(1.08, 0.4, t);
             
-            // Quick distance check to prune calculations:
-            // Since currentYScale >= 0.4, maximum vertical extent of the droplet is radius / 0.4 = 2.5 * radius.
-            if (abs(pos.x) > radius || abs(pos.y) > radius * 3.0) continue;
+            // Quick distance check to prune calculations
+            if (abs(pos.x) > radius * 3.0 || abs(pos.y) > radius * 3.0 + slideDist) continue;
             
             vec2 ovalScale = vec2(1.2, currentYScale);
             vec2 ovalPos = pos * ovalScale;
@@ -120,6 +144,25 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
                     dropMask = 1.0;
                     finalFade = fade;
                 }
+            } else {
+                // Trail refraction
+                float trailWidth = radius * 0.38;
+                if (pos.y > 0.0 && pos.y < t * slideDist) {
+                    float trailDist = abs(pos.x);
+                    if (trailDist < trailWidth) {
+                        float trailFade = 1.0 - (pos.y / (t * slideDist));
+                        float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
+                        
+                        // Wiggle refraction offset for the trail
+                        vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.007, 0.002) * trailMask;
+                        
+                        if (minR > 0.99) {
+                            distortion = trailDistortion;
+                            dropMask = 0.4;
+                            finalFade = fade * trailFade;
+                        }
+                    }
+                }
             }
         }
     }
@@ -129,10 +172,38 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
     return vec4(distortion.x, distortion.y, spec, dropMask);
 }
 
+float GetDarkGodRays(vec2 uv, vec2 lightPos, float flashIntensity, float time, float aspect) {
+    if (flashIntensity <= 0.01) return 1.0;
+    
+    // Scale for isotropic distances
+    vec2 scaledUV = vec2(uv.x * aspect, uv.y);
+    vec2 scaledLight = vec2(lightPos.x * aspect, lightPos.y);
+    
+    vec2 rayVec = scaledUV - scaledLight;
+    float dist = length(rayVec);
+    vec2 rayDir = normalize(rayVec);
+    
+    float shadow = 0.0;
+    const int SAMPLES = 10;
+    float stepSize = dist / float(SAMPLES);
+    
+    vec2 currentPos = uv;
+    for (int i = 0; i < SAMPLES; i++) {
+        currentPos -= (rayDir / vec2(aspect, 1.0)) * stepSize;
+        float density = fbm(currentPos * 3.5 - vec2(time * 0.08, 0.0));
+        shadow += smoothstep(0.35, 0.75, density);
+    }
+    shadow /= float(SAMPLES);
+    
+    float decay = exp(-dist * 0.85);
+    return 1.0 - (shadow * decay * flashIntensity * 0.75);
+}
+
 void main() {
     float edgeBorder = 1.0;
     float fadeVal = 1.0;
     
+    // Use the original vTexCoord for background droplets to maintain the exact lens effect
     // 1. Get droplet refraction distortion and lighting factors
     vec4 droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, edgeBorder, fadeVal);
     
@@ -145,14 +216,20 @@ void main() {
     // Sample the background texture (distorted if inside enabled droplet)
     vec4 texColor = texture(uTexture, distortedUV);
     
+    // Calculate luma and final alpha for silhouette masking
+    float luma = (texColor.r + texColor.g + texColor.b) / 3.0;
+    float alpha = smoothstep(0.96, 0.90, luma);
+    float finalAlpha = min(texColor.a, alpha);
+    
+    if (finalAlpha <= 0.0) {
+        discard;
+    }
+    
     // Tint color contribution inside active droplet
     vec3 baseTexColor = texColor.rgb;
     if (uScreenDropletsEnabled > 0.5 && droplet.w > 0.5) {
-        // Decrease color saturation by 50% by mixing it with its grayscale luminance value
-        float luma = dot(uRainColor, vec3(0.299, 0.587, 0.114));
-        vec3 desaturatedRainColor = mix(vec3(luma), uRainColor, 0.5);
-        
-        // Subtle color tint (15% mix) depending on the selected rain color
+        float lumaRain = dot(uRainColor, vec3(0.299, 0.587, 0.114));
+        vec3 desaturatedRainColor = mix(vec3(lumaRain), uRainColor, 0.5);
         baseTexColor = mix(baseTexColor, desaturatedRainColor, 0.15 * fadeVal);
     }
     
@@ -163,6 +240,22 @@ void main() {
     vec3 flashLight = baseTexColor * uFlashColor * uFlashIntensity * 1.5;
     
     vec3 finalColor = baseColor + flashLight;
+    
+    // Apply Dark God Rays shadowing
+    float darkRay = GetDarkGodRays(vScreenPos, uLightningPos, uFlashIntensity, uTime, uAspectRatio);
+    finalColor *= darkRay;
+    
+    // Rim Lighting: highlights the upper edge of the silhouettes facing the lightning
+    vec3 rimColor = vec3(0.0);
+    if (uFlashIntensity > 0.01) {
+        vec2 rimOffset = normalize(vec2(vScreenPos.x - uLightningPos.x, 1.2)) * 0.008;
+        vec4 texAbove = texture(uTexture, distortedUV + rimOffset);
+        float lumaAbove = (texAbove.r + texAbove.g + texAbove.b) / 3.0;
+        float alphaAbove = smoothstep(0.96, 0.90, lumaAbove);
+        float rimMask = clamp(finalAlpha - alphaAbove, 0.0, 1.0);
+        rimColor = uFlashColor * uFlashIntensity * rimMask * 2.8;
+    }
+    finalColor += rimColor;
     
     if (uScreenDropletsEnabled > 0.5 && droplet.w > 0.5) {
         // Apply droplet edge shading (dark border) and specular highlight (reflection)

@@ -141,6 +141,10 @@ class ConfigManager(context: Context) : ConfigProvider {
         // Fireflies
         const val KEY_FIREFLIES_ENABLED = "fireflies_enabled"
         const val DEFAULT_FIREFLIES_ENABLED = true
+
+        // Storm Variable
+        const val KEY_STORM_VARIABLE_ENABLED = "storm_variable_enabled"
+        const val DEFAULT_STORM_VARIABLE_ENABLED = false
     }
 
     override fun getCloudDensity(): Int {
@@ -528,4 +532,7 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun isFirefliesEnabled(): Boolean = prefs.getBoolean(KEY_FIREFLIES_ENABLED, DEFAULT_FIREFLIES_ENABLED)
     fun setFirefliesEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_FIREFLIES_ENABLED, enabled).apply() }
+
+    override fun isStormVariableEnabled(): Boolean = prefs.getBoolean(KEY_STORM_VARIABLE_ENABLED, DEFAULT_STORM_VARIABLE_ENABLED)
+    fun setStormVariableEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_STORM_VARIABLE_ENABLED, enabled).apply() }
 }

@@ -193,6 +193,18 @@ class StormSettingsFragment : Fragment() {
             pickImageLauncher.launch("image/*")
         }
 
+        val switchStormVariable = view.findViewById<SwitchMaterial>(R.id.switchStormVariable)
+        if (switchStormVariable != null) {
+            val isEnabled = configManager.isStormVariableEnabled()
+            switchStormVariable.isChecked = isEnabled
+            updateControlsLockState(view, isEnabled)
+            switchStormVariable.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setStormVariableEnabled(isChecked)
+                updateControlsLockState(view, isChecked)
+                updateSummaries(view)
+            }
+        }
+
         updateCustomBackgroundViewsVisibility(view, configManager.getBackgroundIndex())
         refreshStormCardPreviews(view)
         updateSummaries(view)
@@ -573,6 +585,8 @@ class StormSettingsFragment : Fragment() {
         setupDropdown(view, R.id.spinnerCloudFlashColor, lightningColors, configManager.getCloudFlashColorIndex()) { position ->
             configManager.setCloudFlashColorIndex(position)
         }
+
+        updateControlsLockState(view, configManager.isStormVariableEnabled())
     }
 
     private fun saveCustomBackground(uri: android.net.Uri) {
@@ -637,9 +651,12 @@ class StormSettingsFragment : Fragment() {
             else -> "Calma"
         }
         val windSpeed = configManager.getWindIntensity()
-        val densityLabel = if (density <= 15) densityText else "$densityText ($density%)"
+        val isVariable = configManager.isStormVariableEnabled()
+        val densityLabel = if (isVariable) "Ciclo Activo" else (if (density <= 15) densityText else "$densityText ($density%)")
+        val windDirLabel = if (isVariable) "Ciclo Activo" else windDir
+        val windSpeedLabel = if (isVariable) "Ciclo Activo" else "${windSpeed}%"
         summaryCloudsWind.text = Html.fromHtml(
-            "Nubes: <font color='$accentColor'>$densityLabel</font> • Viento: <font color='$accentColor'>$windDir (${windSpeed}%)</font>",
+            "Nubes: <font color='$accentColor'>$densityLabel</font> • Viento: <font color='$accentColor'>$windDirLabel ($windSpeedLabel)</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
@@ -660,8 +677,9 @@ class StormSettingsFragment : Fragment() {
             5 -> "Morado"
             else -> "Azul"
         }
+        val rainLabel = if (isVariable) "Ciclo Activo" else "$rainText ($rainIntensity%)"
         summaryRain.text = Html.fromHtml(
-            "Intensidad: <font color='$accentColor'>$rainText ($rainIntensity%)</font> • Color: <font color='$accentColor'>$rainColorText</font>",
+            "Intensidad: <font color='$accentColor'>$rainLabel</font> • Color: <font color='$accentColor'>$rainColorText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
@@ -674,8 +692,9 @@ class StormSettingsFragment : Fragment() {
             else -> "Tormenta activa"
         }
         val flashStatus = if (configManager.isCloudFlashEnabled()) "Activo" else "Inactivo"
+        val lightningLabel = if (isVariable) "Ciclo Activo" else "$lightningText ($lightningFreq%)"
         summaryLightning.text = Html.fromHtml(
-            "Frecuencia: <font color='$accentColor'>$lightningText ($lightningFreq%)</font> • Destellos: <font color='$accentColor'>$flashStatus</font>",
+            "Frecuencia: <font color='$accentColor'>$lightningLabel</font> • Destellos: <font color='$accentColor'>$flashStatus</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
@@ -750,6 +769,43 @@ class StormSettingsFragment : Fragment() {
             }
         }
         return inSampleSize
+    }
+
+    private fun updateControlsLockState(view: View, isVariableEnabled: Boolean) {
+        val enabled = !isVariableEnabled
+        val alpha = if (enabled) 1.0f else 0.4f
+
+        val idsToLock = arrayOf(
+            R.id.spinnerCloudDensity,
+            R.id.spinnerWindDirection,
+            R.id.seekBarWindIntensity,
+            R.id.seekBarCloudDynamicsSpeed,
+            R.id.spinnerRainIntensity,
+            R.id.seekBarRainSpeed,
+            R.id.seekBarLightningFrequency,
+            R.id.seekBarCloudFlashFrequency
+        )
+
+        for (id in idsToLock) {
+            val controlView = view.findViewById<View>(id)
+            if (controlView != null) {
+                controlView.isEnabled = enabled
+                controlView.alpha = alpha
+                if (controlView is ViewGroup) {
+                    for (i in 0 until controlView.childCount) {
+                        val child = controlView.getChildAt(i)
+                        child.isEnabled = enabled
+                        child.alpha = alpha
+                        if (child is ViewGroup) {
+                            for (j in 0 until child.childCount) {
+                                child.getChildAt(j).isEnabled = enabled
+                                child.getChildAt(j).alpha = alpha
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private inner class StormCardPreviewView(

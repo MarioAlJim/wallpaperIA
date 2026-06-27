@@ -38,6 +38,11 @@ class SceneManager(
     @Volatile
     private var pendingTouch: Pair<Float, Float>? = null
 
+    // Variable Storm Mode cycle state variables
+    private var stormCycleTime = 0f
+    private var isBurstActive = false
+    private var currentBurstWindDirection = 2
+
     init {
         updateFromConfig()
         currentWindAngle = targetWindAngle
@@ -70,6 +75,26 @@ class SceneManager(
             if (configProvider.isInteractiveLightningEnabled()) {
                 triggerInteractiveLightning(touch.first, touch.second)
             }
+        }
+
+        if (configProvider.isStormVariableEnabled()) {
+            stormCycleTime += deltaTime
+            if (isBurstActive) {
+                if (stormCycleTime >= 10.0f) { // 10s burst
+                    isBurstActive = false
+                    stormCycleTime = 0f
+                }
+            } else {
+                if (stormCycleTime >= 20.0f) { // 20s calm
+                    isBurstActive = true
+                    stormCycleTime = 0f
+                    // Choose random wind direction for the burst (0: left, 2: right)
+                    currentBurstWindDirection = if (Random.nextBoolean()) 2 else 0
+                }
+            }
+        } else {
+            stormCycleTime = 0f
+            isBurstActive = false
         }
 
         updateFromConfig()
@@ -237,13 +262,49 @@ class SceneManager(
     }
 
     private fun updateFromConfig() {
-        val targetDensity = configProvider.getCloudDensity()
-        val targetRain = configProvider.getRainIntensity()
-        val targetLightning = configProvider.getLightningFrequency()
-        val targetCloudFlashFreq = configProvider.getCloudFlashFrequency()
-        val targetWind = configProvider.getWindDirection()
-        val targetWindIntensity = configProvider.getWindIntensity()
-        val targetRainSpeedVal = configProvider.getRainSpeed()
+        val isVariable = configProvider.isStormVariableEnabled()
+
+        val targetDensity = if (isVariable) {
+            if (isBurstActive) 90 else 40
+        } else {
+            configProvider.getCloudDensity()
+        }
+
+        val targetRain = if (isVariable) {
+            if (isBurstActive) 95 else 15
+        } else {
+            configProvider.getRainIntensity()
+        }
+
+        val targetLightning = if (isVariable) {
+            if (isBurstActive) 85 else 10
+        } else {
+            configProvider.getLightningFrequency()
+        }
+
+        val targetCloudFlashFreq = if (isVariable) {
+            if (isBurstActive) 80 else 10
+        } else {
+            configProvider.getCloudFlashFrequency()
+        }
+
+        val targetWind = if (isVariable) {
+            if (isBurstActive) currentBurstWindDirection else 0
+        } else {
+            configProvider.getWindDirection()
+        }
+
+        val targetWindIntensity = if (isVariable) {
+            if (isBurstActive) 95 else 15
+        } else {
+            configProvider.getWindIntensity()
+        }
+
+        val targetRainSpeedVal = if (isVariable) {
+            if (isBurstActive) 85 else 35
+        } else {
+            configProvider.getRainSpeed()
+        }
 
         if (targetDensity != cloudDensity) {
             adjustClouds(targetDensity)

@@ -98,6 +98,8 @@ class SceneManagerTest {
         override fun isShootingStarsEnabled(): Boolean = true
         override fun getShootingStarsDensity(): Int = 50
         override fun isFirefliesEnabled(): Boolean = true
+        var mockStormVariableEnabled = false
+        override fun isStormVariableEnabled(): Boolean = mockStormVariableEnabled
     }
 
     @Test
@@ -810,5 +812,46 @@ class SceneManagerTest {
         mockConfig.mockWindLinesEnabled = false
         sceneManager.update(0.016f)
         assertEquals(0, sceneManager.getWindLines().size)
+    }
+
+    @Test
+    fun testVariableStormCycle() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        // 1. Enable variable storm mode
+        mockConfig.mockStormVariableEnabled = true
+        // Tick to trigger state evaluation
+        sceneManager.update(0.0f)
+
+        val densityField = SceneManager::class.java.getDeclaredField("cloudDensity").apply { isAccessible = true }
+        val rainField = SceneManager::class.java.getDeclaredField("rainIntensity").apply { isAccessible = true }
+        val lightningField = SceneManager::class.java.getDeclaredField("lightningFrequency").apply { isAccessible = true }
+        val windField = SceneManager::class.java.getDeclaredField("windIntensity").apply { isAccessible = true }
+
+        // It should start in calm state (overrides density=40, rain=15, wind=15, lightning=10)
+        assertEquals(40, densityField.get(sceneManager) as Int)
+        assertEquals(15, rainField.get(sceneManager) as Int)
+        assertEquals(10, lightningField.get(sceneManager) as Int)
+        assertEquals(15, windField.get(sceneManager) as Int)
+
+        // 2. Advance time past the 20-second calm period (e.g. 21 seconds)
+        // We simulate this by advancing 21 seconds
+        sceneManager.update(21.0f)
+
+        // It should enter burst state (overrides density=90, rain=95, wind=95, lightning=85)
+        assertEquals(90, densityField.get(sceneManager) as Int)
+        assertEquals(95, rainField.get(sceneManager) as Int)
+        assertEquals(85, lightningField.get(sceneManager) as Int)
+        assertEquals(95, windField.get(sceneManager) as Int)
+
+        // 3. Advance time past the 10-second burst period (e.g. 11 seconds)
+        sceneManager.update(11.0f)
+
+        // It should return to calm state
+        assertEquals(40, densityField.get(sceneManager) as Int)
+        assertEquals(15, rainField.get(sceneManager) as Int)
+        assertEquals(10, lightningField.get(sceneManager) as Int)
+        assertEquals(15, windField.get(sceneManager) as Int)
     }
 }
