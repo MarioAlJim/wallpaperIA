@@ -56,7 +56,15 @@ float fbm(vec2 p) {
     return value;
 }
 
-// Computes lens distortion, specular highlight, border shading, and trails for raindrops on screen
+struct ActiveDrop {
+    vec2 pos;
+    float radius;
+    float fade;
+    float t;
+    float slideDist;
+};
+
+// Computes lens distortion, specular highlight, border shading, trails, and droplet merging
 vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     vec2 distortion = vec2(0.0, 0.0);
     float spec = 0.0;
@@ -70,7 +78,8 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
     vec2 ip = floor(st);
     vec2 fp = fract(st) - vec2(0.5, 0.5);
     
-    float minR = 1.0; // Track closest drop
+    ActiveDrop drops[6];
+    int dropCount = 0;
     
     for (int y = -9; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
@@ -86,14 +95,12 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             float t = 0.0;
             
             // Calculate randomized sliding distance (1/4 to 3/4 of screen height)
-            // Screen height is 12 cells, so distance is between 3.0 and 9.0 cells.
             float slideDist = mix(3.0, 9.0, Hash(cell + vec2(12.3, 45.6)));
             
             // Droplet sliding velocity (cells per second)
             float velocity = (0.108 + 0.644 * Hash(cell + vec2(4.4, 4.4))) / 3.0;
             
-            // Speed (rate of fract progression per second) is velocity / distance,
-            // so lifetime (duration of one cycle) is proportional to distance (T = slideDist / velocity).
+            // Speed (rate of fract progression per second)
             float speed = velocity / slideDist;
             
             float slideTime = time * speed + h * 20.0;
@@ -115,7 +122,7 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             float h_render = Hash(cell + vec2(wrappedLoopId * 1.3, wrappedLoopId * 1.3));
             if (h_render < 0.45) continue;
             
-            // Size of droplet (increased base size to mix(0.06, 0.13), scaled by uniform)
+            // Size of droplet
             float radius = mix(0.06, 0.13, Hash(cell + vec2(wrappedLoopId * 2.3, wrappedLoopId * 2.3))) * sizeFactor;
             radius *= 0.85; // moving drop size scaling
             radius *= fade;
@@ -123,53 +130,98 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
             vec2 pos = fp - neighbor - offset;
             pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
             
-            // Double the stretching effect: it went from 2.0 (V=0.6) to 3.0 (V=0.4) as it slides down (t -> 1.0)
-            // Starts as 90% circular (V=1.08) instead of 75% circular (V=0.9) at spawn
-            float currentYScale = mix(1.08, 0.4, t);
-            
-            // Quick distance check to prune calculations
+            // Bounding box check (pruning)
             if (abs(pos.x) > radius || pos.y > radius * 3.0 || pos.y < -slideDist - radius) continue;
             
-            vec2 ovalScale = vec2(1.2, currentYScale);
-            vec2 ovalPos = pos * ovalScale;
-            float r = length(ovalPos);
+            if (dropCount < 6) {
+                ActiveDrop d;
+                d.pos = pos;
+                d.radius = radius;
+                d.fade = fade;
+                d.t = t;
+                d.slideDist = slideDist;
+                drops[dropCount++] = d;
+            }
+        }
+    }
+    
+    // Merging pass: if two droplets overlap/meet, merge them into a single larger one
+    for (int i = 0; i < dropCount; i++) {
+        if (drops[i].radius <= 0.001) continue;
+        for (int j = i + 1; j < dropCount; j++) {
+            if (drops[j].radius <= 0.001) continue;
             
-            if (r < radius && radius > 0.001) {
-                // Spherical normal/depth inside the droplet
-                float nz = sqrt(max(0.0, radius * radius - r * r)) / radius;
-                vec2 n = -ovalPos / radius;
+            float dist = length(drops[i].pos - drops[j].pos);
+            float mergeThreshold = (drops[i].radius + drops[j].radius) * 1.1;
+            
+            if (dist < mergeThreshold) {
+                float rI = drops[i].radius;
+                float rJ = drops[j].radius;
                 
-                // Use properties of the closest droplet in this pixel
-                if (r < minR) {
-                    minR = r;
-                    distortion = n * nz * 0.022;
+                // Conserve volume/area and expand slightly
+                drops[i].radius = sqrt(rI * rI + rJ * rJ) * 1.25;
+                
+                // Pull center towards weighted average
+                drops[i].pos = mix(drops[i].pos, drops[j].pos, rJ / (rI + rJ));
+                
+                // Absorb droplet j
+                drops[j].radius = 0.0;
+            }
+        }
+    }
+    
+    float minR = 1.0; // Track closest drop
+    
+    // Rendering pass
+    for (int i = 0; i < dropCount; i++) {
+        if (drops[i].radius <= 0.001) continue;
+        
+        vec2 pos = drops[i].pos;
+        float radius = drops[i].radius;
+        float fade = drops[i].fade;
+        float t = drops[i].t;
+        float slideDist = drops[i].slideDist;
+        
+        float currentYScale = mix(1.08, 0.4, t);
+        vec2 ovalScale = vec2(1.2, currentYScale);
+        vec2 ovalPos = pos * ovalScale;
+        float r = length(ovalPos);
+        
+        if (r < radius && radius > 0.001) {
+            // Spherical normal/depth inside the droplet
+            float nz = sqrt(max(0.0, radius * radius - r * r)) / radius;
+            vec2 n = -ovalPos / radius;
+            
+            // Use properties of the closest droplet in this pixel
+            if (r < minR) {
+                minR = r;
+                distortion = n * nz * 0.022;
+                
+                // Specular highlight from top-right light source
+                vec2 lightDir = normalize(vec2(0.5, 0.7));
+                spec = pow(max(dot(n, lightDir), 0.0), 10.0) * nz * fade;
+                
+                // Refraction loss edge border
+                border = smoothstep(0.0, 0.15, nz);
+                dropMask = 1.0;
+                finalFade = fade;
+            }
+        } else {
+            // Trail refraction (thickness is 75% of the droplet size)
+            float trailWidth = radius * 0.75;
+            if (pos.y < 0.0 && pos.y > -t * slideDist) {
+                float trailDist = abs(pos.x);
+                if (trailDist < trailWidth) {
+                    float trailFade = 1.0 + (pos.y / (t * slideDist));
+                    float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
                     
-                    // Specular highlight from top-right light source
-                    vec2 lightDir = normalize(vec2(0.5, 0.7));
-                    spec = pow(max(dot(n, lightDir), 0.0), 10.0) * nz * fade;
+                    // Increased trail distortion offset for prominent trails
+                    vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.015, 0.004) * trailMask;
                     
-                    // Refraction loss edge border
-                    border = smoothstep(0.0, 0.15, nz);
-                    dropMask = 1.0;
-                    finalFade = fade;
-                }
-            } else {
-                // Trail refraction (thickness is 75% of the droplet size)
-                float trailWidth = radius * 0.75;
-                if (pos.y < 0.0 && pos.y > -t * slideDist) {
-                    float trailDist = abs(pos.x);
-                    if (trailDist < trailWidth) {
-                        float trailFade = 1.0 + (pos.y / (t * slideDist));
-                        float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
-                        
-                        // Wiggle refraction offset for the trail
-                        vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.007, 0.002) * trailMask;
-                        
-                        if (minR > 0.99) {
-                            distortion = trailDistortion;
-                            dropMask = 0.4;
-                            finalFade = fade * trailFade;
-                        }
+                    if (minR > 0.99) {
+                        distortion = trailDistortion;
+                        dropMask = 0.5;
+                        finalFade = fade * trailFade;
                     }
                 }
             }

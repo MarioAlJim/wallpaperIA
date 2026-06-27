@@ -38,14 +38,14 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   Detecta si el pixel actual está en la silueta y el pixel desplazado está en el cielo para identificar los bordes superiores expuestos a la luz del flash.
     *   Aplica un golpe de luz de borde (Rim Light) brillante del color del relámpago que dura únicamente los milisegundos del flash.
 
-### 6. Tormenta Variable (Ciclos de Ráfagas) - ¡Transición Suave!
+### 6. Tormenta Variable (Ciclos de Ráfagas) - ¡Transición Suave Hermite!
 *   **Aumento de Duración de los Ciclos**: Se ampliaron los tiempos de ciclo para evitar oscilaciones climáticas muy rápidas y artificiales:
     *   **Calma**: `60 segundos` de duración.
     *   **Ráfaga**: `30 segundos` de duración.
-*   **Interpolador de Transición Suave**:
-    *   Se introdujo una variable de control `stormTransitionFactor` (de `0.0f` a `1.0f`) que cambia gradualmente a una tasa de `0.1f` por segundo.
-    *   Esto define una **transición de 10 segundos** al cambiar entre calma y ráfagas.
-    *   Todos los parámetros se interpolan linealmente usando la función `mixInt()`, previniendo saltos instantáneos o cambios bruscos en pantalla.
+*   **Interpolación de Transición Hermite (Smoothstep)**:
+    *   Se introdujo una variable de control `stormTransitionFactor` (de `0.0f` a `1.0f`) que cambia gradualmente a una tasa de `1.0f / 15.0f` por segundo (duración de **15 segundos**).
+    *   Para eliminar cualquier aceleración o parada brusca en el viento, cantidad de lluvia o densidad nubosa, el valor de transición se suaviza mediante la curva Hermite de grado tres: `smoothFactor = x * x * (3.0 - 2.0 * x)`.
+    *   Todos los parámetros climatológicos se mezclan progresivamente con `smoothFactor`, resultando en transiciones extremadamente suaves, fluidas y orgánicas.
 *   **Modelo de Datos y Prefs (`ConfigProvider`, `ConfigManager`)**:
     *   Añadida la clave `"storm_variable_enabled"` para guardar la preferencia en el dispositivo.
     *   Se declararon los métodos `isStormVariableEnabled()` y `setStormVariableEnabled(Boolean)` en la API del sistema de configuraciones.
@@ -58,7 +58,7 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   Se implementó `updateControlsLockState` que bloquea todos los controles individuales cuando el modo tormenta variable se activa.
     *   Los resúmenes de secciones en los acordeones se actualizan automáticamente para mostrar `"Ciclo Activo"`.
 *   **Pruebas Unitarias (`SceneManagerTest.kt`)**:
-    *   Se adaptó la prueba `testVariableStormCycle()` para validar la transición suave de 10 segundos y las nuevas duraciones del ciclo (60s/30s).
+    *   Se adaptó la prueba `testVariableStormCycle()` para validar la transición suave de 15 segundos y las nuevas duraciones del ciclo (60s/30s).
 
 ---
 
