@@ -381,8 +381,8 @@ class StormRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glUniform1i(textureHandle, 0)
 
-        val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.05f else 0f
-        val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.05f else 0f
+        val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
+        val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
 
         for (cloud in clouds.sortedBy { it.z }) {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
@@ -391,39 +391,31 @@ class StormRenderer(
             }
             GLES30.glUniform2f(cloudScaleHandle, cloud.scale * 2.4f, cloud.scale)
 
-            val numLayers = 4
-            for (i in (numLayers - 1) downTo 0) {
-                // Static displacement to give a 3D volume feel even when static
-                val staticShiftX = (i - 1.5f) * 0.008f * cloud.scale
-                val staticShiftY = (i - 1.5f) * 0.006f * cloud.scale
+            // Gyroscope depth-based parallax shift
+            // Foreground clouds (z = 1.0) shift more; background clouds (z = 0.3) shift less
+            val depthFactor = 0.2f + 0.8f * ((cloud.z - 0.3f) / 0.7f).coerceIn(0f, 1f)
+            val cloudGyroX = gyroX * depthFactor
+            val cloudGyroY = gyroY * depthFactor
 
-                // Gyroscope parallax displacement: back layers move more relative to front layer
-                val gyroShiftX = gyroX * (i - 1.5f) * cloud.scale
-                val gyroShiftY = gyroY * (i - 1.5f) * cloud.scale
+            val posX = cloud.positionX + cloudGyroX
+            val posY = cloud.positionY + cloudGyroY
 
-                val posX = cloud.positionX + staticShiftX + gyroShiftX
-                val posY = cloud.positionY + staticShiftY + gyroShiftY
+            val modelMatrix = FloatArray(16)
+            Matrix.setIdentityM(modelMatrix, 0)
+            Matrix.translateM(modelMatrix, 0, posX, posY, 0f)
+            Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
 
-                val modelMatrix = FloatArray(16)
-                Matrix.setIdentityM(modelMatrix, 0)
-                Matrix.translateM(modelMatrix, 0, posX, posY, 0f)
-                Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
+            val modelViewProjection = FloatArray(16)
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
 
-                val modelViewProjection = FloatArray(16)
-                Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
+            
+            // Restore original cloud color shading and opacity
+            GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
+            GLES30.glUniform1f(opacityHandle, cloud.opacity)
 
-                GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
-                
-                // Color gets progressively darker for back layers to simulate self-shadowing/depth
-                val shadeFactor = 1.0f - i * 0.12f
-                GLES30.glUniform3f(cloudColorHandle, 0.7f * shadeFactor, 0.7f * shadeFactor, 0.7f * shadeFactor)
-
-                // Soften layer opacity slightly to prevent harsh alpha build-up
-                GLES30.glUniform1f(opacityHandle, cloud.opacity * 0.85f)
-
-                if (cloudTextures.isNotEmpty()) {
-                    GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
-                }
+            if (cloudTextures.isNotEmpty()) {
+                GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
             }
         }
 
