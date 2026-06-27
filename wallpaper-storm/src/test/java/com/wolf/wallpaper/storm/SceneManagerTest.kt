@@ -835,18 +835,25 @@ class SceneManagerTest {
         assertEquals(10, lightningField.get(sceneManager) as Int)
         assertEquals(15, windField.get(sceneManager) as Int)
 
-        // 2. Advance time past the 20-second calm period (e.g. 21 seconds)
-        // We simulate this by advancing 21 seconds
-        sceneManager.update(21.0f)
+        // 2. Advance time past the 60-second calm period (e.g. 61 seconds)
+        // At 60s, isBurstActive becomes true, and transition starts increasing
+        sceneManager.update(61.0f)
+        
+        // After another 10 seconds of transition update, transition factor should be 1.0f (fully burst)
+        sceneManager.update(10.0f)
 
-        // It should enter burst state (overrides density=90, rain=95, wind=95, lightning=85)
+        // It should enter full burst state (overrides density=90, rain=95, wind=95, lightning=85)
         assertEquals(90, densityField.get(sceneManager) as Int)
         assertEquals(95, rainField.get(sceneManager) as Int)
         assertEquals(85, lightningField.get(sceneManager) as Int)
         assertEquals(95, windField.get(sceneManager) as Int)
 
-        // 3. Advance time past the 10-second burst period (e.g. 11 seconds)
-        sceneManager.update(11.0f)
+        // 3. Advance time past the 30-second burst period (e.g. 31 seconds)
+        // isBurstActive becomes false, and transition starts decreasing
+        sceneManager.update(31.0f)
+        
+        // After another 10 seconds of transition update, transition factor should be 0.0f (fully calm)
+        sceneManager.update(10.0f)
 
         // It should return to calm state
         assertEquals(40, densityField.get(sceneManager) as Int)
