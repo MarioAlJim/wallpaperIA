@@ -827,7 +827,7 @@ class StormSettingsFragment : Fragment() {
 
             when (containerId) {
                 R.id.spinnerCloudDensity -> {
-                    val cloudCounts = intArrayOf(0, 1, 3, 5, 7, 9, 11, 13, 15)
+                    val cloudCounts = intArrayOf(0, 1, 2, 4, 6, 8, 10)
                     val count = cloudCounts.getOrElse(optionIndex) { 0 }
                     if (count > 0) {
                         drawStylizedClouds(canvas, w, h, count)

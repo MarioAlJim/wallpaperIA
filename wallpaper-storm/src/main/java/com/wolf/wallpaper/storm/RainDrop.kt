@@ -70,13 +70,8 @@ class RainDrop(
         parentCloud = spawnCloud
         spawnFromCloud = spawnCloud != null
         if (spawnCloud != null) {
-            // Drop size is proportional to the cloud it falls from:
-            // bigger cloud → heavier, larger drops.
-            // baseScale is used to avoid the breathing animation inflating the value.
-            // Cloud baseScale range: ~0.43 (small) to ~1.41 (large storm cloud).
-            // Multiplier 0.06 (increased by 50% from 0.04) gives length ~0.026 for small clouds, ~0.084 for large.
-            // This naturally increases both the minimum size and length by 50%.
-            length = spawnCloud.baseScale * 0.06f * z
+            z = spawnCloud.z
+            length = spawnCloud.baseScale * 0.12f * z
             val halfWidth = spawnCloud.scale * 1.2f
             val maxOffset = halfWidth * 0.80f
             spawnX = spawnCloud.positionX + (Random.nextFloat() * 2f - 1f) * maxOffset

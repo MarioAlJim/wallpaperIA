@@ -293,6 +293,7 @@ class StormRenderer(
         val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        val heightFactorHandle = GLES30.glGetUniformLocation(cloudProgram, "uHeightFactor")
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
 
         var maxIntensity = 0f
@@ -410,8 +411,10 @@ class StormRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             
-            // Restore original cloud color shading and opacity
+            // Restore original cloud color shading, height factor, and opacity
             GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
+            val heightFactor = ((cloud.z - 0.3f) / 0.7f).coerceIn(0f, 1f)
+            GLES30.glUniform1f(heightFactorHandle, heightFactor)
             GLES30.glUniform1f(opacityHandle, cloud.opacity)
 
             if (cloudTextures.isNotEmpty()) {

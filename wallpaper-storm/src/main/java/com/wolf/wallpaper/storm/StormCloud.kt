@@ -76,14 +76,17 @@ class StormCloud(
         
         val minScale = 0.43125f
         val maxScale = 1.40625f
-        baseScale = (Random.nextFloat() * (maxScale - minScale) + minScale) * z
+        // Scale is independent of z for wider size variety at any depth layer
+        baseScale = Random.nextFloat() * (maxScale - minScale) + minScale
         scale = baseScale
         
-        // Calculate Y range to keep the entire cloud body in the upper half (storm)
-        val minLimitY = 0.0f
-        val minY = minLimitY + scale * 0.5f
-        val maxY = 1.0f - scale * 0.5f
-        positionY = if (minY < maxY) Random.nextFloat() * (maxY - minY) + minY else (minLimitY + 1.0f) * 0.5f
+        // Position clouds by depth layer: furthest (z = 0.3) at Y = 0.0 (50% Y) bottom edge, nearest (z = 1.0) at Y = 0.9 (top edge)
+        val normZ = (z - 0.3f) / 0.7f // 0.0 (background) to 1.0 (foreground)
+        val minY = scale * 0.5f
+        val maxY = 0.9f
+        val targetY = minY + (maxY - minY) * normZ
+        val jitter = (Random.nextFloat() * 2f - 1f) * 0.05f
+        positionY = (targetY + jitter).coerceIn(minY, 1.0f)
         basePositionY = positionY
         
         targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z

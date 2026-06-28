@@ -9,6 +9,7 @@ uniform float uOpacity;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
 uniform vec3 uCloudColor;
+uniform float uHeightFactor;
 
 // Refraction uniforms
 uniform float uTime;
@@ -243,6 +244,15 @@ void main() {
     
     // Base cloud color tinted by uCloudColor
     vec3 baseColor = texColor.rgb * uCloudColor;
+    
+    // Vertical gradient (darker at bottom of cloud, lighter at top of cloud)
+    // vTexCoord.y (or distortedTexCoord.y) goes from 0.0 (top) to 1.0 (bottom) of the cloud quad.
+    // Low cloud (uHeightFactor = 0.0, furthest back/background) ranges from 0.85 (bottom) to 1.25 (top) -> dominating in white.
+    // High cloud (uHeightFactor = 1.0, nearest front/foreground) ranges from 0.15 (bottom) to 0.5 (top) -> very dark/shadowed.
+    float gradBottom = mix(0.85, 0.15, uHeightFactor);
+    float gradTop = mix(1.25, 0.5, uHeightFactor);
+    float verticalGrad = mix(gradBottom, gradTop, 1.0 - distortedTexCoord.y);
+    baseColor *= verticalGrad;
     
     // Add internal lightning illumination
     vec3 flashLight = texColor.rgb * uFlashColor * uFlashIntensity * 1.5;
