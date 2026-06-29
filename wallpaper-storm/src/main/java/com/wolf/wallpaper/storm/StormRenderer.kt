@@ -1,6 +1,7 @@
 package com.wolf.wallpaper.storm
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.opengl.GLES30
 import android.opengl.GLUtils
@@ -91,7 +92,7 @@ class StormRenderer(
             val files = assetManager.list("clouds") ?: emptyArray()
             val sortedFiles = files.filter { it.endsWith(".png") }.sorted()
             for (file in sortedFiles) {
-                val tex = loadTexture(context, "clouds/$file")
+                val tex = loadTexture(context, "clouds/$file", maxSize = 512)
                 if (tex != 0) {
                     cloudTextures.add(tex)
                 }
@@ -100,7 +101,7 @@ class StormRenderer(
             e.printStackTrace()
         }
         if (cloudTextures.isEmpty()) {
-            val fallbackTex = loadTexture(context, "clouds/cloud_01.png")
+            val fallbackTex = loadTexture(context, "clouds/cloud_01.png", maxSize = 512)
             if (fallbackTex != 0) {
                 cloudTextures.add(fallbackTex)
             }
@@ -114,7 +115,7 @@ class StormRenderer(
             val files = assetManager.list("lightning") ?: emptyArray()
             for (file in files) {
                 if (file.endsWith(".png")) {
-                    val tex = loadTexture(context, "lightning/$file")
+                    val tex = loadTexture(context, "lightning/$file", maxSize = 512)
                     if (tex != 0) {
                         lightningTextures.add(tex)
                     }
@@ -771,28 +772,67 @@ class StormRenderer(
         }
     }
 
-    private fun loadTexture(context: Context, assetPath: String): Int {
+    private fun loadTexture(context: Context, assetPath: String, maxSize: Int = 0): Int {
         val textureIds = IntArray(1)
         GLES30.glGenTextures(1, textureIds, 0)
         if (textureIds[0] == 0) {
             return 0
         }
 
-        val options = BitmapFactory.Options().apply {
-            inScaled = false // Disable pre-scaling to preserve pixel integrity
-        }
         try {
-            context.assets.open(assetPath).use { inputStream ->
-                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
-                if (bitmap != null) {
-                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                    GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                    bitmap.recycle()
+            var bitmap: Bitmap? = null
+            if (maxSize > 0) {
+                // First pass: decode bounds only to calculate sample size
+                val boundsOpts = BitmapFactory.Options().apply {
+                    inJustDecodeBounds = true
+                    inScaled = false
                 }
+                context.assets.open(assetPath).use { stream ->
+                    BitmapFactory.decodeStream(stream, null, boundsOpts)
+                }
+                val origW = boundsOpts.outWidth
+                val origH = boundsOpts.outHeight
+                var sampleSize = 1
+                while (origW / (sampleSize * 2) >= maxSize && origH / (sampleSize * 2) >= maxSize) {
+                    sampleSize *= 2
+                }
+                // Second pass: decode with sample size
+                val decodeOpts = BitmapFactory.Options().apply {
+                    inScaled = false
+                    inSampleSize = sampleSize
+                }
+                context.assets.open(assetPath).use { stream ->
+                    bitmap = BitmapFactory.decodeStream(stream, null, decodeOpts)
+                }
+                // Scale to exact maxSize if still larger
+                bitmap?.let { bmp ->
+                    val maxDim = maxOf(bmp.width, bmp.height)
+                    if (maxDim > maxSize) {
+                        val scale = maxSize.toFloat() / maxDim
+                        val newW = (bmp.width * scale).toInt().coerceAtLeast(1)
+                        val newH = (bmp.height * scale).toInt().coerceAtLeast(1)
+                        val scaled = Bitmap.createScaledBitmap(bmp, newW, newH, true)
+                        bmp.recycle()
+                        bitmap = scaled
+                    }
+                }
+            } else {
+                // No downsampling: load at full resolution
+                val options = BitmapFactory.Options().apply {
+                    inScaled = false
+                }
+                context.assets.open(assetPath).use { stream ->
+                    bitmap = BitmapFactory.decodeStream(stream, null, options)
+                }
+            }
+            bitmap?.let { bmp ->
+                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
+                GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bmp, 0)
+                bmp.recycle()
             }
         } catch (e: IOException) {
             GLES30.glDeleteTextures(1, textureIds, 0)
