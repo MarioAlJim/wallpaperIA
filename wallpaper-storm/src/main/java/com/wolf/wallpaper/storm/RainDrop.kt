@@ -72,7 +72,7 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        length = spawnCloud.baseScale * 0.168f * z // 0.12 * 1.4 = 40% longer
+        length = spawnCloud.baseScale * 0.1344f * z // 0.168 * 0.8 = 20% shorter
         
         parentCloud = spawnCloud
         spawnFromCloud = true
@@ -109,8 +109,8 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Base length for edge-rain drops (increased 40%)
-        length = (Random.nextFloat() * 0.0525f + 0.030f) * 1.4f * z
+        // Base length for edge-rain drops (net +12%: 1.4 * 0.8 = 1.12)
+        length = (Random.nextFloat() * 0.0525f + 0.030f) * 1.12f * z
         
         parentCloud = null
         spawnFromCloud = false

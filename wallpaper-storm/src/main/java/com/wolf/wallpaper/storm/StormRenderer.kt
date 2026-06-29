@@ -458,33 +458,38 @@ class StormRenderer(
             val x2 = drop.positionX + drop.dirX * drop.length
             val y2 = drop.positionY + drop.dirY * drop.length
             
-            // Perpendicular offset vector: perp = (-dirY, dirX)
-            val offsetX = -drop.dirY * halfW
-            val offsetY = drop.dirX * halfW
+            // Tail tapers to a narrow point (10% of head width) so geometry
+            // itself forms a teardrop — no more square tip at low resolutions.
+            val tailHalfW = halfW * 0.10f
+            val tailOffsetX = -drop.dirY * tailHalfW
+            val tailOffsetY = drop.dirX * tailHalfW
+            // Head keeps full width for the round bulb
+            val headOffsetX = -drop.dirY * halfW
+            val headOffsetY = drop.dirX * halfW
             
             // Calculate opacity based on parent cloud (if any)
             val opacity = drop.parentCloud?.opacity ?: 1.0f
             
             // Triangle 1: Tail Left, Tail Right, Head Left
             // Vertex 1: Tail Left
-            vertexData[idx++] = x1 - offsetX
-            vertexData[idx++] = y1 - offsetY
+            vertexData[idx++] = x1 - tailOffsetX
+            vertexData[idx++] = y1 - tailOffsetY
             vertexData[idx++] = zDepth
-            vertexData[idx++] = 0.0f
+            vertexData[idx++] = 0.45f  // near center U for narrow tip
             vertexData[idx++] = 0.0f
             vertexData[idx++] = opacity
             
             // Vertex 2: Tail Right
-            vertexData[idx++] = x1 + offsetX
-            vertexData[idx++] = y1 + offsetY
+            vertexData[idx++] = x1 + tailOffsetX
+            vertexData[idx++] = y1 + tailOffsetY
             vertexData[idx++] = zDepth
-            vertexData[idx++] = 1.0f
+            vertexData[idx++] = 0.55f  // near center U for narrow tip
             vertexData[idx++] = 0.0f
             vertexData[idx++] = opacity
             
             // Vertex 3: Head Left
-            vertexData[idx++] = x2 - offsetX
-            vertexData[idx++] = y2 - offsetY
+            vertexData[idx++] = x2 - headOffsetX
+            vertexData[idx++] = y2 - headOffsetY
             vertexData[idx++] = zDepth
             vertexData[idx++] = 0.0f
             vertexData[idx++] = 1.0f
@@ -492,24 +497,24 @@ class StormRenderer(
             
             // Triangle 2: Head Left, Tail Right, Head Right
             // Vertex 4: Head Left
-            vertexData[idx++] = x2 - offsetX
-            vertexData[idx++] = y2 - offsetY
+            vertexData[idx++] = x2 - headOffsetX
+            vertexData[idx++] = y2 - headOffsetY
             vertexData[idx++] = zDepth
             vertexData[idx++] = 0.0f
             vertexData[idx++] = 1.0f
             vertexData[idx++] = opacity
             
             // Vertex 5: Tail Right
-            vertexData[idx++] = x1 + offsetX
-            vertexData[idx++] = y1 + offsetY
+            vertexData[idx++] = x1 + tailOffsetX
+            vertexData[idx++] = y1 + tailOffsetY
             vertexData[idx++] = zDepth
-            vertexData[idx++] = 1.0f
+            vertexData[idx++] = 0.55f  // near center U for narrow tip
             vertexData[idx++] = 0.0f
             vertexData[idx++] = opacity
             
             // Vertex 6: Head Right
-            vertexData[idx++] = x2 + offsetX
-            vertexData[idx++] = y2 + offsetY
+            vertexData[idx++] = x2 + headOffsetX
+            vertexData[idx++] = y2 + headOffsetY
             vertexData[idx++] = zDepth
             vertexData[idx++] = 1.0f
             vertexData[idx++] = 1.0f

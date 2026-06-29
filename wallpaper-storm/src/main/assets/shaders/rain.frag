@@ -67,9 +67,11 @@ void main() {
     // Fresnel rim at grazing angles
     float fresnel = pow(1.0 - abs(normal.z), 2.5);
 
-    // Fade the tail slightly so the pointed tip blends naturally.
-    // Low power (1.1) keeps most of the tail opaque so the point is visible.
-    float verticalGradient = pow(y, 1.1);
+    // Fade the tail to near-transparent: head (y=1) stays at full 100% opacity,
+    // tail tip (y=0) fades to 10% opacity (90% transparent).
+    // Using pow with exponent 0.4 keeps the body mostly opaque and
+    // only the very tip becomes strongly transparent.
+    float verticalGradient = 0.10 + 0.90 * pow(y, 0.4);
 
     // Lens glow: brightest at the centre of the head
     float lensGlow = 0.4 + 0.6 * normal.z;
