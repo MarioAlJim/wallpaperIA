@@ -53,6 +53,7 @@ class StormRenderer(
     private var sensorTiltY = 0f
     private var targetTiltX = 0f
     private var targetTiltY = 0f
+    private var swipeOffset = 0f
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -215,6 +216,11 @@ class StormRenderer(
 
     override fun onTouchEvent(x: Float, y: Float) {
         sceneManager.queueTouch(x, y)
+    }
+
+    override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {
+        val clampedX = xOffset.coerceIn(0f, 1f)
+        swipeOffset = (clampedX - 0.5f) * 2.0f
     }
 
     override fun onSensorValuesChanged(tiltX: Float, tiltY: Float) {
@@ -399,7 +405,11 @@ class StormRenderer(
             val cloudGyroX = gyroX * depthFactor
             val cloudGyroY = gyroY * depthFactor
 
-            val posX = cloud.positionX + cloudGyroX
+            // Swipe parallax shift (moving in the same direction as the user's swipe/drag)
+            val maxSwipeShift = aspectRatio * 0.5f
+            val cloudSwipeX = -swipeOffset * maxSwipeShift * depthFactor
+
+            val posX = cloud.positionX + cloudGyroX + cloudSwipeX
             val posY = cloud.positionY + cloudGyroY
 
             val modelMatrix = FloatArray(16)

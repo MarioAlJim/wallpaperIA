@@ -78,6 +78,12 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   **Largo +40%**: Ambas funciones `resetCloudRain` (`0.12f → 0.168f`) y `resetEdgeRain` (multiplicador `* 1.4f`) aumentan el largo de las gotas en un 40%.
 *   **[MODIFY] [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/test/java/com/wolf/wallpaper/storm/SceneManagerTest.kt)**:
     *   Actualización de las aserciones `testRainDropDepthAndScaling` para validar los nuevos rangos de longitud con el factor 1.4x.
+
+### 12. Desplazamiento de Nubes por Deslizamiento (Swipe Parallax)
+*   **[MODIFY] [StormRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/StormRenderer.kt)**:
+    *   **Detección de Deslizamiento**: Registramos el desplazamiento en `onOffsetsChanged(xOffset, yOffset)` definiendo `swipeOffset = (clampedX - 0.5f) * 2.0f`.
+    *   **Movimiento de Nubes**: En el bucle de dibujo de las nubes, calculamos el desplazamiento horizontal del deslizamiento utilizando `cloudSwipeX = -swipeOffset * (aspectRatio * 0.5f) * depthFactor`. Esto desplaza las nubes hacia el lado al que el usuario desliza su dedo, adaptando la velocidad según la profundidad de la capa de la nube.
+
 ---
 
 ## Resultados de Pruebas y Verificación
