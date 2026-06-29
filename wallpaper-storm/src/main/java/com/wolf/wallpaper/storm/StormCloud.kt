@@ -89,7 +89,7 @@ class StormCloud(
         positionY = (targetY + jitter).coerceIn(minY, 1.0f)
         basePositionY = positionY
         
-        targetOpacity = (Random.nextFloat() * 0.4f + 0.4f) * z
+        targetOpacity = ((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
         opacity = targetOpacity
         isFadingOut = false
  

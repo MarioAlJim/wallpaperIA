@@ -60,6 +60,24 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   **Uniformidad por Nube**: Las gotas que nacen de una nube heredan exactamente la profundidad `z` de su nube progenitora (`z = spawnCloud.z`), garantizando que todas las partículas de lluvia de esa misma nube tengan el mismo tamaño (largo y ancho) y comportamiento.
     *   **Incremento del 100% de Tamaño**: Aumentamos en un 100% el tamaño mínimo y longitud de las gotas nacidas de las nubes en relación con el tamaño de la nube, duplicando el factor base de escala de `0.06f` a `0.12f`.
 
+### 9. Aumento de la Opacidad de las Nubes en un 100%
+*   **[MODIFY] [StormCloud.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/StormCloud.kt)**:
+    *   **Incremento del 100% (Doble Opacidad)**: Modificamos el cálculo de `targetOpacity` en `reset()` para multiplicar el rango base por `2.0f` y aplicar una coerción superior: `((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)`. Esto incrementa la opacidad en un 100% (duplicándola con tope de 1.0), logrando que todas las nubes se muestren mucho más definidas, robustas y sólidas en pantalla.
+*   **[MODIFY] [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/test/java/com/wolf/wallpaper/storm/SceneManagerTest.kt)**:
+    *   Se actualizaron las aserciones del test `testCloudDepthAndParallax()` para validar esta escala duplicada con tope en 1.0f.
+
+### 10. Separación de Generación de Lluvia (Nubes vs. Borde)
+*   **[MODIFY] [RainDrop.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/RainDrop.kt)**:
+    *   **Separación del Flujo**: Dividimos la lógica física del método `reset()` delegando en dos métodos privados independientes (`resetCloudRain` y `resetEdgeRain`). Esto aísla por completo las gotas generadas desde las nubes (que heredan el tamaño y profundidad de su respectiva nube progenitora) de las gotas de lluvia normales nacidas del borde superior de la pantalla, posibilitando ajustar de forma totalmente individual cada tipo de lluvia.
+    *   **Rango de Dispersión Acotado**: Modificamos el offset horizontal de spawn en `resetCloudRain` para que las gotas se generen estrictamente en la franja del 25% al 75% de la extensión total lateral de la nube, evitando que se generen o caigan fuera de su contorno físico.
+
+### 11. Forma Realista de Gota, Degradado de Transparencia y Largo +40%
+*   **[MODIFY] [rain.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/assets/shaders/rain.frag)**:
+    *   **Degradado de Transparencia**: El `verticalGradient` ahora usa la fórmula `0.10 + 0.90 * pow(y, 0.4)`. La cabeza redonda (y=1) mantiene 100% de opacidad/saturación, mientras la cola puntiaguda (y=0) se desvanece a 90% de transparencia (10% de opacidad), creando un efecto de gota real con la punta disolviéndose en el aire.
+*   **[MODIFY] [RainDrop.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/main/java/com/wolf/wallpaper/storm/RainDrop.kt)**:
+    *   **Largo +40%**: Ambas funciones `resetCloudRain` (`0.12f → 0.168f`) y `resetEdgeRain` (multiplicador `* 1.4f`) aumentan el largo de las gotas en un 40%.
+*   **[MODIFY] [SceneManagerTest.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-storm/src/test/java/com/wolf/wallpaper/storm/SceneManagerTest.kt)**:
+    *   Actualización de las aserciones `testRainDropDepthAndScaling` para validar los nuevos rangos de longitud con el factor 1.4x.
 ---
 
 ## Resultados de Pruebas y Verificación
