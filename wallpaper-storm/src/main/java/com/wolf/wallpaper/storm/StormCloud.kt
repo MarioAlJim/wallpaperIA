@@ -90,7 +90,7 @@ class StormCloud(
         val maxY = 0.8f
         val targetY = minY + (maxY - minY) * normZ
         val jitter = (Random.nextFloat() * 2f - 1f) * 0.08f
-        positionY = (targetY + jitter).coerceIn(-0.1f, 1.0f)
+        positionY = (targetY + jitter).coerceIn(0.0f, 1.0f)
         basePositionY = positionY
         
         targetOpacity = ((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
