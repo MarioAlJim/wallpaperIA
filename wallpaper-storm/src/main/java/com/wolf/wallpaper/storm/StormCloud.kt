@@ -77,23 +77,26 @@ class StormCloud(
         
         val minScale = 0.43125f
         val maxScale = 1.40625f
-        // Scale is independent of z for wider size variety at any depth layer
-        baseScale = Random.nextFloat() * (maxScale - minScale) + minScale
+        val normZ = (z - 0.3f) / 0.7f // 0.0 (background/far) to 1.0 (foreground/near)
+
+        // Scale proportional to depth (farther = smaller, closer = larger) with some random jitter
+        val scaleJitter = (Random.nextFloat() * 0.2f - 0.1f)
+        baseScale = (minScale + (maxScale - minScale) * normZ + scaleJitter).coerceIn(minScale, maxScale)
         scale = baseScale
         
-        // Position clouds by depth layer: furthest (z = 0.3) at Y = 0.0 (50% Y) bottom edge, nearest (z = 1.0) at Y = 0.9 (top edge)
-        val normZ = (z - 0.3f) / 0.7f // 0.0 (background) to 1.0 (foreground)
-        val minY = scale * 0.5f
-        val maxY = 0.9f
+        // Position: smaller/farther (normZ = 0) near Y = 0.0 (middle of the screen), 
+        // larger/closer (normZ = 1) higher up (Y = 0.8) for enhanced 3D depth perspective
+        val minY = 0.0f
+        val maxY = 0.8f
         val targetY = minY + (maxY - minY) * normZ
-        val jitter = (Random.nextFloat() * 2f - 1f) * 0.05f
-        positionY = (targetY + jitter).coerceIn(minY, 1.0f)
+        val jitter = (Random.nextFloat() * 2f - 1f) * 0.08f
+        positionY = (targetY + jitter).coerceIn(-0.1f, 1.0f)
         basePositionY = positionY
         
         targetOpacity = ((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
         opacity = targetOpacity
         isFadingOut = false
- 
+  
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
         onlyGrows = Random.nextBoolean()
