@@ -84,6 +84,13 @@ Este documento detalla el trabajo realizado para implementar las mejoras visuale
     *   **Detección de Deslizamiento**: Registramos el desplazamiento en `onOffsetsChanged(xOffset, yOffset)` definiendo `swipeOffset = (clampedX - 0.5f) * 2.0f`.
     *   **Movimiento de Nubes**: En el bucle de dibujo de las nubes, calculamos el desplazamiento horizontal del deslizamiento utilizando `cloudSwipeX = -swipeOffset * (aspectRatio * 0.5f) * depthFactor`. Esto desplaza las nubes hacia el lado al que el usuario desliza su dedo, adaptando la velocidad según la profundidad de la capa de la nube.
 
+### 13. Luciérnagas de Dos Capas y Brillo Verde (Modo Noche)
+*   **[NEW] [firefly.frag](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/assets/shaders/firefly.frag)**:
+    *   **Efecto de Dos Capas**: Diseñamos un fragment shader que divide la luciérnaga en dos capas concéntricas: un núcleo central muy brillante (que realiza un degradado a blanco-verde caliente en el centro `dist <= 0.15`) y un halo exterior translúcido (`dist > 0.15` a `0.50`) que decae suavemente en opacidad.
+*   **[MODIFY] [SunnyRenderer.kt](file:///C:/Users/Wildwolf/AndroidStudioProjects/wallpaper/wallpaper-sunny/src/main/java/com/wolf/wallpaper/sunny/SunnyRenderer.kt)**:
+    *   **Color Verde Real**: Modificamos el método `createRandomFirefly` reduciendo la componente roja y azul, resultando en un color verde brillante bioluminiscente muy realista.
+    *   **Programa de Renderizado Independiente**: Implementamos y cargamos el nuevo `fireflyProgram` usando `firefly.frag` de forma aislada, evitando que afecte a las partículas del modo día (semillas de diente de león). Activamos el programa de forma segura mediante `glUseProgram` al dibujar las luciérnagas.
+
 ---
 
 ## Resultados de Pruebas y Verificación

@@ -46,6 +46,12 @@ class SunnyRenderer(
     private var pColorHandle = -1
     private var pOpacityHandle = -1
 
+    // Handles for firefly.frag
+    private var fireflyProgram = 0
+    private var fMVPMatrixHandle = -1
+    private var fColorHandle = -1
+    private var fOpacityHandle = -1
+
     // Handles for sunny_background.frag
     private var bgThemeHandle = -1
     private var bgSunPosHandle = -1
@@ -297,6 +303,19 @@ class SunnyRenderer(
             pMVPMatrixHandle = GLES30.glGetUniformLocation(particleProgram, "uMVPMatrix")
             pColorHandle = GLES30.glGetUniformLocation(particleProgram, "uColor")
             pOpacityHandle = GLES30.glGetUniformLocation(particleProgram, "uOpacity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Compile and link firefly shader
+        try {
+            val fVert = readAssetFile(context, "shaders/particle.vert")
+            val fFrag = readAssetFile(context, "shaders/firefly.frag")
+            fireflyProgram = createProgram(fVert, fFrag)
+
+            fMVPMatrixHandle = GLES30.glGetUniformLocation(fireflyProgram, "uMVPMatrix")
+            fColorHandle = GLES30.glGetUniformLocation(fireflyProgram, "uColor")
+            fOpacityHandle = GLES30.glGetUniformLocation(fireflyProgram, "uOpacity")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -1513,9 +1532,9 @@ class SunnyRenderer(
         val speed = 0.5f + rand.nextFloat() * 1.0f
         val size = 0.012f + rand.nextFloat() * 0.012f
         val targetAlpha = 0.6f + rand.nextFloat() * 0.4f
-        val r = 0.6f + rand.nextFloat() * 0.25f
-        val g = 0.9f + rand.nextFloat() * 0.1f
-        val b = 0.05f + rand.nextFloat() * 0.15f
+        val r = 0.1f + rand.nextFloat() * 0.15f  // Low red for luminous green
+        val g = 0.9f + rand.nextFloat() * 0.1f   // High green
+        val b = 0.0f + rand.nextFloat() * 0.05f  // Very low blue
         return Firefly(
             x = startX, y = startY, baseX = startX, baseY = startY,
             noiseSeedX = seedX, noiseSeedY = seedY, speed = speed, size = size,
@@ -1524,7 +1543,7 @@ class SunnyRenderer(
     }
 
     private fun drawFireflies(intensity: Float) {
-        if (fireflies.isEmpty() || particleProgram == 0) return
+        if (fireflies.isEmpty() || fireflyProgram == 0) return
         val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
         val prevSrcFunc = IntArray(1)
         val prevDstFunc = IntArray(1)
@@ -1532,6 +1551,9 @@ class SunnyRenderer(
         GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
         GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
+        
+        GLES30.glUseProgram(fireflyProgram)
+        
         cloudQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
         GLES30.glEnableVertexAttribArray(0)
@@ -1547,9 +1569,9 @@ class SunnyRenderer(
             Matrix.scaleM(modelMatrix, 0, f.size, f.size, 1.0f)
             val modelViewProjection = FloatArray(16)
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-            GLES30.glUniformMatrix4fv(pMVPMatrixHandle, 1, false, modelViewProjection, 0)
-            GLES30.glUniform3f(pColorHandle, f.r, f.g, f.b)
-            GLES30.glUniform1f(pOpacityHandle, f.alpha * intensity)
+            GLES30.glUniformMatrix4fv(fMVPMatrixHandle, 1, false, modelViewProjection, 0)
+            GLES30.glUniform3f(fColorHandle, f.r, f.g, f.b)
+            GLES30.glUniform1f(fOpacityHandle, f.alpha * intensity)
             GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         }
         GLES30.glDisableVertexAttribArray(0)
