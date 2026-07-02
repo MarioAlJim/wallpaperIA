@@ -251,8 +251,10 @@ void main() {
         baseTexColor = mix(baseTexColor, desaturatedRainColor, 0.15 * fadeVal);
     }
     
-    // Base storm dimming (dark stormy night look)
-    vec3 baseColor = baseTexColor * vec3(0.18, 0.18, 0.22);
+    // Base storm dimming (dark stormy night look, with a vertical gradient: darker at the top, lighter at the bottom)
+    float normY = (vScreenPos.y + 1.0) * 0.5;
+    float darkFactor = mix(0.32, 0.10, normY);
+    vec3 baseColor = baseTexColor * vec3(darkFactor, darkFactor, darkFactor * 1.22);
     
     // Add lightning illumination (up to +1.5 brightness with flash color)
     vec3 flashLight = baseTexColor * uFlashColor * uFlashIntensity * 1.5;

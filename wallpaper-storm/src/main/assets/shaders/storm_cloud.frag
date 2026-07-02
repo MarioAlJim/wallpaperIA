@@ -254,6 +254,11 @@ void main() {
     float verticalGrad = mix(gradBottom, gradTop, 1.0 - distortedTexCoord.y);
     baseColor *= verticalGrad;
     
+    // Screen-space vertical gradient: darker at the top of the screen, lighter at the bottom
+    float normY = (ndc.y + 1.0) * 0.5;
+    float screenGrad = mix(1.15, 0.75, normY);
+    baseColor *= screenGrad;
+    
     // Add internal lightning illumination
     vec3 flashLight = texColor.rgb * uFlashColor * uFlashIntensity * 1.5;
     
