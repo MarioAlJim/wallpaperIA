@@ -21,6 +21,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -52,6 +53,16 @@ class StormSettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         return inflater.inflate(R.layout.fragment_storm_settings, container, false)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        backgroundBitmapCache.forEach { (_, bitmap) ->
+            if (!bitmap.isRecycled) {
+                bitmap.recycle()
+            }
+        }
+        backgroundBitmapCache.clear()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -368,15 +379,64 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun populateCardSelector(parent: View, container: LinearLayout, options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
-        container.removeAllViews()
-        val cardViews = ArrayList<MaterialCardView>()
-
         val activeColor = Color.parseColor("#00E5FF")
         val inactiveColor = Color.parseColor("#E0E0E6")
         val activeBgColor = Color.parseColor("#2D2D3D")
         val inactiveBgColor = Color.parseColor("#21212A")
         val strokeActiveColor = Color.parseColor("#00E5FF")
         val strokeInactiveColor = Color.parseColor("#3A3A4A")
+
+        val activeRainColorHex = when (configManager.getRainColorIndex()) {
+            0 -> "#1E90FF"
+            1 -> "#FFFFFF"
+            2 -> "#FF3030"
+            3 -> "#00FF7F"
+            4 -> "#FFD700"
+            5 -> "#8A2BE2"
+            else -> "#1E90FF"
+        }
+        val activeRainColor = Color.parseColor(activeRainColorHex)
+
+        val activeLightningColorHex = when (configManager.getLightningColorIndex()) {
+            0 -> "#FFFFFF"
+            1 -> "#6699FF"
+            2 -> "#FFE533"
+            3 -> "#FF3333"
+            4 -> "#33FF33"
+            5 -> "#CC4DFF"
+            6 -> "#FFE533"
+            else -> "#FFFFFF"
+        }
+        val activeLightningColor = Color.parseColor(activeLightningColorHex)
+        val activeWindDir = configManager.getWindDirection()
+
+        if (container.childCount == options.size) {
+            for (i in options.indices) {
+                val card = container.getChildAt(i) as? MaterialCardView ?: continue
+                val innerLayout = card.getChildAt(0) as? LinearLayout ?: continue
+                val previewFrame = innerLayout.getChildAt(0) as? FrameLayout ?: continue
+                val titleText = innerLayout.getChildAt(1) as? TextView ?: continue
+
+                titleText.setTextColor(if (i == initialIndex) activeColor else inactiveColor)
+                if (i == initialIndex) {
+                    card.strokeColor = strokeActiveColor
+                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(activeBgColor)
+                } else {
+                    card.strokeColor = strokeInactiveColor
+                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
+                    card.setCardBackgroundColor(inactiveBgColor)
+                }
+
+                if (container.id != R.id.spinnerBackgroundMode) {
+                    val stormPreview = previewFrame.getChildAt(0) as? StormCardPreviewView
+                    stormPreview?.updateConfig(activeRainColor, activeWindDir, activeLightningColor)
+                }
+            }
+            return
+        }
+
+        container.removeAllViews()
 
         for (i in options.indices) {
             val optionText = options[i]
@@ -414,30 +474,6 @@ class StormSettingsFragment : Fragment() {
                     setStroke((1 * resources.displayMetrics.density).toInt(), Color.parseColor("#3A3A4A"))
                 }
             }
-
-            val activeRainColorHex = when (configManager.getRainColorIndex()) {
-                0 -> "#1E90FF"
-                1 -> "#FFFFFF"
-                2 -> "#FF3030"
-                3 -> "#00FF7F"
-                4 -> "#FFD700"
-                5 -> "#8A2BE2"
-                else -> "#1E90FF"
-            }
-            val activeRainColor = Color.parseColor(activeRainColorHex)
-
-            val activeLightningColorHex = when (configManager.getLightningColorIndex()) {
-                0 -> "#FFFFFF"
-                1 -> "#6699FF"
-                2 -> "#FFE533"
-                3 -> "#FF3333"
-                4 -> "#33FF33"
-                5 -> "#CC4DFF"
-                6 -> "#FFE533"
-                else -> "#FFFFFF"
-            }
-            val activeLightningColor = Color.parseColor(activeLightningColorHex)
-            val activeWindDir = configManager.getWindDirection()
 
             if (container.id != R.id.spinnerBackgroundMode) {
                 val stormPreview = StormCardPreviewView(
@@ -533,10 +569,10 @@ class StormSettingsFragment : Fragment() {
                 onSelected(i)
                 updateSummaries(parent)
                 
-                for (j in cardViews.indices) {
-                    val c = cardViews[j]
-                    val childLayout = c.getChildAt(0) as LinearLayout
-                    val titleTv = childLayout.getChildAt(1) as TextView
+                for (j in 0 until container.childCount) {
+                    val c = container.getChildAt(j) as? MaterialCardView ?: continue
+                    val childLayout = c.getChildAt(0) as? LinearLayout ?: continue
+                    val titleTv = childLayout.getChildAt(1) as? TextView ?: continue
                     if (j == i) {
                         c.strokeColor = strokeActiveColor
                         c.strokeWidth = (3 * resources.displayMetrics.density).toInt()
@@ -552,7 +588,6 @@ class StormSettingsFragment : Fragment() {
             }
 
             container.addView(card)
-            cardViews.add(card)
         }
     }
 
@@ -811,10 +846,17 @@ class StormSettingsFragment : Fragment() {
         context: Context,
         val containerId: Int,
         val optionIndex: Int,
-        val activeRainColor: Int,
-        val activeWindDir: Int,
-        val activeLightningColor: Int
+        var activeRainColor: Int,
+        var activeWindDir: Int,
+        var activeLightningColor: Int
     ) : View(context) {
+
+        fun updateConfig(rainColor: Int, windDir: Int, lightningColor: Int) {
+            this.activeRainColor = rainColor
+            this.activeWindDir = windDir
+            this.activeLightningColor = lightningColor
+            invalidate()
+        }
 
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val path = Path()

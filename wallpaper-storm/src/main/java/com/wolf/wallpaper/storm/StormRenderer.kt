@@ -55,6 +55,15 @@ class StormRenderer(
     private var targetTiltY = 0f
     private var swipeOffset = 0f
 
+    // Reusable buffers to avoid allocations in drawRain and drawWindLines
+    private var rainVertexBuffer: FloatBuffer? = null
+    private var rainByteBuffer: ByteBuffer? = null
+    private var rainCapacityBytes = 0
+
+    private var windVertexBuffer: FloatBuffer? = null
+    private var windByteBuffer: ByteBuffer? = null
+    private var windCapacityBytes = 0
+
     init {
         Matrix.setIdentityM(viewMatrix, 0)
         Matrix.setIdentityM(identityMatrix, 0)
@@ -532,12 +541,10 @@ class StormRenderer(
             vertexData[idx++] = opacity
         }
 
-        val rainBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer().apply {
-                put(vertexData)
-                position(0)
-            }
+        val rainBuffer = getRainBuffer(vertexData.size).apply {
+            put(vertexData)
+            position(0)
+        }
 
         // Bind positions attribute (location 0, stride 24 bytes: 6 floats)
         rainBuffer.position(0)
@@ -604,12 +611,10 @@ class StormRenderer(
             vertexData[idx++] = lineAlpha * 0.25f
         }
 
-        val windBuffer = ByteBuffer.allocateDirect(vertexData.size * 4)
-            .order(ByteOrder.nativeOrder())
-            .asFloatBuffer().apply {
-                put(vertexData)
-                position(0)
-            }
+        val windBuffer = getWindBuffer(vertexData.size).apply {
+            put(vertexData)
+            position(0)
+        }
 
         windBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, windBuffer)
@@ -1041,5 +1046,37 @@ class StormRenderer(
 
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
+    }
+
+    private fun getRainBuffer(requiredFloats: Int): FloatBuffer {
+        val requiredBytes = requiredFloats * 4
+        var currentByteBuf = rainByteBuffer
+        var currentFloatBuf = rainVertexBuffer
+        if (currentByteBuf == null || rainCapacityBytes < requiredBytes) {
+            val newCapacity = requiredBytes * 2
+            currentByteBuf = ByteBuffer.allocateDirect(newCapacity).order(ByteOrder.nativeOrder())
+            currentFloatBuf = currentByteBuf.asFloatBuffer()
+            rainByteBuffer = currentByteBuf
+            rainVertexBuffer = currentFloatBuf
+            rainCapacityBytes = newCapacity
+        }
+        currentFloatBuf!!.clear()
+        return currentFloatBuf
+    }
+
+    private fun getWindBuffer(requiredFloats: Int): FloatBuffer {
+        val requiredBytes = requiredFloats * 4
+        var currentByteBuf = windByteBuffer
+        var currentFloatBuf = windVertexBuffer
+        if (currentByteBuf == null || windCapacityBytes < requiredBytes) {
+            val newCapacity = requiredBytes * 2
+            currentByteBuf = ByteBuffer.allocateDirect(newCapacity).order(ByteOrder.nativeOrder())
+            currentFloatBuf = currentByteBuf.asFloatBuffer()
+            windByteBuffer = currentByteBuf
+            windVertexBuffer = currentFloatBuf
+            windCapacityBytes = newCapacity
+        }
+        currentFloatBuf!!.clear()
+        return currentFloatBuf
     }
 }

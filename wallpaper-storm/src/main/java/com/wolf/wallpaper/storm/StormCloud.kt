@@ -29,7 +29,8 @@ class StormCloud(
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
 
     override fun update(deltaTime: Float) {
-        // Required by StormObject, we use update(deltaTime, windSpeed) in SceneManager
+        // Default call using 0f windSpeed and 1f dynamicsSpeed to satisfy StormObject contract
+        update(deltaTime, 0f, 1.0f)
     }
 
     fun update(deltaTime: Float, windSpeed: Float, dynamicsSpeed: Float = 1.0f) {

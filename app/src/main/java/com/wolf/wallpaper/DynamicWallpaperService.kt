@@ -111,14 +111,7 @@ class DynamicWallpaperService : WallpaperService() {
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
             renderThread?.setVisible(visible)
-            if (visible) {
-                val acc = accelerometer
-                if (acc != null) {
-                    sensorManager?.registerListener(this, acc, SensorManager.SENSOR_DELAY_GAME)
-                }
-            } else {
-                sensorManager?.unregisterListener(this)
-            }
+            updateSensorListener()
         }
 
         override fun onSurfaceCreated(holder: SurfaceHolder) {
@@ -156,6 +149,22 @@ class DynamicWallpaperService : WallpaperService() {
                         currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
                     }
                 }
+            } else if (key == ConfigManager.KEY_SUNNY_GYRO_ENABLED) {
+                updateSensorListener()
+            }
+        }
+
+        private fun updateSensorListener() {
+            if (isVisible && configManager.isSunnyGyroEnabled()) {
+                val acc = accelerometer
+                if (acc != null) {
+                    sensorManager?.registerListener(this, acc, SensorManager.SENSOR_DELAY_GAME)
+                }
+            } else {
+                sensorManager?.unregisterListener(this)
+                smoothedTiltX = 0f
+                smoothedTiltY = 0f
+                renderThread?.queueSensorValues(0f, 0f)
             }
         }
 
