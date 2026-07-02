@@ -126,7 +126,7 @@ class StormRenderer(
             val files = assetManager.list("lightning") ?: emptyArray()
             for (file in files) {
                 if (file.endsWith(".png")) {
-                    val tex = loadTexture(context, "lightning/$file", maxSize = 512)
+                    val tex = loadTexture(context, "lightning/$file", maxSize = 1024)
                     if (tex != 0) {
                         lightningTextures.add(tex)
                     }
@@ -848,11 +848,12 @@ class StormRenderer(
             }
             bitmap?.let { bmp ->
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR)
                 GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
                 GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
                 GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
                 GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bmp, 0)
+                GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
                 bmp.recycle()
             }
         } catch (e: IOException) {
