@@ -54,6 +54,7 @@ class StormRenderer(
     private var targetTiltX = 0f
     private var targetTiltY = 0f
     private var swipeOffset = 0f
+    private var targetSwipeOffset = 0f
 
     // Reusable buffers to avoid allocations in drawRain and drawWindLines
     private var rainVertexBuffer: FloatBuffer? = null
@@ -216,6 +217,11 @@ class StormRenderer(
         val lerpFactor = 5f * deltaTime
         sensorTiltX += (targetTiltX - sensorTiltX) * lerpFactor
         sensorTiltY += (targetTiltY - sensorTiltY) * lerpFactor
+        
+        // Smoothly interpolate the swipe offset to make dragging/swiping look soft and fluid
+        val swipeLerpFactor = 4f * deltaTime
+        swipeOffset += (targetSwipeOffset - swipeOffset) * swipeLerpFactor
+        
         sceneManager.update(deltaTime)
     }
 
@@ -229,7 +235,7 @@ class StormRenderer(
 
     override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {
         val clampedX = xOffset.coerceIn(0f, 1f)
-        swipeOffset = (clampedX - 0.5f) * 2.0f
+        targetSwipeOffset = (clampedX - 0.5f) * 2.0f
     }
 
     override fun onSensorValuesChanged(tiltX: Float, tiltY: Float) {
@@ -415,7 +421,7 @@ class StormRenderer(
             val cloudGyroY = gyroY * depthFactor
 
             // Swipe parallax shift (moving in the same direction as the user's swipe/drag)
-            val maxSwipeShift = aspectRatio * 0.5f
+            val maxSwipeShift = aspectRatio * 0.3f
             val cloudSwipeX = -swipeOffset * maxSwipeShift * depthFactor
 
             val posX = cloud.positionX + cloudGyroX + cloudSwipeX
