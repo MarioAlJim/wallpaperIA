@@ -84,13 +84,14 @@ class StormCloud(
         baseScale = (minScale + (maxScale - minScale) * normZ + scaleJitter).coerceIn(minScale, maxScale)
         scale = baseScale
         
-        // Position: smaller/farther (normZ = 0) near Y = 0.0 (middle of the screen), 
-        // larger/closer (normZ = 1) higher up (Y = 0.8) for enhanced 3D depth perspective
-        val minY = 0.0f
-        val maxY = 0.8f
+        // Position: smaller/farther (normZ = 0) near Y = 0.2 (lower bound of top 2/5), 
+        // larger/closer (normZ = 1) higher up (Y = 0.85) for enhanced 3D depth perspective.
+        // Clouds must strictly be in the top 2/5 of the screen (Y >= 0.2).
+        val minY = 0.2f
+        val maxY = 0.85f
         val targetY = minY + (maxY - minY) * normZ
-        val jitter = (Random.nextFloat() * 2f - 1f) * 0.08f
-        positionY = (targetY + jitter).coerceIn(0.0f, 1.0f)
+        val jitter = (Random.nextFloat() * 2f - 1f) * 0.06f
+        positionY = (targetY + jitter).coerceIn(0.2f, 1.0f)
         basePositionY = positionY
         
         targetOpacity = ((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
