@@ -356,7 +356,7 @@ class SceneManagerTest {
             val initialX = initialXPositions[i]
             if (cloud.positionX < initialX) {
                 // If it wrapped, it must have exceeded maxBound and wrapped to -maxBound
-                val halfWidth = cloud.scale * 1.2f
+                val halfWidth = cloud.scale * 2.4f
                 val maxBound = 0.5625f + halfWidth
                 assertTrue("Wrapped cloud should be on the left side", cloud.positionX <= -maxBound + 0.5f)
             } else {
@@ -376,7 +376,7 @@ class SceneManagerTest {
             val preX = currentXPositions[i]
             if (cloud.positionX > preX) {
                 // Wrapped, should be on the right side
-                val halfWidth = cloud.scale * 1.2f
+                val halfWidth = cloud.scale * 2.4f
                 val maxBound = 0.5625f + halfWidth
                 assertTrue("Wrapped cloud should be on the right side", cloud.positionX >= maxBound - 0.5f)
             } else {
@@ -401,7 +401,7 @@ class SceneManagerTest {
         assertEquals(5, clouds.size)
 
         val cloud = clouds[0]
-        val halfWidth = cloud.scale * 1.2f
+        val halfWidth = cloud.scale * 2.4f
         val maxBound = aspectRatio + halfWidth
 
         // Test 1: Force cloud out of bounds to the right
@@ -410,7 +410,7 @@ class SceneManagerTest {
         sceneManager.update(0.016f)
 
         // After reset, the cloud should be positioned according to the direction of its new driftSpeed
-        val newHalfWidth = cloud.scale * 1.2f
+        val newHalfWidth = cloud.scale * 2.4f
         if (cloud.driftSpeed >= 0f) {
             // Reappear on left
             assertEquals(-aspectRatio - newHalfWidth, cloud.positionX, 0.001f)
@@ -420,13 +420,13 @@ class SceneManagerTest {
         }
 
         // Test 2: Force cloud out of bounds to the left
-        val currentHalfWidth = cloud.scale * 1.2f
+        val currentHalfWidth = cloud.scale * 2.4f
         val currentMaxBound = aspectRatio + currentHalfWidth
         cloud.positionX = -currentMaxBound - 2.0f
         // Update should trigger reset & wrap
         sceneManager.update(0.016f)
 
-        val newHalfWidth2 = cloud.scale * 1.2f
+        val newHalfWidth2 = cloud.scale * 2.4f
         if (cloud.driftSpeed >= 0f) {
             // Reappear on left
             assertEquals(-aspectRatio - newHalfWidth2, cloud.positionX, 0.001f)
