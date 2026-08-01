@@ -1,15 +1,13 @@
 package com.wolf.wallpaper.sunny
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.opengl.GLES30
-import android.opengl.GLUtils
 import android.opengl.Matrix
 import com.wolf.wallpaper.core.ConfigProvider
 import com.wolf.wallpaper.core.GLRenderer
+import com.wolf.wallpaper.core.GLRenderUtils
 import com.wolf.wallpaper.core.Cloud
 import com.wolf.wallpaper.core.Moon
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -232,6 +230,10 @@ class SunnyRenderer(
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
+
+    // Scratch matrices reused across per-object draw calls (clouds, moon, particles, fireflies, background)
+    private val scratchModelMatrix = FloatArray(16)
+    private val scratchMVPMatrix = FloatArray(16)
 
     // Buffers
     private lateinit var fullscreenQuadBuffer: FloatBuffer
@@ -1191,12 +1193,12 @@ class SunnyRenderer(
         } else {
             0.24f
         }
-        val modelMatrix = FloatArray(16)
+        val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
         Matrix.translateM(modelMatrix, 0, moon.positionX, moon.positionY, 0f)
         Matrix.scaleM(modelMatrix, 0, mappedMoonSize * 3.0f, mappedMoonSize * 3.0f, 1.0f)
 
-        val mvp = FloatArray(16)
+        val mvp = scratchMVPMatrix
         Matrix.multiplyMM(mvp, 0, projectionMatrix, 0, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(moonMVPHandle, 1, false, mvp, 0)
         GLES30.glUniform1i(moonPhaseHandle, moon.phase)
@@ -1286,12 +1288,12 @@ class SunnyRenderer(
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
         for (cloud in nightClouds.sortedBy { it.z }) {
-            val modelMatrix = FloatArray(16)
+            val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
             Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
 
-            val modelViewProjection = FloatArray(16)
+            val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
@@ -1401,12 +1403,12 @@ class SunnyRenderer(
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
         for (cloud in clouds.sortedBy { it.z }) {
-            val modelMatrix = FloatArray(16)
+            val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
             Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
 
-            val modelViewProjection = FloatArray(16)
+            val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
@@ -1455,12 +1457,12 @@ class SunnyRenderer(
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
 
         for (p in particles) {
-            val modelMatrix = FloatArray(16)
+            val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, p.x + gyroX, p.y + gyroY, 0f)
             Matrix.scaleM(modelMatrix, 0, p.size, p.size, 1.0f)
 
-            val modelViewProjection = FloatArray(16)
+            val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
 
             GLES30.glUniformMatrix4fv(pMVPMatrixHandle, 1, false, modelViewProjection, 0)
@@ -1563,11 +1565,11 @@ class SunnyRenderer(
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
         for (f in fireflies) {
-            val modelMatrix = FloatArray(16)
+            val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, f.x + gyroX, f.y + gyroY, 0f)
             Matrix.scaleM(modelMatrix, 0, f.size, f.size, 1.0f)
-            val modelViewProjection = FloatArray(16)
+            val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
             GLES30.glUniformMatrix4fv(fMVPMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform3f(fColorHandle, f.r, f.g, f.b)
@@ -1639,7 +1641,7 @@ class SunnyRenderer(
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
         GLES30.glUniform1i(textureHandle, 0)
 
-        val modelMatrix = FloatArray(16)
+        val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
 
         val screenAspect = aspectRatio
@@ -1665,7 +1667,7 @@ class SunnyRenderer(
 
         Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
 
-        val modelViewProjection = FloatArray(16)
+        val modelViewProjection = scratchMVPMatrix
         Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
@@ -1869,10 +1871,8 @@ class SunnyRenderer(
         swipeOffset = (clampedX - 0.5f) * 2.0f
     }
 
-    private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float {
-        val t = ((x - edge0) / (edge1 - edge0)).coerceIn(0f, 1f)
-        return t * t * (3f - 2f * t)
-    }
+    private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float =
+        SunnyMath.smoothstep(edge0, edge1, x)
 
     private fun drawLensFlare(intensity: Float = 1f) {
         if (lensFlareProgram == 0) return
@@ -1926,101 +1926,25 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(0)
     }
 
-    private fun readAssetFile(context: Context, path: String): String {
-        return try {
-            context.assets.open(path).bufferedReader().use { it.readText() }
-        } catch (e: IOException) {
-            throw RuntimeException("Could not open asset file: $path", e)
-        }
-    }
+    private fun readAssetFile(context: Context, path: String): String =
+        GLRenderUtils.readAssetFile(context, path)
 
-    private fun loadTexture(context: Context, assetPath: String): Int {
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) {
-            return 0
-        }
-
-        val options = BitmapFactory.Options().apply {
-            inScaled = false
-        }
-        try {
-            context.assets.open(assetPath).use { inputStream ->
-                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
-                if (bitmap != null) {
-                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                    GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                    bitmap.recycle()
-                }
-            }
-        } catch (e: IOException) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            throw RuntimeException("Could not load texture from asset: $assetPath", e)
-        }
-        return textureIds[0]
-    }
+    private fun loadTexture(context: Context, assetPath: String): Int =
+        GLRenderUtils.loadTexture(context, assetPath)
 
     private fun loadBackgroundTexture(context: Context, index: Int, assetPath: String) {
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) return
-
-        val options = BitmapFactory.Options().apply {
-            inScaled = false
-        }
-        try {
-            context.assets.open(assetPath).use { inputStream ->
-                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
-                if (bitmap != null) {
-                    backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
-                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                    GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                    bitmap.recycle()
-                    backgroundTextures[index] = textureIds[0]
-                }
-            }
-        } catch (e: Exception) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            e.printStackTrace()
-        }
+        val result = GLRenderUtils.loadBackgroundTextureFromAsset(context, assetPath) ?: return
+        val (textureId, aspectRatio) = result
+        backgroundAspectRatios[index] = aspectRatio
+        backgroundTextures[index] = textureId
     }
 
     private fun loadCustomBackgroundTexture(context: Context, index: Int) {
         val file = java.io.File(context.filesDir, "custom_sunny_background.png")
-        if (!file.exists()) return
-
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) return
-
-        val options = BitmapFactory.Options().apply {
-            inScaled = false
-        }
-        try {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
-            if (bitmap != null) {
-                backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                bitmap.recycle()
-                backgroundTextures[index] = textureIds[0]
-            }
-        } catch (e: Exception) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            e.printStackTrace()
-        }
+        val result = GLRenderUtils.loadBackgroundTextureFromFile(file) ?: return
+        val (textureId, aspectRatio) = result
+        backgroundAspectRatios[index] = aspectRatio
+        backgroundTextures[index] = textureId
     }
 
     private fun wrapPathX(x: Float): Float {
@@ -2030,36 +1954,6 @@ class SunnyRenderer(
         return v
     }
 
-    private fun loadShader(type: Int, shaderCode: String): Int {
-        val shader = GLES30.glCreateShader(type)
-        GLES30.glShaderSource(shader, shaderCode)
-        GLES30.glCompileShader(shader)
-
-        val compileStatus = IntArray(1)
-        GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compileStatus, 0)
-        if (compileStatus[0] == 0) {
-            val log = GLES30.glGetShaderInfoLog(shader)
-            GLES30.glDeleteShader(shader)
-            throw RuntimeException("Error compiling shader ($type): $log")
-        }
-        return shader
-    }
-
-    private fun createProgram(vertexCode: String, fragmentCode: String): Int {
-        val vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexCode)
-        val fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentCode)
-        val program = GLES30.glCreateProgram()
-        GLES30.glAttachShader(program, vertexShader)
-        GLES30.glAttachShader(program, fragmentShader)
-        GLES30.glLinkProgram(program)
-
-        val linkStatus = IntArray(1)
-        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
-        if (linkStatus[0] == 0) {
-            val log = GLES30.glGetProgramInfoLog(program)
-            GLES30.glDeleteProgram(program)
-            throw RuntimeException("Error linking program: $log")
-        }
-        return program
-    }
+    private fun createProgram(vertexCode: String, fragmentCode: String): Int =
+        GLRenderUtils.createProgram(vertexCode, fragmentCode)
 }

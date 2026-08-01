@@ -1,15 +1,12 @@
 package com.wolf.wallpaper.storm
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.opengl.GLES30
-import android.opengl.GLUtils
 import android.opengl.Matrix
 import com.wolf.wallpaper.core.GLRenderer
+import com.wolf.wallpaper.core.GLRenderUtils
 import com.wolf.wallpaper.storm.StormCloud
 import com.wolf.wallpaper.core.StormObject
-import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.FloatBuffer
@@ -64,6 +61,18 @@ class StormRenderer(
     private var windVertexBuffer: FloatBuffer? = null
     private var windByteBuffer: ByteBuffer? = null
     private var windCapacityBytes = 0
+
+    // Reusable Kotlin arrays backing the vertex data before it's copied into the direct buffers above
+    private var rainVertexData = FloatArray(0)
+    private var windVertexData = FloatArray(0)
+
+    // Reusable lists to avoid allocating new lists every frame when partitioning rain drops
+    private val cloudRainBuffer = mutableListOf<RainDrop>()
+    private val edgeRainBuffer = mutableListOf<RainDrop>()
+
+    // Scratch matrices reused across per-object draw calls (clouds, lightning, background)
+    private val scratchModelMatrix = FloatArray(16)
+    private val scratchMVPMatrix = FloatArray(16)
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -291,18 +300,24 @@ class StormRenderer(
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Render layered elements in order: Fondo -> Gotas de Nube -> Rayos -> Nubes -> Gotas de Borde
+        // Sort once by depth (in place, no new list allocated) instead of sorting each subset separately
+        sceneManager.sortRainDropsByDepth()
         val allRain = sceneManager.getRainDrops()
-        val cloudRain = allRain.filter { it.spawnFromCloud }
-        val edgeRain = allRain.filter { !it.spawnFromCloud }
+        cloudRainBuffer.clear()
+        edgeRainBuffer.clear()
+        for (drop in allRain) {
+            if (drop.spawnFromCloud) cloudRainBuffer.add(drop) else edgeRainBuffer.add(drop)
+        }
 
         drawBackground(sceneManager.getBackgroundIndex(), sceneManager.lightnings, lightningFlashEnabled)
-        drawRain(cloudRain, sceneManager.getRainColorIndex())
+        drawRain(cloudRainBuffer, sceneManager.getRainColorIndex())
         drawLightning(sceneManager.lightnings, lightningFlashEnabled)
         if (sceneManager.isWindLinesEnabled() && sceneManager.getWindIntensity() >= 50) {
+            sceneManager.sortWindLinesByDepth()
             drawWindLines(sceneManager.getWindLines())
         }
         drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
-        drawRain(edgeRain, sceneManager.getRainColorIndex())
+        drawRain(edgeRainBuffer, sceneManager.getRainColorIndex())
     }
 
     private fun drawClouds(clouds: List<StormCloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {
@@ -427,12 +442,12 @@ class StormRenderer(
             val posX = cloud.positionX + cloudGyroX + cloudSwipeX
             val posY = cloud.positionY + cloudGyroY
 
-            val modelMatrix = FloatArray(16)
+            val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, posX, posY, 0f)
             Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
 
-            val modelViewProjection = FloatArray(16)
+            val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
@@ -465,12 +480,16 @@ class StormRenderer(
         val color = getRainColor(colorIndex)
         GLES30.glUniform4fv(colorHandle, 1, color, 0)
 
-        // 1. Sort the rain drops by depth (z) ascending for layers/depth ordering
-        val sortedDrops = rainDrops.sortedBy { it.z }
+        // Rain drops are already sorted by depth (z) in place by SceneManager.sortRainDropsByDepth()
+        val sortedDrops = rainDrops
 
-        // 2. Construct interleaved coordinate buffer (X, Y, Depth, U, V, Opacity) for all rain drop quads
+        // Construct interleaved coordinate buffer (X, Y, Depth, U, V, Opacity) for all rain drop quads
         // Each vertex has 6 floats. 6 vertices (2 triangles) per drop.
-        val vertexData = FloatArray(sortedDrops.size * 36)
+        val requiredSize = sortedDrops.size * 36
+        if (rainVertexData.size < requiredSize) {
+            rainVertexData = FloatArray(requiredSize)
+        }
+        val vertexData = rainVertexData
         var idx = 0
         for (drop in sortedDrops) {
             val zDepth = drop.z
@@ -547,8 +566,8 @@ class StormRenderer(
             vertexData[idx++] = opacity
         }
 
-        val rainBuffer = getRainBuffer(vertexData.size).apply {
-            put(vertexData)
+        val rainBuffer = getRainBuffer(requiredSize).apply {
+            put(vertexData, 0, requiredSize)
             position(0)
         }
 
@@ -594,9 +613,14 @@ class StormRenderer(
         val windColor = floatArrayOf(0.85f, 0.90f, 0.98f, 0.35f)
         GLES30.glUniform4fv(colorHandle, 1, windColor, 0)
 
-        val sortedLines = windLines.sortedBy { it.z }
+        // Wind lines are already sorted by depth (z) in place by SceneManager.sortWindLinesByDepth()
+        val sortedLines = windLines
 
-        val vertexData = FloatArray(sortedLines.size * 8)
+        val requiredSize = sortedLines.size * 8
+        if (windVertexData.size < requiredSize) {
+            windVertexData = FloatArray(requiredSize)
+        }
+        val vertexData = windVertexData
         var idx = 0
         for (line in sortedLines) {
             val progress = line.lifetime / line.maxLifetime
@@ -617,8 +641,8 @@ class StormRenderer(
             vertexData[idx++] = lineAlpha * 0.25f
         }
 
-        val windBuffer = getWindBuffer(vertexData.size).apply {
-            put(vertexData)
+        val windBuffer = getWindBuffer(requiredSize).apply {
+            put(vertexData, 0, requiredSize)
             position(0)
         }
 
@@ -742,7 +766,7 @@ class StormRenderer(
                 GLES30.glUniform4fv(colorHandle, 1, color, 0)
                 GLES30.glUniform1f(growthProgressHandle, lightning.growthProgress)
 
-                val modelMatrix = FloatArray(16)
+                val modelMatrix = scratchModelMatrix
                 Matrix.setIdentityM(modelMatrix, 0)
 
                 // Apply world translation
@@ -758,7 +782,7 @@ class StormRenderer(
                 // Apply scale
                 Matrix.scaleM(modelMatrix, 0, lightning.scaleX, lightning.scaleY, 1.0f)
 
-                val modelViewProjection = FloatArray(16)
+                val modelViewProjection = scratchMVPMatrix
                 Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
                 GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
@@ -785,174 +809,28 @@ class StormRenderer(
         }
     }
 
-    private fun readAssetFile(context: Context, path: String): String {
-        return try {
-            context.assets.open(path).bufferedReader().use { it.readText() }
-        } catch (e: IOException) {
-            throw RuntimeException("Could not open asset file: $path", e)
-        }
-    }
+    private fun readAssetFile(context: Context, path: String): String =
+        GLRenderUtils.readAssetFile(context, path)
 
-    private fun loadTexture(context: Context, assetPath: String, maxSize: Int = 0): Int {
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) {
-            return 0
-        }
+    private fun loadTexture(context: Context, assetPath: String, maxSize: Int = 0): Int =
+        GLRenderUtils.loadTexture(context, assetPath, maxSize)
 
-        try {
-            var bitmap: Bitmap? = null
-            if (maxSize > 0) {
-                // First pass: decode bounds only to calculate sample size
-                val boundsOpts = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
-                    inScaled = false
-                }
-                context.assets.open(assetPath).use { stream ->
-                    BitmapFactory.decodeStream(stream, null, boundsOpts)
-                }
-                val origW = boundsOpts.outWidth
-                val origH = boundsOpts.outHeight
-                var sampleSize = 1
-                while (origW / (sampleSize * 2) >= maxSize && origH / (sampleSize * 2) >= maxSize) {
-                    sampleSize *= 2
-                }
-                // Second pass: decode with sample size
-                val decodeOpts = BitmapFactory.Options().apply {
-                    inScaled = false
-                    inSampleSize = sampleSize
-                }
-                context.assets.open(assetPath).use { stream ->
-                    bitmap = BitmapFactory.decodeStream(stream, null, decodeOpts)
-                }
-                // Scale to exact maxSize if still larger
-                bitmap?.let { bmp ->
-                    val maxDim = maxOf(bmp.width, bmp.height)
-                    if (maxDim > maxSize) {
-                        val scale = maxSize.toFloat() / maxDim
-                        val newW = (bmp.width * scale).toInt().coerceAtLeast(1)
-                        val newH = (bmp.height * scale).toInt().coerceAtLeast(1)
-                        val scaled = Bitmap.createScaledBitmap(bmp, newW, newH, true)
-                        bmp.recycle()
-                        bitmap = scaled
-                    }
-                }
-            } else {
-                // No downsampling: load at full resolution
-                val options = BitmapFactory.Options().apply {
-                    inScaled = false
-                }
-                context.assets.open(assetPath).use { stream ->
-                    bitmap = BitmapFactory.decodeStream(stream, null, options)
-                }
-            }
-            bitmap?.let { bmp ->
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR_MIPMAP_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bmp, 0)
-                GLES30.glGenerateMipmap(GLES30.GL_TEXTURE_2D)
-                bmp.recycle()
-            }
-        } catch (e: IOException) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            throw RuntimeException("Could not load texture from asset: $assetPath", e)
-        }
-        return textureIds[0]
-    }
-
-    private fun loadShader(type: Int, shaderCode: String): Int {
-        val shader = GLES30.glCreateShader(type)
-        GLES30.glShaderSource(shader, shaderCode)
-        GLES30.glCompileShader(shader)
-
-        val compileStatus = IntArray(1)
-        GLES30.glGetShaderiv(shader, GLES30.GL_COMPILE_STATUS, compileStatus, 0)
-        if (compileStatus[0] == 0) {
-            val log = GLES30.glGetShaderInfoLog(shader)
-            GLES30.glDeleteShader(shader)
-            throw RuntimeException("Error compiling shader ($type): $log")
-        }
-        return shader
-    }
-
-    private fun createProgram(vertexCode: String, fragmentCode: String): Int {
-        val vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexCode)
-        val fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentCode)
-        val program = GLES30.glCreateProgram()
-        GLES30.glAttachShader(program, vertexShader)
-        GLES30.glAttachShader(program, fragmentShader)
-        GLES30.glLinkProgram(program)
-
-        val linkStatus = IntArray(1)
-        GLES30.glGetProgramiv(program, GLES30.GL_LINK_STATUS, linkStatus, 0)
-        if (linkStatus[0] == 0) {
-            val log = GLES30.glGetProgramInfoLog(program)
-            GLES30.glDeleteProgram(program)
-            throw RuntimeException("Error linking program: $log")
-        }
-        return program
-    }
+    private fun createProgram(vertexCode: String, fragmentCode: String): Int =
+        GLRenderUtils.createProgram(vertexCode, fragmentCode)
 
     private fun loadBackgroundTexture(context: Context, index: Int, assetPath: String) {
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) return
-
-        val options = BitmapFactory.Options().apply {
-            inScaled = false
-        }
-        try {
-            context.assets.open(assetPath).use { inputStream ->
-                val bitmap = BitmapFactory.decodeStream(inputStream, null, options)
-                if (bitmap != null) {
-                    backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
-                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                    GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                    GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                    bitmap.recycle()
-                    backgroundTextures[index] = textureIds[0]
-                }
-            }
-        } catch (e: Exception) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            e.printStackTrace()
-        }
+        val result = GLRenderUtils.loadBackgroundTextureFromAsset(context, assetPath) ?: return
+        val (textureId, aspectRatio) = result
+        backgroundAspectRatios[index] = aspectRatio
+        backgroundTextures[index] = textureId
     }
 
     private fun loadCustomBackgroundTexture(context: Context, index: Int) {
         val file = java.io.File(context.filesDir, "custom_background.png")
-        if (!file.exists()) return
-
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        if (textureIds[0] == 0) return
-
-        val options = BitmapFactory.Options().apply {
-            inScaled = false
-        }
-        try {
-            val bitmap = BitmapFactory.decodeFile(file.absolutePath, options)
-            if (bitmap != null) {
-                backgroundAspectRatios[index] = bitmap.width.toFloat() / bitmap.height.toFloat()
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-                GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-                GLUtils.texImage2D(GLES30.GL_TEXTURE_2D, 0, bitmap, 0)
-                bitmap.recycle()
-                backgroundTextures[index] = textureIds[0]
-            }
-        } catch (e: Exception) {
-            GLES30.glDeleteTextures(1, textureIds, 0)
-            e.printStackTrace()
-        }
+        val result = GLRenderUtils.loadBackgroundTextureFromFile(file) ?: return
+        val (textureId, aspectRatio) = result
+        backgroundAspectRatios[index] = aspectRatio
+        backgroundTextures[index] = textureId
     }
 
     private fun drawBackground(backgroundIndex: Int, lightnings: List<Lightning>, flashEnabled: Boolean) {
@@ -984,7 +862,7 @@ class StormRenderer(
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
         GLES30.glUniform1i(textureHandle, 0)
 
-        val modelMatrix = FloatArray(16)
+        val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
 
         val screenAspect = aspectRatio
@@ -1002,7 +880,7 @@ class StormRenderer(
 
         Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
 
-        val modelViewProjection = FloatArray(16)
+        val modelViewProjection = scratchMVPMatrix
         Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 

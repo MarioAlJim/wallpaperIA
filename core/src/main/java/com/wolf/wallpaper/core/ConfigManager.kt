@@ -6,6 +6,11 @@ import android.content.SharedPreferences
 class ConfigManager(context: Context) : ConfigProvider {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
+    private val storm = StormConfigStore(prefs)
+    private val sunny = SunnyConfigStore(prefs)
+    private val night = NightConfigStore(prefs)
+    private val combined = CombinedConfigStore(prefs)
+
     companion object {
         const val PREFS_NAME = "storm_wallpaper_prefs"
         const val KEY_CLOUD_DENSITY = "cloud_density"
@@ -24,7 +29,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_LIGHTNING_FLASH_ENABLED = "lightning_flash_enabled"
         const val KEY_CLOUD_FLASH_ENABLED = "cloud_flash_enabled"
         const val KEY_INTERACTIVE_LIGHTNING_ENABLED = "interactive_lightning_enabled"
-        
+
         // New keys
         const val KEY_ACTIVE_EFFECT = "active_effect"
         const val KEY_SUN_SIZE = "sun_size"
@@ -61,7 +66,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_STAR_MODE = "star_mode"
         const val KEY_NIGHT_CLOUD_DENSITY = "night_cloud_density"
         const val KEY_GRADIENT_CYCLE_SPEED = "gradient_cycle_speed"
-        
+
         // New keys for Combined Mode
         const val KEY_COMBINED_SUN_SIZE = "combined_sun_size"
         const val KEY_COMBINED_MOON_SIZE = "combined_moon_size"
@@ -80,7 +85,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_STAR_MODE = 0
         const val DEFAULT_NIGHT_CLOUD_DENSITY = 40
         const val DEFAULT_GRADIENT_CYCLE_SPEED = 30
-        
+
         const val DEFAULT_COMBINED_SUN_SIZE = 50
         const val DEFAULT_COMBINED_MOON_SIZE = 50
         const val DEFAULT_COMBINED_MOON_PHASE = 4
@@ -104,7 +109,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_LIGHTNING_FLASH_ENABLED = true
         const val DEFAULT_CLOUD_FLASH_ENABLED = true
         const val DEFAULT_INTERACTIVE_LIGHTNING_ENABLED = true
-        
+
         // New defaults
         const val DEFAULT_ACTIVE_EFFECT = 0
         const val DEFAULT_SUN_SIZE = 50
@@ -147,392 +152,190 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_STORM_VARIABLE_ENABLED = false
     }
 
-    override fun getCloudDensity(): Int {
-        return prefs.getInt(KEY_CLOUD_DENSITY, DEFAULT_CLOUD_DENSITY)
-    }
-
-    override fun getRainIntensity(): Int {
-        return prefs.getInt(KEY_RAIN_INTENSITY, DEFAULT_RAIN_INTENSITY)
-    }
-
-    override fun getLightningFrequency(): Int {
-        return prefs.getInt(KEY_LIGHTNING_FREQUENCY, DEFAULT_LIGHTNING_FREQUENCY)
-    }
-
-    override fun getWindDirection(): Int {
-        return prefs.getInt(KEY_WIND_DIRECTION, DEFAULT_WIND_DIRECTION)
-    }
-
-    override fun getRainColorIndex(): Int {
-        return prefs.getInt(KEY_RAIN_COLOR_INDEX, DEFAULT_RAIN_COLOR_INDEX)
-    }
-
-    override fun getWindIntensity(): Int {
-        return prefs.getInt(KEY_WIND_INTENSITY, DEFAULT_WIND_INTENSITY)
-    }
-
-    override fun getRainSpeed(): Int {
-        return prefs.getInt(KEY_RAIN_SPEED, DEFAULT_RAIN_SPEED)
-    }
-
-    fun setCloudDensity(density: Int) {
-        prefs.edit().putInt(KEY_CLOUD_DENSITY, density.coerceIn(0, 100)).apply()
-    }
-
-    fun setRainIntensity(intensity: Int) {
-        prefs.edit().putInt(KEY_RAIN_INTENSITY, intensity.coerceIn(0, 100)).apply()
-    }
-
-    fun setLightningFrequency(frequency: Int) {
-        prefs.edit().putInt(KEY_LIGHTNING_FREQUENCY, frequency.coerceIn(0, 100)).apply()
-    }
-
-    fun setWindDirection(direction: Int) {
-        prefs.edit().putInt(KEY_WIND_DIRECTION, direction.coerceIn(0, 2)).apply()
-    }
-
-    fun setRainColorIndex(index: Int) {
-        prefs.edit().putInt(KEY_RAIN_COLOR_INDEX, index.coerceIn(0, 5)).apply()
-    }
-
-    fun setWindIntensity(intensity: Int) {
-        prefs.edit().putInt(KEY_WIND_INTENSITY, intensity.coerceIn(0, 100)).apply()
-    }
-
-    fun setRainSpeed(speed: Int) {
-        prefs.edit().putInt(KEY_RAIN_SPEED, speed.coerceIn(0, 100)).apply()
-    }
-
-    override fun getLightningColorIndex(): Int {
-        return prefs.getInt(KEY_LIGHTNING_COLOR_INDEX, DEFAULT_LIGHTNING_COLOR_INDEX)
-    }
-
-    fun setLightningColorIndex(index: Int) {
-        prefs.edit().putInt(KEY_LIGHTNING_COLOR_INDEX, index.coerceIn(0, 6)).apply()
-    }
-
-    override fun getLightningDuration(): Int {
-        return prefs.getInt(KEY_LIGHTNING_DURATION, DEFAULT_LIGHTNING_DURATION)
-    }
-
-    fun setLightningDuration(duration: Int) {
-        prefs.edit().putInt(KEY_LIGHTNING_DURATION, duration.coerceIn(0, 100)).apply()
-    }
-
-    override fun getBackgroundIndex(): Int {
-        return prefs.getInt(KEY_BACKGROUND_INDEX, DEFAULT_BACKGROUND_INDEX)
-    }
-
-    fun setBackgroundIndex(index: Int) {
-        prefs.edit().putInt(KEY_BACKGROUND_INDEX, index.coerceIn(0, 8)).apply()
-    }
-
-    override fun getCloudFlashFrequency(): Int {
-        return prefs.getInt(KEY_CLOUD_FLASH_FREQUENCY, DEFAULT_CLOUD_FLASH_FREQUENCY)
-    }
-
-    fun setCloudFlashFrequency(frequency: Int) {
-        prefs.edit().putInt(KEY_CLOUD_FLASH_FREQUENCY, frequency.coerceIn(0, 100)).apply()
-    }
-
-    override fun getCloudFlashColorIndex(): Int {
-        return prefs.getInt(KEY_CLOUD_FLASH_COLOR_INDEX, DEFAULT_CLOUD_FLASH_COLOR_INDEX)
-    }
-
-    fun setCloudFlashColorIndex(index: Int) {
-        prefs.edit().putInt(KEY_CLOUD_FLASH_COLOR_INDEX, index.coerceIn(0, 6)).apply()
-    }
-
-    override fun getCloudDynamicsSpeed(): Int {
-        return prefs.getInt(KEY_CLOUD_DYNAMICS_SPEED, DEFAULT_CLOUD_DYNAMICS_SPEED)
-    }
-
-    fun setCloudDynamicsSpeed(speed: Int) {
-        prefs.edit().putInt(KEY_CLOUD_DYNAMICS_SPEED, speed.coerceIn(0, 100)).apply()
-    }
-
-    override fun isLightningFlashEnabled(): Boolean {
-        return prefs.getBoolean(KEY_LIGHTNING_FLASH_ENABLED, DEFAULT_LIGHTNING_FLASH_ENABLED)
-    }
-
-    fun setLightningFlashEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_LIGHTNING_FLASH_ENABLED, enabled).apply()
-    }
-
-    override fun isCloudFlashEnabled(): Boolean {
-        return prefs.getBoolean(KEY_CLOUD_FLASH_ENABLED, DEFAULT_CLOUD_FLASH_ENABLED)
-    }
-
-    fun setCloudFlashEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_CLOUD_FLASH_ENABLED, enabled).apply()
-    }
-
-    override fun isInteractiveLightningEnabled(): Boolean {
-        return prefs.getBoolean(KEY_INTERACTIVE_LIGHTNING_ENABLED, DEFAULT_INTERACTIVE_LIGHTNING_ENABLED)
-    }
-
-    fun setInteractiveLightningEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_INTERACTIVE_LIGHTNING_ENABLED, enabled).apply()
-    }
-
-    // New configuration methods
-    override fun getActiveEffect(): Int {
-        return prefs.getInt(KEY_ACTIVE_EFFECT, DEFAULT_ACTIVE_EFFECT)
-    }
-
-    fun setActiveEffect(effect: Int) {
-        prefs.edit().putInt(KEY_ACTIVE_EFFECT, effect.coerceIn(0, 1)).apply()
-    }
-
-    override fun getSunSize(): Int {
-        return prefs.getInt(KEY_SUN_SIZE, DEFAULT_SUN_SIZE)
-    }
-
-    fun setSunSize(size: Int) {
-        prefs.edit().putInt(KEY_SUN_SIZE, size.coerceIn(0, 100)).apply()
-    }
-
-    override fun getSunSpeed(): Int {
-        return prefs.getInt(KEY_SUN_SPEED, DEFAULT_SUN_SPEED)
-    }
-
-    fun setSunSpeed(speed: Int) {
-        prefs.edit().putInt(KEY_SUN_SPEED, speed.coerceIn(0, 100)).apply()
-    }
-
-    override fun getSunnyTheme(): Int {
-        return prefs.getInt(KEY_SUNNY_THEME, DEFAULT_SUNNY_THEME)
-    }
-
-    fun setSunnyTheme(theme: Int) {
-        prefs.edit().putInt(KEY_SUNNY_THEME, theme.coerceIn(0, 3)).apply()
-    }
-
-    override fun getSunPathDirection(): Int {
-        return prefs.getInt(KEY_SUN_PATH_DIRECTION, DEFAULT_SUN_PATH_DIRECTION)
-    }
-
-    fun setSunPathDirection(direction: Int) {
-        prefs.edit().putInt(KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 3)).apply()
-    }
-
-    override fun getSunMoveSpeed(): Int {
-        return prefs.getInt(KEY_SUN_MOVE_SPEED, DEFAULT_SUN_MOVE_SPEED)
-    }
-
-    fun setSunMoveSpeed(speed: Int) {
-        prefs.edit().putInt(KEY_SUN_MOVE_SPEED, speed.coerceIn(0, 100)).apply()
-    }
-
-    override fun getSunnyBackgroundIndex(): Int {
-        return prefs.getInt(KEY_SUNNY_BACKGROUND_INDEX, DEFAULT_SUNNY_BACKGROUND_INDEX)
-    }
-
-    fun setSunnyBackgroundIndex(index: Int) {
-        prefs.edit().putInt(KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 7)).apply()
-    }
-
-    override fun getSunStationaryPosition(): Int {
-        return prefs.getInt(KEY_SUN_STATIONARY_POSITION, DEFAULT_SUN_STATIONARY_POSITION)
-    }
-
-    fun setSunStationaryPosition(position: Int) {
-        prefs.edit().putInt(KEY_SUN_STATIONARY_POSITION, position.coerceIn(0, 5)).apply()
-    }
-
-    override fun getSunCustomX(): Int {
-        return prefs.getInt(KEY_SUN_CUSTOM_X, DEFAULT_SUN_CUSTOM_X)
-    }
-
-    fun setSunCustomX(x: Int) {
-        prefs.edit().putInt(KEY_SUN_CUSTOM_X, x.coerceIn(0, 100)).apply()
-    }
-
-    override fun getSunCustomY(): Int {
-        return prefs.getInt(KEY_SUN_CUSTOM_Y, DEFAULT_SUN_CUSTOM_Y)
-    }
-
-    fun setSunCustomY(y: Int) {
-        prefs.edit().putInt(KEY_SUN_CUSTOM_Y, y.coerceIn(0, 100)).apply()
-    }
-
-    override fun getMoonCustomX(): Int {
-        return prefs.getInt(KEY_MOON_CUSTOM_X, DEFAULT_MOON_CUSTOM_X)
-    }
-
-    fun setMoonCustomX(x: Int) {
-        prefs.edit().putInt(KEY_MOON_CUSTOM_X, x.coerceIn(0, 100)).apply()
-    }
-
-    override fun getMoonCustomY(): Int {
-        return prefs.getInt(KEY_MOON_CUSTOM_Y, DEFAULT_MOON_CUSTOM_Y)
-    }
-
-    fun setMoonCustomY(y: Int) {
-        prefs.edit().putInt(KEY_MOON_CUSTOM_Y, y.coerceIn(0, 100)).apply()
-    }
-
-    override fun getSunnyCustomSkyTopColor(): Int {
-        return prefs.getInt(KEY_SUNNY_CUSTOM_SKY_TOP_COLOR, DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR)
-    }
-
-    fun setSunnyCustomSkyTopColor(color: Int) {
-        prefs.edit().putInt(KEY_SUNNY_CUSTOM_SKY_TOP_COLOR, color).apply()
-    }
+    // Storm mode
+    override fun getCloudDensity(): Int = storm.getCloudDensity()
+    fun setCloudDensity(density: Int) = storm.setCloudDensity(density)
 
-    override fun getSunnyCustomSkyBottomColor(): Int {
-        return prefs.getInt(KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR, DEFAULT_SUNNY_CUSTOM_SKY_BOTTOM_COLOR)
-    }
+    override fun getRainIntensity(): Int = storm.getRainIntensity()
+    fun setRainIntensity(intensity: Int) = storm.setRainIntensity(intensity)
 
-    fun setSunnyCustomSkyBottomColor(color: Int) {
-        prefs.edit().putInt(KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR, color).apply()
-    }
+    override fun getLightningFrequency(): Int = storm.getLightningFrequency()
+    fun setLightningFrequency(frequency: Int) = storm.setLightningFrequency(frequency)
 
-    override fun isSunnyGodRaysEnabled(): Boolean {
-        return prefs.getBoolean(KEY_SUNNY_GOD_RAYS_ENABLED, DEFAULT_SUNNY_GOD_RAYS_ENABLED)
-    }
+    override fun getWindDirection(): Int = storm.getWindDirection()
+    fun setWindDirection(direction: Int) = storm.setWindDirection(direction)
 
-    fun setSunnyGodRaysEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_SUNNY_GOD_RAYS_ENABLED, enabled).apply()
-    }
+    override fun getRainColorIndex(): Int = storm.getRainColorIndex()
+    fun setRainColorIndex(index: Int) = storm.setRainColorIndex(index)
 
-    override fun getSunnyGodRaysIntensity(): Int {
-        return prefs.getInt(KEY_SUNNY_GOD_RAYS_INTENSITY, DEFAULT_SUNNY_GOD_RAYS_INTENSITY)
-    }
+    override fun getWindIntensity(): Int = storm.getWindIntensity()
+    fun setWindIntensity(intensity: Int) = storm.setWindIntensity(intensity)
 
-    fun setSunnyGodRaysIntensity(intensity: Int) {
-        prefs.edit().putInt(KEY_SUNNY_GOD_RAYS_INTENSITY, intensity.coerceIn(0, 100)).apply()
-    }
+    override fun getRainSpeed(): Int = storm.getRainSpeed()
+    fun setRainSpeed(speed: Int) = storm.setRainSpeed(speed)
 
-    override fun isSunnyLensFlareEnabled(): Boolean {
-        return prefs.getBoolean(KEY_SUNNY_LENS_FLARE_ENABLED, DEFAULT_SUNNY_LENS_FLARE_ENABLED)
-    }
+    override fun getLightningColorIndex(): Int = storm.getLightningColorIndex()
+    fun setLightningColorIndex(index: Int) = storm.setLightningColorIndex(index)
 
-    fun setSunnyLensFlareEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_SUNNY_LENS_FLARE_ENABLED, enabled).apply()
-    }
+    override fun getLightningDuration(): Int = storm.getLightningDuration()
+    fun setLightningDuration(duration: Int) = storm.setLightningDuration(duration)
 
-    override fun getSunnyLensFlareIntensity(): Int {
-        return prefs.getInt(KEY_SUNNY_LENS_FLARE_INTENSITY, DEFAULT_SUNNY_LENS_FLARE_INTENSITY)
-    }
+    override fun getBackgroundIndex(): Int = storm.getBackgroundIndex()
+    fun setBackgroundIndex(index: Int) = storm.setBackgroundIndex(index)
 
-    fun setSunnyLensFlareIntensity(intensity: Int) {
-        prefs.edit().putInt(KEY_SUNNY_LENS_FLARE_INTENSITY, intensity.coerceIn(0, 100)).apply()
-    }
+    override fun getCloudFlashFrequency(): Int = storm.getCloudFlashFrequency()
+    fun setCloudFlashFrequency(frequency: Int) = storm.setCloudFlashFrequency(frequency)
 
-    override fun isSunnyGyroEnabled(): Boolean {
-        return prefs.getBoolean(KEY_SUNNY_GYRO_ENABLED, DEFAULT_SUNNY_GYRO_ENABLED)
-    }
+    override fun getCloudFlashColorIndex(): Int = storm.getCloudFlashColorIndex()
+    fun setCloudFlashColorIndex(index: Int) = storm.setCloudFlashColorIndex(index)
 
-    fun setSunnyGyroEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_SUNNY_GYRO_ENABLED, enabled).apply()
-    }
+    override fun getCloudDynamicsSpeed(): Int = storm.getCloudDynamicsSpeed()
+    fun setCloudDynamicsSpeed(speed: Int) = storm.setCloudDynamicsSpeed(speed)
 
-    override fun isSunnyTouchBurstEnabled(): Boolean {
-        return prefs.getBoolean(KEY_SUNNY_TOUCH_BURST_ENABLED, DEFAULT_SUNNY_TOUCH_BURST_ENABLED)
-    }
+    override fun isLightningFlashEnabled(): Boolean = storm.isLightningFlashEnabled()
+    fun setLightningFlashEnabled(enabled: Boolean) = storm.setLightningFlashEnabled(enabled)
 
-    fun setSunnyTouchBurstEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_SUNNY_TOUCH_BURST_ENABLED, enabled).apply()
-    }
+    override fun isCloudFlashEnabled(): Boolean = storm.isCloudFlashEnabled()
+    fun setCloudFlashEnabled(enabled: Boolean) = storm.setCloudFlashEnabled(enabled)
 
-    override fun isScreenDropletsEnabled(): Boolean {
-        return prefs.getBoolean(KEY_SCREEN_DROPLETS_ENABLED, DEFAULT_SCREEN_DROPLETS_ENABLED)
-    }
+    override fun isInteractiveLightningEnabled(): Boolean = storm.isInteractiveLightningEnabled()
+    fun setInteractiveLightningEnabled(enabled: Boolean) = storm.setInteractiveLightningEnabled(enabled)
 
-    fun setScreenDropletsEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_SCREEN_DROPLETS_ENABLED, enabled).apply()
-    }
+    override fun isScreenDropletsEnabled(): Boolean = storm.isScreenDropletsEnabled()
+    fun setScreenDropletsEnabled(enabled: Boolean) = storm.setScreenDropletsEnabled(enabled)
 
-    override fun getScreenDropletsSize(): Int {
-        return prefs.getInt(KEY_SCREEN_DROPLETS_SIZE, DEFAULT_SCREEN_DROPLETS_SIZE)
-    }
+    override fun getScreenDropletsSize(): Int = storm.getScreenDropletsSize()
+    fun setScreenDropletsSize(size: Int) = storm.setScreenDropletsSize(size)
 
-    fun setScreenDropletsSize(size: Int) {
-        prefs.edit().putInt(KEY_SCREEN_DROPLETS_SIZE, size.coerceIn(10, 200)).apply()
-    }
+    override fun getRainSpawnMode(): Int = storm.getRainSpawnMode()
+    fun setRainSpawnMode(mode: Int) = storm.setRainSpawnMode(mode)
 
-    override fun getRainSpawnMode(): Int {
-        return prefs.getInt(KEY_RAIN_SPAWN_MODE, DEFAULT_RAIN_SPAWN_MODE)
-    }
+    override fun isWindLinesEnabled(): Boolean = storm.isWindLinesEnabled()
+    fun setWindLinesEnabled(enabled: Boolean) = storm.setWindLinesEnabled(enabled)
 
-    fun setRainSpawnMode(mode: Int) {
-        prefs.edit().putInt(KEY_RAIN_SPAWN_MODE, mode.coerceIn(0, 2)).apply()
-    }
+    override fun getWindLinesIntensity(): Int = storm.getWindLinesIntensity()
+    fun setWindLinesIntensity(intensity: Int) = storm.setWindLinesIntensity(intensity)
 
-    override fun isWindLinesEnabled(): Boolean {
-        return prefs.getBoolean(KEY_WIND_LINES_ENABLED, DEFAULT_WIND_LINES_ENABLED)
-    }
+    override fun isStormVariableEnabled(): Boolean = storm.isStormVariableEnabled()
+    fun setStormVariableEnabled(enabled: Boolean) = storm.setStormVariableEnabled(enabled)
 
-    fun setWindLinesEnabled(enabled: Boolean) {
-        prefs.edit().putBoolean(KEY_WIND_LINES_ENABLED, enabled).apply()
-    }
+    // Sunny (day) mode
+    override fun getActiveEffect(): Int = sunny.getActiveEffect()
+    fun setActiveEffect(effect: Int) = sunny.setActiveEffect(effect)
 
-    override fun getWindLinesIntensity(): Int {
-        return prefs.getInt(KEY_WIND_LINES_INTENSITY, DEFAULT_WIND_LINES_INTENSITY)
-    }
+    override fun getSunSize(): Int = sunny.getSunSize()
+    fun setSunSize(size: Int) = sunny.setSunSize(size)
 
-    fun setWindLinesIntensity(intensity: Int) {
-        prefs.edit().putInt(KEY_WIND_LINES_INTENSITY, intensity.coerceIn(0, 100)).apply()
-    }
+    override fun getSunSpeed(): Int = sunny.getSunSpeed()
+    fun setSunSpeed(speed: Int) = sunny.setSunSpeed(speed)
 
-    override fun getTimeMode(): Int = prefs.getInt(KEY_TIME_MODE, DEFAULT_TIME_MODE)
-    fun setTimeMode(mode: Int) { prefs.edit().putInt(KEY_TIME_MODE, mode.coerceIn(0, 2)).apply() }
+    override fun getSunnyTheme(): Int = sunny.getSunnyTheme()
+    fun setSunnyTheme(theme: Int) = sunny.setSunnyTheme(theme)
 
-    override fun getMoonPhase(): Int = prefs.getInt(KEY_MOON_PHASE, DEFAULT_MOON_PHASE)
-    fun setMoonPhase(phase: Int) { prefs.edit().putInt(KEY_MOON_PHASE, phase.coerceIn(0, 7)).apply() }
+    override fun getSunPathDirection(): Int = sunny.getSunPathDirection()
+    fun setSunPathDirection(direction: Int) = sunny.setSunPathDirection(direction)
 
-    override fun getMoonPathDirection(): Int = prefs.getInt(KEY_MOON_PATH_DIRECTION, DEFAULT_MOON_PATH_DIRECTION)
-    fun setMoonPathDirection(dir: Int) { prefs.edit().putInt(KEY_MOON_PATH_DIRECTION, dir.coerceIn(0, 3)).apply() }
+    override fun getSunMoveSpeed(): Int = sunny.getSunMoveSpeed()
+    fun setSunMoveSpeed(speed: Int) = sunny.setSunMoveSpeed(speed)
 
-    override fun getMoonMoveSpeed(): Int = prefs.getInt(KEY_MOON_MOVE_SPEED, DEFAULT_MOON_MOVE_SPEED)
-    fun setMoonMoveSpeed(speed: Int) { prefs.edit().putInt(KEY_MOON_MOVE_SPEED, speed.coerceIn(0, 100)).apply() }
+    override fun getSunnyBackgroundIndex(): Int = sunny.getSunnyBackgroundIndex()
+    fun setSunnyBackgroundIndex(index: Int) = sunny.setSunnyBackgroundIndex(index)
 
-    override fun getMoonStationaryPosition(): Int = prefs.getInt(KEY_MOON_STATIONARY_POSITION, DEFAULT_MOON_STATIONARY_POSITION)
-    fun setMoonStationaryPosition(pos: Int) { prefs.edit().putInt(KEY_MOON_STATIONARY_POSITION, pos.coerceIn(0, 5)).apply() }
+    override fun getSunStationaryPosition(): Int = sunny.getSunStationaryPosition()
+    fun setSunStationaryPosition(position: Int) = sunny.setSunStationaryPosition(position)
 
-    override fun getStarColorIndex(): Int = prefs.getInt(KEY_STAR_COLOR_INDEX, DEFAULT_STAR_COLOR_INDEX)
-    fun setStarColorIndex(index: Int) { prefs.edit().putInt(KEY_STAR_COLOR_INDEX, index.coerceIn(0, 5)).apply() }
+    override fun getSunCustomX(): Int = sunny.getSunCustomX()
+    fun setSunCustomX(x: Int) = sunny.setSunCustomX(x)
 
-    override fun getStarDensity(): Int = prefs.getInt(KEY_STAR_DENSITY, DEFAULT_STAR_DENSITY)
-    fun setStarDensity(density: Int) { prefs.edit().putInt(KEY_STAR_DENSITY, density.coerceIn(0, 100)).apply() }
+    override fun getSunCustomY(): Int = sunny.getSunCustomY()
+    fun setSunCustomY(y: Int) = sunny.setSunCustomY(y)
 
-    override fun getStarMode(): Int = prefs.getInt(KEY_STAR_MODE, DEFAULT_STAR_MODE)
-    fun setStarMode(mode: Int) { prefs.edit().putInt(KEY_STAR_MODE, mode.coerceIn(0, 1)).apply() }
+    override fun getMoonCustomX(): Int = sunny.getMoonCustomX()
+    fun setMoonCustomX(x: Int) = sunny.setMoonCustomX(x)
 
-    override fun getNightCloudDensity(): Int = prefs.getInt(KEY_NIGHT_CLOUD_DENSITY, DEFAULT_NIGHT_CLOUD_DENSITY)
-    fun setNightCloudDensity(density: Int) { prefs.edit().putInt(KEY_NIGHT_CLOUD_DENSITY, density.coerceIn(0, 100)).apply() }
+    override fun getMoonCustomY(): Int = sunny.getMoonCustomY()
+    fun setMoonCustomY(y: Int) = sunny.setMoonCustomY(y)
 
-    override fun getGradientCycleSpeed(): Int = prefs.getInt(KEY_GRADIENT_CYCLE_SPEED, DEFAULT_GRADIENT_CYCLE_SPEED)
-    fun setGradientCycleSpeed(speed: Int) { prefs.edit().putInt(KEY_GRADIENT_CYCLE_SPEED, speed.coerceIn(0, 100)).apply() }
+    override fun getSunnyCustomSkyTopColor(): Int = sunny.getSunnyCustomSkyTopColor()
+    fun setSunnyCustomSkyTopColor(color: Int) = sunny.setSunnyCustomSkyTopColor(color)
 
-    override fun getCombinedSunSize(): Int = prefs.getInt(KEY_COMBINED_SUN_SIZE, DEFAULT_COMBINED_SUN_SIZE)
-    fun setCombinedSunSize(size: Int) { prefs.edit().putInt(KEY_COMBINED_SUN_SIZE, size.coerceIn(0, 100)).apply() }
+    override fun getSunnyCustomSkyBottomColor(): Int = sunny.getSunnyCustomSkyBottomColor()
+    fun setSunnyCustomSkyBottomColor(color: Int) = sunny.setSunnyCustomSkyBottomColor(color)
 
-    override fun getCombinedMoonSize(): Int = prefs.getInt(KEY_COMBINED_MOON_SIZE, DEFAULT_COMBINED_MOON_SIZE)
-    fun setCombinedMoonSize(size: Int) { prefs.edit().putInt(KEY_COMBINED_MOON_SIZE, size.coerceIn(0, 100)).apply() }
+    override fun isSunnyGodRaysEnabled(): Boolean = sunny.isSunnyGodRaysEnabled()
+    fun setSunnyGodRaysEnabled(enabled: Boolean) = sunny.setSunnyGodRaysEnabled(enabled)
 
-    override fun getCombinedMoonPhase(): Int = prefs.getInt(KEY_COMBINED_MOON_PHASE, DEFAULT_COMBINED_MOON_PHASE)
-    fun setCombinedMoonPhase(phase: Int) { prefs.edit().putInt(KEY_COMBINED_MOON_PHASE, phase.coerceIn(0, 7)).apply() }
+    override fun getSunnyGodRaysIntensity(): Int = sunny.getSunnyGodRaysIntensity()
+    fun setSunnyGodRaysIntensity(intensity: Int) = sunny.setSunnyGodRaysIntensity(intensity)
 
-    override fun getCombinedStarDensity(): Int = prefs.getInt(KEY_COMBINED_STAR_DENSITY, DEFAULT_COMBINED_STAR_DENSITY)
-    fun setCombinedStarDensity(density: Int) { prefs.edit().putInt(KEY_COMBINED_STAR_DENSITY, density.coerceIn(0, 100)).apply() }
+    override fun isSunnyLensFlareEnabled(): Boolean = sunny.isSunnyLensFlareEnabled()
+    fun setSunnyLensFlareEnabled(enabled: Boolean) = sunny.setSunnyLensFlareEnabled(enabled)
 
-    override fun getCombinedStarColorIndex(): Int = prefs.getInt(KEY_COMBINED_STAR_COLOR_INDEX, DEFAULT_COMBINED_STAR_COLOR_INDEX)
-    fun setCombinedStarColorIndex(index: Int) { prefs.edit().putInt(KEY_COMBINED_STAR_COLOR_INDEX, index.coerceIn(0, 5)).apply() }
+    override fun getSunnyLensFlareIntensity(): Int = sunny.getSunnyLensFlareIntensity()
+    fun setSunnyLensFlareIntensity(intensity: Int) = sunny.setSunnyLensFlareIntensity(intensity)
 
-    override fun getCombinedPathDirection(): Int = prefs.getInt(KEY_COMBINED_PATH_DIRECTION, DEFAULT_COMBINED_PATH_DIRECTION)
-    fun setCombinedPathDirection(dir: Int) { prefs.edit().putInt(KEY_COMBINED_PATH_DIRECTION, dir.coerceIn(0, 3)).apply() }
+    override fun isSunnyGyroEnabled(): Boolean = sunny.isSunnyGyroEnabled()
+    fun setSunnyGyroEnabled(enabled: Boolean) = sunny.setSunnyGyroEnabled(enabled)
 
-    override fun isShootingStarsEnabled(): Boolean = prefs.getBoolean(KEY_SHOOTING_STARS_ENABLED, DEFAULT_SHOOTING_STARS_ENABLED)
-    fun setShootingStarsEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_SHOOTING_STARS_ENABLED, enabled).apply() }
+    override fun isSunnyTouchBurstEnabled(): Boolean = sunny.isSunnyTouchBurstEnabled()
+    fun setSunnyTouchBurstEnabled(enabled: Boolean) = sunny.setSunnyTouchBurstEnabled(enabled)
 
-    override fun getShootingStarsDensity(): Int = prefs.getInt(KEY_SHOOTING_STARS_DENSITY, DEFAULT_SHOOTING_STARS_DENSITY)
-    fun setShootingStarsDensity(density: Int) { prefs.edit().putInt(KEY_SHOOTING_STARS_DENSITY, density.coerceIn(0, 100)).apply() }
+    override fun isFirefliesEnabled(): Boolean = sunny.isFirefliesEnabled()
+    fun setFirefliesEnabled(enabled: Boolean) = sunny.setFirefliesEnabled(enabled)
 
-    override fun isFirefliesEnabled(): Boolean = prefs.getBoolean(KEY_FIREFLIES_ENABLED, DEFAULT_FIREFLIES_ENABLED)
-    fun setFirefliesEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_FIREFLIES_ENABLED, enabled).apply() }
+    // Night mode
+    override fun getTimeMode(): Int = night.getTimeMode()
+    fun setTimeMode(mode: Int) = night.setTimeMode(mode)
 
-    override fun isStormVariableEnabled(): Boolean = prefs.getBoolean(KEY_STORM_VARIABLE_ENABLED, DEFAULT_STORM_VARIABLE_ENABLED)
-    fun setStormVariableEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_STORM_VARIABLE_ENABLED, enabled).apply() }
+    override fun getMoonPhase(): Int = night.getMoonPhase()
+    fun setMoonPhase(phase: Int) = night.setMoonPhase(phase)
+
+    override fun getMoonPathDirection(): Int = night.getMoonPathDirection()
+    fun setMoonPathDirection(dir: Int) = night.setMoonPathDirection(dir)
+
+    override fun getMoonMoveSpeed(): Int = night.getMoonMoveSpeed()
+    fun setMoonMoveSpeed(speed: Int) = night.setMoonMoveSpeed(speed)
+
+    override fun getMoonStationaryPosition(): Int = night.getMoonStationaryPosition()
+    fun setMoonStationaryPosition(pos: Int) = night.setMoonStationaryPosition(pos)
+
+    override fun getStarColorIndex(): Int = night.getStarColorIndex()
+    fun setStarColorIndex(index: Int) = night.setStarColorIndex(index)
+
+    override fun getStarDensity(): Int = night.getStarDensity()
+    fun setStarDensity(density: Int) = night.setStarDensity(density)
+
+    override fun getStarMode(): Int = night.getStarMode()
+    fun setStarMode(mode: Int) = night.setStarMode(mode)
+
+    override fun getNightCloudDensity(): Int = night.getNightCloudDensity()
+    fun setNightCloudDensity(density: Int) = night.setNightCloudDensity(density)
+
+    override fun getGradientCycleSpeed(): Int = night.getGradientCycleSpeed()
+    fun setGradientCycleSpeed(speed: Int) = night.setGradientCycleSpeed(speed)
+
+    override fun isShootingStarsEnabled(): Boolean = night.isShootingStarsEnabled()
+    fun setShootingStarsEnabled(enabled: Boolean) = night.setShootingStarsEnabled(enabled)
+
+    override fun getShootingStarsDensity(): Int = night.getShootingStarsDensity()
+    fun setShootingStarsDensity(density: Int) = night.setShootingStarsDensity(density)
+
+    // Combined day+night mode
+    override fun getCombinedSunSize(): Int = combined.getCombinedSunSize()
+    fun setCombinedSunSize(size: Int) = combined.setCombinedSunSize(size)
+
+    override fun getCombinedMoonSize(): Int = combined.getCombinedMoonSize()
+    fun setCombinedMoonSize(size: Int) = combined.setCombinedMoonSize(size)
+
+    override fun getCombinedMoonPhase(): Int = combined.getCombinedMoonPhase()
+    fun setCombinedMoonPhase(phase: Int) = combined.setCombinedMoonPhase(phase)
+
+    override fun getCombinedStarDensity(): Int = combined.getCombinedStarDensity()
+    fun setCombinedStarDensity(density: Int) = combined.setCombinedStarDensity(density)
+
+    override fun getCombinedStarColorIndex(): Int = combined.getCombinedStarColorIndex()
+    fun setCombinedStarColorIndex(index: Int) = combined.setCombinedStarColorIndex(index)
+
+    override fun getCombinedPathDirection(): Int = combined.getCombinedPathDirection()
+    fun setCombinedPathDirection(dir: Int) = combined.setCombinedPathDirection(dir)
 }

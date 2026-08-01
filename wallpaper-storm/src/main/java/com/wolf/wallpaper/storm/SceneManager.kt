@@ -9,6 +9,47 @@ class SceneManager(
     private val context: Context?,
     val configProvider: ConfigProvider
 ) {
+    companion object {
+        // Variable Storm Mode cycle timings (seconds)
+        private const val STORM_BURST_DURATION = 30.0f
+        private const val STORM_CALM_DURATION = 60.0f
+        private const val STORM_TRANSITION_DURATION = 15.0f
+
+        // Current-value smoothing rate (lerp fraction per second)
+        private const val VALUE_LERP_RATE = 5f
+
+        // Wind angle / cloud drift
+        private const val MAX_WIND_ANGLE_DEGREES = 35f
+        private const val MAX_CLOUD_WIND_SPEED = 0.15f
+        private const val CLOUD_WRAP_SCALE_FACTOR = 2.4f
+        private const val CLOUD_DRIFT_WIND_THRESHOLD = 0.1f
+
+        // Wind lines
+        private const val WIND_LINES_MIN_INTENSITY = 50
+        private const val WIND_LINES_MAX_COUNT = 8
+        private const val WIND_LINES_HARD_CAP = 15
+
+        // Variable Storm Mode target ranges (calm -> burst), mixed by transition factor
+        private const val VARIABLE_CLOUD_DENSITY_CALM = 40
+        private const val VARIABLE_CLOUD_DENSITY_BURST = 90
+        private const val VARIABLE_RAIN_INTENSITY_CALM = 15
+        private const val VARIABLE_RAIN_INTENSITY_BURST = 95
+        private const val VARIABLE_LIGHTNING_FREQ_CALM = 10
+        private const val VARIABLE_LIGHTNING_FREQ_BURST = 85
+        private const val VARIABLE_CLOUD_FLASH_FREQ_CALM = 10
+        private const val VARIABLE_CLOUD_FLASH_FREQ_BURST = 80
+        private const val VARIABLE_WIND_INTENSITY_CALM = 15
+        private const val VARIABLE_WIND_INTENSITY_BURST = 95
+        private const val VARIABLE_RAIN_SPEED_CALM = 35
+        private const val VARIABLE_RAIN_SPEED_BURST = 85
+
+        // Cloud count mapping (density 0-100 -> cloud count, max 10)
+        private const val MAX_CLOUD_COUNT = 10
+
+        // Rain drop count mapping (intensity 0-100 -> drop count, max 1000)
+        private const val MAX_RAIN_DROP_COUNT = 1000
+    }
+
     private val clouds = mutableListOf<StormCloud>()
     private val rainDrops = mutableListOf<RainDrop>()
     private val windLines = mutableListOf<WindLine>()
@@ -81,12 +122,12 @@ class SceneManager(
         if (configProvider.isStormVariableEnabled()) {
             stormCycleTime += deltaTime
             if (isBurstActive) {
-                if (stormCycleTime >= 30.0f) { // 30s burst
+                if (stormCycleTime >= STORM_BURST_DURATION) {
                     isBurstActive = false
                     stormCycleTime = 0f
                 }
             } else {
-                if (stormCycleTime >= 60.0f) { // 60s calm
+                if (stormCycleTime >= STORM_CALM_DURATION) {
                     isBurstActive = true
                     stormCycleTime = 0f
                     // Choose random wind direction for the burst (0: left, 2: right)
@@ -94,9 +135,9 @@ class SceneManager(
                 }
             }
 
-            // Smoothly interpolate transition factor (takes 15 seconds: rate = 0.0667f)
+            // Smoothly interpolate transition factor
             val targetTransition = if (isBurstActive) 1.0f else 0.0f
-            val transitionRate = 1.0f / 15.0f
+            val transitionRate = 1.0f / STORM_TRANSITION_DURATION
             if (stormTransitionFactor < targetTransition) {
                 stormTransitionFactor = (stormTransitionFactor + transitionRate * deltaTime).coerceAtMost(targetTransition)
             } else if (stormTransitionFactor > targetTransition) {
@@ -111,26 +152,25 @@ class SceneManager(
         updateFromConfig()
 
         // Interpolate current values (lerp)
-        val lerpFactor = 5f * deltaTime
+        val lerpFactor = VALUE_LERP_RATE * deltaTime
         currentWindAngle += (targetWindAngle - currentWindAngle) * lerpFactor.coerceAtMost(1f)
         currentRainSpeed += (targetRainSpeed - currentRainSpeed) * lerpFactor.coerceAtMost(1f)
 
         // 1. Update Clouds
         val windSpeed = when (windDirection) {
-            0 -> -(windIntensity / 100f) * 0.15f
-            2 -> (windIntensity / 100f) * 0.15f
+            0 -> -(windIntensity / 100f) * MAX_CLOUD_WIND_SPEED
+            2 -> (windIntensity / 100f) * MAX_CLOUD_WIND_SPEED
             else -> 0f
         }
         val dynamicsSpeed = configProvider.getCloudDynamicsSpeed() / 100f
         for (cloud in clouds) {
             cloud.update(deltaTime, windSpeed, dynamicsSpeed)
-            val halfWidth = cloud.scale * 2.4f
+            val halfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
                 cloud.reset(0f, aspectRatio, textureCount = getCloudTextureCount())
-                val newHalfWidth = cloud.scale * 2.4f
-                val windThreshold = 0.1f
-                val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
+                val newHalfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
+                val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / CLOUD_DRIFT_WIND_THRESHOLD)).coerceIn(0f, 1f)
                 val netSpeed = windSpeed + (cloud.driftSpeed * driftInfluence)
                 if (netSpeed >= 0f) {
                     cloud.positionX = -aspectRatio - newHalfWidth
@@ -159,8 +199,8 @@ class SceneManager(
         }
 
         // 2b. Update Wind Lines
-        val targetWindLinesCount = if (configProvider.isWindLinesEnabled() && windIntensity >= 50) {
-            (configProvider.getWindLinesIntensity() / 100f * 8).toInt().coerceIn(1, 15)
+        val targetWindLinesCount = if (configProvider.isWindLinesEnabled() && windIntensity >= WIND_LINES_MIN_INTENSITY) {
+            (configProvider.getWindLinesIntensity() / 100f * WIND_LINES_MAX_COUNT).toInt().coerceIn(1, WIND_LINES_HARD_CAP)
         } else {
             0
         }
@@ -241,6 +281,10 @@ class SceneManager(
 
     fun getClouds(): List<StormCloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
+    // Sorts the internal rain drop / wind line lists in place by depth (z), letting callers
+    // avoid re-sorting into a freshly allocated list every frame.
+    fun sortRainDropsByDepth() { rainDrops.sortBy { it.z } }
+    fun sortWindLinesByDepth() { windLines.sortBy { it.z } }
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
     fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()
@@ -251,25 +295,32 @@ class SceneManager(
     fun isWindLinesEnabled(): Boolean = configProvider.isWindLinesEnabled()
     fun getWindIntensity(): Int = windIntensity
 
+    private var cachedLightningTextureCount: Int? = null
+    private var cachedCloudTextureCount: Int? = null
+
     fun getLightningTextureCount(): Int {
-        if (context == null) return 1
-        return try {
+        cachedLightningTextureCount?.let { return it }
+        val count = if (context == null) 1 else try {
             val files = context.assets.list("lightning") ?: emptyArray()
-            files.filter { it.endsWith(".png") }.size
+            files.count { it.endsWith(".png") }
         } catch (e: Exception) {
             1
         }
+        cachedLightningTextureCount = count
+        return count
     }
 
     fun getCloudTextureCount(): Int {
-        if (context == null) return 1
-        return try {
+        cachedCloudTextureCount?.let { return it }
+        val count = if (context == null) 1 else try {
             val files = context.assets.list("clouds") ?: emptyArray()
-            val count = files.filter { it.endsWith(".png") }.size
-            if (count > 0) count else 1
+            val pngCount = files.count { it.endsWith(".png") }
+            if (pngCount > 0) pngCount else 1
         } catch (e: Exception) {
             1
         }
+        cachedCloudTextureCount = count
+        return count
     }
 
     private fun mixInt(start: Int, end: Int, fraction: Float): Int {
@@ -285,25 +336,25 @@ class SceneManager(
         val smoothFactor = smoothstep(stormTransitionFactor)
 
         val targetDensity = if (isVariable) {
-            mixInt(40, 90, smoothFactor)
+            mixInt(VARIABLE_CLOUD_DENSITY_CALM, VARIABLE_CLOUD_DENSITY_BURST, smoothFactor)
         } else {
             configProvider.getCloudDensity()
         }
 
         val targetRain = if (isVariable) {
-            mixInt(15, 95, smoothFactor)
+            mixInt(VARIABLE_RAIN_INTENSITY_CALM, VARIABLE_RAIN_INTENSITY_BURST, smoothFactor)
         } else {
             configProvider.getRainIntensity()
         }
 
         val targetLightning = if (isVariable) {
-            mixInt(10, 85, smoothFactor)
+            mixInt(VARIABLE_LIGHTNING_FREQ_CALM, VARIABLE_LIGHTNING_FREQ_BURST, smoothFactor)
         } else {
             configProvider.getLightningFrequency()
         }
 
         val targetCloudFlashFreq = if (isVariable) {
-            mixInt(10, 80, smoothFactor)
+            mixInt(VARIABLE_CLOUD_FLASH_FREQ_CALM, VARIABLE_CLOUD_FLASH_FREQ_BURST, smoothFactor)
         } else {
             configProvider.getCloudFlashFrequency()
         }
@@ -315,13 +366,13 @@ class SceneManager(
         }
 
         val targetWindIntensity = if (isVariable) {
-            mixInt(15, 95, smoothFactor)
+            mixInt(VARIABLE_WIND_INTENSITY_CALM, VARIABLE_WIND_INTENSITY_BURST, smoothFactor)
         } else {
             configProvider.getWindIntensity()
         }
 
         val targetRainSpeedVal = if (isVariable) {
-            mixInt(35, 85, smoothFactor)
+            mixInt(VARIABLE_RAIN_SPEED_CALM, VARIABLE_RAIN_SPEED_BURST, smoothFactor)
         } else {
             configProvider.getRainSpeed()
         }
@@ -333,8 +384,8 @@ class SceneManager(
 
         // Calculate target values
         targetWindAngle = when (targetWind) {
-            0 -> -(targetWindIntensity / 100f) * 35f
-            2 -> (targetWindIntensity / 100f) * 35f
+            0 -> -(targetWindIntensity / 100f) * MAX_WIND_ANGLE_DEGREES
+            2 -> (targetWindIntensity / 100f) * MAX_WIND_ANGLE_DEGREES
             else -> 0f
         }
         targetRainSpeed = targetRainSpeedVal.toFloat()
@@ -373,9 +424,9 @@ class SceneManager(
                 75 -> 8
                 90 -> 9
                 100 -> 10
-                else -> (density / 100f * 10).toInt()
+                else -> (density / 100f * MAX_CLOUD_COUNT).toInt()
             }
-        }.coerceIn(0, 10)
+        }.coerceIn(0, MAX_CLOUD_COUNT)
         val textureCount = getCloudTextureCount()
         
         val activeClouds = clouds.filter { !it.isFadingOut }
@@ -418,7 +469,7 @@ class SceneManager(
             75 -> 62
             100 -> 187
             else -> (intensity / 100f * 187).toInt()
-        }.coerceIn(0, 1000)
+        }.coerceIn(0, MAX_RAIN_DROP_COUNT)
         
         val allowFallback = configProvider.getRainSpawnMode() != 1
         while (rainDrops.size < targetCount) {
@@ -432,81 +483,46 @@ class SceneManager(
         }
     }
 
-    private fun setupNextLightningDelay() {
-        if (lightningFrequency <= 0) {
-            nextLightningDelay = Float.MAX_VALUE
-            return
-        }
+    // Maps an event frequency (0-100) to a delay in seconds, with random variance applied:
+    // 0 -> Never, 25 -> 20s, 50 -> 5s, 75 -> 2s, 90 -> 0.8s, 100 -> 0.25s
+    private fun frequencyToDelay(frequency: Int): Float {
+        if (frequency <= 0) return Float.MAX_VALUE
 
-        // Map frequency to delay in seconds:
-        // 0 -> Never
-        // 25 -> 20s
-        // 50 -> 5s
-        // 75 -> 2s
-        // 90 -> 0.8s
-        // 100 -> 0.25s
         val baseDelay = when {
-            lightningFrequency <= 25 -> {
-                val t = lightningFrequency / 25f
+            frequency <= 25 -> {
+                val t = frequency / 25f
                 if (t <= 0.05f) 3600f else 60f - t * 40f
             }
-            lightningFrequency <= 50 -> {
-                val t = (lightningFrequency - 25) / 25f
+            frequency <= 50 -> {
+                val t = (frequency - 25) / 25f
                 20f - t * 15f
             }
-            lightningFrequency <= 75 -> {
-                val t = (lightningFrequency - 50) / 25f
+            frequency <= 75 -> {
+                val t = (frequency - 50) / 25f
                 5f - t * 3f
             }
-            lightningFrequency <= 90 -> {
-                val t = (lightningFrequency - 75) / 15f
+            frequency <= 90 -> {
+                val t = (frequency - 75) / 15f
                 2f - t * 1.2f
             }
             else -> {
-                val t = (lightningFrequency - 90) / 10f
+                val t = (frequency - 90) / 10f
                 0.8f - t * 0.55f
             }
         }
-        
+
         // Add random variance (+/- 40% maximum tolerance) to make intervals feel natural and variable
         val maxVariance = 0.40f
         val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
-        nextLightningDelay = baseDelay + variance
+        return baseDelay + variance
+    }
+
+    private fun setupNextLightningDelay() {
+        nextLightningDelay = frequencyToDelay(lightningFrequency)
     }
 
     private fun setupNextCloudFlashDelay() {
-        val freq = cloudFlashFrequency
-        if (freq <= 0) {
-            nextCloudFlashDelay = Float.MAX_VALUE
-            return
-        }
-
-        val baseDelay = when {
-            freq <= 25 -> {
-                val t = freq / 25f
-                if (t <= 0.05f) 3600f else 60f - t * 40f
-            }
-            freq <= 50 -> {
-                val t = (freq - 25) / 25f
-                20f - t * 15f
-            }
-            freq <= 75 -> {
-                val t = (freq - 50) / 25f
-                5f - t * 3f
-            }
-            freq <= 90 -> {
-                val t = (freq - 75) / 15f
-                2f - t * 1.2f
-            }
-            else -> {
-                val t = (freq - 90) / 10f
-                0.8f - t * 0.55f
-            }
-        }
-        
-        val maxVariance = 0.40f
-        val variance = (Random.nextFloat() * 2f - 1f) * maxVariance * baseDelay
-        nextCloudFlashDelay = baseDelay + variance
+        nextCloudFlashDelay = frequencyToDelay(cloudFlashFrequency)
     }
 
     fun queueTouch(x: Float, y: Float) {

@@ -15,6 +15,13 @@ class RainDrop(
     var spawnDelay: Float = 0f
 ) : StormObject {
 
+    companion object {
+        // Cloud-spawned drops scale with both cloud scale and depth (z), which otherwise
+        // makes drops from close-up (high z) clouds look oversized. Cap their length so
+        // close clouds don't produce disproportionately large drops.
+        private const val MAX_CLOUD_RAIN_LENGTH = 0.13f
+    }
+
     var z: Float = 1.0f
     var isActive = false
     var spawnX: Float = 0f
@@ -72,7 +79,7 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        length = spawnCloud.baseScale * 0.1344f * z // 0.168 * 0.8 = 20% shorter
+        length = (spawnCloud.baseScale * 0.1344f * z).coerceAtMost(MAX_CLOUD_RAIN_LENGTH) // 0.168 * 0.8 = 20% shorter, capped for close-up clouds
         
         parentCloud = spawnCloud
         spawnFromCloud = true
