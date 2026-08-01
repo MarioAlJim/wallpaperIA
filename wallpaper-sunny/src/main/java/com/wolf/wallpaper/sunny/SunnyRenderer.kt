@@ -59,6 +59,26 @@ class SunnyRenderer(
     private var bgSkyBottomHandle = -1
     private var bgNightIntensityHandle = -1
     private var bgMoonPhaseMultiplierHandle = -1
+    private var bgMvpMatrixHandle = -1
+    private var bgTextureHandleCached = -1
+
+    // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
+    // the background program's own bgNightIntensityHandle above)
+    private var dayNightIntensityHandle = -1
+
+    // Cloud handles (cloudProgram is shared by drawNightClouds and drawClouds; both
+    // uniform sets are identical since it's the same shader program)
+    private var cloudMvpMatrixHandle = -1
+    private var cloudOpacityHandleCached = -1
+    private var cloudTextureHandleCached = -1
+    private var cloudFlashIntensityHandleCached = -1
+    private var cloudFlashColorHandleCached = -1
+    private var cloudCloudColorHandleCached = -1
+    private var cloudVariationHandle = -1
+    private var cloudMoonPosHandle = -1
+    private var cloudCloudPosHandle = -1
+    private var cloudCloudScaleHandleCached = -1
+    private var cloudSilverLiningIntensityHandle = -1
 
     // Handles for lens_flare.frag
     private var lfSunPosHandle = -1
@@ -219,6 +239,12 @@ class SunnyRenderer(
     private var combinedDayIntensity = 1f
     private var combinedNightIntensity = 0f
 
+    // Tracks the last density passed to adjustClouds/adjustNightClouds so they only
+    // re-run their cloud-count bookkeeping (filtering, spawning/fading) when the
+    // configured density actually changes, instead of every frame regardless.
+    private var lastDayCloudDensity = -1
+    private var lastNightCloudDensity = -1
+
     // Clouds
     private val clouds = mutableListOf<Cloud>()
     private val cloudTextures = mutableListOf<Int>()
@@ -264,6 +290,7 @@ class SunnyRenderer(
         skyBottomHandle = GLES30.glGetUniformLocation(program, "uSkyBottom")
         godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
+        dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
 
         // Compile and link lens flare shader
         try {
@@ -327,6 +354,18 @@ class SunnyRenderer(
         val cloudFrag = readAssetFile(context, "shaders/procedural_cloud.frag")
         cloudProgram = createProgram(cloudVert, cloudFrag)
 
+        cloudMvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
+        cloudOpacityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
+        cloudTextureHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
+        cloudFlashIntensityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
+        cloudFlashColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
+        cloudCloudColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        cloudVariationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
+        cloudMoonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
+        cloudCloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
+        cloudCloudScaleHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+        cloudSilverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
+
         // Compile and link background shader
         val bgVert = readAssetFile(context, "shaders/sunny_background.vert")
         val bgFrag = readAssetFile(context, "shaders/sunny_background.frag")
@@ -340,6 +379,8 @@ class SunnyRenderer(
         bgSkyBottomHandle = GLES30.glGetUniformLocation(backgroundProgram, "uSkyBottom")
         bgNightIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNightIntensity")
         bgMoonPhaseMultiplierHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMoonPhaseMultiplier")
+        bgMvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
+        bgTextureHandleCached = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
 
 
 
@@ -678,7 +719,10 @@ class SunnyRenderer(
         // 3. Clouds simulation updates (Day/Combined)
         val dayCloudsActive = (timeMode == 0 || timeMode == 2)
         val dayDensity = if (dayCloudsActive) configProvider.getCloudDensity() else 0
-        adjustClouds(dayDensity)
+        if (dayDensity != lastDayCloudDensity) {
+            adjustClouds(dayDensity)
+            lastDayCloudDensity = dayDensity
+        }
 
         for (cloud in clouds) {
             cloud.update(deltaTime, windSpeed, dynamicsSpeed)
@@ -722,7 +766,10 @@ class SunnyRenderer(
         // Night clouds simulation updates (Night/Combined)
         val nightCloudsActive = (timeMode == 1 || timeMode == 2)
         val nightDensity = if (nightCloudsActive) configProvider.getCloudDensity() else 0
-        adjustNightClouds(nightDensity)
+        if (nightDensity != lastNightCloudDensity) {
+            adjustNightClouds(nightDensity)
+            lastNightCloudDensity = nightDensity
+        }
 
         if (nightCloudsActive || nightClouds.isNotEmpty()) {
             for (nc in nightClouds) {
@@ -983,8 +1030,7 @@ class SunnyRenderer(
         GLES30.glUniform1f(sunFadeFactorHandle, pathFadeFactor * intensity)
 
         // Pass night intensity uniform to sky shader
-        val nightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
-        GLES30.glUniform1f(nightIntensityHandle, nightIntensity)
+        GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
 
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()
@@ -1252,17 +1298,17 @@ class SunnyRenderer(
         if (nightClouds.isEmpty() || cloudProgram == 0) return
         GLES30.glUseProgram(cloudProgram)
 
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
-        val opacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
-        val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
-        val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
-        val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
-        val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
-        val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
-        val moonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
-        val cloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
-        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
-        val silverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
+        val mvpMatrixHandle = cloudMvpMatrixHandle
+        val opacityHandle = cloudOpacityHandleCached
+        val textureHandle = cloudTextureHandleCached
+        val flashIntensityHandle = cloudFlashIntensityHandleCached
+        val flashColorHandle = cloudFlashColorHandleCached
+        val cloudColorHandle = cloudCloudColorHandleCached
+        val variationHandle = cloudVariationHandle
+        val moonPosHandle = cloudMoonPosHandle
+        val cloudPosHandle = cloudCloudPosHandle
+        val cloudScaleHandle = cloudCloudScaleHandleCached
+        val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
 
         // Night clouds color: slightly darker/cooler/blue-ish gray tint
         GLES30.glUniform3f(cloudColorHandle, 0.35f, 0.42f, 0.55f)
@@ -1351,17 +1397,17 @@ class SunnyRenderer(
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
-        val opacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
-        val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
-        val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
-        val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
-        val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
-        val variationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
-        val moonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
-        val cloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
-        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
-        val silverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
+        val mvpMatrixHandle = cloudMvpMatrixHandle
+        val opacityHandle = cloudOpacityHandleCached
+        val textureHandle = cloudTextureHandleCached
+        val flashIntensityHandle = cloudFlashIntensityHandleCached
+        val flashColorHandle = cloudFlashColorHandleCached
+        val cloudColorHandle = cloudCloudColorHandleCached
+        val variationHandle = cloudVariationHandle
+        val moonPosHandle = cloudMoonPosHandle
+        val cloudPosHandle = cloudCloudPosHandle
+        val cloudScaleHandle = cloudCloudScaleHandleCached
+        val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
 
         GLES30.glUniform2f(moonPosHandle, 0f, 0f)
         GLES30.glUniform1f(silverLiningIntensityHandle, 0f) // Disabled during day
@@ -1592,8 +1638,8 @@ class SunnyRenderer(
         if (textureId == 0) return
 
         GLES30.glUseProgram(backgroundProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
-        val textureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
+        val mvpMatrixHandle = bgMvpMatrixHandle
+        val textureHandle = bgTextureHandleCached
 
         // Pass theme, sun position, aspect ratio, and custom image flag to the shader
         val theme = configProvider.getSunnyTheme()

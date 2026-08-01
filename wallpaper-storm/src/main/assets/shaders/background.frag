@@ -54,7 +54,10 @@ float fbm(highp vec2 p) {
     return value;
 }
 
-// Computes lens distortion, specular highlight, border shading, trails, and smooth metaball blending for raindrops on screen
+// Computes lens distortion, specular highlight, and border shading for a single droplet
+// per grid cell that impacts, slides down, and stretches vertically as it slides (no trail —
+// removed for performance; the trail's per-pixel sin()-based refraction was the most
+// expensive part of this loop for comparatively little visual payoff).
 vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     highp vec2 distortion = vec2(0.0, 0.0);
     float spec = 0.0;
@@ -74,10 +77,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
     float totalSpec = 0.0;
     float totalBorder = 0.0;
     float totalFade = 0.0;
-
-    highp vec2 totalTrailDistortion = vec2(0.0);
-    float totalTrailMask = 0.0;
-    float totalTrailFade = 0.0;
 
     vec2 lightDir = normalize(vec2(0.5, 0.7));
 
@@ -132,9 +131,11 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             highp vec2 pos = fp - neighbor - offset;
             pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
 
-            // Bounding box check (pruning)
-            if (abs(pos.x) > radius || pos.y > radius * 3.0 || pos.y < -slideDist - radius) continue;
+            // Bounding box check (pruning): only the droplet's own footprint now that
+            // there's no trail extending back up to the slide's starting point.
+            if (abs(pos.x) > radius * 1.3 || abs(pos.y) > radius * 3.0) continue;
 
+            // Stretches vertically as it slides (currentYScale shrinks from 1.08 to 0.4)
             float currentYScale = mix(1.08, 0.4, t);
             vec2 ovalScale = vec2(1.2, currentYScale);
             highp vec2 ovalPos = pos * ovalScale;
@@ -156,23 +157,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
                 totalBorder += borderK * h_height;
                 totalFade += fade * h_height;
                 sumHeight += h_height;
-            } else {
-                // Trail refraction (thickness is 75% of the droplet size)
-                float trailWidth = radius * 0.75;
-                if (pos.y < 0.0 && pos.y > -t * slideDist) {
-                    float trailDist = abs(pos.x);
-                    if (trailDist < trailWidth) {
-                        float trailFade = 1.0 + (pos.y / (t * slideDist));
-                        float trailMask = smoothstep(trailWidth, 0.0, trailDist) * trailFade * fade;
-
-                        // Stronger trail distortion
-                        highp vec2 trailDistortion = vec2(sin(pos.y * 30.0 + time * 4.0) * 0.015, 0.004) * trailMask;
-
-                        totalTrailDistortion += trailDistortion;
-                        totalTrailMask = max(totalTrailMask, 0.5 * trailMask);
-                        totalTrailFade = max(totalTrailFade, fade * trailFade);
-                    }
-                }
             }
         }
     }
@@ -183,12 +167,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
         border = totalBorder / sumHeight;
         finalFade = totalFade / sumHeight;
         dropMask = 1.0;
-    } else if (totalTrailMask > 0.0001) {
-        distortion = totalTrailDistortion;
-        spec = 0.0;
-        border = 1.0;
-        finalFade = totalTrailFade;
-        dropMask = totalTrailMask;
     }
 
     borderVal = border;

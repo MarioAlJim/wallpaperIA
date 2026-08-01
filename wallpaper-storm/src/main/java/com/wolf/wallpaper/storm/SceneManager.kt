@@ -285,6 +285,7 @@ class SceneManager(
     // avoid re-sorting into a freshly allocated list every frame.
     fun sortRainDropsByDepth() { rainDrops.sortBy { it.z } }
     fun sortWindLinesByDepth() { windLines.sortBy { it.z } }
+    fun sortCloudsByDepth() { clouds.sortBy { it.z } }
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
     fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()

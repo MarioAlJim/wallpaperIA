@@ -82,6 +82,7 @@ class StormRenderer(
     // Reusable lists to avoid allocating new lists every frame when partitioning rain drops
     private val cloudRainBuffer = mutableListOf<RainDrop>()
     private val edgeRainBuffer = mutableListOf<RainDrop>()
+    private val activeLightningsBuffer = mutableListOf<Lightning>()
 
     // Scratch matrices reused across per-object draw calls (clouds, lightning, background)
     private val scratchModelMatrix = FloatArray(16)
@@ -484,7 +485,9 @@ class StormRenderer(
 
         // Apply lightning flash peak color directly to background if enabled
         var maxIntensity = 0f
-        var resolvedColor = floatArrayOf(0f, 0f, 0f, 0f)
+        var resolvedR = 0f
+        var resolvedG = 0f
+        var resolvedB = 0f
         var activeCount = 0
 
         if (lightningFlashEnabled) {
@@ -494,18 +497,18 @@ class StormRenderer(
                         maxIntensity = lightning.intensity
                     }
                     val color = getLightningColor(lightning.selectedColorIndex)
-                    resolvedColor[0] += color[0] * lightning.intensity
-                    resolvedColor[1] += color[1] * lightning.intensity
-                    resolvedColor[2] += color[2] * lightning.intensity
+                    resolvedR += color[0] * lightning.intensity
+                    resolvedG += color[1] * lightning.intensity
+                    resolvedB += color[2] * lightning.intensity
                     activeCount++
                 }
             }
 
             if (activeCount > 0) {
                 val flashCoeff = maxIntensity * 0.45f
-                val r = (resolvedColor[0] / activeCount) * flashCoeff
-                val g = (resolvedColor[1] / activeCount) * flashCoeff
-                val b = (resolvedColor[2] / activeCount) * flashCoeff
+                val r = (resolvedR / activeCount) * flashCoeff
+                val g = (resolvedG / activeCount) * flashCoeff
+                val b = (resolvedB / activeCount) * flashCoeff
                 clearR += r
                 clearG += g
                 clearB += b
@@ -532,6 +535,7 @@ class StormRenderer(
             sceneManager.sortWindLinesByDepth()
             drawWindLines(sceneManager.getWindLines())
         }
+        sceneManager.sortCloudsByDepth()
         drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
         drawRain(edgeRainBuffer, sceneManager.getRainColorIndex())
     }
@@ -550,35 +554,39 @@ class StormRenderer(
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
 
         var maxIntensity = 0f
-        var resolvedColor = floatArrayOf(0f, 0f, 0f)
-        val activeLightnings = lightnings.filter { lightning ->
-            lightning.isActive && (
-                (!lightning.isInternalOnly && lightningFlashEnabled) ||
-                (lightning.isInternalOnly && cloudFlashEnabled)
-            )
-        }
-        for (lightning in activeLightnings) {
-            if (lightning.intensity > maxIntensity) {
-                maxIntensity = lightning.intensity
+        var resolvedR = 0f
+        var resolvedG = 0f
+        var resolvedB = 0f
+        var activeLightningCount = 0
+        var brightestLightning: Lightning? = null
+        for (lightning in lightnings) {
+            if (lightning.isActive && (
+                    (!lightning.isInternalOnly && lightningFlashEnabled) ||
+                    (lightning.isInternalOnly && cloudFlashEnabled)
+                )) {
+                if (lightning.intensity > maxIntensity) {
+                    maxIntensity = lightning.intensity
+                    brightestLightning = lightning
+                }
+                val color = getLightningColor(lightning.selectedColorIndex)
+                resolvedR += color[0] * lightning.intensity
+                resolvedG += color[1] * lightning.intensity
+                resolvedB += color[2] * lightning.intensity
+                activeLightningCount++
             }
-            val color = getLightningColor(lightning.selectedColorIndex)
-            resolvedColor[0] += color[0] * lightning.intensity
-            resolvedColor[1] += color[1] * lightning.intensity
-            resolvedColor[2] += color[2] * lightning.intensity
-        }
-
-        val avgColor = if (activeLightnings.isNotEmpty()) {
-            floatArrayOf(
-                (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[1] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[2] / activeLightnings.size).coerceIn(0f, 1f)
-            )
-        } else {
-            floatArrayOf(1.0f, 1.0f, 1.0f)
         }
 
         GLES30.glUniform1f(flashIntensityHandle, maxIntensity)
-        GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
+        if (activeLightningCount > 0) {
+            GLES30.glUniform3f(
+                flashColorHandle,
+                (resolvedR / activeLightningCount).coerceIn(0f, 1f),
+                (resolvedG / activeLightningCount).coerceIn(0f, 1f),
+                (resolvedB / activeLightningCount).coerceIn(0f, 1f)
+            )
+        } else {
+            GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
+        }
 
         // Bind additional uniforms for refraction and dark god rays
         val timeHandle = cloudTimeHandle
@@ -598,13 +606,11 @@ class StormRenderer(
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
 
-        val brightestLightning = activeLightnings.maxByOrNull { it.intensity }
-        val lightningPos = if (brightestLightning != null) {
-            floatArrayOf(brightestLightning.positionX, brightestLightning.positionY)
+        if (brightestLightning != null) {
+            GLES30.glUniform2f(lightningPosHandle, brightestLightning.positionX, brightestLightning.positionY)
         } else {
-            floatArrayOf(0f, 1f)
+            GLES30.glUniform2f(lightningPosHandle, 0f, 1f)
         }
-        GLES30.glUniform2f(lightningPosHandle, lightningPos[0], lightningPos[1])
 
         // Pass background scale to keep coordinates matched
         val bgIndex = sceneManager.getBackgroundIndex()
@@ -647,7 +653,8 @@ class StormRenderer(
         val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
 
-        for (cloud in clouds.sortedBy { it.z }) {
+        // Already sorted by depth in place by SceneManager.sortCloudsByDepth()
+        for (cloud in clouds) {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
@@ -835,8 +842,7 @@ class StormRenderer(
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
 
-        val windColor = floatArrayOf(0.85f, 0.90f, 0.98f, 0.35f)
-        GLES30.glUniform4fv(colorHandle, 1, windColor, 0)
+        GLES30.glUniform4f(colorHandle, 0.85f, 0.90f, 0.98f, 0.35f)
 
         // Wind lines are already sorted by depth (z) in place by SceneManager.sortWindLinesByDepth()
         val sortedLines = windLines
@@ -914,20 +920,25 @@ class StormRenderer(
         GLES30.glDisableVertexAttribArray(2)
     }
 
-    private fun getRainColor(index: Int): FloatArray {
-        return when (index) {
-            0 -> floatArrayOf(0.7f, 0.8f, 1.0f, 0.7f) // Azul Claro
-            1 -> floatArrayOf(1.0f, 1.0f, 1.0f, 0.7f) // Blanco
-            2 -> floatArrayOf(1.0f, 0.2f, 0.2f, 0.7f) // Rojo
-            3 -> floatArrayOf(0.2f, 1.0f, 0.2f, 0.7f) // Verde
-            4 -> floatArrayOf(1.0f, 0.9f, 0.0f, 0.7f) // Amarillo
-            5 -> floatArrayOf(0.7f, 0.3f, 1.0f, 0.7f) // Morado
-            else -> floatArrayOf(0.7f, 0.8f, 1.0f, 0.7f)
-        }
-    }
+    // Precomputed once instead of allocating a new FloatArray on every call (called
+    // multiple times per frame, e.g. once per active lightning, every frame).
+    private val rainColors = arrayOf(
+        floatArrayOf(0.7f, 0.8f, 1.0f, 0.7f), // Azul Claro
+        floatArrayOf(1.0f, 1.0f, 1.0f, 0.7f), // Blanco
+        floatArrayOf(1.0f, 0.2f, 0.2f, 0.7f), // Rojo
+        floatArrayOf(0.2f, 1.0f, 0.2f, 0.7f), // Verde
+        floatArrayOf(1.0f, 0.9f, 0.0f, 0.7f), // Amarillo
+        floatArrayOf(0.7f, 0.3f, 1.0f, 0.7f)  // Morado
+    )
+
+    private fun getRainColor(index: Int): FloatArray = rainColors.getOrElse(index) { rainColors[0] }
 
     private fun drawLightning(lightnings: List<Lightning>, flashEnabled: Boolean) {
-        val activeLightnings = lightnings.filter { it.isActive && !it.isInternalOnly }
+        activeLightningsBuffer.clear()
+        for (lightning in lightnings) {
+            if (lightning.isActive && !lightning.isInternalOnly) activeLightningsBuffer.add(lightning)
+        }
+        val activeLightnings = activeLightningsBuffer
         if (activeLightnings.isEmpty()) return
 
         GLES30.glUseProgram(lightningProgram)
@@ -941,15 +952,17 @@ class StormRenderer(
         // 1. Draw a single combined full screen overlay flash
         if (flashEnabled) {
             var maxIntensity = 0f
-            var resolvedColor = floatArrayOf(0f, 0f, 0f, 0f)
+            var resolvedR = 0f
+            var resolvedG = 0f
+            var resolvedB = 0f
             for (lightning in activeLightnings) {
                 if (lightning.intensity > maxIntensity) {
                     maxIntensity = lightning.intensity
                 }
                 val color = getLightningColor(lightning.selectedColorIndex)
-                resolvedColor[0] += color[0] * lightning.intensity
-                resolvedColor[1] += color[1] * lightning.intensity
-                resolvedColor[2] += color[2] * lightning.intensity
+                resolvedR += color[0] * lightning.intensity
+                resolvedG += color[1] * lightning.intensity
+                resolvedB += color[2] * lightning.intensity
             }
 
             GLES30.glUniform1i(isTexturedHandle, 0)
@@ -957,13 +970,13 @@ class StormRenderer(
             GLES30.glUniform1f(flashIntensityHandle, maxIntensity * 0.20f)
             GLES30.glUniform1f(growthProgressHandle, 1.0f)
 
-            val avgColor = floatArrayOf(
-                (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[1] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[2] / activeLightnings.size).coerceIn(0f, 1f),
+            GLES30.glUniform4f(
+                colorHandle,
+                (resolvedR / activeLightnings.size).coerceIn(0f, 1f),
+                (resolvedG / activeLightnings.size).coerceIn(0f, 1f),
+                (resolvedB / activeLightnings.size).coerceIn(0f, 1f),
                 1.0f
             )
-            GLES30.glUniform4fv(colorHandle, 1, avgColor, 0)
 
             fullscreenQuadBuffer.position(0)
             GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
@@ -1022,17 +1035,17 @@ class StormRenderer(
         GLES30.glDisableVertexAttribArray(0)
     }
 
-    private fun getLightningColor(index: Int): FloatArray {
-        return when (index) {
-            0 -> floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f) // Blanco
-            1 -> floatArrayOf(0.4f, 0.6f, 1.0f, 1.0f) // Azul
-            2 -> floatArrayOf(1.0f, 0.9f, 0.2f, 1.0f) // Amarillo
-            3 -> floatArrayOf(1.0f, 0.2f, 0.2f, 1.0f) // Rojo
-            4 -> floatArrayOf(0.2f, 1.0f, 0.2f, 1.0f) // Verde
-            5 -> floatArrayOf(0.8f, 0.3f, 1.0f, 1.0f) // Morado
-            else -> floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f)
-        }
-    }
+    // Precomputed once instead of allocating a new FloatArray on every call.
+    private val lightningColors = arrayOf(
+        floatArrayOf(1.0f, 1.0f, 1.0f, 1.0f), // Blanco
+        floatArrayOf(0.4f, 0.6f, 1.0f, 1.0f), // Azul
+        floatArrayOf(1.0f, 0.9f, 0.2f, 1.0f), // Amarillo
+        floatArrayOf(1.0f, 0.2f, 0.2f, 1.0f), // Rojo
+        floatArrayOf(0.2f, 1.0f, 0.2f, 1.0f), // Verde
+        floatArrayOf(0.8f, 0.3f, 1.0f, 1.0f)  // Morado
+    )
+
+    private fun getLightningColor(index: Int): FloatArray = lightningColors.getOrElse(index) { lightningColors[0] }
 
     private fun readAssetFile(context: Context, path: String): String =
         GLRenderUtils.readAssetFile(context, path)
@@ -1114,30 +1127,38 @@ class StormRenderer(
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
         var maxIntensity = 0f
-        var resolvedColor = floatArrayOf(0f, 0f, 0f)
-        val activeLightnings = if (flashEnabled) lightnings.filter { it.isActive && !it.isInternalOnly } else emptyList()
-        for (lightning in activeLightnings) {
-            if (lightning.intensity > maxIntensity) {
-                maxIntensity = lightning.intensity
+        var resolvedR = 0f
+        var resolvedG = 0f
+        var resolvedB = 0f
+        var activeLightningCount = 0
+        var brightestLightning: Lightning? = null
+        if (flashEnabled) {
+            for (lightning in lightnings) {
+                if (lightning.isActive && !lightning.isInternalOnly) {
+                    if (lightning.intensity > maxIntensity) {
+                        maxIntensity = lightning.intensity
+                        brightestLightning = lightning
+                    }
+                    val color = getLightningColor(lightning.selectedColorIndex)
+                    resolvedR += color[0] * lightning.intensity
+                    resolvedG += color[1] * lightning.intensity
+                    resolvedB += color[2] * lightning.intensity
+                    activeLightningCount++
+                }
             }
-            val color = getLightningColor(lightning.selectedColorIndex)
-            resolvedColor[0] += color[0] * lightning.intensity
-            resolvedColor[1] += color[1] * lightning.intensity
-            resolvedColor[2] += color[2] * lightning.intensity
-        }
-
-        val avgColor = if (activeLightnings.isNotEmpty()) {
-            floatArrayOf(
-                (resolvedColor[0] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[1] / activeLightnings.size).coerceIn(0f, 1f),
-                (resolvedColor[2] / activeLightnings.size).coerceIn(0f, 1f)
-            )
-        } else {
-            floatArrayOf(1.0f, 1.0f, 1.0f)
         }
 
         GLES30.glUniform1f(flashIntensityHandle, maxIntensity)
-        GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
+        if (activeLightningCount > 0) {
+            GLES30.glUniform3f(
+                flashColorHandle,
+                (resolvedR / activeLightningCount).coerceIn(0f, 1f),
+                (resolvedG / activeLightningCount).coerceIn(0f, 1f),
+                (resolvedB / activeLightningCount).coerceIn(0f, 1f)
+            )
+        } else {
+            GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
+        }
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, screenAspect)
         GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
@@ -1147,13 +1168,11 @@ class StormRenderer(
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
 
         // Pass lightning position for Rim Lighting and Dark God Rays
-        val brightestLightning = activeLightnings.maxByOrNull { it.intensity }
-        val lightningPos = if (brightestLightning != null) {
-            floatArrayOf(brightestLightning.positionX, brightestLightning.positionY)
+        if (brightestLightning != null) {
+            GLES30.glUniform2f(bgLightningPosHandle, brightestLightning.positionX, brightestLightning.positionY)
         } else {
-            floatArrayOf(0f, 1f)
+            GLES30.glUniform2f(bgLightningPosHandle, 0f, 1f)
         }
-        GLES30.glUniform2f(bgLightningPosHandle, lightningPos[0], lightningPos[1])
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 
