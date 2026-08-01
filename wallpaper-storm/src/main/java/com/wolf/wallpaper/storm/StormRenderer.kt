@@ -36,6 +36,11 @@ class StormRenderer(
     private var dropletMaskTexture = 0
     private var viewportWidth = 0
     private var viewportHeight = 0
+
+    // Small prebaked noise grid sampled by storm_cloud.frag/background.frag's noise()/fbm()
+    // for the Dark God Rays effect, replacing per-fragment sin()/fract() hash math.
+    private var noiseTexture = 0
+    private val noiseTextureSize = 64
     
     // MVP Matrices
     private val projectionMatrix = FloatArray(16)
@@ -106,6 +111,7 @@ class StormRenderer(
     private var cloudBgScaleHandle = -1
     private var cloudCloudScaleHandle = -1
     private var cloudDropletMaskHandle = -1
+    private var cloudNoiseTextureHandle = -1
 
     private var rainMvpHandle = -1
     private var rainColorHandleCached = -1
@@ -130,6 +136,7 @@ class StormRenderer(
     private var bgDropletsSizeHandle = -1
     private var bgRainColorHandle = -1
     private var bgLightningPosHandle = -1
+    private var bgNoiseTextureHandle = -1
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -219,6 +226,8 @@ class StormRenderer(
         loadBackgroundTexture(context, 6, "background/background_07.png")
         loadCustomBackgroundTexture(context, 7)
 
+        noiseTexture = createNoiseTexture(noiseTextureSize)
+
         // Screen quad coordinates (for full-screen flash using identity matrix)
         val fullscreenCoords = floatArrayOf(
             -1f,  1f,
@@ -299,6 +308,7 @@ class StormRenderer(
         cloudBgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
         cloudCloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
         cloudDropletMaskHandle = GLES30.glGetUniformLocation(cloudProgram, "uDropletMask")
+        cloudNoiseTextureHandle = GLES30.glGetUniformLocation(cloudProgram, "uNoiseTexture")
 
         rainMvpHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
         rainColorHandleCached = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
@@ -323,6 +333,7 @@ class StormRenderer(
         bgDropletsSizeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsSize")
         bgRainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
         bgLightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
+        bgNoiseTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNoiseTexture")
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -334,6 +345,34 @@ class StormRenderer(
         Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         sceneManager.onSurfaceChanged(width, height)
         setupDropletMaskTarget(width, height)
+    }
+
+    // Builds a small tileable grid of random single-channel values sampled by
+    // storm_cloud.frag/background.frag's noise()/fbm() for the Dark God Rays effect.
+    // GL_LINEAR + GL_REPEAT reproduces the same bilinear-interpolated value noise the
+    // shaders used to compute per-fragment via sin()/fract() hash math, but as one
+    // hardware-filtered texture fetch instead of four hash calls per octave.
+    private fun createNoiseTexture(size: Int): Int {
+        val textureIds = IntArray(1)
+        GLES30.glGenTextures(1, textureIds, 0)
+        val textureId = textureIds[0]
+        if (textureId == 0) return 0
+
+        val random = kotlin.random.Random(0)
+        val buffer = ByteBuffer.allocateDirect(size * size).order(ByteOrder.nativeOrder())
+        repeat(size * size) {
+            buffer.put(random.nextInt(256).toByte())
+        }
+        buffer.position(0)
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_R8, size, size, 0, GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, buffer)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
+        return textureId
     }
 
     private fun setupDropletMaskTarget(width: Int, height: Int) {
@@ -600,6 +639,10 @@ class StormRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, dropletMaskTexture)
         GLES30.glUniform1i(dropletMaskHandle, 1)
+
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE2)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
+        GLES30.glUniform1i(cloudNoiseTextureHandle, 2)
 
         val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
@@ -1043,6 +1086,10 @@ class StormRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
         GLES30.glUniform1i(textureHandle, 0)
+
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
+        GLES30.glUniform1i(bgNoiseTextureHandle, 1)
 
         val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
