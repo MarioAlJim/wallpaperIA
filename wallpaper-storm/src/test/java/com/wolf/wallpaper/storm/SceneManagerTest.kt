@@ -567,20 +567,20 @@ class SceneManagerTest {
     fun testCloudSpeedBasedOnDepth() {
         val cloudNear = StormCloud(id = 1, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
         cloudNear.z = 1.0f
-        // When z = 1.0f, speedZFactor must be exactly 1.25f (25% increase)
-        assertEquals(1.25f, cloudNear.speedZFactor, 0.001f)
+        // When z = 1.0f, speedZFactor must be exactly 1.45f (0.15 + 1.30)
+        assertEquals(1.45f, cloudNear.speedZFactor, 0.001f)
 
         val cloudFar = StormCloud(id = 2, positionX = 0f, positionY = 0f, speedFactor = 1.0f, scale = 1.0f, opacity = 1.0f, textureIndex = 0)
         cloudFar.z = 0.3f
-        // When z = 0.3f, speedZFactor must be exactly 0.225f (25% decrease of 0.3f)
-        assertEquals(0.225f, cloudFar.speedZFactor, 0.001f)
+        // When z = 0.3f, speedZFactor must be exactly 0.15f (normZ = 0)
+        assertEquals(0.15f, cloudFar.speedZFactor, 0.001f)
 
         // Test position updates
         cloudNear.update(deltaTime = 1.0f, windSpeed = 1.0f)
-        assertEquals(1.25f, cloudNear.positionX, 0.001f)
+        assertEquals(1.45f, cloudNear.positionX, 0.001f)
 
         cloudFar.update(deltaTime = 1.0f, windSpeed = 1.0f)
-        assertEquals(0.225f, cloudFar.positionX, 0.001f)
+        assertEquals(0.15f, cloudFar.positionX, 0.001f)
     }
 
     @Test

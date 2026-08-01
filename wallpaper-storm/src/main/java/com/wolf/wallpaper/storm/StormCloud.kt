@@ -25,8 +25,10 @@ class StormCloud(
     var pulseTime: Float = 0f
     var onlyGrows: Boolean = true
 
+    // Exaggerated parallax: background clouds drift far slower and foreground clouds far faster,
+    // since relative speed difference is the strongest depth cue for the human eye.
     val speedZFactor: Float
-        get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
+        get() = 0.15f + ((z - 0.3f) / 0.7f) * 1.30f
 
     override fun update(deltaTime: Float) {
         // Default call using 0f windSpeed and 1f dynamicsSpeed to satisfy StormObject contract
