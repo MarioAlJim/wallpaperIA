@@ -82,6 +82,55 @@ class StormRenderer(
     private val scratchModelMatrix = FloatArray(16)
     private val scratchMVPMatrix = FloatArray(16)
 
+    // Cached uniform locations, resolved once in onSurfaceCreated instead of being
+    // re-queried via glGetUniformLocation (a string-hash lookup) on every single frame.
+    private var rdmEnabledHandle = -1
+    private var rdmTimeHandle = -1
+    private var rdmAspectHandle = -1
+    private var rdmSizeHandle = -1
+    private var rdmRainColorHandle = -1
+
+    private var cloudMvpHandle = -1
+    private var cloudOpacityHandle = -1
+    private var cloudTextureHandle = -1
+    private var cloudFlashIntensityHandle = -1
+    private var cloudFlashColorHandle = -1
+    private var cloudCloudColorHandle = -1
+    private var cloudHeightFactorHandle = -1
+    private var cloudTimeHandle = -1
+    private var cloudAspectHandle = -1
+    private var cloudDropletsEnabledHandle = -1
+    private var cloudDropletsSizeHandle = -1
+    private var cloudRainColorHandle = -1
+    private var cloudLightningPosHandle = -1
+    private var cloudBgScaleHandle = -1
+    private var cloudCloudScaleHandle = -1
+    private var cloudDropletMaskHandle = -1
+
+    private var rainMvpHandle = -1
+    private var rainColorHandleCached = -1
+
+    private var windMvpHandle = -1
+    private var windColorHandleCached = -1
+
+    private var lightningMvpHandle = -1
+    private var lightningFlashIntensityHandle = -1
+    private var lightningIsTexturedHandle = -1
+    private var lightningTextureHandle = -1
+    private var lightningColorHandleCached = -1
+    private var lightningGrowthProgressHandle = -1
+
+    private var bgMvpHandle = -1
+    private var bgFlashIntensityHandle = -1
+    private var bgFlashColorHandle = -1
+    private var bgTextureHandle = -1
+    private var bgTimeHandle = -1
+    private var bgAspectHandle = -1
+    private var bgDropletsEnabledHandle = -1
+    private var bgDropletsSizeHandle = -1
+    private var bgRainColorHandle = -1
+    private var bgLightningPosHandle = -1
+
     init {
         Matrix.setIdentityM(viewMatrix, 0)
         Matrix.setIdentityM(identityMatrix, 0)
@@ -116,6 +165,8 @@ class StormRenderer(
         val raindropMaskVert = readAssetFile(context, "shaders/raindrop_mask.vert")
         val raindropMaskFrag = readAssetFile(context, "shaders/raindrop_mask.frag")
         raindropMaskProgram = createProgram(raindropMaskVert, raindropMaskFrag)
+
+        cacheUniformLocations()
 
         // Load textures from assets
         cloudTextures.clear()
@@ -225,6 +276,55 @@ class StormRenderer(
             }
     }
 
+    private fun cacheUniformLocations() {
+        rdmEnabledHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsEnabled")
+        rdmTimeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uTime")
+        rdmAspectHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uAspectRatio")
+        rdmSizeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsSize")
+        rdmRainColorHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uRainColor")
+
+        cloudMvpHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
+        cloudOpacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
+        cloudTextureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
+        cloudFlashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
+        cloudFlashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
+        cloudCloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
+        cloudHeightFactorHandle = GLES30.glGetUniformLocation(cloudProgram, "uHeightFactor")
+        cloudTimeHandle = GLES30.glGetUniformLocation(cloudProgram, "uTime")
+        cloudAspectHandle = GLES30.glGetUniformLocation(cloudProgram, "uAspectRatio")
+        cloudDropletsEnabledHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsEnabled")
+        cloudDropletsSizeHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsSize")
+        cloudRainColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uRainColor")
+        cloudLightningPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uLightningPos")
+        cloudBgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
+        cloudCloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+        cloudDropletMaskHandle = GLES30.glGetUniformLocation(cloudProgram, "uDropletMask")
+
+        rainMvpHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
+        rainColorHandleCached = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
+
+        windMvpHandle = GLES30.glGetUniformLocation(windProgram, "uMVPMatrix")
+        windColorHandleCached = GLES30.glGetUniformLocation(windProgram, "uWindColor")
+
+        lightningMvpHandle = GLES30.glGetUniformLocation(lightningProgram, "uMVPMatrix")
+        lightningFlashIntensityHandle = GLES30.glGetUniformLocation(lightningProgram, "uFlashIntensity")
+        lightningIsTexturedHandle = GLES30.glGetUniformLocation(lightningProgram, "uIsTextured")
+        lightningTextureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
+        lightningColorHandleCached = GLES30.glGetUniformLocation(lightningProgram, "uLightningColor")
+        lightningGrowthProgressHandle = GLES30.glGetUniformLocation(lightningProgram, "uGrowthProgress")
+
+        bgMvpHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
+        bgFlashIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashIntensity")
+        bgFlashColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashColor")
+        bgTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
+        bgTimeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
+        bgAspectHandle = GLES30.glGetUniformLocation(backgroundProgram, "uAspectRatio")
+        bgDropletsEnabledHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsEnabled")
+        bgDropletsSizeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsSize")
+        bgRainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
+        bgLightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
+    }
+
     override fun onSurfaceChanged(width: Int, height: Int) {
         viewportWidth = width
         viewportHeight = height
@@ -311,19 +411,14 @@ class StormRenderer(
         GLES30.glViewport(0, 0, viewportWidth, viewportHeight)
 
         GLES30.glUseProgram(raindropMaskProgram)
-        val enabledHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsEnabled")
-        val timeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uTime")
-        val aspectHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uAspectRatio")
-        val sizeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsSize")
-        val rainColorHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uRainColor")
 
-        GLES30.glUniform1f(enabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
-        GLES30.glUniform1f(timeHandle, elapsedTime)
-        GLES30.glUniform1f(aspectHandle, aspectRatio)
+        GLES30.glUniform1f(rdmEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
+        GLES30.glUniform1f(rdmTimeHandle, elapsedTime)
+        GLES30.glUniform1f(rdmAspectHandle, aspectRatio)
         val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
-        GLES30.glUniform1f(sizeHandle, sizeFactor)
+        GLES30.glUniform1f(rdmSizeHandle, sizeFactor)
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
-        GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
+        GLES30.glUniform3f(rdmRainColorHandle, rainColor[0], rainColor[1], rainColor[2])
 
         fullscreenQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
@@ -406,13 +501,13 @@ class StormRenderer(
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
-        val opacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
-        val textureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
-        val flashIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
-        val flashColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
-        val cloudColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
-        val heightFactorHandle = GLES30.glGetUniformLocation(cloudProgram, "uHeightFactor")
+        val mvpMatrixHandle = cloudMvpHandle
+        val opacityHandle = cloudOpacityHandle
+        val textureHandle = cloudTextureHandle
+        val flashIntensityHandle = cloudFlashIntensityHandle
+        val flashColorHandle = cloudFlashColorHandle
+        val cloudColorHandle = cloudCloudColorHandle
+        val heightFactorHandle = cloudHeightFactorHandle
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
 
         var maxIntensity = 0f
@@ -447,14 +542,14 @@ class StormRenderer(
         GLES30.glUniform3fv(flashColorHandle, 1, avgColor, 0)
 
         // Bind additional uniforms for refraction and dark god rays
-        val timeHandle = GLES30.glGetUniformLocation(cloudProgram, "uTime")
-        val aspectHandle = GLES30.glGetUniformLocation(cloudProgram, "uAspectRatio")
-        val dropletsEnabledHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsEnabled")
-        val dropletsSizeHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsSize")
-        val rainColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uRainColor")
-        val lightningPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uLightningPos")
-        val bgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
-        val cloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
+        val timeHandle = cloudTimeHandle
+        val aspectHandle = cloudAspectHandle
+        val dropletsEnabledHandle = cloudDropletsEnabledHandle
+        val dropletsSizeHandle = cloudDropletsSizeHandle
+        val rainColorHandle = cloudRainColorHandle
+        val lightningPosHandle = cloudLightningPosHandle
+        val bgScaleHandle = cloudBgScaleHandle
+        val cloudScaleHandle = cloudCloudScaleHandle
 
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, aspectRatio)
@@ -501,7 +596,7 @@ class StormRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glUniform1i(textureHandle, 0)
 
-        val dropletMaskHandle = GLES30.glGetUniformLocation(cloudProgram, "uDropletMask")
+        val dropletMaskHandle = cloudDropletMaskHandle
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, dropletMaskTexture)
         GLES30.glUniform1i(dropletMaskHandle, 1)
@@ -558,8 +653,8 @@ class StormRenderer(
         if (rainDrops.isEmpty()) return
 
         GLES30.glUseProgram(rainProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
-        val colorHandle = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
+        val mvpMatrixHandle = rainMvpHandle
+        val colorHandle = rainColorHandleCached
         
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
@@ -691,8 +786,8 @@ class StormRenderer(
         if (windLines.isEmpty()) return
 
         GLES30.glUseProgram(windProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(windProgram, "uMVPMatrix")
-        val colorHandle = GLES30.glGetUniformLocation(windProgram, "uWindColor")
+        val mvpMatrixHandle = windMvpHandle
+        val colorHandle = windColorHandleCached
 
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
@@ -793,12 +888,12 @@ class StormRenderer(
         if (activeLightnings.isEmpty()) return
 
         GLES30.glUseProgram(lightningProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(lightningProgram, "uMVPMatrix")
-        val flashIntensityHandle = GLES30.glGetUniformLocation(lightningProgram, "uFlashIntensity")
-        val isTexturedHandle = GLES30.glGetUniformLocation(lightningProgram, "uIsTextured")
-        val textureHandle = GLES30.glGetUniformLocation(lightningProgram, "uTexture")
-        val colorHandle = GLES30.glGetUniformLocation(lightningProgram, "uLightningColor")
-        val growthProgressHandle = GLES30.glGetUniformLocation(lightningProgram, "uGrowthProgress")
+        val mvpMatrixHandle = lightningMvpHandle
+        val flashIntensityHandle = lightningFlashIntensityHandle
+        val isTexturedHandle = lightningIsTexturedHandle
+        val textureHandle = lightningTextureHandle
+        val colorHandle = lightningColorHandleCached
+        val growthProgressHandle = lightningGrowthProgressHandle
 
         // 1. Draw a single combined full screen overlay flash
         if (flashEnabled) {
@@ -927,15 +1022,15 @@ class StormRenderer(
         if (textureId == 0) return
 
         GLES30.glUseProgram(backgroundProgram)
-        val mvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
-        val flashIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashIntensity")
-        val flashColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashColor")
-        val textureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
-        val timeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
-        val aspectHandle = GLES30.glGetUniformLocation(backgroundProgram, "uAspectRatio")
-        val dropletsEnabledHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsEnabled")
-        val dropletsSizeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsSize")
-        val rainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
+        val mvpMatrixHandle = bgMvpHandle
+        val flashIntensityHandle = bgFlashIntensityHandle
+        val flashColorHandle = bgFlashColorHandle
+        val textureHandle = bgTextureHandle
+        val timeHandle = bgTimeHandle
+        val aspectHandle = bgAspectHandle
+        val dropletsEnabledHandle = bgDropletsEnabledHandle
+        val dropletsSizeHandle = bgDropletsSizeHandle
+        val rainColorHandle = bgRainColorHandle
 
         backgroundQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, backgroundQuadBuffer)
@@ -1011,8 +1106,7 @@ class StormRenderer(
         } else {
             floatArrayOf(0f, 1f)
         }
-        val lightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
-        GLES30.glUniform2f(lightningPosHandle, lightningPos[0], lightningPos[1])
+        GLES30.glUniform2f(bgLightningPosHandle, lightningPos[0], lightningPos[1])
 
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
 
