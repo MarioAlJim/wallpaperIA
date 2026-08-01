@@ -459,12 +459,12 @@ class SceneManagerTest {
             
             // 3. Velocity should be constant (not scaled by z)
             // baseSpeed = Random.nextFloat() * 1.5f + 3.0f -> range [3.0, 4.5]
-            // speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
-            // For rainSpeed = 50f: speedFactor = 0.3f + 0.75f = 1.05f
+            // speedFactor = 0.3f + (rainSpeed / 100f) * 0.6f
+            // For rainSpeed = 50f: speedFactor = 0.3f + 0.3f = 0.6f
             // speed = baseSpeed * speedFactor
             val speed = kotlin.math.sqrt(drop.velocityX * drop.velocityX + drop.velocityY * drop.velocityY)
-            val expectedMinSpeed = 3.0f * 1.05f
-            val expectedMaxSpeed = 4.5f * 1.05f
+            val expectedMinSpeed = 3.0f * 0.6f
+            val expectedMaxSpeed = 4.5f * 0.6f
             assertTrue("Speed ($speed) should be in range [${expectedMinSpeed}, ${expectedMaxSpeed}]", speed in (expectedMinSpeed - 0.05f)..(expectedMaxSpeed + 0.05f))
         }
     }

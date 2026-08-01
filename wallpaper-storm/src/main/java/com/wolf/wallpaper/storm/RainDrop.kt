@@ -44,7 +44,7 @@ class RainDrop(
     }
 
     fun updateVelocity(windAngle: Float, rainSpeed: Float) {
-        val speedFactor = 0.3f + (rainSpeed / 100f) * 1.5f
+        val speedFactor = 0.3f + (rainSpeed / 100f) * 0.6f
         val speed = baseSpeed * speedFactor
         
         val angleDeg = windAngle + angleOffset
