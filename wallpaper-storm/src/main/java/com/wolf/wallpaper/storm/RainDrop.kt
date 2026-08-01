@@ -19,7 +19,7 @@ class RainDrop(
         // Cloud-spawned drops scale with both cloud scale and depth (z), which otherwise
         // makes drops from close-up (high z) clouds look oversized. Cap their length so
         // close clouds don't produce disproportionately large drops.
-        private const val MAX_CLOUD_RAIN_LENGTH = 0.13f
+        private const val MAX_CLOUD_RAIN_LENGTH = 0.0936f
     }
 
     var z: Float = 1.0f

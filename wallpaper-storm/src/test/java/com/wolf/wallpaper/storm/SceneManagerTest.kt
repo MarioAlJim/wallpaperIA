@@ -511,9 +511,9 @@ class SceneManagerTest {
             val maxExpectedScale = 1.40625f + 0.001f
             assertTrue("Scale (${cloud.scale}) should be in range [0.43125, 1.40625]", cloud.scale in minExpectedScale..maxExpectedScale)
             
-            // 3. opacity should be ((Random.nextFloat() * 0.3f + 0.4f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
-            val minExpectedOpacity = (0.8f * (0.6f + 0.4f * cloud.z)).coerceAtMost(1.0f) - 0.001f
-            val maxExpectedOpacity = (1.4f * (0.6f + 0.4f * cloud.z)).coerceAtMost(1.0f) + 0.001f
+            // 3. opacity should be ((Random.nextFloat() * 0.3f + 0.55f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
+            val minExpectedOpacity = (1.1f * (0.6f + 0.4f * cloud.z)).coerceAtMost(1.0f) - 0.001f
+            val maxExpectedOpacity = (1.7f * (0.6f + 0.4f * cloud.z)).coerceAtMost(1.0f) + 0.001f
             assertTrue("Opacity (${cloud.opacity}) should be scaled by z", cloud.opacity in minExpectedOpacity..maxExpectedOpacity)
         }
     }
