@@ -28,7 +28,6 @@ float Hash(vec2 p) {
 // expensive part of this loop for comparatively little visual payoff).
 vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     vec2 distortion = vec2(0.0, 0.0);
-    float spec = 0.0;
     float border = 1.0;
     float dropMask = 0.0;
     float finalFade = 1.0;
@@ -41,7 +40,6 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
 
     float sumHeight = 0.0;
     vec2 totalDistortion = vec2(0.0);
-    float totalSpec = 0.0;
     float totalBorder = 0.0;
     float totalFade = 0.0;
 
@@ -113,12 +111,10 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
                 vec2 n = -ovalPos / radius;
 
                 vec2 distK = n * nz * 0.022;
-                float specK = pow(max(dot(n, lightDir), 0.0), 10.0) * nz * fade;
                 float borderK = smoothstep(0.0, 0.15, nz);
 
                 // Accumulate weighted properties for smooth blending
                 totalDistortion += distK * h_height;
-                totalSpec += specK * h_height;
                 totalBorder += borderK * h_height;
                 totalFade += fade * h_height;
                 sumHeight += h_height;
@@ -128,7 +124,6 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
 
     if (sumHeight > 0.0001) {
         distortion = totalDistortion / sumHeight;
-        spec = totalSpec / sumHeight;
         border = totalBorder / sumHeight;
         finalFade = totalFade / sumHeight;
         dropMask = 1.0;

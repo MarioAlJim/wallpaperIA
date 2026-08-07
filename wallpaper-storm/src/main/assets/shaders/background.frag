@@ -60,7 +60,6 @@ float fbm(highp vec2 p) {
 // expensive part of this loop for comparatively little visual payoff).
 vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
     highp vec2 distortion = vec2(0.0, 0.0);
-    float spec = 0.0;
     float border = 1.0;
     float dropMask = 0.0;
     float finalFade = 1.0;
@@ -74,7 +73,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
 
     float sumHeight = 0.0;
     highp vec2 totalDistortion = vec2(0.0);
-    float totalSpec = 0.0;
     float totalBorder = 0.0;
     float totalFade = 0.0;
 
@@ -148,12 +146,10 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
                 highp vec2 n = -ovalPos / radius;
 
                 highp vec2 distK = n * nz * 0.022;
-                float specK = pow(max(dot(n, lightDir), 0.0), 10.0) * nz * fade;
                 float borderK = smoothstep(0.0, 0.15, nz);
 
                 // Accumulate weighted properties for smooth blending
                 totalDistortion += distK * h_height;
-                totalSpec += specK * h_height;
                 totalBorder += borderK * h_height;
                 totalFade += fade * h_height;
                 sumHeight += h_height;
@@ -163,7 +159,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
 
     if (sumHeight > 0.0001) {
         distortion = totalDistortion / sumHeight;
-        spec = totalSpec / sumHeight;
         border = totalBorder / sumHeight;
         finalFade = totalFade / sumHeight;
         dropMask = 1.0;
@@ -262,9 +257,8 @@ void main() {
     finalColor += rimColor;
 
     if (uScreenDropletsEnabled > 0.5 && droplet.w > 0.5) {
-        // Apply droplet edge shading (dark border) and specular highlight (reflection)
-        float specHighlight = droplet.z;
-        finalColor = finalColor * (0.6 + 0.4 * edgeBorder) + vec3(0.5) * specHighlight;
+        // Apply only droplet edge shading (dark border) to maintain depth without the "upward reflection"
+        finalColor = finalColor * (0.6 + 0.4 * edgeBorder);
     }
 
     fragColor = vec4(finalColor, 1.0);
