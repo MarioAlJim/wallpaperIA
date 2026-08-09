@@ -131,7 +131,9 @@ vec4 GetDropletEffects(vec2 uv, float time, float aspect, float sizeFactor, vec3
 
     borderVal = border;
     fadeVal = finalFade;
-    return vec4(distortion.x, distortion.y, spec, dropMask);
+    // .z is unused by the caller; kept at 0.0 (was previously an undeclared
+    // "spec" identifier left over from a removed specular-highlight term).
+    return vec4(distortion.x, distortion.y, 0.0, dropMask);
 }
 
 void main() {

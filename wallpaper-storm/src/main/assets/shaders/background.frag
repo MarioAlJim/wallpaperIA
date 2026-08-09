@@ -166,7 +166,9 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
 
     borderVal = border;
     fadeVal = finalFade;
-    return vec4(distortion.x, distortion.y, spec, dropMask);
+    // .z is unused by the caller; kept at 0.0 (was previously an undeclared
+    // "spec" identifier left over from a removed specular-highlight term).
+    return vec4(distortion.x, distortion.y, 0.0, dropMask);
 }
 
 float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, highp float time, highp float aspect) {

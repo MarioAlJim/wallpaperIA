@@ -11,6 +11,26 @@ class ConfigManager(context: Context) : ConfigProvider {
     private val night = NightConfigStore(prefs)
     private val combined = CombinedConfigStore(prefs)
 
+    // Each store memoizes its reads (see CachedPrefStore) so the render thread doesn't
+    // hit SharedPreferences on every frame. Settings can be changed from a different
+    // ConfigManager instance than the one the wallpaper engine is polling (the settings
+    // screen and the wallpaper service each hold their own), so we listen for changes on
+    // the underlying prefs object (shared per-process by Android) and drop the stale
+    // cached value wherever it lives. A strong reference to the listener is kept here
+    // because SharedPreferences only holds a weak reference to registered listeners.
+    private val prefsChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key != null) {
+            storm.invalidate(key)
+            sunny.invalidate(key)
+            night.invalidate(key)
+            combined.invalidate(key)
+        }
+    }
+
+    init {
+        prefs.registerOnSharedPreferenceChangeListener(prefsChangeListener)
+    }
+
     companion object {
         const val PREFS_NAME = "storm_wallpaper_prefs"
         const val KEY_CLOUD_DENSITY = "cloud_density"
