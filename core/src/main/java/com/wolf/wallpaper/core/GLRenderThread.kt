@@ -102,10 +102,16 @@ class GLRenderThread(
                 
                 if (!running) break
 
+                // Snapshot every per-frame input in a single critical section instead of one
+                // synchronized block per field — same data, fewer monitor acquisitions on a
+                // loop that runs up to 60x/sec for as long as the wallpaper is visible.
                 var localWidth = 0
                 var localHeight = 0
                 var needsViewportUpdate = false
-
+                var localXOffset: Float
+                var localYOffset: Float
+                var localTiltX: Float
+                var localTiltY: Float
                 synchronized(lock) {
                     if (surfaceChanged) {
                         localWidth = width
@@ -113,6 +119,10 @@ class GLRenderThread(
                         needsViewportUpdate = true
                         surfaceChanged = false
                     }
+                    localXOffset = xOffset
+                    localYOffset = yOffset
+                    localTiltX = tiltX
+                    localTiltY = tiltY
                 }
 
                 if (needsViewportUpdate) {
@@ -125,20 +135,7 @@ class GLRenderThread(
                     renderer.onTouchEvent(touch.first, touch.second)
                 }
 
-                var localXOffset = 0.5f
-                var localYOffset = 0.5f
-                synchronized(lock) {
-                    localXOffset = xOffset
-                    localYOffset = yOffset
-                }
                 renderer.onOffsetsChanged(localXOffset, localYOffset)
-
-                var localTiltX = 0f
-                var localTiltY = 0f
-                synchronized(lock) {
-                    localTiltX = tiltX
-                    localTiltY = tiltY
-                }
                 renderer.onSensorValuesChanged(localTiltX, localTiltY)
 
                 val currentTime = System.nanoTime()

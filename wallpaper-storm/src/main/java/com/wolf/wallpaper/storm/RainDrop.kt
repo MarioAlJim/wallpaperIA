@@ -17,9 +17,16 @@ class RainDrop(
 
     companion object {
         // Cloud-spawned drops scale with both cloud scale and depth (z), which otherwise
-        // makes drops from close-up (high z) clouds look oversized. Cap their length so
-        // close clouds don't produce disproportionately large drops.
-        private const val MAX_CLOUD_RAIN_LENGTH = 0.0936f
+        // makes drops from close-up (high z) clouds look oversized. Cap their length at the
+        // same maximum edge-rain drops can reach — (0.0525 + 0.030) * 1.12 * zMax(1.0), see
+        // resetEdgeRain() below — so neither source can produce a bigger drop than the other.
+        private const val MAX_CLOUD_RAIN_LENGTH = 0.0924f
+
+        // updateVelocity() runs for every active raindrop (up to MAX_RAIN_DROP_COUNT) every
+        // frame. Math.toRadians() takes/returns Double, so calling it here would promote to
+        // double precision and back for no benefit — this constant keeps the conversion in
+        // Float end to end.
+        private const val DEG_TO_RAD_F = (Math.PI / 180.0).toFloat()
     }
 
     var z: Float = 1.0f
@@ -55,7 +62,7 @@ class RainDrop(
         val speed = baseSpeed * speedFactor
         
         val angleDeg = windAngle + angleOffset
-        val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
+        val angleRad = angleDeg * DEG_TO_RAD_F
         velocityY = -speed * kotlin.math.cos(angleRad)
         velocityX = speed * kotlin.math.sin(angleRad)
         
