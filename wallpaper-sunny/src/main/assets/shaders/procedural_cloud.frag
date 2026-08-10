@@ -4,7 +4,6 @@ precision mediump float;
 
 in vec2 vTexCoord;
 
-uniform sampler2D uTexture; // Declared for compatibility, not used
 uniform float uOpacity;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;

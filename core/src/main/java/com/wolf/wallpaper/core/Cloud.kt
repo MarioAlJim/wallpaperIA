@@ -11,8 +11,7 @@ class Cloud(
     var positionY: Float,
     var speedFactor: Float,
     var scale: Float,
-    var opacity: Float,
-    var textureIndex: Int
+    var opacity: Float
 ) : StormObject {
 
     var z: Float = 1.0f
@@ -24,6 +23,14 @@ class Cloud(
     var basePositionY: Float = positionY
     var pulseTime: Float = 0f
     var onlyGrows: Boolean = true
+
+    // Seed fed to the procedural cloud shader's `uVariation` uniform to pick its ellipse
+    // shape. Used to be `id.toFloat()`, which is assigned once per pooled slot and never
+    // changed again - since a cloud's slot `id` is stable for the app's lifetime (only
+    // repositioned/rescaled on reset()), every recycle rendered the exact same silhouette,
+    // making a small, fixed set of shapes (as few as 2 at low density) repeat forever.
+    // Rerolling this in reset() gives each recycle a fresh, effectively unlimited shape.
+    var shapeSeed: Float = Random.nextFloat() * 1000f
 
     // Temporary horizontal "wind kick" velocity (units/second) from a touch/swipe gesture
     // (used by Sunny's touch-wind effect; see SunnyRenderer.applyTouchWindImpulse). Defaults
@@ -96,8 +103,9 @@ class Cloud(
         // Rendering is coordinated by StormRenderer using the Cloud attributes
     }
 
-    fun reset(startX: Float, aspectRatio: Float, textureCount: Int = 0) {
+    fun reset(startX: Float, aspectRatio: Float) {
         windImpulse = 0f // A recycled/off-screen cloud shouldn't carry over a stale swipe kick
+        shapeSeed = Random.nextFloat() * 1000f
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
@@ -121,10 +129,6 @@ class Cloud(
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
         onlyGrows = Random.nextBoolean()
-
-        if (textureCount > 1) {
-            textureIndex = Random.nextInt(textureCount)
-        }
     }
 
     companion object {
@@ -132,6 +136,10 @@ class Cloud(
         // ~0.7s, fading to imperceptible by ~2-3s, matching the "1-3s" touch-wind spec.
         private const val WIND_IMPULSE_DECAY_RATE = 1.4f
         private const val WIND_IMPULSE_STOP_THRESHOLD = 0.001f
-        private const val WIND_IMPULSE_MAX_MAGNITUDE = 2.5f
+        // Clamped to roughly match a cloud's natural top speed (~0.27 units/s from wind+drift
+        // at max settings) so a swipe reads as a gentle gust, not a fling. Kept equal to
+        // SunnyRenderer's kWindSwipeMaxImpulse so back-to-back swipes can't stack past the
+        // single-swipe cap.
+        private const val WIND_IMPULSE_MAX_MAGNITUDE = 0.45f
     }
 }

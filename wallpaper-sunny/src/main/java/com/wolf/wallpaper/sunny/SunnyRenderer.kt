@@ -89,7 +89,6 @@ class SunnyRenderer(
     // uniform sets are identical since it's the same shader program)
     private var cloudMvpMatrixHandle = -1
     private var cloudOpacityHandleCached = -1
-    private var cloudTextureHandleCached = -1
     private var cloudFlashIntensityHandleCached = -1
     private var cloudFlashColorHandleCached = -1
     private var cloudCloudColorHandleCached = -1
@@ -283,7 +282,6 @@ class SunnyRenderer(
 
     // Clouds
     private val clouds = mutableListOf<Cloud>()
-    private val cloudTextures = mutableListOf<Int>()
 
     // Depth-sort caches: rebuilt only when a cloud is added/removed/reset (z changes),
     // instead of re-sorting the whole list every single frame in the draw loop.
@@ -408,7 +406,6 @@ class SunnyRenderer(
 
         cloudMvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
         cloudOpacityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
-        cloudTextureHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
         cloudFlashIntensityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         cloudFlashColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         cloudCloudColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
@@ -475,27 +472,6 @@ class SunnyRenderer(
         val dir = configProvider.getSunPathDirection()
         sunPathX = if (dir == 1) 1.3f else -1.3f
 
-        // Load cloud textures
-        cloudTextures.clear()
-        try {
-            val assetManager = context.assets
-            val files = assetManager.list("clouds_sunny") ?: emptyArray()
-            val sortedFiles = files.filter { it.endsWith(".png") }.sorted()
-            for (file in sortedFiles) {
-                val tex = loadTexture(context, "clouds_sunny/$file")
-                if (tex != 0) {
-                    cloudTextures.add(tex)
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        if (cloudTextures.isEmpty()) {
-            val fallbackTex = loadTexture(context, "clouds_sunny/cloud_01.png")
-            if (fallbackTex != 0) {
-                cloudTextures.add(fallbackTex)
-            }
-        }
 
         // Load background textures
         backgroundTextures.indices.forEach { backgroundTextures[it] = 0 }
@@ -598,7 +574,7 @@ class SunnyRenderer(
         
         // Adjust and align cloud positions for new aspect ratio
         for (cloud in clouds) {
-            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = cloudTextures.size)
+            cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
         }
         cloudsDirty = true
     }
@@ -783,7 +759,7 @@ class SunnyRenderer(
             val halfWidth = cloud.scale * 1.2f
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
-                cloud.reset(0f, aspectRatio, textureCount = cloudTextures.size)
+                cloud.reset(0f, aspectRatio)
                 cloudsDirty = true
                 val newHalfWidth = cloud.scale * 1.2f
                 val windThreshold = 0.1f
@@ -834,7 +810,7 @@ class SunnyRenderer(
                 val halfW = nc.scale * 1.2f
                 val maxB = aspectRatio + halfW
                 if (nc.positionX > maxB || nc.positionX < -maxB) {
-                    nc.reset(0f, aspectRatio, textureCount = cloudTextures.size)
+                    nc.reset(0f, aspectRatio)
                     nightCloudsDirty = true
                     val newHalfW = nc.scale * 1.2f
                     val windThreshold = 0.1f
@@ -1474,7 +1450,6 @@ class SunnyRenderer(
 
         val mvpMatrixHandle = cloudMvpMatrixHandle
         val opacityHandle = cloudOpacityHandleCached
-        val textureHandle = cloudTextureHandleCached
         val flashIntensityHandle = cloudFlashIntensityHandleCached
         val flashColorHandle = cloudFlashColorHandleCached
         val cloudColorHandle = cloudCloudColorHandleCached
@@ -1501,9 +1476,6 @@ class SunnyRenderer(
         GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
         GLES30.glEnableVertexAttribArray(1)
 
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-        GLES30.glUniform1i(textureHandle, 0)
-
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
@@ -1525,14 +1497,11 @@ class SunnyRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
-            GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
+            GLES30.glUniform1f(variationHandle, cloud.shapeSeed)
             GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
             GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
 
-            if (cloudTextures.isNotEmpty()) {
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
-                GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
-            }
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         }
 
         GLES30.glDisableVertexAttribArray(0)
@@ -1548,7 +1517,6 @@ class SunnyRenderer(
             else -> if (density <= 25) 1 else if (density <= 50) 3 else if (density <= 75) 6 else 10
         }
 
-        val textureCount = cloudTextures.size.coerceAtLeast(1)
         val activeClouds = nightClouds.filter { !it.isFadingOut }
 
         if (activeClouds.size < targetCount) {
@@ -1559,9 +1527,8 @@ class SunnyRenderer(
             }
             while (needed > 0) {
                 val id = if (nightClouds.isNotEmpty()) nightClouds.maxOf { it.id } + 1 else 0
-                val nc = Cloud(id, 0f, 0f, 0f, 0f, 0f, 0)
-                nc.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio,
-                    aspectRatio, textureCount = textureCount)
+                val nc = Cloud(id, 0f, 0f, 0f, 0f, 0f)
+                nc.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
                 nc.opacity = 0f
                 nightClouds.add(nc)
                 nightCloudsDirty = true
@@ -1581,7 +1548,6 @@ class SunnyRenderer(
         GLES30.glUseProgram(cloudProgram)
         val mvpMatrixHandle = cloudMvpMatrixHandle
         val opacityHandle = cloudOpacityHandleCached
-        val textureHandle = cloudTextureHandleCached
         val flashIntensityHandle = cloudFlashIntensityHandleCached
         val flashColorHandle = cloudFlashColorHandleCached
         val cloudColorHandle = cloudCloudColorHandleCached
@@ -1624,9 +1590,6 @@ class SunnyRenderer(
         GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
         GLES30.glEnableVertexAttribArray(1)
 
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-        GLES30.glUniform1i(textureHandle, 0)
-
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
@@ -1648,14 +1611,11 @@ class SunnyRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
-            GLES30.glUniform1f(variationHandle, cloud.id.toFloat())
+            GLES30.glUniform1f(variationHandle, cloud.shapeSeed)
             GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
             GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
 
-            if (cloudTextures.isNotEmpty()) {
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
-                GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
-            }
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         }
 
         GLES30.glDisableVertexAttribArray(0)
@@ -1966,9 +1926,6 @@ class SunnyRenderer(
             else -> if (density <= 25) 2 else if (density <= 50) 5 else if (density <= 75) 9 else 14
         }
 
-        val textureCount = cloudTextures.size
-        if (textureCount == 0) return
-
         val activeClouds = clouds.filter { !it.isFadingOut }
 
         if (activeClouds.size < targetCount) {
@@ -1982,9 +1939,8 @@ class SunnyRenderer(
             }
             while (needed > 0) {
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
-                val textureIndex = kotlin.random.Random.nextInt(textureCount)
-                val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
+                val cloud = Cloud(cloudId, 0f, 0f, 0f, 0f, 0f)
+                cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
                 cloud.opacity = 0f
                 clouds.add(cloud)
                 cloudsDirty = true
@@ -2288,9 +2244,6 @@ class SunnyRenderer(
     private fun readAssetFile(context: Context, path: String): String =
         GLRenderUtils.readAssetFile(context, path)
 
-    private fun loadTexture(context: Context, assetPath: String): Int =
-        GLRenderUtils.loadTexture(context, assetPath)
-
     /**
      * Generates a small single-channel, tileable noise texture once at startup, used by
      * sunny.frag to approximate multi-octave fbm noise via a few bilinearly-filtered
@@ -2374,9 +2327,9 @@ class SunnyRenderer(
         private const val kCloudShaftScaleFactor = 0.6f      // extra influence radius per unit of cloud.scale
 
         // --- Touch wind (effect: swipe gives clouds a temporary wind kick) ---
-        private const val kWindSwipeMinVelocity = 1.2f  // minimum |d(swipeOffset)/dt| to count as a deliberate swipe
-        private const val kWindSwipeImpulseScale = 0.35f // converts swipe velocity into a cloud wind-impulse magnitude
-        private const val kWindSwipeMaxImpulse = 1.8f    // clamps a very fast swipe from flinging clouds off-screen
+        private const val kWindSwipeMinVelocity = 1.2f   // minimum |d(swipeOffset)/dt| to count as a deliberate swipe
+        private const val kWindSwipeImpulseScale = 0.12f // converts swipe velocity into a cloud wind-impulse magnitude
+        private const val kWindSwipeMaxImpulse = 0.45f   // caps the kick near a cloud's natural top speed (~0.27 units/s), so it reads as a gentle gust rather than a fling
         private const val kWindSwipeMaxDt = 0.5f         // ignore stale/first-sample deltas larger than this (seconds)
         private const val kWindSwipeMinDt = 0.0005f      // ignore near-zero/duplicate-timestamp samples
 
