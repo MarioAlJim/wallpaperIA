@@ -84,6 +84,7 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
     float totalFade = 0.0;
     float totalGlow = 0.0;
     float sumWeight = 0.0;
+    highp vec2 totalDistortion = vec2(0.0);
 
     // Determine the light direction for specular reflections and lens glow.
     // Default light is top-left (classic desktop shading)
@@ -182,23 +183,25 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             float edgeFade = 1.0 - smoothstep(0.82, 1.0, normDist);
             float weight = fade * edgeFade;
 
-            // Shading calculations to mimic a lens (without refraction):
+            // Shading calculations to mimic a lens with refraction:
             // 1. Specular reflection (glint) on the side facing the light
             highp vec2 glintOffset = activeLightDir * radius * 0.35;
             float glintDist = length(shapePos - glintOffset);
             float glint = 1.0 - smoothstep(0.0, radius * 0.22, glintDist);
             
-            // 2. Focal glow (light concentration) on the opposite side of the light source
-            highp vec2 focalOffset = -activeLightDir * radius * 0.25;
-            float focalDist = length(shapePos - focalOffset);
-            float lensCore = 1.0 - smoothstep(0.0, radius * 0.65, focalDist);
-            
-            // 3. Fresnel rim reflection around the edges (surface normal N on a hemisphere)
+            // 2. Fresnel rim reflection around the edges (surface normal N on a hemisphere)
             float nz = sqrt(1.0 - clamp(normDist * normDist, 0.0, 1.0));
             float fresnel = pow(1.0 - nz, 3.0) * 0.40;
             
-            // Combine glow components (focal glow, specular glint, fresnel rim)
-            float lensGlow = (lensCore * 0.30 + glint * 0.85 + fresnel) * fade;
+            // Combine surface reflection components (specular glint and Fresnel rim, no interior focal glow)
+            float lensGlow = (glint * 0.85 + fresnel) * fade;
+
+            // 3. Lens refraction distortion:
+            // Displace texture coordinates towards the center to create a convex magnifying lens effect.
+            // Distorts smoothly from 0 at the center (normDist=0) to 0 at the outer boundary (normDist=1).
+            float refractStrength = normDist * (1.0 - normDist) * 0.22 * fade;
+            highp vec2 distortion = (shapePos / scale) * refractStrength;
+            totalDistortion += distortion * weight;
 
             totalFade += fade * weight;
             totalGlow += lensGlow * weight;
@@ -206,10 +209,12 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
         }
     }
 
+    highp vec2 finalDistortion = vec2(0.0);
     float dropMask = 0.0;
     float finalFade = 0.0;
     float finalGlow = 0.0;
     if (sumWeight > 0.0001) {
+        finalDistortion = totalDistortion / sumWeight;
         finalFade = totalFade / sumWeight;
         finalGlow = totalGlow / sumWeight;
         dropMask = 1.0;
@@ -217,7 +222,7 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
 
     borderVal = 1.0;
     fadeVal = finalFade;
-    return vec4(0.0, 0.0, finalGlow, dropMask);
+    return vec4(finalDistortion.x, finalDistortion.y, finalGlow, dropMask);
 }
 
 float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, highp float time, highp float aspect) {
@@ -251,10 +256,14 @@ void main() {
     float unusedBorder = 1.0;
     float fadeVal = 1.0;
 
-    // Get the droplet mask/fade (no refraction anymore, see GetDropletEffects' comment —
-    // droplet.xy is always (0,0), so sampling stays at the plain vTexCoord below).
+    // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset).
     vec4 droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
+    
+    // Apply lens refraction distortion if droplets are enabled
     highp vec2 distortedUV = vTexCoord;
+    if (uScreenDropletsEnabled > 0.5) {
+        distortedUV = clamp(vTexCoord - droplet.xy, vec2(0.0), vec2(1.0));
+    }
 
     // Sample the background texture
     vec4 texColor = texture(uTexture, distortedUV);
