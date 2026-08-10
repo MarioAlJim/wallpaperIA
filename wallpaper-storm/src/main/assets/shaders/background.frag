@@ -85,6 +85,17 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
     float totalGlow = 0.0;
     float sumWeight = 0.0;
 
+    // Determine the light direction for specular reflections and lens glow.
+    // Default light is top-left (classic desktop shading)
+    highp vec2 activeLightDir = normalize(vec2(-0.5, 0.5));
+    if (uFlashIntensity > 0.05) {
+        // Shift light direction towards the lightning position during a flash
+        highp vec2 lightVec = uLightningPos - vScreenPos;
+        if (length(lightVec) > 0.001) {
+            activeLightDir = normalize(lightVec);
+        }
+    }
+
     // Droplets only ever move straight down (never sideways), but a lane's horizontal jitter
     // (laneOffsetX below) plus a large enough radius can still push a droplet's footprint past
     // its own column's half-width — and each column hashes to a fully independent lane, so a
@@ -92,7 +103,9 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
     // explicitly check that neighboring column too. Skipping that (checking x=0 only) is what
     // was clipping wide/offset droplets to a hard vertical cut at the column boundary, so the
     // 3 nearest columns are checked for every row instead.
-    for (int y = -9; y <= 0; y++) {
+    // We also check one row below (y = 1) to prevent the top half of spawning droplets from
+    // being clipped by the cell boundary at t=0, making them appear instantaneously.
+    for (int y = -9; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             highp vec2 neighbor = vec2(float(x), float(y));
             highp vec2 cell = ip + neighbor;
@@ -138,24 +151,22 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             float radius = baseRadius * shrink;
             if (radius <= 0.001) continue;
 
+            // Improved stretching effect: the leading edge shrinks from baseRadius to 0.
+            // The trailing edge (tail) starts flush with the leading cap (forming a semicircle at t=0)
+            // and stretches up to 100% more than the initial radius (baseRadius * 2.0) as it falls.
+            float stretchT = smoothstep(0.0, 1.0, t);
+            float trailingReach = mix(radius, baseRadius * 2.0, stretchT);
+
             // Position relative to the droplet's current center: starts at the top of its
             // spawn cell and moves straight down by fallDist cells as t goes 0 -> 1.
             highp vec2 localPos = fp - neighbor - vec2(laneOffsetX, 0.0);
             localPos.y -= (t * fallDist - 0.5);
 
             // Bounding box check (pruning): wider on the trailing (negative-y) side to cover
-            // the tail's maximum reach (up to 2x radius), plus a margin so the tail's soft
+            // the tail's maximum reach (up to trailingReach), plus a margin so the tail's soft
             // edge (edgeFade below) is never culled before it has faded out.
-            if (abs(localPos.x) > radius * 1.3 || localPos.y > radius * 1.3 || localPos.y < -radius * 2.2) continue;
+            if (abs(localPos.x) > radius * 1.3 || localPos.y > radius * 1.3 || localPos.y < -trailingReach * 1.1) continue;
 
-            // Asymmetric teardrop: the leading edge (localPos.y > 0, the direction of fall) is
-            // always a plain rounded cap the size of `radius`. The trailing edge (localPos.y <
-            // 0, where the droplet came from) starts flush with that cap — a semicircle, since
-            // the tail hasn't grown at all yet — and its reach grows gradually across the
-            // droplet's whole fall (stretchT spans the entire t range, same as the shrink
-            // above), reaching 100% more than the original radius (2x) by the end of the fall.
-            float stretchT = smoothstep(0.0, 1.0, t);
-            float trailingReach = mix(radius * 1.02, radius * 2.0, stretchT);
             float yComp = localPos.y;
             if (yComp < 0.0) {
                 yComp *= radius / trailingReach;
@@ -171,15 +182,23 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             float edgeFade = 1.0 - smoothstep(0.82, 1.0, normDist);
             float weight = fade * edgeFade;
 
-            // Fake "lupa" glass look, no refraction: a broad, soft brightening toward the
-            // droplet's own center (mimics a lens gathering/focusing light) plus a small sharp
-            // glint offset toward one side (mimics a specular highlight on curved glass). Both
-            // are pure color contributions in main() — this shape math never touches the UV.
-            float lensCore = 1.0 - smoothstep(0.0, 0.65, normDist);
-            highp vec2 glintOffset = vec2(-radius * 0.28, radius * 0.32);
+            // Shading calculations to mimic a lens (without refraction):
+            // 1. Specular reflection (glint) on the side facing the light
+            highp vec2 glintOffset = activeLightDir * radius * 0.35;
             float glintDist = length(shapePos - glintOffset);
             float glint = 1.0 - smoothstep(0.0, radius * 0.22, glintDist);
-            float lensGlow = (lensCore * 0.25 + glint * 0.85) * fade;
+            
+            // 2. Focal glow (light concentration) on the opposite side of the light source
+            highp vec2 focalOffset = -activeLightDir * radius * 0.25;
+            float focalDist = length(shapePos - focalOffset);
+            float lensCore = 1.0 - smoothstep(0.0, radius * 0.65, focalDist);
+            
+            // 3. Fresnel rim reflection around the edges (surface normal N on a hemisphere)
+            float nz = sqrt(1.0 - clamp(normDist * normDist, 0.0, 1.0));
+            float fresnel = pow(1.0 - nz, 3.0) * 0.40;
+            
+            // Combine glow components (focal glow, specular glint, fresnel rim)
+            float lensGlow = (lensCore * 0.30 + glint * 0.85 + fresnel) * fade;
 
             totalFade += fade * weight;
             totalGlow += lensGlow * weight;
@@ -196,8 +215,6 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
         dropMask = 1.0;
     }
 
-    // No edge-darkening "shadow" — kept as an out-param only for interface
-    // compatibility with main(), which no longer applies any darkening from it.
     borderVal = 1.0;
     fadeVal = finalFade;
     return vec4(0.0, 0.0, finalGlow, dropMask);
@@ -231,8 +248,6 @@ float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, h
 }
 
 void main() {
-    // GetDropletEffects no longer produces edge-darkening (see its comment), so this out-param
-    // is unused here — kept only because the function signature still returns it.
     float unusedBorder = 1.0;
     float fadeVal = 1.0;
 
