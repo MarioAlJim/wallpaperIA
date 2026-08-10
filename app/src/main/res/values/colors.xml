@@ -8,4 +8,22 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="accent_storm">#00E5FF</color>
+
+    <!-- Settings screen color tokens (light palette, default) -->
+    <color name="settings_bg">#F5F6F8</color>
+    <color name="settings_card_bg">#FFFFFF</color>
+    <color name="settings_card_bg_alt">#EDEEF2</color>
+    <color name="settings_card_bg_alt2">#E3E5EA</color>
+    <color name="settings_card_bg_alt3">#D8DAE0</color>
+    <color name="settings_chip_bg_inactive">#DADCE2</color>
+    <color name="settings_chip_bg_active">#D6F0F5</color>
+    <color name="settings_stroke">#D8DAE0</color>
+    <color name="settings_text_primary">#1B1C1F</color>
+    <color name="settings_text_secondary">#55575F</color>
+    <color name="settings_text_tertiary">#83858D</color>
+    <color name="settings_text_muted">#6B6D75</color>
+    <color name="settings_accent">#00ACC1</color>
+    <color name="settings_accent_text">#00767F</color>
+    <color name="settings_accent_ripple">#2200ACC1</color>
+    <color name="settings_section_warning">#C8600F</color>
 </resources>

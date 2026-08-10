@@ -5,19 +5,100 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="20dp"
-    android:background="#121214">
+    android:background="@color/settings_bg">
 
     <TextView
         android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Efecto de Clima"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/settings_text_primary"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp" />
+        android:layout_marginBottom="12dp" />
+
+    <!-- Selector de Tema de la App (Auto / Claro / Oscuro) -->
+    <LinearLayout
+        android:id="@+id/layoutThemeMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeAuto"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/settings_chip_bg_inactive"
+            app:cardBackgroundColor="@color/settings_card_bg_alt">
+            <TextView
+                android:id="@+id/textThemeAuto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Auto"
+                android:gravity="center"
+                android:textColor="@color/settings_text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeLight"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="6dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/settings_chip_bg_inactive"
+            app:cardBackgroundColor="@color/settings_card_bg_alt">
+            <TextView
+                android:id="@+id/textThemeLight"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Claro"
+                android:gravity="center"
+                android:textColor="@color/settings_text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardThemeDark"
+            android:layout_width="0dp"
+            android:layout_height="34dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardCornerRadius="10dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/settings_chip_bg_inactive"
+            app:cardBackgroundColor="@color/settings_card_bg_alt">
+            <TextView
+                android:id="@+id/textThemeDark"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="Oscuro"
+                android:gravity="center"
+                android:textColor="@color/settings_text_muted"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
 
     <!-- Selector de Clima -->
     <com.google.android.material.card.MaterialCardView
@@ -26,9 +107,9 @@
         android:layout_marginBottom="24dp"
         app:cardCornerRadius="12dp"
         app:strokeWidth="1dp"
-        app:strokeColor="#2E2E33"
+        app:strokeColor="@color/settings_stroke"
         app:cardElevation="0dp"
-        app:cardBackgroundColor="#17171A">
+        app:cardBackgroundColor="@color/settings_card_bg">
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayoutWeather"
@@ -36,13 +117,13 @@
             android:layout_height="wrap_content"
             app:tabGravity="fill"
             app:tabMode="fixed"
-            app:tabTextColor="#9D9DA6"
-            app:tabSelectedTextColor="#00E5FF"
-            app:tabIndicatorColor="#00E5FF"
-            android:background="#17171A"
+            app:tabTextColor="@color/settings_text_secondary"
+            app:tabSelectedTextColor="@color/settings_accent_text"
+            app:tabIndicatorColor="@color/settings_accent"
+            android:background="@color/settings_card_bg"
             app:tabBackground="@android:color/transparent"
             app:tabIndicatorHeight="3dp"
-            app:tabRippleColor="#2200E5FF">
+            app:tabRippleColor="@color/settings_accent_ripple">
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
@@ -71,7 +152,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Establecer Fondo de Pantalla"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
         android:backgroundTint="@color/accent_storm"

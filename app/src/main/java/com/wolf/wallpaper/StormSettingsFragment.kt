@@ -13,8 +13,6 @@ import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Html
-import android.transition.AutoTransition
-import android.transition.TransitionManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,10 +20,11 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.slider.Slider
@@ -70,10 +69,13 @@ class StormSettingsFragment : Fragment() {
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
         // 1. Setup Accordions
-        setupAccordion(view, R.id.headerCloudsWind, R.id.contentCloudsWind, R.id.dividerCloudsWind, R.id.arrowCloudsWind)
-        setupAccordion(view, R.id.headerRain, R.id.contentRain, R.id.dividerRain, R.id.arrowRain)
-        setupAccordion(view, R.id.headerLightning, R.id.contentLightning, R.id.dividerLightning, R.id.arrowLightning)
-        setupAccordion(view, R.id.headerBackground, R.id.contentBackground, R.id.dividerBackground, R.id.arrowBackground)
+        SettingsAccordionHelper.setupAccordionGroup(
+            view,
+            SettingsAccordionHelper.AccordionSpec(R.id.headerCloudsWind, R.id.contentCloudsWind, R.id.dividerCloudsWind, R.id.arrowCloudsWind),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerRain, R.id.contentRain, R.id.dividerRain, R.id.arrowRain),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerLightning, R.id.contentLightning, R.id.dividerLightning, R.id.arrowLightning),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerBackground, R.id.contentBackground, R.id.dividerBackground, R.id.arrowBackground)
+        )
 
         // 2. Setup Nubes y Viento Controls
         val cloudOptions = arrayOf("0 nubes", "1 nube", "2 nubes", "4 nubes", "6 nubes", "8 nubes", "10 nubes")
@@ -221,24 +223,6 @@ class StormSettingsFragment : Fragment() {
         updateSummaries(view)
     }
 
-    private fun setupAccordion(parent: View, headerId: Int, contentId: Int, dividerId: Int, arrowId: Int) {
-        val header = parent.findViewById<RelativeLayout>(headerId)
-        val content = parent.findViewById<LinearLayout>(contentId)
-        val divider = parent.findViewById<View>(dividerId)
-        val arrow = parent.findViewById<ImageView>(arrowId)
-
-        header.setOnClickListener {
-            val isVisible = content.visibility == View.VISIBLE
-            val parentViewGroup = content.parent as? ViewGroup ?: return@setOnClickListener
-            TransitionManager.beginDelayedTransition(parentViewGroup, AutoTransition().apply {
-                duration = 250
-            })
-            content.visibility = if (isVisible) View.GONE else View.VISIBLE
-            divider?.visibility = if (isVisible) View.GONE else View.VISIBLE
-            arrow.animate().rotation(if (isVisible) 0f else 180f).setDuration(250).start()
-        }
-    }
-
     private fun setupSlider(parent: View, viewId: Int, textViewId: Int, initialValue: Int, onProgressChanged: (Int) -> Unit) {
         val slider = parent.findViewById<Slider>(viewId)
         val textView = parent.findViewById<TextView>(textViewId)
@@ -382,12 +366,12 @@ class StormSettingsFragment : Fragment() {
         container.removeAllViews()
         val cardViews = ArrayList<MaterialCardView>()
 
-        val activeColor = Color.parseColor("#00E5FF")
-        val inactiveColor = Color.parseColor("#E0E0E6")
-        val activeBgColor = Color.parseColor("#2D2D3D")
-        val inactiveBgColor = Color.parseColor("#21212A")
-        val strokeActiveColor = Color.parseColor("#00E5FF")
-        val strokeInactiveColor = Color.parseColor("#3A3A4A")
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
+        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_primary)
+        val activeBgColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active)
+        val inactiveBgColor = ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt)
+        val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
+        val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
 
         for (i in options.indices) {
             val optionText = options[i]
@@ -421,8 +405,8 @@ class StormSettingsFragment : Fragment() {
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
                     cornerRadius = 6 * resources.displayMetrics.density
-                    setColor(Color.parseColor("#15151A"))
-                    setStroke((1 * resources.displayMetrics.density).toInt(), Color.parseColor("#3A3A4A"))
+                    setColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt2))
+                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
                 }
             }
 
@@ -489,7 +473,7 @@ class StormSettingsFragment : Fragment() {
                 }
 
                 if (bgPath == "black") {
-                    previewImage.setBackgroundColor(Color.parseColor("#08080C"))
+                    previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt3))
                 } else if (bgPath == "custom") {
                     val customBgFile = File(requireContext().filesDir, "custom_background.png")
                     if (customBgFile.exists()) {
@@ -503,7 +487,7 @@ class StormSettingsFragment : Fragment() {
                         }
                         previewImage.setImageBitmap(bitmap)
                     } else {
-                        previewImage.setBackgroundColor(Color.parseColor("#1C1A24"))
+                        previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                     }
                 } else {
                     var bitmap = backgroundBitmapCache[bgPath]
@@ -564,6 +548,12 @@ class StormSettingsFragment : Fragment() {
 
             container.addView(card)
             cardViews.add(card)
+        }
+
+        cardViews.getOrNull(initialIndex)?.let { selectedCard ->
+            (container.parent as? HorizontalScrollView)?.let { scrollView ->
+                SettingsAccordionHelper.scrollToSelected(scrollView, selectedCard)
+            }
         }
     }
 
@@ -637,7 +627,10 @@ class StormSettingsFragment : Fragment() {
         val summaryLightning = parent.findViewById<TextView>(R.id.summaryLightning) ?: return
         val summaryBackground = parent.findViewById<TextView>(R.id.summaryBackground) ?: return
 
-        val accentColor = "#00E5FF"
+        val accentColor = String.format(
+            "#%06X",
+            0xFFFFFF and ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
+        )
 
         val density = configManager.getCloudDensity()
         val densityText = if (density <= 15) {
@@ -850,7 +843,7 @@ class StormSettingsFragment : Fragment() {
                     if (count > 0) {
                         drawStylizedClouds(canvas, w, h, count)
                     } else {
-                        paint.color = Color.parseColor("#444455")
+                        paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
                         paint.style = Paint.Style.STROKE
                         paint.strokeWidth = 1.dpToPx().toFloat()
                         canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
@@ -1094,7 +1087,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         private fun drawCloudShape(canvas: Canvas, w: Float, h: Float) {
-            paint.color = Color.parseColor("#4A4A5A")
+            paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
             paint.style = Paint.Style.FILL
             
             canvas.drawCircle(w * 0.35f, 10.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
@@ -1104,7 +1097,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         private fun drawCloudShapeCentered(canvas: Canvas, w: Float, h: Float) {
-            paint.color = Color.parseColor("#E0E0E6")
+            paint.color = ContextCompat.getColor(context, R.color.settings_text_primary)
             paint.style = Paint.Style.FILL
             
             val cy = h / 2f
@@ -1115,7 +1108,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         private fun drawStylizedClouds(canvas: Canvas, w: Float, h: Float, count: Int) {
-            paint.color = Color.parseColor("#4A4A5A")
+            paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
             paint.style = Paint.Style.FILL
             
             val random = java.util.Random(count * 100L)

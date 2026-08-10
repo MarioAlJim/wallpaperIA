@@ -14,10 +14,11 @@ import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.EditText
+import android.widget.HorizontalScrollView
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.slider.Slider
@@ -51,10 +52,13 @@ class SunnySettingsFragment : Fragment() {
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
         // 1. Setup Accordions
-        setupAccordion(view, R.id.headerSunnyEnvironment, R.id.contentSunnyEnvironment, R.id.dividerSunnyEnvironment, R.id.arrowSunnyEnvironment)
-        setupAccordion(view, R.id.headerSunnySun, R.id.contentSunnySun, R.id.dividerSunnySun, R.id.arrowSunnySun)
-        setupAccordion(view, R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon)
-        setupAccordion(view, R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
+        SettingsAccordionHelper.setupAccordionGroup(
+            view,
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyEnvironment, R.id.contentSunnyEnvironment, R.id.dividerSunnyEnvironment, R.id.arrowSunnyEnvironment),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnySun, R.id.contentSunnySun, R.id.dividerSunnySun, R.id.arrowSunnySun),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
+        )
 
         // 2. Setup Cloud Density Cards (Sunny clouds)
         setupCloudDensityCards(view)
@@ -169,22 +173,11 @@ class SunnySettingsFragment : Fragment() {
         updateSummaries(view)
     }
 
-    private fun setupAccordion(parent: View, headerId: Int, contentId: Int, dividerId: Int, arrowId: Int) {
-        val header = parent.findViewById<RelativeLayout>(headerId)
-        val content = parent.findViewById<LinearLayout>(contentId)
-        val divider = parent.findViewById<View>(dividerId)
-        val arrow = parent.findViewById<ImageView>(arrowId)
-
-        header.setOnClickListener {
-            val isVisible = content.visibility == View.VISIBLE
-            val parentViewGroup = content.parent as? ViewGroup ?: return@setOnClickListener
-            TransitionManager.beginDelayedTransition(parentViewGroup, AutoTransition().apply {
-                duration = 250
-            })
-            content.visibility = if (isVisible) View.GONE else View.VISIBLE
-            divider?.visibility = if (isVisible) View.GONE else View.VISIBLE
-            arrow.animate().rotation(if (isVisible) 0f else 180f).setDuration(250).start()
-        }
+    /** Centers the currently-selected card of a horizontally-scrolling chip row, if any. */
+    private fun scrollCardIntoView(card: View?) {
+        card ?: return
+        val scrollView = card.parent?.parent as? HorizontalScrollView ?: return
+        SettingsAccordionHelper.scrollToSelected(scrollView, card)
     }
 
     private fun setupSlider(parent: View, viewId: Int, textViewId: Int, initialValue: Int, onProgressChanged: (Int) -> Unit) {
@@ -355,13 +348,13 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { index, card ->
                 if (card != null) {
                     if (index == selectedTheme) {
-                        card.strokeColor = Color.parseColor("#00E5FF")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                         card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                     } else {
-                        card.strokeColor = Color.parseColor("#3A3A4A")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                         card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                     }
                 }
             }
@@ -377,6 +370,7 @@ class SunnySettingsFragment : Fragment() {
 
         val initialTheme = configManager.getSunnyTheme()
         updateThemeSelection(initialTheme)
+        scrollCardIntoView(cards.getOrNull(initialTheme))
 
         cards.forEachIndexed { index, card ->
             card?.setOnClickListener {
@@ -421,7 +415,7 @@ class SunnySettingsFragment : Fragment() {
         val gd = GradientDrawable().apply {
             shape = GradientDrawable.OVAL
             setColor(color)
-            setStroke((1 * resources.displayMetrics.density).toInt(), Color.parseColor("#3A3A4A"))
+            setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
         }
         view.background = gd
     }
@@ -437,13 +431,13 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { index, card ->
                 if (card != null) {
                     if (index == selectedDir) {
-                        card.strokeColor = Color.parseColor("#00E5FF")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                         card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                     } else {
-                        card.strokeColor = Color.parseColor("#3A3A4A")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                         card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                     }
                 }
             }
@@ -451,6 +445,7 @@ class SunnySettingsFragment : Fragment() {
         }
 
         updateCardSelection(configManager.getSunPathDirection())
+        scrollCardIntoView(cards.getOrNull(configManager.getSunPathDirection()))
 
         cards.forEachIndexed { index, card ->
             card?.setOnClickListener {
@@ -475,13 +470,13 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { index, card ->
                 if (card != null) {
                     if (index == selectedPosition) {
-                        card.strokeColor = Color.parseColor("#00E5FF")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                         card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                     } else {
-                        card.strokeColor = Color.parseColor("#3A3A4A")
+                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                         card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                     }
                 }
             }
@@ -493,6 +488,7 @@ class SunnySettingsFragment : Fragment() {
         }
 
         updateCardSelection(configManager.getSunStationaryPosition())
+        scrollCardIntoView(cards.getOrNull(configManager.getSunStationaryPosition()))
 
         // Wire sliders for custom X/Y
         setupSlider(parent, R.id.seekBarSunCustomX, R.id.textViewSunCustomXValue, configManager.getSunCustomX()) { value ->
@@ -567,12 +563,12 @@ class SunnySettingsFragment : Fragment() {
         val textMuyAlto = cardMuyAlto.getChildAt(0) as? TextView
         val texts = listOf(textPoco, textMedio, textAlto, textMuyAlto)
 
-        val activeColor = Color.parseColor("#00E5FF")
-        val inactiveColor = Color.parseColor("#B0B0BA")
-        val activeBgColor = Color.parseColor("#2D2D3D")
-        val inactiveBgColor = Color.parseColor("#21212A")
-        val strokeActiveColor = Color.parseColor("#00E5FF")
-        val strokeInactiveColor = Color.parseColor("#3A3A4A")
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
+        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_muted)
+        val activeBgColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active)
+        val inactiveBgColor = ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt)
+        val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
+        val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
 
         fun selectDensity(densityValue: Int) {
             val index = when (densityValue) {
@@ -643,12 +639,12 @@ class SunnySettingsFragment : Fragment() {
         val textCombined = parent.findViewById<TextView>(R.id.textTimeModeCombined)
         val texts = listOf(textDay, textNight, textCombined)
 
-        val activeColor = Color.parseColor("#00E5FF")
-        val inactiveColor = Color.parseColor("#B0B0BA")
-        val activeBgColor = Color.parseColor("#2D2D3D")
-        val inactiveBgColor = Color.parseColor("#21212A")
-        val strokeActiveColor = Color.parseColor("#00E5FF")
-        val strokeInactiveColor = Color.parseColor("#3A3A4A")
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
+        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_muted)
+        val activeBgColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active)
+        val inactiveBgColor = ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt)
+        val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
+        val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
 
         fun selectMode(mode: Int) {
             cards.forEachIndexed { i, card ->
@@ -721,18 +717,19 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == phase) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
         }
 
         selectPhase(configManager.getMoonPhase())
+        scrollCardIntoView(cards.getOrNull(configManager.getMoonPhase()))
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -754,19 +751,20 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == dir) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
             updateMoonMoveSpeedVisibility(parent, dir)
         }
 
         selectDir(configManager.getMoonPathDirection())
+        scrollCardIntoView(cards.getOrNull(configManager.getMoonPathDirection()))
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -801,13 +799,13 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == pos) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
             if (customLayout != null) {
@@ -818,6 +816,7 @@ class SunnySettingsFragment : Fragment() {
         }
 
         selectPos(configManager.getMoonStationaryPosition())
+        scrollCardIntoView(cards.getOrNull(configManager.getMoonStationaryPosition()))
 
         // Wire sliders for custom X/Y
         setupSlider(parent, R.id.seekBarMoonCustomX, R.id.textViewMoonCustomXValue, configManager.getMoonCustomX()) { value ->
@@ -847,18 +846,19 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == index) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
         }
 
         selectColor(configManager.getStarColorIndex())
+        scrollCardIntoView(cards.getOrNull(configManager.getStarColorIndex()))
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -878,13 +878,13 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == mode) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
         }
@@ -961,18 +961,19 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == phase) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
         }
 
         selectPhase(configManager.getCombinedMoonPhase())
+        scrollCardIntoView(cards.getOrNull(configManager.getCombinedMoonPhase()))
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -994,18 +995,19 @@ class SunnySettingsFragment : Fragment() {
             cards.forEachIndexed { i, card ->
                 card ?: return@forEachIndexed
                 if (i == index) {
-                    card.strokeColor = Color.parseColor("#00E5FF")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#2D2D3D"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
                 } else {
-                    card.strokeColor = Color.parseColor("#3A3A4A")
+                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
                     card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(Color.parseColor("#21212A"))
+                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
                 }
             }
         }
 
         selectColor(configManager.getCombinedStarColorIndex())
+        scrollCardIntoView(cards.getOrNull(configManager.getCombinedStarColorIndex()))
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
@@ -1142,7 +1144,7 @@ class SunnySettingsFragment : Fragment() {
                 presetView.background = GradientDrawable().apply {
                     shape = GradientDrawable.OVAL
                     setColor(presets[i])
-                    setStroke((1 * resources.displayMetrics.density).toInt(), Color.parseColor("#3A3A4A"))
+                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
                 }
                 presetView.setOnClickListener {
                     updateDialogColor(presets[i], updateHexText = true, updateSliders = true)
@@ -1173,7 +1175,10 @@ class SunnySettingsFragment : Fragment() {
         val summarySunnyMoon = parent.findViewById<TextView>(R.id.summarySunnyMoon)
         val summarySunnyCombined = parent.findViewById<TextView>(R.id.summarySunnyCombined)
 
-        val accentColor = "#00E5FF"
+        val accentColor = String.format(
+            "#%06X",
+            0xFFFFFF and ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
+        )
 
         if (summarySunnyEnvironment != null) {
             val density = configManager.getCloudDensity()

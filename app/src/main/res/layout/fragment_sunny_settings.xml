@@ -20,9 +20,9 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#2E2E33"
+            app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#17171A">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -61,7 +61,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Ajuste de Entorno"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -70,7 +70,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Cargando..."
-                            android:textColor="#9D9DA6"
+                            android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -82,14 +82,14 @@
                         android:src="@drawable/ic_arrow_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        app:tint="#9D9DA6" />
+                        app:tint="@color/settings_text_secondary" />
                 </RelativeLayout>
 
                 <View
                     android:id="@+id/dividerSunnyEnvironment"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#2E2E33"
+                    android:background="@color/settings_stroke"
                     android:visibility="gone" />
 
                 <!-- Content Area (Expandable) -->
@@ -110,7 +110,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Densidad de Nubes"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <TextView
@@ -118,7 +118,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="50%"
-                            android:textColor="#9D9DA6"
+                            android:textColor="@color/settings_text_secondary"
                             android:textSize="14sp"
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
@@ -137,7 +137,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Poco" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Poco" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityMedio"
@@ -147,7 +147,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Medio" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Medio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityAlto"
@@ -157,7 +157,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Alto" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityMuyAlto"
@@ -166,7 +166,7 @@
                             android:layout_weight="1"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Muy Alto" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Muy Alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
 
@@ -174,7 +174,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Ajusta la densidad de nubes en el cielo (Poco, Medio, Alto o Muy Alto)."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="8dp" />
@@ -183,7 +183,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#2E2E33"
+                        android:background="@color/settings_stroke"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp" />
 
@@ -192,7 +192,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Fondo Silueta Minimalista"
-                        android:textColor="#E0E0E6"
+                        android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
@@ -212,7 +212,7 @@
                              android:layout_width="match_parent"
                              android:layout_height="wrap_content"
                              android:inputType="none"
-                             android:textColor="#E0E0E6"
+                             android:textColor="@color/settings_text_primary"
                              android:textSize="15sp"
                              android:padding="14dp" />
                     </com.google.android.material.textfield.TextInputLayout>
@@ -240,7 +240,7 @@
                         android:layout_marginTop="6dp"
                         android:layout_marginBottom="12dp"
                         android:text="No se ha seleccionado ninguna imagen"
-                        android:textColor="#9D9DA6"
+                        android:textColor="@color/settings_text_secondary"
                         android:textSize="12sp"
                         android:gravity="center"
                         android:visibility="gone" />
@@ -249,7 +249,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="#2E2E33"
+                        android:background="@color/settings_stroke"
                         android:layout_marginTop="12dp"
                         android:layout_marginBottom="12dp" />
 
@@ -265,7 +265,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="Efecto de Inclinación 3D (Giroscopio)"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -281,7 +281,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Usa el giroscopio/acelerómetro para simular profundidad moviendo las capas del fondo."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
                 </LinearLayout>
@@ -295,9 +295,9 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#2E2E33"
+            app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#17171A">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -310,7 +310,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Modo de Tiempo"
-                    android:textColor="#E0E0E6"
+                    android:textColor="@color/settings_text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
@@ -329,7 +329,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
-                            app:strokeColor="#3A3A4A"
+                            app:strokeColor="@color/settings_chip_bg_inactive"
                             app:strokeWidth="1dp">
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -355,7 +355,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Día"
-                                    android:textColor="#B0B0BA"
+                                    android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:gravity="center" />
@@ -371,7 +371,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
-                            app:strokeColor="#3A3A4A"
+                            app:strokeColor="@color/settings_chip_bg_inactive"
                             app:strokeWidth="1dp">
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -397,7 +397,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Noche"
-                                    android:textColor="#B0B0BA"
+                                    android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:gravity="center" />
@@ -412,7 +412,7 @@
                             android:layout_marginStart="4dp"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
-                            app:strokeColor="#3A3A4A"
+                            app:strokeColor="@color/settings_chip_bg_inactive"
                             app:strokeWidth="1dp">
                             <LinearLayout
                                 android:layout_width="match_parent"
@@ -438,7 +438,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Combinado"
-                                    android:textColor="#B0B0BA"
+                                    android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
                                     android:gravity="center" />
@@ -456,9 +456,9 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#2E2E33"
+            app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#17171A">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -497,7 +497,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Configuración del Sol"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -506,7 +506,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Cargando..."
-                            android:textColor="#9D9DA6"
+                            android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -518,7 +518,7 @@
                         android:src="@drawable/ic_arrow_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        app:tint="#E0E0E6" />
+                        app:tint="@color/settings_text_primary" />
 
                 </RelativeLayout>
 
@@ -527,7 +527,7 @@
                     android:id="@+id/dividerSunnySun"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#2E2E33"
+                    android:background="@color/settings_stroke"
                     android:visibility="gone" />
 
                 <!-- Content Area (Expandable) -->
@@ -559,7 +559,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Tamaño del Sol"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -567,7 +567,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="50%"
-                                android:textColor="#9D9DA6"
+                                android:textColor="@color/settings_text_secondary"
                                 android:textSize="14sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
@@ -592,7 +592,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Velocidad del Pulso"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -600,7 +600,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="50%"
-                                android:textColor="#9D9DA6"
+                                android:textColor="@color/settings_text_secondary"
                                 android:textSize="14sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
@@ -622,7 +622,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="Tema del Cielo"
-                        android:textColor="#E0E0E6"
+                        android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
@@ -631,6 +631,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                         android:layout_marginBottom="12dp">
 
                         <LinearLayout
@@ -648,9 +650,9 @@
                                 android:layout_width="92dp"
                                 android:layout_height="115dp"
                                 android:layout_marginEnd="10dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp">
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -667,7 +669,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Celeste"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
                                 </LinearLayout>
@@ -679,9 +681,9 @@
                                 android:layout_width="92dp"
                                 android:layout_height="115dp"
                                 android:layout_marginEnd="10dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp">
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -698,7 +700,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Atardecer"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
                                 </LinearLayout>
@@ -710,9 +712,9 @@
                                 android:layout_width="92dp"
                                 android:layout_height="115dp"
                                 android:layout_marginEnd="10dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp">
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -729,7 +731,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Anochecer"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
                                 </LinearLayout>
@@ -741,9 +743,9 @@
                                 android:layout_width="92dp"
                                 android:layout_height="115dp"
                                 android:layout_marginEnd="10dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp">
                                 <LinearLayout
                                     android:layout_width="match_parent"
@@ -760,7 +762,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Personalizado"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
                                 </LinearLayout>
@@ -782,7 +784,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Colores del Degradado"
-                            android:textColor="#6C6C75"
+                            android:textColor="@color/settings_text_tertiary"
                             android:textSize="12sp"
                             android:layout_marginBottom="8dp" />
 
@@ -799,9 +801,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginEnd="6dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp"
                                 android:clickable="true"
                                 android:focusable="true">
@@ -824,7 +826,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Superior"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:textStyle="bold" />
                                         <TextView
@@ -832,7 +834,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="#1A0D40"
-                                            android:textColor="#6C6C75"
+                                            android:textColor="@color/settings_text_tertiary"
                                             android:textSize="10sp" />
                                     </LinearLayout>
                                 </LinearLayout>
@@ -845,9 +847,9 @@
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
                                 android:layout_marginStart="6dp"
-                                app:cardBackgroundColor="#21212A"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
-                                app:strokeColor="#3A3A4A"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
                                 app:strokeWidth="1dp"
                                 android:clickable="true"
                                 android:focusable="true">
@@ -870,7 +872,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Inferior"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:textStyle="bold" />
                                         <TextView
@@ -878,7 +880,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="#F2731A"
-                                            android:textColor="#6C6C75"
+                                            android:textColor="@color/settings_text_tertiary"
                                             android:textSize="10sp" />
                                     </LinearLayout>
                                 </LinearLayout>
@@ -891,7 +893,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Selecciona el tema de color degradado para el cielo soleado."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="12dp" />
 
@@ -906,7 +908,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
                             android:text="Trayectoria/Movimiento del Sol"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginBottom="6dp" />
@@ -915,6 +917,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                             android:layout_marginBottom="12dp">
 
                             <LinearLayout
@@ -932,9 +936,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -951,7 +955,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="→"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
                                         </FrameLayout>
@@ -959,7 +963,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Izq. a Der."
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -971,9 +975,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -990,7 +994,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="←"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
                                         </FrameLayout>
@@ -998,7 +1002,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Der. a Izq."
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -1010,9 +1014,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -1029,7 +1033,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="⚫"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="16sp"
                                                 android:layout_gravity="center" />
                                         </FrameLayout>
@@ -1037,7 +1041,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Estático"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -1048,9 +1052,9 @@
                                     android:id="@+id/cardSunDirRandom"
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -1076,7 +1080,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Aleatorio"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -1101,7 +1105,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Velocidad de Movimiento"
-                                    android:textColor="#E0E0E6"
+                                    android:textColor="@color/settings_text_primary"
                                     android:textSize="15sp"
                                     android:textStyle="bold" />
                                 <TextView
@@ -1109,7 +1113,7 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="50%"
-                                    android:textColor="#9D9DA6"
+                                    android:textColor="@color/settings_text_secondary"
                                     android:textSize="14sp"
                                     android:layout_alignParentEnd="true" />
                             </RelativeLayout>
@@ -1139,7 +1143,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Posición del Sol (Estático)"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:layout_marginBottom="8dp" />
@@ -1147,7 +1151,9 @@
                             <HorizontalScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:scrollbars="none">
+                                android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp">
 
                                 <LinearLayout
                                     android:layout_width="wrap_content"
@@ -1164,9 +1170,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1190,7 +1196,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Sup. Izq."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1202,9 +1208,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1228,7 +1234,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Sup. Der."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1240,9 +1246,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1265,7 +1271,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Centro"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1277,9 +1283,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1303,7 +1309,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Borde Izq."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1315,9 +1321,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1341,7 +1347,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Borde Der."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1352,9 +1358,9 @@
                                         android:id="@+id/cardSunPosCustom"
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1380,7 +1386,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Personalizado"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1407,7 +1413,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Posición Horizontal (X)"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
                                     <TextView
@@ -1415,7 +1421,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="50%"
-                                        android:textColor="#9D9DA6"
+                                        android:textColor="@color/settings_text_secondary"
                                         android:textSize="13sp"
                                         android:layout_alignParentEnd="true" />
                                 </RelativeLayout>
@@ -1439,7 +1445,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Posición Vertical (Y)"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
                                     <TextView
@@ -1447,7 +1453,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="74%"
-                                        android:textColor="#9D9DA6"
+                                        android:textColor="@color/settings_text_secondary"
                                         android:textSize="13sp"
                                         android:layout_alignParentEnd="true" />
                                 </RelativeLayout>
@@ -1472,7 +1478,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Efectos Visuales Avanzados (Sol Bajo)"
-                        android:textColor="#F2731A"
+                        android:textColor="@color/settings_section_warning"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
@@ -1489,7 +1495,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="Haces de Luz (God Rays)"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -1505,7 +1511,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Genera haces de luz desde detrás del fondo y las nubes cuando el sol está bajo."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
 
@@ -1524,7 +1530,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Intensidad de Rayos"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -1532,7 +1538,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="50%"
-                                android:textColor="#9D9DA6"
+                                android:textColor="@color/settings_text_secondary"
                                 android:textSize="13sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
@@ -1559,7 +1565,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="Destellos de Lente (Lens Flare)"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -1575,7 +1581,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Añade reflejos dinámicos que se mueven en dirección opuesta al sol cuando deslizas el launcher."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
 
@@ -1594,7 +1600,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Intensidad de Destellos"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
                             <TextView
@@ -1602,7 +1608,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="50%"
-                                android:textColor="#9D9DA6"
+                                android:textColor="@color/settings_text_secondary"
                                 android:textSize="13sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
@@ -1631,7 +1637,7 @@
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
                             android:text="Ráfaga Solar al Tocar"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -1647,7 +1653,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Al tocar el disco solar se genera una pulsación de brillo y un estallido de partículas."
-                        android:textColor="#6C6C75"
+                        android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
 
@@ -1664,9 +1670,9 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#2E2E33"
+            app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#17171A">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -1705,7 +1711,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Configuración de Luna y Estrellas"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -1714,7 +1720,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Cargando..."
-                            android:textColor="#9D9DA6"
+                            android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -1726,7 +1732,7 @@
                         android:src="@drawable/ic_arrow_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        app:tint="#E0E0E6" />
+                        app:tint="@color/settings_text_primary" />
 
                 </RelativeLayout>
 
@@ -1735,7 +1741,7 @@
                     android:id="@+id/dividerSunnyMoon"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#2E2E33"
+                    android:background="@color/settings_stroke"
                     android:visibility="gone" />
 
                 <!-- Content Area (Expandable) -->
@@ -1763,7 +1769,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Fase Lunar"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:layout_marginTop="8dp"
@@ -1772,6 +1778,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutMoonPhaseCards"
@@ -1788,9 +1796,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1813,7 +1821,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Luna Nueva"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1824,9 +1832,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1849,7 +1857,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Creciente\nCóncava"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1860,9 +1868,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1885,7 +1893,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Cuarto\nCreciente"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1896,9 +1904,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1921,7 +1929,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Creciente\nConvexa"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1932,9 +1940,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1957,7 +1965,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Luna Llena"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -1968,9 +1976,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -1993,7 +2001,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Menguante\nConvexa"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2004,9 +2012,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2029,7 +2037,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Cuarto\nMenguante"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2039,9 +2047,9 @@
                                         android:id="@+id/cardMoonPhase7"
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2064,7 +2072,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Menguante\nCóncava"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2077,7 +2085,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Trayectoria de la Luna"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:layout_marginTop="12dp"
@@ -2086,6 +2094,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutMoonDirectionCards"
@@ -2102,9 +2112,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2121,7 +2131,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="→"
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
                                             </FrameLayout>
@@ -2129,7 +2139,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Izq. a Der."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2140,9 +2150,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2159,7 +2169,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="←"
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
                                             </FrameLayout>
@@ -2167,7 +2177,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Der. a Izq."
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2178,9 +2188,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2197,7 +2207,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="⚫"
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="16sp"
                                                     android:layout_gravity="center" />
                                             </FrameLayout>
@@ -2205,7 +2215,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Estático"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2215,9 +2225,9 @@
                                         android:id="@+id/cardMoonDirRandom"
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2243,7 +2253,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Aleatorio"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2266,7 +2276,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="Velocidad de Movimiento"
-                                        android:textColor="#E0E0E6"
+                                        android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
                                     <TextView
@@ -2274,7 +2284,7 @@
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:text="50%"
-                                        android:textColor="#9D9DA6"
+                                        android:textColor="@color/settings_text_secondary"
                                         android:textSize="13sp"
                                         android:layout_alignParentEnd="true" />
                                 </RelativeLayout>
@@ -2304,7 +2314,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:text="Posición de la Luna (Estática)"
-                                    android:textColor="#E0E0E6"
+                                    android:textColor="@color/settings_text_primary"
                                     android:textSize="15sp"
                                     android:textStyle="bold"
                                     android:layout_marginBottom="8dp" />
@@ -2312,6 +2322,8 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                                     android:layout_marginBottom="12dp">
                                     <LinearLayout
                                         android:layout_width="wrap_content"
@@ -2327,9 +2339,9 @@
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
                                             android:layout_marginEnd="10dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2353,7 +2365,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Sup. Izq."
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2364,9 +2376,9 @@
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
                                             android:layout_marginEnd="10dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2390,7 +2402,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Sup. Der."
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2401,9 +2413,9 @@
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
                                             android:layout_marginEnd="10dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2426,7 +2438,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Centro"
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2437,9 +2449,9 @@
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
                                             android:layout_marginEnd="10dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2463,7 +2475,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Borde Izq."
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2474,9 +2486,9 @@
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
                                             android:layout_marginEnd="10dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2500,7 +2512,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Borde Der."
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2510,9 +2522,9 @@
                                             android:id="@+id/cardMoonPosCustom"
                                             android:layout_width="92dp"
                                             android:layout_height="115dp"
-                                            app:cardBackgroundColor="#21212A"
+                                            app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
-                                            app:strokeColor="#3A3A4A"
+                                            app:strokeColor="@color/settings_chip_bg_inactive"
                                             app:strokeWidth="1dp">
                                             <LinearLayout
                                                 android:layout_width="match_parent"
@@ -2538,7 +2550,7 @@
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
                                                     android:text="Personalizado"
-                                                    android:textColor="#E0E0E6"
+                                                    android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
                                             </LinearLayout>
@@ -2564,7 +2576,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Posición Horizontal (X)"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="14sp"
                                             android:textStyle="bold" />
                                         <TextView
@@ -2572,7 +2584,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="50%"
-                                            android:textColor="#9D9DA6"
+                                            android:textColor="@color/settings_text_secondary"
                                             android:textSize="13sp"
                                             android:layout_alignParentEnd="true" />
                                     </RelativeLayout>
@@ -2596,7 +2608,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Posición Vertical (Y)"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="14sp"
                                             android:textStyle="bold" />
                                         <TextView
@@ -2604,7 +2616,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="74%"
-                                            android:textColor="#9D9DA6"
+                                            android:textColor="@color/settings_text_secondary"
                                             android:textSize="13sp"
                                             android:layout_alignParentEnd="true" />
                                     </RelativeLayout>
@@ -2634,7 +2646,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="Color de Estrellas"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
                                 android:layout_marginTop="12dp"
@@ -2643,6 +2655,8 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutStarColorCards"
@@ -2659,9 +2673,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2684,7 +2698,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Blanco"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2695,9 +2709,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2720,7 +2734,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Azul"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2731,9 +2745,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2756,7 +2770,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Cálido"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2767,9 +2781,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2792,7 +2806,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Rosa"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2803,9 +2817,9 @@
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
                                         android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2828,7 +2842,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Verde"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2838,9 +2852,9 @@
                                         android:id="@+id/cardStarColorMixed"
                                         android:layout_width="92dp"
                                         android:layout_height="115dp"
-                                        app:cardBackgroundColor="#21212A"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
-                                        app:strokeColor="#3A3A4A"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
                                         app:strokeWidth="1dp">
                                         <LinearLayout
                                             android:layout_width="match_parent"
@@ -2863,7 +2877,7 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Mixto"
-                                                android:textColor="#E0E0E6"
+                                                android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
                                         </LinearLayout>
@@ -2873,8 +2887,8 @@
 
                             <!-- Star Density -->
                             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                                <TextView android:id="@+id/textViewStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:id="@+id/textViewStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/seekBarStarDensity"
@@ -2893,7 +2907,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Modo de Estrellas"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="12dp"
@@ -2912,7 +2926,7 @@
                                 android:layout_marginEnd="4dp"
                                 app:cardCornerRadius="8dp"
                                 app:strokeWidth="1dp">
-                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Estático" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Estático" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                             </com.google.android.material.card.MaterialCardView>
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardStarModeRandom"
@@ -2921,7 +2935,7 @@
                                 android:layout_weight="1"
                                 app:cardCornerRadius="8dp"
                                 app:strokeWidth="1dp">
-                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Aleatorio" android:gravity="center" android:textColor="#B0B0BA" android:textSize="12sp" android:textStyle="bold" />
+                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Aleatorio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                             </com.google.android.material.card.MaterialCardView>
                         </LinearLayout>
 
@@ -2937,7 +2951,7 @@
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:text="Estrellas Fugaces"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -2956,8 +2970,8 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
                             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas Fugaces" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                                <TextView android:id="@+id/textViewShootingStarsDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas Fugaces" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:id="@+id/textViewShootingStarsDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
                             <com.google.android.material.slider.Slider
                                 android:id="@+id/seekBarShootingStarsDensity"
@@ -2983,7 +2997,7 @@
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
                                 android:text="Luciérnagas"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <com.google.android.material.switchmaterial.SwitchMaterial
@@ -3010,9 +3024,9 @@
             android:layout_marginBottom="16dp"
             app:cardCornerRadius="16dp"
             app:strokeWidth="1dp"
-            app:strokeColor="#2E2E33"
+            app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="#17171A">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -3036,7 +3050,7 @@
                         android:src="@drawable/ic_combined"
                         android:layout_alignParentStart="true"
                         android:layout_centerVertical="true"
-                        app:tint="#00E5FF" />
+                        app:tint="@color/settings_accent" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -3051,7 +3065,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Configuración de Transición"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
 
@@ -3060,7 +3074,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Cargando..."
-                            android:textColor="#9D9DA6"
+                            android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
@@ -3072,7 +3086,7 @@
                         android:src="@drawable/ic_arrow_down"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        app:tint="#E0E0E6" />
+                        app:tint="@color/settings_text_primary" />
 
                 </RelativeLayout>
 
@@ -3081,7 +3095,7 @@
                     android:id="@+id/dividerSunnyCombined"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#2E2E33"
+                    android:background="@color/settings_stroke"
                     android:visibility="gone" />
 
                 <!-- Content Area (Expandable) -->
@@ -3104,14 +3118,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Velocidad del Ciclo Día-Noche"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp" />
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ciclo Día/Noche" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ciclo Día/Noche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <com.google.android.material.slider.Slider
                             android:id="@+id/seekBarGradientCycleSpeed"
@@ -3126,8 +3140,8 @@
 
                         <!-- Combined Sun Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño del Sol" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño del Sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <com.google.android.material.slider.Slider
                             android:id="@+id/seekBarCombinedSunSize"
@@ -3142,8 +3156,8 @@
 
                         <!-- Combined Moon Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño de la Luna" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewCombinedMoonSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño de la Luna" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewCombinedMoonSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <com.google.android.material.slider.Slider
                             android:id="@+id/seekBarCombinedMoonSize"
@@ -3161,7 +3175,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Fase de la Luna"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="12dp"
@@ -3170,6 +3184,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                             android:layout_marginBottom="12dp">
                             <LinearLayout
                                 android:id="@+id/layoutCombinedMoonPhaseCards"
@@ -3186,9 +3202,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3211,7 +3227,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Luna Nueva"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3222,9 +3238,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3247,7 +3263,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Creciente\nCóncava"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3258,9 +3274,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3283,7 +3299,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Cuarto\nCreciente"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3294,9 +3310,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3319,7 +3335,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Creciente\nConvexa"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3330,9 +3346,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3355,7 +3371,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Luna Llena"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3366,9 +3382,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3391,7 +3407,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Menguante\nConvexa"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3402,9 +3418,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3427,7 +3443,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Cuarto\nMenguante"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3437,9 +3453,9 @@
                                     android:id="@+id/cardCombinedMoonPhase7"
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3462,7 +3478,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Menguante\nCóncava"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3475,7 +3491,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Color de Estrellas"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="12dp"
@@ -3484,6 +3500,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
                             android:layout_marginBottom="12dp">
                             <LinearLayout
                                 android:id="@+id/layoutCombinedStarColorCards"
@@ -3500,9 +3518,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3525,7 +3543,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Blanco"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3536,9 +3554,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3561,7 +3579,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Azul"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3572,9 +3590,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3597,7 +3615,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Cálido"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3608,9 +3626,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3633,7 +3651,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Rosa"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3644,9 +3662,9 @@
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
                                     android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3669,7 +3687,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Verde"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3679,9 +3697,9 @@
                                     android:id="@+id/cardCombinedStarColorMixed"
                                     android:layout_width="92dp"
                                     android:layout_height="115dp"
-                                    app:cardBackgroundColor="#21212A"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
-                                    app:strokeColor="#3A3A4A"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
                                     app:strokeWidth="1dp">
                                     <LinearLayout
                                         android:layout_width="match_parent"
@@ -3704,7 +3722,7 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Mixto"
-                                            android:textColor="#E0E0E6"
+                                            android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
                                     </LinearLayout>
@@ -3714,8 +3732,8 @@
 
                         <!-- Combined Star Density -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="#E0E0E6" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewCombinedStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="#9D9DA6" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewCombinedStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <com.google.android.material.slider.Slider
                             android:id="@+id/seekBarCombinedStarDensity"
@@ -3733,7 +3751,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Trayectoria del Sol y la Luna"
-                            android:textColor="#E0E0E6"
+                            android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="12dp"
@@ -3753,7 +3771,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:inputType="none"
-                                android:textColor="#E0E0E6"
+                                android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:padding="14dp" />
                         </com.google.android.material.textfield.TextInputLayout>

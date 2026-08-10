@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">wallpaper</string>
-    <string name="settings_title">Configuración de Tormenta</string>
+    <string name="settings_title">Configuración de Fondo Animado</string>
+    <string name="settings_title_storm">Configuración de Tormenta</string>
+    <string name="settings_title_sunny">Configuración de Día y Noche</string>
     <string name="cloud_density_label">Densidad de Nubes</string>
     <string name="rain_intensity_label">Densidad de Lluvia</string>
     <string name="wind_direction_label">Dirección de la Lluvia</string>
