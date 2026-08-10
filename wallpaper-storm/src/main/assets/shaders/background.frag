@@ -54,121 +54,153 @@ float fbm(highp vec2 p) {
     return value;
 }
 
-// Computes lens distortion, specular highlight, and border shading for a single droplet
-// per grid cell that impacts, slides down, and stretches vertically as it slides (no trail —
-// removed for performance; the trail's per-pixel sin()-based refraction was the most
-// expensive part of this loop for comparatively little visual payoff).
+// Marks which on-screen fragments fall inside a droplet's silhouette (droplet.w, used by
+// main() below to tint them toward the rain color) and how strongly (fadeVal), plus a "lupa"
+// glow amount (droplet.z, see below). There is no refraction/distortion here anymore — an
+// earlier version's lens effect is gone entirely, so distortion.xy is always (0,0) and nothing
+// here ever displaces what's sampled from the background texture.
+//
+// The magnifying-glass ("lupa") look is instead faked purely with color: a soft brightening
+// toward the droplet's center plus a small bright glint offset toward one side, the way light
+// catches a curved glass surface — no UV sampling is involved, so it can't be mistaken for
+// real refraction.
+//
+// Shape: an asymmetric teardrop. The leading half (the direction of fall) is a fixed rounded
+// cap the size of the droplet's own radius; the trailing half (where it came from) starts
+// flush with that cap — i.e. the droplet begins life as a plain semicircle — and gradually
+// grows a tail as it falls, reaching 100% further than the radius by the end of its life.
+//
+// Lifecycle: droplets never cut off abruptly. Near the end of their life, radius and opacity
+// both ease down together (see `shrink` below) so a droplet visibly shrinks and fades out at
+// the same time instead of vanishing at a hard cutoff.
 vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
-    highp vec2 distortion = vec2(0.0, 0.0);
-    float border = 1.0;
-    float dropMask = 0.0;
-    float finalFade = 1.0;
-
-    // Grid size to control droplet scale (12 vertical cells). Grid-cell math (st/ip/fp/pos)
+    // 12 lanes tall on screen regardless of aspect ratio. Grid-cell math (st/ip/fp/localPos)
     // stays highp: at mediump, this jitters visibly as the droplet grid "swims".
     highp vec2 scale = vec2(12.0 * aspect, 12.0);
     highp vec2 st = uv * scale;
     highp vec2 ip = floor(st);
     highp vec2 fp = fract(st) - vec2(0.5, 0.5);
 
-    float sumHeight = 0.0;
-    highp vec2 totalDistortion = vec2(0.0);
-    float totalBorder = 0.0;
     float totalFade = 0.0;
+    float totalGlow = 0.0;
+    float sumWeight = 0.0;
 
-    vec2 lightDir = normalize(vec2(0.5, 0.7));
-
-    for (int y = -9; y <= 1; y++) {
+    // Droplets only ever move straight down (never sideways), but a lane's horizontal jitter
+    // (laneOffsetX below) plus a large enough radius can still push a droplet's footprint past
+    // its own column's half-width — and each column hashes to a fully independent lane, so a
+    // fragment in the next column over won't render any part of a neighbor's droplet unless we
+    // explicitly check that neighboring column too. Skipping that (checking x=0 only) is what
+    // was clipping wide/offset droplets to a hard vertical cut at the column boundary, so the
+    // 3 nearest columns are checked for every row instead.
+    for (int y = -9; y <= 0; y++) {
         for (int x = -1; x <= 1; x++) {
             highp vec2 neighbor = vec2(float(x), float(y));
             highp vec2 cell = ip + neighbor;
             float h_cell = Hash(cell);
 
-            // 55% density check
+            // ~45% of lanes are active at any given moment; the rest stay empty.
             if (h_cell < 0.55) continue;
 
-            // Kept highp: this accumulates uTime (unbounded over hours of wallpaper
-            // uptime), so mediump would eventually make the slide animation glitch.
-            highp float loopId = 0.0;
-            highp float wrappedLoopId = 0.0;
-            highp float t = 0.0;
+            // This lane's fall distance and speed are fixed for its whole lifetime; only its
+            // vertical position (via t below) changes from one frame to the next. Kept highp:
+            // fallTime accumulates uTime (unbounded over hours of wallpaper uptime), so mediump
+            // would eventually make the fall animation glitch. The extra / 2.0 doubles each
+            // droplet's on-screen lifetime (half the per-second progression rate = twice as long
+            // to fall the same fallDist) without changing anything else about its motion.
+            float fallDist = mix(3.0, 8.0, Hash(cell + vec2(12.3, 45.6)));
+            float speed = mix(0.12, 0.4, Hash(cell + vec2(4.4, 4.4))) / fallDist / 2.0;
 
-            // Calculate randomized sliding distance (1/4 to 3/4 of screen height)
-            float slideDist = mix(3.0, 9.0, Hash(cell + vec2(12.3, 45.6)));
+            highp float fallTime = time * speed + h_cell * 20.0;
+            highp float loopId = floor(fallTime);
+            highp float t = fract(fallTime);
+            float wrappedLoopId = mod(loopId, 16.0);
 
-            // Droplet sliding velocity (cells per second)
-            float velocity = (0.108 + 0.644 * Hash(cell + vec2(4.4, 4.4))) / 3.0;
+            // Small per-spawn horizontal jitter so lanes don't all sit dead-center in their
+            // column. Fixed for the whole fall (doesn't change with t), so it can't read as
+            // sideways drift — only the vertical position below does.
+            float laneOffsetX = (Hash(cell + vec2(wrappedLoopId * 7.7, wrappedLoopId * 7.7)) - 0.5) * 0.5;
 
-            // Speed (rate of fract progression per second)
-            float speed = velocity / slideDist;
+            float baseRadius = mix(0.045, 0.10, Hash(cell + vec2(wrappedLoopId * 2.3, wrappedLoopId * 2.3))) * sizeFactor;
+            if (baseRadius <= 0.001) continue;
 
-            highp float slideTime = time * speed + h_cell * 20.0;
-            loopId = floor(slideTime);
-            wrappedLoopId = mod(loopId, 16.0);
-            t = fract(slideTime);
+            // No fade-in: a droplet appears instantly at full strength, already shaped as a
+            // semicircle (see the trailing-edge math below, which starts flush with the leading
+            // cap at t=0) — a gradual fade-in made it look like it was materializing out of its
+            // spawn row's grid line instead of just popping into existence. Shrink starts
+            // immediately at that same instant, easing continuously toward 0 across the whole
+            // fall, so the droplet is visibly getting smaller the entire time it's moving, not
+            // just at the end — and fade tracks that same curve so opacity and size shrink
+            // together, never popping out of existence either.
+            float shrink = 1.0 - smoothstep(0.0, 1.0, t);
+            float fade = shrink;
+            if (fade <= 0.001) continue;
 
-            // Completely random offset per loop iteration
-            highp vec2 offset = vec2(
-                Hash(cell + vec2(wrappedLoopId * 7.7, wrappedLoopId * 7.7)),
-                Hash(cell + vec2(wrappedLoopId * 11.1, wrappedLoopId * 11.1))
-            ) - vec2(0.5, 0.5);
-            offset *= 0.3;
+            float radius = baseRadius * shrink;
+            if (radius <= 0.001) continue;
 
-            // Instantaneous appearance at start of slide, gradual fade out at the end
-            float fade = 1.0 - smoothstep(0.55, 1.0, t);
+            // Position relative to the droplet's current center: starts at the top of its
+            // spawn cell and moves straight down by fallDist cells as t goes 0 -> 1.
+            highp vec2 localPos = fp - neighbor - vec2(laneOffsetX, 0.0);
+            localPos.y -= (t * fallDist - 0.5);
 
-            // Render check per loop to add further spawn randomization
-            float h_render = Hash(cell + vec2(wrappedLoopId * 1.3, wrappedLoopId * 1.3));
-            if (h_render < 0.45) continue;
+            // Bounding box check (pruning): wider on the trailing (negative-y) side to cover
+            // the tail's maximum reach (up to 2x radius), plus a margin so the tail's soft
+            // edge (edgeFade below) is never culled before it has faded out.
+            if (abs(localPos.x) > radius * 1.3 || localPos.y > radius * 1.3 || localPos.y < -radius * 2.2) continue;
 
-            // Size of droplet
-            float radius = mix(0.06, 0.13, Hash(cell + vec2(wrappedLoopId * 2.3, wrappedLoopId * 2.3))) * sizeFactor;
-            radius *= 0.85; // moving drop size scaling
-            radius *= fade;
-
-            highp vec2 pos = fp - neighbor - offset;
-            pos.y -= (t * slideDist - 0.5); // Slide down by slideDist
-
-            // Bounding box check (pruning): only the droplet's own footprint now that
-            // there's no trail extending back up to the slide's starting point.
-            if (abs(pos.x) > radius * 1.3 || abs(pos.y) > radius * 3.0) continue;
-
-            // Stretches vertically as it slides (currentYScale shrinks from 1.08 to 0.4)
-            float currentYScale = mix(1.08, 0.4, t);
-            vec2 ovalScale = vec2(1.2, currentYScale);
-            highp vec2 ovalPos = pos * ovalScale;
-            float r = length(ovalPos);
-
-            if (r < radius && radius > 0.001) {
-                // Smooth blending height factor (distance field)
-                float h_height = radius - r;
-                float nz = sqrt(max(0.0, radius * radius - r * r)) / radius;
-                highp vec2 n = -ovalPos / radius;
-
-                highp vec2 distK = n * nz * 0.022;
-                float borderK = smoothstep(0.0, 0.15, nz);
-
-                // Accumulate weighted properties for smooth blending
-                totalDistortion += distK * h_height;
-                totalBorder += borderK * h_height;
-                totalFade += fade * h_height;
-                sumHeight += h_height;
+            // Asymmetric teardrop: the leading edge (localPos.y > 0, the direction of fall) is
+            // always a plain rounded cap the size of `radius`. The trailing edge (localPos.y <
+            // 0, where the droplet came from) starts flush with that cap — a semicircle, since
+            // the tail hasn't grown at all yet — and its reach grows gradually across the
+            // droplet's whole fall (stretchT spans the entire t range, same as the shrink
+            // above), reaching 100% more than the original radius (2x) by the end of the fall.
+            float stretchT = smoothstep(0.0, 1.0, t);
+            float trailingReach = mix(radius * 1.02, radius * 2.0, stretchT);
+            float yComp = localPos.y;
+            if (yComp < 0.0) {
+                yComp *= radius / trailingReach;
             }
+            highp vec2 shapePos = vec2(localPos.x * 1.2, yComp);
+            float dist = length(shapePos);
+            if (dist >= radius) continue;
+
+            float normDist = dist / radius;
+
+            // Softens only the silhouette's edge (not a color/darkening effect) so it isn't a
+            // hard-edged shape.
+            float edgeFade = 1.0 - smoothstep(0.82, 1.0, normDist);
+            float weight = fade * edgeFade;
+
+            // Fake "lupa" glass look, no refraction: a broad, soft brightening toward the
+            // droplet's own center (mimics a lens gathering/focusing light) plus a small sharp
+            // glint offset toward one side (mimics a specular highlight on curved glass). Both
+            // are pure color contributions in main() — this shape math never touches the UV.
+            float lensCore = 1.0 - smoothstep(0.0, 0.65, normDist);
+            highp vec2 glintOffset = vec2(-radius * 0.28, radius * 0.32);
+            float glintDist = length(shapePos - glintOffset);
+            float glint = 1.0 - smoothstep(0.0, radius * 0.22, glintDist);
+            float lensGlow = (lensCore * 0.25 + glint * 0.85) * fade;
+
+            totalFade += fade * weight;
+            totalGlow += lensGlow * weight;
+            sumWeight += weight;
         }
     }
 
-    if (sumHeight > 0.0001) {
-        distortion = totalDistortion / sumHeight;
-        border = totalBorder / sumHeight;
-        finalFade = totalFade / sumHeight;
+    float dropMask = 0.0;
+    float finalFade = 0.0;
+    float finalGlow = 0.0;
+    if (sumWeight > 0.0001) {
+        finalFade = totalFade / sumWeight;
+        finalGlow = totalGlow / sumWeight;
         dropMask = 1.0;
     }
 
-    borderVal = border;
+    // No edge-darkening "shadow" — kept as an out-param only for interface
+    // compatibility with main(), which no longer applies any darkening from it.
+    borderVal = 1.0;
     fadeVal = finalFade;
-    // .z is unused by the caller; kept at 0.0 (was previously an undeclared
-    // "spec" identifier left over from a removed specular-highlight term).
-    return vec4(distortion.x, distortion.y, 0.0, dropMask);
+    return vec4(0.0, 0.0, finalGlow, dropMask);
 }
 
 float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, highp float time, highp float aspect) {
@@ -199,20 +231,17 @@ float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, h
 }
 
 void main() {
-    float edgeBorder = 1.0;
+    // GetDropletEffects no longer produces edge-darkening (see its comment), so this out-param
+    // is unused here — kept only because the function signature still returns it.
+    float unusedBorder = 1.0;
     float fadeVal = 1.0;
 
-    // Use the original vTexCoord for background droplets to maintain the exact lens effect
-    // 1. Get droplet refraction distortion and lighting factors
-    vec4 droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, edgeBorder, fadeVal);
-
-    // 2. Only apply distortion if droplets are enabled
+    // Get the droplet mask/fade (no refraction anymore, see GetDropletEffects' comment —
+    // droplet.xy is always (0,0), so sampling stays at the plain vTexCoord below).
+    vec4 droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
     highp vec2 distortedUV = vTexCoord;
-    if (uScreenDropletsEnabled > 0.5) {
-        distortedUV = clamp(vTexCoord + droplet.xy, vec2(0.0, 0.0), vec2(1.0, 1.0));
-    }
 
-    // Sample the background texture (distorted if inside enabled droplet)
+    // Sample the background texture
     vec4 texColor = texture(uTexture, distortedUV);
 
     // Calculate luma and final alpha for silhouette masking
@@ -258,9 +287,11 @@ void main() {
     }
     finalColor += rimColor;
 
+    // "Lupa" glass glow (see GetDropletEffects' comment): a pure-color brightening, never a
+    // UV sample, applied after the storm dimming so it still reads as glass catching light
+    // even in the darkest parts of the scene.
     if (uScreenDropletsEnabled > 0.5 && droplet.w > 0.5) {
-        // Apply only droplet edge shading (dark border) to maintain depth without the "upward reflection"
-        finalColor = finalColor * (0.6 + 0.4 * edgeBorder);
+        finalColor += baseTexColor * droplet.z * 0.9;
     }
 
     fragColor = vec4(finalColor, 1.0);

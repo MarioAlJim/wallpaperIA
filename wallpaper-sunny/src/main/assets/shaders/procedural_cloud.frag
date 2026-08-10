@@ -34,6 +34,20 @@ void main() {
     // Invert the Y axis (0.5 - vTexCoord.y) to correct the vertical orientation of the cloud shape.
     vec2 p = vec2((vTexCoord.x - 0.5) * 2.4, 0.5 - vTexCoord.y);
 
+    // Early discard: every ellipse used to build the cloud body/shadow (c1..c8 with
+    // r1..r8, including their random growth factors and the shadow shift/grow) stays
+    // within a known maximum extent along each axis. A fragment further out than that
+    // (plus a safety margin for the soft edge falloff and the silver-lining bloom)
+    // can never contribute to the final color, so bail out before the ellipse/fbm math.
+    // Widest ellipse pair on X is c2/c3 (center ~0.425, radius ~0.3625*1.15+0.0125 shadow
+    // grow ~0.43) -> extent ~0.855. Tallest on Y is c4 (center ~0.2275, radius ~0.325*1.15
+    // +0.0125 grow -0.0625 shadow shift ~0.30) -> extent ~0.52.
+    const vec2 kMaxCloudExtent = vec2(0.855, 0.52) * 1.15;
+    vec2 pn = p / kMaxCloudExtent;
+    if (dot(pn, pn) > 1.0) {
+        discard;
+    }
+
     // Seed based on the variation uniform
     float seed = uVariation;
 

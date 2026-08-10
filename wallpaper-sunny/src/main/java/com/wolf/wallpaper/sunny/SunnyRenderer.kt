@@ -39,16 +39,28 @@ class SunnyRenderer(
     private var sunFadeFactorHandle = -1
     private var sunPulseHandle = -1
 
-    // Handles for particle.frag
-    private var pMVPMatrixHandle = -1
-    private var pColorHandle = -1
-    private var pOpacityHandle = -1
+    // Handles for the new subtle effects added to sunny.frag (cloud shafts / rainbow / lens dirt)
+    private var cloudOcclusionHandle = -1
+    private var rainbowOpacityHandle = -1
+    private var lensDirtOpacityHandle = -1
 
-    // Handles for firefly.frag
+    // Handles for particle.vert/particle.frag (instanced: per-instance position/scale/
+    // color/opacity travel as vertex attributes, not per-draw uniforms; uProjectionMatrix
+    // is the only remaining uniform, shared across the whole instanced batch)
+    private var pProjMatrixHandle = -1
+
+    // Handles for firefly.vert(particle.vert)/firefly.frag (instanced, same layout as particles)
     private var fireflyProgram = 0
-    private var fMVPMatrixHandle = -1
-    private var fColorHandle = -1
-    private var fOpacityHandle = -1
+    private var fProjMatrixHandle = -1
+
+    // Instanced-draw geometry for particles/fireflies: 4-vertex GL_TRIANGLE_STRIP quad
+    // (locations 0/1, divisor 0) plus per-instance attributes packed as
+    // [x, y, scale, r, g, b, opacity] (locations 2-5, divisor 1) uploaded once per frame.
+    private val instanceFloatsPerEntry = 7
+    private val maxParticleInstances = 512
+    private val maxFireflyInstances = 64
+    private lateinit var particleInstanceBuffer: FloatBuffer
+    private lateinit var fireflyInstanceBuffer: FloatBuffer
 
     // Handles for sunny_background.frag
     private var bgThemeHandle = -1
@@ -61,10 +73,17 @@ class SunnyRenderer(
     private var bgMoonPhaseMultiplierHandle = -1
     private var bgMvpMatrixHandle = -1
     private var bgTextureHandleCached = -1
+    private var bgTimeHandle = -1 // uTime, used by sunny_background.frag's heat-haze effect (Noon theme only)
 
     // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
+
+    // Precomputed noise texture used by sunny.frag's nebula fbm approximation
+    // (dedicated texture unit: GL_TEXTURE1, so it never clashes with the cloud/
+    // background/moon programs which all bind their own texture at GL_TEXTURE0).
+    private var noiseTexture = 0
+    private var noiseTexHandle = -1
 
     // Cloud handles (cloudProgram is shared by drawNightClouds and drawClouds; both
     // uniform sets are identical since it's the same shader program)
@@ -154,7 +173,11 @@ class SunnyRenderer(
         val maxLife: Float,
         val r: Float,
         val g: Float,
-        val b: Float
+        val b: Float,
+        // Simulated downward acceleration applied each frame (units/sec^2). Defaults to 0 so
+        // the existing touch-burst confetti (which never sets it) is completely unaffected;
+        // only the shooting-star trail burst opts in (see spawnShootingStarTrailBurst).
+        val gravity: Float = 0f
     )
 
     private class Star(
@@ -216,6 +239,19 @@ class SunnyRenderer(
     )
     private val fireflies = mutableListOf<Firefly>()
 
+    // Rare subtle-rainbow state (see updateRainbow): a simple 4-state fade in/hold/fade out
+    // timer, following the same "random per-frame probability" spawn pattern already used
+    // for shooting stars above.
+    private var rainbowOpacity = 0f
+    private var rainbowState = RAINBOW_STATE_IDLE
+    private var rainbowTimer = 0f
+    private var rainbowHoldDuration = 0f
+
+    // Touch-wind state (see onOffsetsChanged/applyTouchWindImpulse): tracks when the last
+    // horizontal-offset sample arrived so a swipe's velocity can be derived from consecutive
+    // samples, independently of the render loop's own frame timing.
+    private var lastSwipeOffsetSampleTimeNanos = 0L
+
     // Sun movement state
     private var sunX = 0.35f
     private var sunY = 0.45f
@@ -248,6 +284,13 @@ class SunnyRenderer(
     // Clouds
     private val clouds = mutableListOf<Cloud>()
     private val cloudTextures = mutableListOf<Int>()
+
+    // Depth-sort caches: rebuilt only when a cloud is added/removed/reset (z changes),
+    // instead of re-sorting the whole list every single frame in the draw loop.
+    private var cloudsDirty = true
+    private var nightCloudsDirty = true
+    private val sortedClouds = mutableListOf<Cloud>()
+    private val sortedNightClouds = mutableListOf<Cloud>()
 
     // Backgrounds
     private val backgroundTextures = IntArray(8)
@@ -291,6 +334,11 @@ class SunnyRenderer(
         godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
+        noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
+        cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
+        rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
+        lensDirtOpacityHandle = GLES30.glGetUniformLocation(program, "uLensDirtOpacity")
+        noiseTexture = createNoiseTexture(128)
 
         // Compile and link lens flare shader
         try {
@@ -329,9 +377,7 @@ class SunnyRenderer(
             val pFrag = readAssetFile(context, "shaders/particle.frag")
             particleProgram = createProgram(pVert, pFrag)
 
-            pMVPMatrixHandle = GLES30.glGetUniformLocation(particleProgram, "uMVPMatrix")
-            pColorHandle = GLES30.glGetUniformLocation(particleProgram, "uColor")
-            pOpacityHandle = GLES30.glGetUniformLocation(particleProgram, "uOpacity")
+            pProjMatrixHandle = GLES30.glGetUniformLocation(particleProgram, "uProjectionMatrix")
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -342,12 +388,18 @@ class SunnyRenderer(
             val fFrag = readAssetFile(context, "shaders/firefly.frag")
             fireflyProgram = createProgram(fVert, fFrag)
 
-            fMVPMatrixHandle = GLES30.glGetUniformLocation(fireflyProgram, "uMVPMatrix")
-            fColorHandle = GLES30.glGetUniformLocation(fireflyProgram, "uColor")
-            fOpacityHandle = GLES30.glGetUniformLocation(fireflyProgram, "uOpacity")
+            fProjMatrixHandle = GLES30.glGetUniformLocation(fireflyProgram, "uProjectionMatrix")
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // Instanced per-instance attribute buffers for particles/fireflies
+        particleInstanceBuffer = ByteBuffer.allocateDirect(maxParticleInstances * instanceFloatsPerEntry * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+        fireflyInstanceBuffer = ByteBuffer.allocateDirect(maxFireflyInstances * instanceFloatsPerEntry * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
 
         // Compile and link cloud shader
         val cloudVert = readAssetFile(context, "shaders/procedural_cloud.vert")
@@ -381,6 +433,7 @@ class SunnyRenderer(
         bgMoonPhaseMultiplierHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMoonPhaseMultiplier")
         bgMvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
         bgTextureHandleCached = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
+        bgTimeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
 
 
 
@@ -547,6 +600,7 @@ class SunnyRenderer(
         for (cloud in clouds) {
             cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = cloudTextures.size)
         }
+        cloudsDirty = true
     }
 
     override fun onUpdate(deltaTime: Float) {
@@ -730,6 +784,7 @@ class SunnyRenderer(
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
                 cloud.reset(0f, aspectRatio, textureCount = cloudTextures.size)
+                cloudsDirty = true
                 val newHalfWidth = cloud.scale * 1.2f
                 val windThreshold = 0.1f
                 val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -741,7 +796,9 @@ class SunnyRenderer(
                 }
             }
         }
-        clouds.removeAll { it.isFadingOut && it.opacity <= 0f }
+        if (clouds.removeAll { it.isFadingOut && it.opacity <= 0f }) {
+            cloudsDirty = true
+        }
 
         // Night / Combined mode: update moon and night clouds
         if (timeMode == 1 || timeMode == 2) {
@@ -778,6 +835,7 @@ class SunnyRenderer(
                 val maxB = aspectRatio + halfW
                 if (nc.positionX > maxB || nc.positionX < -maxB) {
                     nc.reset(0f, aspectRatio, textureCount = cloudTextures.size)
+                    nightCloudsDirty = true
                     val newHalfW = nc.scale * 1.2f
                     val windThreshold = 0.1f
                     val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
@@ -789,7 +847,9 @@ class SunnyRenderer(
                     }
                 }
             }
-            nightClouds.removeAll { it.isFadingOut && it.opacity <= 0f }
+            if (nightClouds.removeAll { it.isFadingOut && it.opacity <= 0f }) {
+                nightCloudsDirty = true
+            }
         }
         if (timeMode == 2) {
             moonFadeFactor = if (kotlin.math.abs(moonPathX) > 1.1f) {
@@ -840,6 +900,11 @@ class SunnyRenderer(
             if (p.life <= 0f) {
                 pIterator.remove()
             } else {
+                // Simulated gravity: only shooting-star trail particles set p.gravity != 0
+                // (touch-burst confetti keeps its existing drag-only behavior unchanged).
+                if (p.gravity != 0f) {
+                    p.vy -= p.gravity * deltaTime
+                }
                 p.x += p.vx * deltaTime
                 p.y += p.vy * deltaTime
                 p.alpha = (p.life / p.maxLife).coerceIn(0f, 1f)
@@ -941,6 +1006,7 @@ class SunnyRenderer(
                         g = gVal,
                         b = bVal
                     )
+                    spawnShootingStarTrailBurst(startX, startY, vxVal, vyVal, rVal, gVal, bVal)
                 }
             }
         }
@@ -948,6 +1014,9 @@ class SunnyRenderer(
         // Fireflies simulation update
         val firefliesActive = configProvider.isFirefliesEnabled() && (timeMode == 1 || (timeMode == 2 && combinedNightIntensity > 0.01f))
         updateFireflies(deltaTime, firefliesActive)
+
+        // Rare subtle-rainbow simulation update (day skies only, see updateRainbow)
+        updateRainbow(deltaTime)
     }
 
     private fun generateRandomPath() {
@@ -985,6 +1054,86 @@ class SunnyRenderer(
         
         randomProgress = 0f
         isRandomPathInitialized = true
+    }
+
+    /**
+     * Aggregates how much day-cloud "density" currently sits near the sun into a single 0..1
+     * scalar (see kCloudShaftInfluenceRadius/kCloudShaftScaleFactor), used to widen/soften the
+     * analytic god rays in sunny.frag into an approximate "cloud shafts" look. Each cloud's
+     * own influence radius grows with its scale so bigger/closer clouds register from farther
+     * away, matching their actual on-screen footprint; contributions from multiple clouds
+     * stack (clamped to 1) so several partial clouds near the sun can add up to full occlusion.
+     */
+    private fun computeCloudOcclusionNearSun(): Float {
+        if (clouds.isEmpty()) return 0f
+        var occlusion = 0f
+        for (cloud in clouds) {
+            if (cloud.opacity <= 0f) continue
+            val dx = cloud.positionX - sunX
+            val dy = cloud.positionY - sunY
+            val dist = kotlin.math.sqrt(dx * dx + dy * dy)
+            val influenceRadius = kCloudShaftInfluenceRadius + cloud.scale * kCloudShaftScaleFactor
+            val proximity = smoothstep(influenceRadius, 0f, dist)
+            occlusion += proximity * cloud.opacity
+        }
+        return occlusion.coerceIn(0f, 1f)
+    }
+
+    /**
+     * Rare subtle-rainbow timer: a simple idle -> fade-in -> hold -> fade-out state machine.
+     * Eligibility (day mode or Combined with high day intensity, and never the Anochecer/Dusk
+     * theme) is re-checked every frame; if it stops being eligible mid-display, the rainbow is
+     * pushed straight into its fade-out phase rather than popping off instantly.
+     */
+    private fun updateRainbow(deltaTime: Float) {
+        val timeMode = configProvider.getTimeMode()
+        val theme = configProvider.getSunnyTheme()
+        val dayIntensity = when (timeMode) {
+            0 -> 1f
+            2 -> combinedDayIntensity
+            else -> 0f
+        }
+        val eligible = theme != 2 && dayIntensity > kRainbowMinDayIntensity
+
+        if (!eligible && rainbowState != RAINBOW_STATE_IDLE && rainbowState != RAINBOW_STATE_FADE_OUT) {
+            rainbowState = RAINBOW_STATE_FADE_OUT
+            rainbowTimer = kRainbowFadeOutDuration * (1f - rainbowOpacity)
+        }
+
+        when (rainbowState) {
+            RAINBOW_STATE_IDLE -> {
+                if (eligible && kotlin.random.Random.nextFloat() < kRainbowSpawnRatePerSecond * deltaTime) {
+                    rainbowState = RAINBOW_STATE_FADE_IN
+                    rainbowTimer = 0f
+                    rainbowHoldDuration = kRainbowHoldMin + kotlin.random.Random.nextFloat() * kRainbowHoldRange
+                }
+            }
+            RAINBOW_STATE_FADE_IN -> {
+                rainbowTimer += deltaTime
+                rainbowOpacity = (rainbowTimer / kRainbowFadeInDuration).coerceIn(0f, 1f)
+                if (rainbowTimer >= kRainbowFadeInDuration) {
+                    rainbowState = RAINBOW_STATE_HOLD
+                    rainbowTimer = 0f
+                }
+            }
+            RAINBOW_STATE_HOLD -> {
+                rainbowTimer += deltaTime
+                rainbowOpacity = 1f
+                if (rainbowTimer >= rainbowHoldDuration) {
+                    rainbowState = RAINBOW_STATE_FADE_OUT
+                    rainbowTimer = 0f
+                }
+            }
+            RAINBOW_STATE_FADE_OUT -> {
+                rainbowTimer += deltaTime
+                rainbowOpacity = (1f - rainbowTimer / kRainbowFadeOutDuration).coerceIn(0f, 1f)
+                if (rainbowTimer >= kRainbowFadeOutDuration || rainbowOpacity <= 0f) {
+                    rainbowState = RAINBOW_STATE_IDLE
+                    rainbowTimer = 0f
+                    rainbowOpacity = 0f
+                }
+            }
+        }
     }
 
     override fun onDrawFrame() {
@@ -1031,6 +1180,31 @@ class SunnyRenderer(
 
         // Pass night intensity uniform to sky shader
         GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
+
+        // Bind the precomputed noise texture used by the nebula fbm approximation
+        // (only sampled by the shader's night branch, but binding is cheap either way)
+        if (noiseTexture != 0) {
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
+            GLES30.glUniform1i(noiseTexHandle, 1)
+        }
+
+        // Cloud shafts: aggregate day-cloud occlusion near the sun into a single scalar (see
+        // computeCloudOcclusionNearSun) so the shader can spread/soften the existing god rays.
+        GLES30.glUniform1f(cloudOcclusionHandle, computeCloudOcclusionNearSun())
+
+        // Subtle rare rainbow (see updateRainbow): CPU-driven fade in/hold/fade out, already
+        // forced to 0 outside eligible day conditions by updateRainbow itself.
+        GLES30.glUniform1f(rainbowOpacityHandle, rainbowOpacity)
+
+        // Lens dirt: reuse the same "is the sun visible near screen center" gating already
+        // used for the lens flare (isSunnyLensFlareEnabled + lowSunFactor + pathFadeFactor),
+        // plus a screen-center-proximity falloff so the smudge only shows while the sun sits
+        // near the middle of the screen.
+        val lensDirtBase = if (configProvider.isSunnyLensFlareEnabled()) lowSunFactor * pathFadeFactor * intensity else 0f
+        val centerDist = kotlin.math.sqrt((sunX + gyroX) * (sunX + gyroX) + (sunY + gyroY) * (sunY + gyroY))
+        val centerProximity = (1f - smoothstep(0f, kLensDirtCenterFalloff, centerDist)).coerceIn(0f, 1f)
+        GLES30.glUniform1f(lensDirtOpacityHandle, (lensDirtBase * centerProximity).coerceIn(0f, 1f))
 
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()
@@ -1333,7 +1507,14 @@ class SunnyRenderer(
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
-        for (cloud in nightClouds.sortedBy { it.z }) {
+        if (nightCloudsDirty) {
+            sortedNightClouds.clear()
+            sortedNightClouds.addAll(nightClouds)
+            sortedNightClouds.sortBy { it.z }
+            nightCloudsDirty = false
+        }
+
+        for (cloud in sortedNightClouds) {
             val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
@@ -1383,6 +1564,7 @@ class SunnyRenderer(
                     aspectRatio, textureCount = textureCount)
                 nc.opacity = 0f
                 nightClouds.add(nc)
+                nightCloudsDirty = true
                 needed--
             }
         } else if (activeClouds.size > targetCount) {
@@ -1448,7 +1630,14 @@ class SunnyRenderer(
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
-        for (cloud in clouds.sortedBy { it.z }) {
+        if (cloudsDirty) {
+            sortedClouds.clear()
+            sortedClouds.addAll(clouds)
+            sortedClouds.sortBy { it.z }
+            cloudsDirty = false
+        }
+
+        for (cloud in sortedClouds) {
             val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
@@ -1489,37 +1678,28 @@ class SunnyRenderer(
         GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
 
-        // Bind positions attribute (location 0)
-        cloudQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-
-        // Bind UV coordinates attribute (location 1)
-        cloudQuadBuffer.position(2)
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(1)
+        GLES30.glUniformMatrix4fv(pProjMatrixHandle, 1, false, projectionMatrix, 0)
 
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
 
-        for (p in particles) {
-            val modelMatrix = scratchModelMatrix
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, p.x + gyroX, p.y + gyroY, 0f)
-            Matrix.scaleM(modelMatrix, 0, p.size, p.size, 1.0f)
-
-            val modelViewProjection = scratchMVPMatrix
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-
-            GLES30.glUniformMatrix4fv(pMVPMatrixHandle, 1, false, modelViewProjection, 0)
-            GLES30.glUniform3f(pColorHandle, p.r, p.g, p.b)
-            GLES30.glUniform1f(pOpacityHandle, p.alpha * intensity)
-
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        // Silently drop the tail past the buffer's capacity (only reachable under a
+        // pathological burst of touch events); this keeps the instance buffer fixed-size.
+        val count = particles.size.coerceAtMost(maxParticleInstances)
+        particleInstanceBuffer.clear()
+        for (i in 0 until count) {
+            val p = particles[i]
+            particleInstanceBuffer.put(p.x + gyroX)
+            particleInstanceBuffer.put(p.y + gyroY)
+            particleInstanceBuffer.put(p.size)
+            particleInstanceBuffer.put(p.r)
+            particleInstanceBuffer.put(p.g)
+            particleInstanceBuffer.put(p.b)
+            particleInstanceBuffer.put(p.alpha * intensity)
         }
+        particleInstanceBuffer.position(0)
 
-        GLES30.glDisableVertexAttribArray(0)
-        GLES30.glDisableVertexAttribArray(1)
+        drawInstancedQuads(particleInstanceBuffer, count)
 
         // Restore blend function to default to avoid breaking subsequent renders
         if (!blendEnabled) {
@@ -1527,6 +1707,61 @@ class SunnyRenderer(
         } else {
             GLES30.glBlendFunc(prevSrcFunc[0], prevDstFunc[0])
         }
+    }
+
+    /**
+     * Draws [count] instances of the shared unit quad (cloudQuadBuffer geometry) using
+     * [instanceBuffer]'s per-instance [x, y, scale, r, g, b, opacity] attributes (locations
+     * 2-5, divisor 1) in a single glDrawArraysInstanced call. Used by drawParticles and
+     * drawFireflies, whose vertex/fragment shaders (particle.vert + particle.frag/firefly.frag)
+     * share this exact attribute layout.
+     */
+    private fun drawInstancedQuads(instanceBuffer: FloatBuffer, count: Int) {
+        if (count <= 0) return
+
+        // Shared quad geometry (locations 0/1, divisor 0 -> same 4 vertices for every instance)
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        val stride = instanceFloatsPerEntry * 4
+        instanceBuffer.position(0)
+        GLES30.glVertexAttribPointer(2, 2, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(2)
+        GLES30.glVertexAttribDivisor(2, 1)
+
+        instanceBuffer.position(2)
+        GLES30.glVertexAttribPointer(3, 1, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(3)
+        GLES30.glVertexAttribDivisor(3, 1)
+
+        instanceBuffer.position(3)
+        GLES30.glVertexAttribPointer(4, 3, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(4)
+        GLES30.glVertexAttribDivisor(4, 1)
+
+        instanceBuffer.position(6)
+        GLES30.glVertexAttribPointer(5, 1, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(5)
+        GLES30.glVertexAttribDivisor(5, 1)
+
+        GLES30.glDrawArraysInstanced(GLES30.GL_TRIANGLE_STRIP, 0, 4, count)
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+        GLES30.glDisableVertexAttribArray(2)
+        GLES30.glDisableVertexAttribArray(3)
+        GLES30.glDisableVertexAttribArray(4)
+        GLES30.glDisableVertexAttribArray(5)
+        // Reset divisors so these locations behave as regular per-vertex attributes if
+        // reused by a subsequent non-instanced draw call using the same slots.
+        GLES30.glVertexAttribDivisor(2, 0)
+        GLES30.glVertexAttribDivisor(3, 0)
+        GLES30.glVertexAttribDivisor(4, 0)
+        GLES30.glVertexAttribDivisor(5, 0)
     }
 
     private fun updateFireflies(deltaTime: Float, active: Boolean) {
@@ -1599,31 +1834,29 @@ class SunnyRenderer(
         GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
         GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
-        
+
         GLES30.glUseProgram(fireflyProgram)
-        
-        cloudQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-        cloudQuadBuffer.position(2)
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(1)
+        GLES30.glUniformMatrix4fv(fProjMatrixHandle, 1, false, projectionMatrix, 0)
+
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
-        for (f in fireflies) {
-            val modelMatrix = scratchModelMatrix
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, f.x + gyroX, f.y + gyroY, 0f)
-            Matrix.scaleM(modelMatrix, 0, f.size, f.size, 1.0f)
-            val modelViewProjection = scratchMVPMatrix
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-            GLES30.glUniformMatrix4fv(fMVPMatrixHandle, 1, false, modelViewProjection, 0)
-            GLES30.glUniform3f(fColorHandle, f.r, f.g, f.b)
-            GLES30.glUniform1f(fOpacityHandle, f.alpha * intensity)
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+
+        val count = fireflies.size.coerceAtMost(maxFireflyInstances)
+        fireflyInstanceBuffer.clear()
+        for (i in 0 until count) {
+            val f = fireflies[i]
+            fireflyInstanceBuffer.put(f.x + gyroX)
+            fireflyInstanceBuffer.put(f.y + gyroY)
+            fireflyInstanceBuffer.put(f.size)
+            fireflyInstanceBuffer.put(f.r)
+            fireflyInstanceBuffer.put(f.g)
+            fireflyInstanceBuffer.put(f.b)
+            fireflyInstanceBuffer.put(f.alpha * intensity)
         }
-        GLES30.glDisableVertexAttribArray(0)
-        GLES30.glDisableVertexAttribArray(1)
+        fireflyInstanceBuffer.position(0)
+
+        drawInstancedQuads(fireflyInstanceBuffer, count)
+
         if (!blendEnabled) {
             GLES30.glDisable(GLES30.GL_BLEND)
         } else {
@@ -1651,6 +1884,7 @@ class SunnyRenderer(
         GLES30.glUniform2f(bgSunPosHandle, lightX + bgGyroX, lightY + bgGyroY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
+        GLES30.glUniform1f(bgTimeHandle, time) // drives sunny_background.frag's Noon-only heat-haze wobble
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
         
         val currentPhase = if (configProvider.getTimeMode() == 2) {
@@ -1753,6 +1987,7 @@ class SunnyRenderer(
                 cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
+                cloudsDirty = true
                 needed--
             }
         } else if (activeClouds.size > targetCount) {
@@ -1912,9 +2147,87 @@ class SunnyRenderer(
         }
     }
 
+    /**
+     * Spawns a small burst of debris particles trailing a freshly-created shooting star,
+     * reusing the same instanced particle pool/buffer as the touch-burst (drawParticles /
+     * drawInstancedQuads), just with `gravity` set so they arc downward and fade out as they
+     * fall, instead of the touch-burst's plain radial drag-only decay. The shared pool is
+     * sized for 512 instances with ample headroom over the touch-burst's 35 + this burst's
+     * handful, so no separate pool/buffer is needed.
+     */
+    private fun spawnShootingStarTrailBurst(
+        startX: Float, startY: Float, starVx: Float, starVy: Float,
+        r: Float, g: Float, b: Float
+    ) {
+        val roomLeft = (maxParticleInstances - particles.size).coerceAtLeast(0)
+        val spawnCount = kShootingStarTrailParticleCount.coerceAtMost(roomLeft)
+        if (spawnCount <= 0) return
+
+        val rand = kotlin.random.Random
+        val speed = kotlin.math.sqrt(starVx * starVx + starVy * starVy).coerceAtLeast(0.0001f)
+        val dirX = starVx / speed
+        val dirY = starVy / speed
+
+        for (i in 0 until spawnCount) {
+            // Distribute the burst slightly behind the star's head, along its path, with a
+            // bit of lateral scatter so it reads as a debris trail rather than a single line.
+            val along = rand.nextFloat() * kShootingStarTrailSpread
+            val lateral = (rand.nextFloat() * 2f - 1f) * kShootingStarTrailLateralScatter
+            val px = startX - dirX * along - dirY * lateral
+            val py = startY - dirY * along + dirX * lateral
+
+            val speedScatter = kShootingStarTrailSpeedScatterMin + rand.nextFloat() * kShootingStarTrailSpeedScatterRange
+            val vx = starVx * speedScatter + (rand.nextFloat() * 2f - 1f) * kShootingStarTrailVelocityJitter
+            val vy = starVy * speedScatter + (rand.nextFloat() * 2f - 1f) * kShootingStarTrailVelocityJitter
+
+            val pSize = kShootingStarTrailMinSize + rand.nextFloat() * kShootingStarTrailSizeRange
+            val maxLife = kShootingStarTrailMinLife + rand.nextFloat() * kShootingStarTrailLifeRange
+
+            particles.add(
+                SunnyParticle(
+                    x = px, y = py, vx = vx, vy = vy,
+                    size = pSize, alpha = 1.0f, life = maxLife, maxLife = maxLife,
+                    r = r, g = g, b = b, gravity = kShootingStarTrailGravity
+                )
+            )
+        }
+    }
+
     override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {
         val clampedX = xOffset.coerceIn(0f, 1f)
-        swipeOffset = (clampedX - 0.5f) * 2.0f
+        val newSwipeOffset = (clampedX - 0.5f) * 2.0f
+
+        // Touch wind: this callback already receives a continuous stream of horizontal-offset
+        // samples while the user drags (both from the in-wallpaper touch-drag emulation and
+        // from launcher home-screen paging), so a swipe's velocity can be derived directly
+        // from consecutive samples here without needing per-pointer ACTION_MOVE plumbing.
+        // Fast enough deltas give visible clouds a temporary wind kick in the swipe direction.
+        val nowNanos = System.nanoTime()
+        if (lastSwipeOffsetSampleTimeNanos != 0L) {
+            val dt = (nowNanos - lastSwipeOffsetSampleTimeNanos) / 1_000_000_000f
+            if (dt in kWindSwipeMinDt..kWindSwipeMaxDt) {
+                val velocity = (newSwipeOffset - swipeOffset) / dt
+                if (kotlin.math.abs(velocity) > kWindSwipeMinVelocity) {
+                    val impulse = (velocity * kWindSwipeImpulseScale).coerceIn(-kWindSwipeMaxImpulse, kWindSwipeMaxImpulse)
+                    applyTouchWindImpulse(impulse)
+                }
+            }
+        }
+        lastSwipeOffsetSampleTimeNanos = nowNanos
+
+        swipeOffset = newSwipeOffset
+    }
+
+    /** Gives every currently-visible cloud list (per active time mode) a temporary horizontal
+     *  wind kick; the impulse itself decays back to 0 inside [Cloud.update]. */
+    private fun applyTouchWindImpulse(impulse: Float) {
+        val timeMode = configProvider.getTimeMode()
+        if (timeMode == 0 || timeMode == 2) {
+            for (cloud in clouds) cloud.applyWindImpulse(impulse)
+        }
+        if (timeMode == 1 || timeMode == 2) {
+            for (cloud in nightClouds) cloud.applyWindImpulse(impulse)
+        }
     }
 
     private fun smoothstep(edge0: Float, edge1: Float, x: Float): Float =
@@ -1978,6 +2291,42 @@ class SunnyRenderer(
     private fun loadTexture(context: Context, assetPath: String): Int =
         GLRenderUtils.loadTexture(context, assetPath)
 
+    /**
+     * Generates a small single-channel, tileable noise texture once at startup, used by
+     * sunny.frag to approximate multi-octave fbm noise via a few bilinearly-filtered
+     * texture samples instead of per-pixel hash/fract math. Each texel is an independent
+     * random value; GL_LINEAR sampling + GL_REPEAT wrapping produces smooth, continuous
+     * value-noise when sampled at frequencies below the texture's own resolution.
+     */
+    private fun createNoiseTexture(size: Int): Int {
+        val textureIds = IntArray(1)
+        GLES30.glGenTextures(1, textureIds, 0)
+        if (textureIds[0] == 0) return 0
+
+        val random = kotlin.random.Random(1337)
+        val data = ByteArray(size * size)
+        for (i in data.indices) {
+            data[i] = random.nextInt(0, 256).toByte()
+        }
+        val buffer = ByteBuffer.allocateDirect(data.size)
+            .order(ByteOrder.nativeOrder())
+            .apply {
+                put(data)
+                position(0)
+            }
+
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureIds[0])
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_REPEAT)
+        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_REPEAT)
+        GLES30.glTexImage2D(
+            GLES30.GL_TEXTURE_2D, 0, GLES30.GL_R8, size, size, 0,
+            GLES30.GL_RED, GLES30.GL_UNSIGNED_BYTE, buffer
+        )
+        return textureIds[0]
+    }
+
     private fun loadBackgroundTexture(context: Context, index: Int, assetPath: String) {
         val result = GLRenderUtils.loadBackgroundTextureFromAsset(context, assetPath) ?: return
         val (textureId, aspectRatio) = result
@@ -2002,4 +2351,49 @@ class SunnyRenderer(
 
     private fun createProgram(vertexCode: String, fragmentCode: String): Int =
         GLRenderUtils.createProgram(vertexCode, fragmentCode)
+
+    companion object {
+        // --- Rainbow state machine (effect: subtle rare rainbow) ---
+        private const val RAINBOW_STATE_IDLE = 0
+        private const val RAINBOW_STATE_FADE_IN = 1
+        private const val RAINBOW_STATE_HOLD = 2
+        private const val RAINBOW_STATE_FADE_OUT = 3
+
+        // Average of one rainbow every ~15 minutes while conditions are eligible (rare, as
+        // required). Uses the same "probability * deltaTime per frame" spawn pattern already
+        // used for shooting stars, so no separate interval-timer bookkeeping is needed.
+        private const val kRainbowSpawnRatePerSecond = 1f / 900f
+        private const val kRainbowMinDayIntensity = 0.6f // required day-intensity floor in Combined mode
+        private const val kRainbowFadeInDuration = 4f    // seconds
+        private const val kRainbowFadeOutDuration = 6f   // seconds
+        private const val kRainbowHoldMin = 20f          // minimum seconds held at full opacity
+        private const val kRainbowHoldRange = 25f         // + up to this many extra random seconds (20-45s total)
+
+        // --- Cloud shafts (effect: approximate cloud-occluded god rays) ---
+        private const val kCloudShaftInfluenceRadius = 0.35f // base "near the sun" radius, in world units
+        private const val kCloudShaftScaleFactor = 0.6f      // extra influence radius per unit of cloud.scale
+
+        // --- Touch wind (effect: swipe gives clouds a temporary wind kick) ---
+        private const val kWindSwipeMinVelocity = 1.2f  // minimum |d(swipeOffset)/dt| to count as a deliberate swipe
+        private const val kWindSwipeImpulseScale = 0.35f // converts swipe velocity into a cloud wind-impulse magnitude
+        private const val kWindSwipeMaxImpulse = 1.8f    // clamps a very fast swipe from flinging clouds off-screen
+        private const val kWindSwipeMaxDt = 0.5f         // ignore stale/first-sample deltas larger than this (seconds)
+        private const val kWindSwipeMinDt = 0.0005f      // ignore near-zero/duplicate-timestamp samples
+
+        // --- Lens dirt (effect: subtle screen-space smudge near the sun) ---
+        private const val kLensDirtCenterFalloff = 0.9f // how far (world units) the sun can be from center before dirt opacity reaches 0
+
+        // --- Shooting star trail burst (effect: particle trail + gravity) ---
+        private const val kShootingStarTrailParticleCount = 14      // particles spawned per shooting-star burst
+        private const val kShootingStarTrailSpread = 0.05f          // how far back along the path particles start, in world units
+        private const val kShootingStarTrailLateralScatter = 0.012f // sideways jitter off the path line
+        private const val kShootingStarTrailSpeedScatterMin = 0.15f
+        private const val kShootingStarTrailSpeedScatterRange = 0.35f
+        private const val kShootingStarTrailVelocityJitter = 0.15f
+        private const val kShootingStarTrailMinSize = 0.012f
+        private const val kShootingStarTrailSizeRange = 0.012f
+        private const val kShootingStarTrailMinLife = 0.35f
+        private const val kShootingStarTrailLifeRange = 0.45f
+        private const val kShootingStarTrailGravity = 0.55f // simulated gravity (units/sec^2), trail particles only
+    }
 }

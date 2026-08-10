@@ -13,22 +13,47 @@ uniform vec3 uSkyTop;
 uniform vec3 uSkyBottom;
 uniform float uNightIntensity;
 uniform float uMoonPhaseMultiplier;
+uniform float uTime;
 
 out vec4 fragColor;
 
 void main() {
-    vec4 texColor = texture(uTexture, vTexCoord);
-    
+    // --- Heat haze / calima (Noon theme only): a subtle horizontal UV wobble confined to a
+    // thin band near the bottom of the background image, simulating shimmering hot air near
+    // the horizon. Zero outside uTheme==0 and outside that band, and faded out at night, so
+    // it never touches the rest of the image or other themes. Computed unconditionally (no
+    // branch) since the per-pixel cost is a single sin() - cheaper and more predictable than
+    // a non-uniform branch.
+    const float kHazeBandStart = 0.80; // fraction of image height (vTexCoord.y) where the band begins
+    const float kHazeBandEnd = 1.0;    // bottom edge of the image
+    const float kHazeAmplitude = 0.006; // UV displacement amplitude - kept low/subtle
+    const float kHazeFrequency = 40.0;
+    const float kHazeSpeed = 1.6;
+    float hazeBandMask = smoothstep(kHazeBandStart, kHazeBandEnd, vTexCoord.y);
+    float hazeThemeMask = (uTheme == 0) ? 1.0 : 0.0;
+    float hazeStrength = hazeBandMask * hazeThemeMask * (1.0 - uNightIntensity);
+    float hazeWobble = sin(vTexCoord.x * kHazeFrequency + uTime * kHazeSpeed) * kHazeAmplitude;
+    vec2 sampleUv = vTexCoord;
+    sampleUv.x += hazeWobble * hazeStrength;
+
+    vec4 texColor = texture(uTexture, sampleUv);
+
     // Calculate luminance/luma to key out the white sky
     float luma = (texColor.r + texColor.g + texColor.b) / 3.0;
-    
+
     // White pixels (luma >= 0.96) become fully transparent,
     // darker silhouette pixels (luma <= 0.90) remain fully opaque.
     float alpha = smoothstep(0.96, 0.90, luma);
-    
+
+    // --- Rim lighting setup: measure how fast alpha changes across neighboring fragments
+    // (the silhouette's edge) using native ES3 derivatives, computed here - before any
+    // `discard` - so every fragment in a 2x2 quad takes the same control-flow path and the
+    // derivative stays well-defined.
+    float edgeDerivative = fwidth(alpha);
+
     // Combine with the texture's original alpha channel
     float finalAlpha = min(texColor.a, alpha);
-    
+
     if (finalAlpha <= 0.0) {
         discard;
     }
@@ -111,5 +136,18 @@ void main() {
         }
     }
     
+    // --- Rim lighting: a thin, sun-tinted glow along the silhouette's edge, strongest on the
+    // side of the horizon facing the sun. Reuses `glare` (already computed above from the
+    // sun/moon-to-fragment distance, including its night/moon-phase/horizon fades) so the rim
+    // only lights up where the general terrain glare already would. `rimEdge` is a narrow
+    // band centered exactly on the alpha transition (peaks at alpha==0.5, tapering to 0 at
+    // fully opaque/fully transparent), reinforced by the derivative so it stays a couple of
+    // pixels wide regardless of how steep the source silhouette's alpha ramp is.
+    const float kRimEdgeDerivativeThreshold = 0.35;
+    const float kRimIntensity = 0.35; // overall rim-glow strength multiplier - kept subtle
+    float rimEdge = smoothstep(0.0, kRimEdgeDerivativeThreshold, edgeDerivative) * (4.0 * alpha * (1.0 - alpha));
+    vec3 rimColor = mix(highlightColor, vec3(1.0, 0.95, 0.85), 0.3);
+    finalHillColor += rimColor * rimEdge * glare * kRimIntensity;
+
     fragColor = vec4(finalHillColor, finalAlpha);
 }

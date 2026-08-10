@@ -23,7 +23,7 @@ internal class SunnyConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun setSunMoveSpeed(speed: Int) { putInt(ConfigManager.KEY_SUN_MOVE_SPEED, speed.coerceIn(0, 100)) }
 
     fun getSunnyBackgroundIndex(): Int = cachedInt(ConfigManager.KEY_SUNNY_BACKGROUND_INDEX, ConfigManager.DEFAULT_SUNNY_BACKGROUND_INDEX)
-    fun setSunnyBackgroundIndex(index: Int) { putInt(ConfigManager.KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 7)) }
+    fun setSunnyBackgroundIndex(index: Int) { putInt(ConfigManager.KEY_SUNNY_BACKGROUND_INDEX, index.coerceIn(0, 8)) }
 
     fun getSunStationaryPosition(): Int = cachedInt(ConfigManager.KEY_SUN_STATIONARY_POSITION, ConfigManager.DEFAULT_SUN_STATIONARY_POSITION)
     fun setSunStationaryPosition(position: Int) { putInt(ConfigManager.KEY_SUN_STATIONARY_POSITION, position.coerceIn(0, 5)) }

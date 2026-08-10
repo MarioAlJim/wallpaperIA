@@ -16,29 +16,20 @@ uniform float uGodRaysIntensity;
 uniform float uSunFadeFactor;
 uniform float uSunPulse;
 uniform float uNightIntensity; // 0.0 for full day, 1.0 for full night
+uniform sampler2D uNoiseTex; // Precomputed tileable value-noise texture (GL_REPEAT, GL_LINEAR)
+uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" computed on the CPU (SunnyRenderer.computeCloudOcclusionNearSun)
+uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
+uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
 
-// Pseudo-random noise for procedural nebula
-float hash(vec2 p) {
-    p = fract(p * vec2(127.1, 311.7));
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float noise(vec2 p) {
-    vec2 i = floor(p);
-    vec2 f = fract(p);
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(mix(hash(i + vec2(0.0, 0.0)), hash(i + vec2(1.0, 0.0)), u.x),
-               mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
-}
-
-float fbm(vec2 p) {
+// Approximates the old 4-octave hash/fract-based fbm() by summing a few samples of a
+// precomputed, bilinearly-filtered noise texture at different scales/weights instead of
+// computing the noise function in ALU per pixel. GL_LINEAR sampling already gives a
+// smoothly interpolated value-noise result per sample.
+float fbmTex(vec2 p) {
     float value = 0.0;
-    float amplitude = 0.5;
-    for (int i = 0; i < 4; i++) {
-        value += amplitude * noise(p);
-        p *= 2.0;
-        amplitude *= 0.5;
-    }
+    value += 0.5 * texture(uNoiseTex, p).r;
+    value += 0.25 * texture(uNoiseTex, p * 2.03 + 17.3).r;
+    value += 0.125 * texture(uNoiseTex, p * 4.01 + 5.7).r;
     return value;
 }
 
@@ -88,7 +79,7 @@ void main() {
         nebulaUV.x += uTime * 0.0012;
         nebulaUV.y += uTime * 0.0006;
         
-        float nebulaNoiseVal = fbm(nebulaUV);
+        float nebulaNoiseVal = fbmTex(nebulaUV);
         float nebulaMask = smoothstep(0.35, 0.75, nebulaNoiseVal);
         
         // Deep purple-magenta colors for nebulae
@@ -129,7 +120,40 @@ void main() {
     float glowMask = smoothstep(radius * (3.5 + uSunPulse * 1.5), radius, dist);
     vec3 finalGlow = sunGlowColor * (glowMask * (0.65 + uSunPulse * 0.5));
 
-    // Dynamic God Rays (Crepuscular Rays)
+    // --- Enhanced Rayleigh halo: a soft warm (white -> yellow) ring around the sun, wider
+    // than the glow above, that fuses into the surrounding sky. Implemented as a Gaussian
+    // "ring" band in normalized sun-distance space so it fades in AND out smoothly without
+    // ever touching the sharp sun disc. Added on top of finalGlow (additive, subtle) so it
+    // only ever brightens, never saturates/washes out the sky.
+    const float kHaloPeakDist = 5.0;  // ring center, in multiples of the sun radius
+    const float kHaloWidth = 2.2;     // ring softness/width
+    const float kHaloIntensityNoon = 0.22;
+    const float kHaloIntensitySunset = 0.26;
+    const float kHaloIntensityDusk = 0.09;
+    const float kHaloIntensityCustom = 0.18;
+    float haloDistNorm = dist / max(radius, 0.0001);
+    float haloDelta = (haloDistNorm - kHaloPeakDist) / kHaloWidth;
+    // Avoid pow(x, 2.0) here: GLSL ES defines pow() as undefined for a negative base
+    // (haloDelta is negative for most of the screen), so square it via a plain multiply.
+    float haloBand = exp(-(haloDelta * haloDelta));
+    float haloThemeIntensity;
+    if (uTheme == 0) {
+        haloThemeIntensity = kHaloIntensityNoon;
+    } else if (uTheme == 1) {
+        haloThemeIntensity = kHaloIntensitySunset;
+    } else if (uTheme == 2) {
+        haloThemeIntensity = kHaloIntensityDusk;
+    } else {
+        haloThemeIntensity = kHaloIntensityCustom;
+    }
+    haloThemeIntensity *= (1.0 - uNightIntensity); // vanish as the sky goes dark
+    vec3 haloColor = mix(vec3(1.0, 0.98, 0.85), sunGlowColor, 0.35); // white -> yellow, tinted toward the theme's own glow color
+    finalGlow += haloColor * haloBand * haloThemeIntensity;
+
+    // Dynamic God Rays (Crepuscular Rays), extended with an approximate "cloud shafts" look:
+    // when uCloudOcclusionNearSun (computed on the CPU from clouds near the sun) is > 0, the
+    // rays blend toward a lower-frequency pattern and spread further/softer, as if emanating
+    // from behind the clouds, while staying identical to the original look when it's 0.
     if (uGodRaysIntensity > 0.0) {
         float angle = atan(uv.y - uSunPos.y * uAspectRatio, uv.x - uSunPos.x * uAspectRatio);
         float rays = sin(angle * 12.0 + uTime * 0.15) * 0.5 + 0.5;
@@ -138,12 +162,72 @@ void main() {
         rays += sin(angle * 89.0 - uTime * 0.6) * 0.05 + 0.05;
         rays = rays / 2.0; // Normalize [0, 1]
 
-        float rayAttenuation = exp(-dist * 0.8);
-        finalGlow += sunGlowColor * rays * rayAttenuation * uGodRaysIntensity * 1.5;
+        const float kCloudShaftLowFreqA = 4.0;
+        const float kCloudShaftLowFreqB = 7.0;
+        const float kCloudShaftRayBlend = 0.6;   // how much of the shaft pattern replaces the base rays at full occlusion
+        const float kCloudShaftMaxBoost = 0.9;   // extra ray strength contributed at full occlusion
+        const float kCloudShaftMinAttenuation = 0.55; // wider spread (slower falloff) near clouds vs the base 0.8
+        float shaftRays = sin(angle * kCloudShaftLowFreqA + uTime * 0.08) * 0.5 + 0.5;
+        shaftRays += sin(angle * kCloudShaftLowFreqB - uTime * 0.12) * 0.5 + 0.5;
+        shaftRays *= 0.5;
+        rays = mix(rays, mix(rays, shaftRays, kCloudShaftRayBlend), uCloudOcclusionNearSun);
+
+        float rayAttenuation = exp(-dist * mix(0.8, kCloudShaftMinAttenuation, uCloudOcclusionNearSun));
+        float occlusionBoost = 1.0 + uCloudOcclusionNearSun * kCloudShaftMaxBoost;
+        finalGlow += sunGlowColor * rays * rayAttenuation * uGodRaysIntensity * 1.5 * occlusionBoost;
     }
 
     // Combine
     vec3 finalColor = mix(skyColor, sunColor, sunMask * uSunFadeFactor) + finalGlow * uSunFadeFactor * (1.0 - sunMask * uSunFadeFactor);
-    
+
+    // --- Subtle rainbow (rare event, day skies only): a thin spectral ring around the
+    // stylized anti-solar point (the sun's position reflected through the screen center).
+    // uRainbowOpacity is 0 almost always (rare CPU-driven timer with fade in/hold/fade out)
+    // and this branch is a uniform (not per-fragment) condition, so it costs nothing on the
+    // overwhelming majority of frames where no rainbow is active.
+    if (uRainbowOpacity > 0.001) {
+        const float kRainbowRadius = 1.55;    // ring radius (same uv units as the sun distance above)
+        const float kRainbowBandWidth = 0.10; // total ring thickness across all color bands
+        const float kRainbowMaxIntensity = 0.14; // global cap - "casi lo ves o no"
+        vec2 antiSolarPos = -(uSunPos * uAspectRatio);
+        float distToAntiSolar = distance(uv, antiSolarPos);
+        float ringDist = abs(distToAntiSolar - kRainbowRadius);
+        float ringMask = smoothstep(kRainbowBandWidth, 0.0, ringDist);
+        if (ringMask > 0.0) {
+            float bandT = clamp((distToAntiSolar - (kRainbowRadius - kRainbowBandWidth * 0.5)) / kRainbowBandWidth, 0.0, 1.0);
+            // 7-color spectral gradient: red on the outside (bandT=0) -> violet inside (bandT=1)
+            vec3 rainbowColor;
+            if (bandT < 0.166) {
+                rainbowColor = mix(vec3(1.0, 0.0, 0.0), vec3(1.0, 0.5, 0.0), bandT / 0.166);
+            } else if (bandT < 0.333) {
+                rainbowColor = mix(vec3(1.0, 0.5, 0.0), vec3(1.0, 1.0, 0.0), (bandT - 0.166) / 0.167);
+            } else if (bandT < 0.5) {
+                rainbowColor = mix(vec3(1.0, 1.0, 0.0), vec3(0.0, 1.0, 0.0), (bandT - 0.333) / 0.167);
+            } else if (bandT < 0.666) {
+                rainbowColor = mix(vec3(0.0, 1.0, 0.0), vec3(0.0, 0.4, 1.0), (bandT - 0.5) / 0.166);
+            } else if (bandT < 0.833) {
+                rainbowColor = mix(vec3(0.0, 0.4, 1.0), vec3(0.29, 0.0, 0.51), (bandT - 0.666) / 0.167);
+            } else {
+                rainbowColor = mix(vec3(0.29, 0.0, 0.51), vec3(0.56, 0.0, 1.0), (bandT - 0.833) / 0.167);
+            }
+            finalColor += rainbowColor * ringMask * uRainbowOpacity * kRainbowMaxIntensity;
+        }
+    }
+
+    // --- Lens dirt: a very subtle, screen-space-fixed smudge/dust pattern that darkens the
+    // final image slightly, reusing the precomputed noise texture (uNoiseTex) at a much
+    // finer tiling than the nebula use above so it reads as fine grain rather than soft
+    // blobs. Opacity (uLensDirtOpacity) is computed on the CPU from the same "is the sun
+    // visible near screen center" logic that gates the lens flare, so it is 0 whenever the
+    // sun itself is not visible.
+    if (uLensDirtOpacity > 0.001) {
+        const float kLensDirtMaxDarken = 0.10; // max fractional darkening at full opacity+mask
+        vec2 dirtUv = vPosition * 0.5 + 0.5; // fixed to screen space, not world space, so it reads as "on the lens" rather than moving with the scene
+        float dirtNoiseA = texture(uNoiseTex, dirtUv * 5.0).r;
+        float dirtNoiseB = texture(uNoiseTex, dirtUv * 11.0 + 31.7).r;
+        float dirtMask = dirtNoiseA * 0.6 + dirtNoiseB * 0.4;
+        finalColor *= (1.0 - dirtMask * uLensDirtOpacity * kLensDirtMaxDarken);
+    }
+
     fragColor = vec4(finalColor, 1.0);
 }

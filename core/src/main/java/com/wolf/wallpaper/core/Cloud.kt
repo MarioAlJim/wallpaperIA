@@ -3,6 +3,7 @@ package com.wolf.wallpaper.core
 import kotlin.random.Random
 import kotlin.math.sin
 import kotlin.math.abs
+import kotlin.math.exp
 
 class Cloud(
     val id: Int,
@@ -24,11 +25,26 @@ class Cloud(
     var pulseTime: Float = 0f
     var onlyGrows: Boolean = true
 
+    // Temporary horizontal "wind kick" velocity (units/second) from a touch/swipe gesture
+    // (used by Sunny's touch-wind effect; see SunnyRenderer.applyTouchWindImpulse). Defaults
+    // to 0 and decays back to 0 inside update() over roughly 1-3 seconds. Callers that never
+    // touch this field (e.g. Storm's SceneManager) see zero behavior change.
+    var windImpulse: Float = 0f
+
     val speedZFactor: Float
         get() = 0.225f + ((z - 0.3f) / 0.7f) * 1.025f
 
     override fun update(deltaTime: Float) {
         // Required by StormObject, we use update(deltaTime, windSpeed) in SceneManager
+    }
+
+    /**
+     * Adds a temporary horizontal velocity kick (units/second) from a swipe gesture, on top
+     * of the cloud's steady wind/drift motion. Repeated swipes accumulate (clamped to
+     * +/-[WIND_IMPULSE_MAX_MAGNITUDE]) instead of simply overwriting one another.
+     */
+    fun applyWindImpulse(impulse: Float) {
+        windImpulse = (windImpulse + impulse).coerceIn(-WIND_IMPULSE_MAX_MAGNITUDE, WIND_IMPULSE_MAX_MAGNITUDE)
     }
 
     fun update(deltaTime: Float, windSpeed: Float, dynamicsSpeed: Float = 1.0f) {
@@ -50,7 +66,19 @@ class Cloud(
         val windThreshold = 0.1f
         val driftInfluence = (1.0f - (abs(windSpeed) / windThreshold)).coerceIn(0f, 1f)
         positionX += (windSpeed + (driftSpeed * driftInfluence)) * speedFactor * speedZFactor * deltaTime
-        
+
+        // Touch-wind impulse: added directly to displacement (not scaled by speedFactor, so
+        // a swipe nudges near/far clouds similarly) and decays exponentially back to 0 over
+        // roughly 1-3 seconds. A no-op while windImpulse is 0 (the default, and Storm's
+        // permanent state since it never calls applyWindImpulse).
+        if (windImpulse != 0f) {
+            positionX += windImpulse * deltaTime
+            windImpulse *= exp(-WIND_IMPULSE_DECAY_RATE * deltaTime)
+            if (abs(windImpulse) < WIND_IMPULSE_STOP_THRESHOLD) {
+                windImpulse = 0f
+            }
+        }
+
         // Smoothly transition opacity - decreased by 90% (base speed from 1.5f to 0.3375f) and scaled by dynamicsSpeed (min speed 20%)
         val activeFadeSpeed = 0.3375f * windFactorOpacity * (0.2f + 0.8f * dynamicsSpeed)
         if (isFadingOut) {
@@ -69,6 +97,7 @@ class Cloud(
     }
 
     fun reset(startX: Float, aspectRatio: Float, textureCount: Int = 0) {
+        windImpulse = 0f // A recycled/off-screen cloud shouldn't carry over a stale swipe kick
         z = Random.nextFloat() * 0.7f + 0.3f
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
@@ -96,5 +125,13 @@ class Cloud(
         if (textureCount > 1) {
             textureIndex = Random.nextInt(textureCount)
         }
+    }
+
+    companion object {
+        // Decay rate (1/seconds) for the swipe wind impulse; ~1.4 gives an e-folding time of
+        // ~0.7s, fading to imperceptible by ~2-3s, matching the "1-3s" touch-wind spec.
+        private const val WIND_IMPULSE_DECAY_RATE = 1.4f
+        private const val WIND_IMPULSE_STOP_THRESHOLD = 0.001f
+        private const val WIND_IMPULSE_MAX_MAGNITUDE = 2.5f
     }
 }

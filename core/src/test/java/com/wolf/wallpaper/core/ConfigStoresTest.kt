@@ -80,6 +80,22 @@ class ConfigStoresTest {
     }
 
     @Test
+    fun sunny_setSunnyBackgroundIndex_allowsCustomGalleryImageIndex() {
+        val store = SunnyConfigStore(prefs)
+        store.setSunnyBackgroundIndex(8)
+        assertEquals(8, store.getSunnyBackgroundIndex())
+    }
+
+    @Test
+    fun sunny_setSunnyBackgroundIndex_clampsOutOfRangeValues() {
+        val store = SunnyConfigStore(prefs)
+        store.setSunnyBackgroundIndex(-1)
+        assertEquals(0, store.getSunnyBackgroundIndex())
+        store.setSunnyBackgroundIndex(9)
+        assertEquals(8, store.getSunnyBackgroundIndex())
+    }
+
+    @Test
     fun sunny_setSunCustomX_roundTrips() {
         val store = SunnyConfigStore(prefs)
         store.setSunCustomX(30)

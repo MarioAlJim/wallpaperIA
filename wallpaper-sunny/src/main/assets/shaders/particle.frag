@@ -2,10 +2,9 @@
 precision mediump float;
 
 in vec2 vTexCoord;
+in vec3 vColor;
+in float vOpacity;
 out vec4 fragColor;
-
-uniform vec3 uColor;
-uniform float uOpacity;
 
 void main() {
     // Draw a soft glowing circular particle procedurally
@@ -14,5 +13,5 @@ void main() {
     if (alpha <= 0.0) {
         discard;
     }
-    fragColor = vec4(uColor, alpha * uOpacity);
+    fragColor = vec4(vColor, alpha * vOpacity);
 }
