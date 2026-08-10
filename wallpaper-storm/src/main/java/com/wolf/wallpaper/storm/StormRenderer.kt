@@ -502,7 +502,7 @@ class StormRenderer(
                     maxIntensity = lightning.intensity
                     brightest = lightning
                 }
-                val color = getLightningColor(lightning.selectedColorIndex)
+                val color = lightning.customColor ?: getLightningColor(lightning.selectedColorIndex)
                 resolvedR += color[0] * lightning.intensity
                 resolvedG += color[1] * lightning.intensity
                 resolvedB += color[2] * lightning.intensity
@@ -1004,7 +1004,7 @@ class StormRenderer(
         for (lightning in activeLightnings) {
             if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
                 GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
-                val color = getLightningColor(lightning.selectedColorIndex)
+                val color = lightning.customColor ?: getLightningColor(lightning.selectedColorIndex)
                 GLES30.glUniform4fv(colorHandle, 1, color, 0)
                 GLES30.glUniform1f(growthProgressHandle, lightning.growthProgress)
 

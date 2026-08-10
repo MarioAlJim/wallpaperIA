@@ -234,12 +234,7 @@ class SceneManager(
             if (timeSinceLastLightning >= nextLightningDelay) {
                 val inactiveLightning = lightnings.firstOrNull { !it.isActive }
                 if (inactiveLightning != null) {
-                    val configColorIndex = configProvider.getLightningColorIndex()
-                    val colorToUse = if (configColorIndex == 6) {
-                        Random.nextInt(6)
-                    } else {
-                        configColorIndex
-                    }
+                    val colorToUse = configProvider.getLightningColorIndex()
                     inactiveLightning.trigger(
                         aspectRatio,
                         getLightningTextureCount(),
@@ -259,12 +254,7 @@ class SceneManager(
             if (timeSinceLastCloudFlash >= nextCloudFlashDelay) {
                 val inactiveLightning = lightnings.firstOrNull { !it.isActive }
                 if (inactiveLightning != null) {
-                    val configColorIndex = configProvider.getCloudFlashColorIndex()
-                    val colorToUse = if (configColorIndex == 6) {
-                        Random.nextInt(6)
-                    } else {
-                        configColorIndex
-                    }
+                    val colorToUse = configProvider.getCloudFlashColorIndex()
                     inactiveLightning.trigger(
                         aspectRatio,
                         getLightningTextureCount(),
@@ -537,12 +527,7 @@ class SceneManager(
         
         val inactiveLightning = lightnings.firstOrNull { !it.isActive }
         if (inactiveLightning != null) {
-            val configColorIndex = configProvider.getLightningColorIndex()
-            val colorToUse = if (configColorIndex == 6) {
-                Random.nextInt(6)
-            } else {
-                configColorIndex
-            }
+            val colorToUse = configProvider.getLightningColorIndex()
             inactiveLightning.triggerAt(
                 openglX,
                 openglY,

@@ -17,6 +17,8 @@ class Lightning(
     var isInternalOnly: Boolean = false
 ) : StormObject {
 
+    var customColor: FloatArray? = null
+
     private var age = 0f
     var isActive = false
         private set
@@ -71,6 +73,18 @@ class Lightning(
         // Select alternating texture index
         selectedTextureIndex = getNextTextureIndex(textureCount)
         selectedColorIndex = colorIndex
+        if (colorIndex == 6) {
+            val r = kotlin.random.Random.nextFloat()
+            val g = kotlin.random.Random.nextFloat()
+            val b = kotlin.random.Random.nextFloat()
+            val max = maxOf(r, maxOf(g, b))
+            val normR = if (max > 0f) r / max else 1.0f
+            val normG = if (max > 0f) g / max else 1.0f
+            val normB = if (max > 0f) b / max else 1.0f
+            customColor = floatArrayOf(normR, normG, normB, 1.0f)
+        } else {
+            customColor = null
+        }
         
         val startX: Float
         val startY: Float
@@ -128,6 +142,18 @@ class Lightning(
         
         selectedTextureIndex = getNextTextureIndex(textureCount)
         selectedColorIndex = colorIndex
+        if (colorIndex == 6) {
+            val r = kotlin.random.Random.nextFloat()
+            val g = kotlin.random.Random.nextFloat()
+            val b = kotlin.random.Random.nextFloat()
+            val max = maxOf(r, maxOf(g, b))
+            val normR = if (max > 0f) r / max else 1.0f
+            val normG = if (max > 0f) g / max else 1.0f
+            val normB = if (max > 0f) b / max else 1.0f
+            customColor = floatArrayOf(normR, normG, normB, 1.0f)
+        } else {
+            customColor = null
+        }
 
         val minHeight = 2.0f * 0.225f // 0.45f
         val maxHeight = 2.0f * 1.125f // 2.25f

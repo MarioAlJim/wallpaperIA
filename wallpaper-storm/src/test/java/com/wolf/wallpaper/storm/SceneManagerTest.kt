@@ -5,6 +5,8 @@ import com.wolf.wallpaper.core.ConfigProvider
 import com.wolf.wallpaper.storm.StormCloud
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
 import org.junit.Test
 class SceneManagerTest {
 
@@ -239,16 +241,16 @@ class SceneManagerTest {
         mockConfig.mockLightningColorIndex = 3
         sceneManager.lightning.trigger(1.0f, 1, mockConfig.getLightningColorIndex())
         assertEquals(3, sceneManager.lightning.selectedColorIndex)
+        assertNull(sceneManager.lightning.customColor)
 
-        // 2. Random Mode (index 6) -> should choose a valid color index (0 to 5)
+        // 2. Random Mode (index 6) -> should set selectedColorIndex to 6 and generate customColor
         mockConfig.mockLightningColorIndex = 6
-        val resolvedColor = if (mockConfig.getLightningColorIndex() == 6) {
-            kotlin.random.Random.nextInt(6)
-        } else {
-            mockConfig.getLightningColorIndex()
-        }
-        sceneManager.lightning.trigger(1.0f, 1, resolvedColor)
-        assertTrue(sceneManager.lightning.selectedColorIndex in 0..5)
+        sceneManager.lightning.trigger(1.0f, 1, mockConfig.getLightningColorIndex())
+        assertEquals(6, sceneManager.lightning.selectedColorIndex)
+        val customColor = sceneManager.lightning.customColor
+        assertNotNull(customColor)
+        assertEquals(4, customColor!!.size)
+        assertEquals(1.0f, customColor[3]) // alpha is 1.0f
     }
 
     @Test
