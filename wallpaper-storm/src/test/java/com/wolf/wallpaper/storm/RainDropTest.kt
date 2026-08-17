@@ -80,10 +80,10 @@ class RainDropTest {
         val drop = RainDrop(0f, 0f, 0f, 0f)
         drop.reset(aspectRatio = 1f, windAngle = 0f, rainSpeed = 50f, startOnScreen = true, spawnCloud = cloud)
 
-        val uncappedLength = cloud.baseScale * 0.2016f * cloud.z
-        assertTrue("uncapped length ($uncappedLength) should exceed the cap for this scenario", uncappedLength > 0.1386f)
-        // The cap matches the maximum edge-rain drop can reach: (0.09492 + 0.04368) * zMax(1.0).
-        assertEquals(0.1386f, drop.length, 0.0001f)
+        val uncappedLength = cloud.baseScale * 0.3024f * cloud.z
+        assertTrue("uncapped length ($uncappedLength) should exceed the cap for this scenario", uncappedLength > 0.2079f)
+        // The cap matches the maximum edge-rain drop can reach: (0.16422 + 0.04368) * zMax(1.0).
+        assertEquals(0.2079f, drop.length, 0.0001f)
     }
 
     @Test

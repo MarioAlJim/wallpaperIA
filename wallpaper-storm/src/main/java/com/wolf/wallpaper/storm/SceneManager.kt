@@ -194,7 +194,8 @@ class SceneManager(
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f) ||
                 (drop.length == 0f && drop.spawnDelay <= 0f)
             if (needsReset) {
-                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
+                val existingSpawnX = rainDrops.filter { it !== drop && it.isActive }.map { it.spawnX }
+                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingSpawnX = existingSpawnX)
             }
         }
 
@@ -482,7 +483,8 @@ class SceneManager(
         val allowFallback = configProvider.getRainSpawnMode() != 1
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
+            val existingSpawnX = rainDrops.map { it.spawnX }
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingSpawnX = existingSpawnX)
             rainDrops.add(drop)
         }
         

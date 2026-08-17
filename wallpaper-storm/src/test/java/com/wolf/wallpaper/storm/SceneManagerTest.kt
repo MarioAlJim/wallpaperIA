@@ -453,10 +453,10 @@ class SceneManagerTest {
             assertTrue("z (${drop.z}) should be in range [0.2, 1.0]", drop.z in 0.2f..1.0f)
             
             // 2. Length should be scaled by z (with 1.12x net increase)
-            // Base length formula: (Random.nextFloat() * 0.09492f + 0.04368f) * z
-            // Min base length = 0.04368f, Max base length = 0.1386f
+            // Base length formula: (Random.nextFloat() * 0.16422f + 0.04368f) * z
+            // Min base length = 0.04368f, Max base length = 0.2079f
             val minExpectedLength = 0.04368f * drop.z - 0.001f
-            val maxExpectedLength = 0.1386f * drop.z + 0.001f
+            val maxExpectedLength = 0.2079f * drop.z + 0.001f
             assertTrue("Length (${drop.length}) should be scaled by z", drop.length in minExpectedLength..maxExpectedLength)
             
             // 3. Velocity should be constant (not scaled by z)
