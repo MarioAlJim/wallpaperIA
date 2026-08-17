@@ -691,9 +691,27 @@ class StormSettingsFragment : Fragment() {
         }
         val windSpeed = configManager.getWindIntensity()
         val isVariable = configManager.isStormVariableEnabled()
-        val densityLabel = if (isVariable) "Ciclo Activo" else (if (density <= 15) densityText else "$densityText ($density%)")
+        val densityLabel = if (isVariable) "Ciclo Activo" else densityText
         val windDirLabel = if (isVariable) "Ciclo Activo" else windDir
-        val windSpeedLabel = if (isVariable) "Ciclo Activo" else "${windSpeed}%"
+        
+        val windSpeedText = when (windSpeed) {
+            0 -> "Sin viento"
+            25 -> "Lento"
+            50 -> "Medio"
+            75 -> "Rápido"
+            100 -> "Muy rápido"
+            else -> {
+                when {
+                    windSpeed < 12 -> "Sin viento"
+                    windSpeed < 37 -> "Lento"
+                    windSpeed < 62 -> "Medio"
+                    windSpeed < 87 -> "Rápido"
+                    else -> "Muy rápido"
+                }
+            }
+        }
+        val windSpeedLabel = if (isVariable) "Ciclo Activo" else windSpeedText
+
         summaryCloudsWind.text = Html.fromHtml(
             "Nubes: <font color='$accentColor'>$densityLabel</font> • Viento: <font color='$accentColor'>$windDirLabel ($windSpeedLabel)</font>",
             Html.FROM_HTML_MODE_LEGACY
@@ -716,9 +734,25 @@ class StormSettingsFragment : Fragment() {
             5 -> "Morado"
             else -> "Azul"
         }
-        val rainLabel = if (isVariable) "Ciclo Activo" else "$rainText ($rainIntensity%)"
+        val rainSpeedVal = configManager.getRainSpeed()
+        val rainSpeedText = when (rainSpeedVal) {
+            0 -> "Baja"
+            25 -> "Media"
+            50 -> "Rápida"
+            else -> {
+                when {
+                    rainSpeedVal < 12 -> "Baja"
+                    rainSpeedVal < 37 -> "Media"
+                    else -> "Rápida"
+                }
+            }
+        }
+
+        val rainLabel = if (isVariable) "Ciclo Activo" else rainText
+        val rainSpeedLabel = if (isVariable) "Ciclo Activo" else rainSpeedText
+
         summaryRain.text = Html.fromHtml(
-            "Intensidad: <font color='$accentColor'>$rainLabel</font> • Color: <font color='$accentColor'>$rainColorText</font>",
+            "Densidad: <font color='$accentColor'>$rainLabel</font> • Velocidad: <font color='$accentColor'>$rainSpeedLabel</font> • Color: <font color='$accentColor'>$rainColorText</font>",
             Html.FROM_HTML_MODE_LEGACY
         )
 
