@@ -213,42 +213,6 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Wind Direction -->
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Dirección del Viento (Lluvia/Nubes)"
-                        android:textColor="@color/settings_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
-
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:requiresFadingEdge="horizontal"
-                        android:fadingEdgeLength="24dp"
-                        android:layout_marginBottom="12dp">
-                        <LinearLayout
-                            android:id="@+id/spinnerWindDirection"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
-                    </HorizontalScrollView>
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Establece la dirección en la que sopla el viento, afectando el ángulo de caída de la lluvia y nubes."
-                        android:textColor="@color/settings_text_tertiary"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="16dp" />
-
                     <!-- Wind Intensity (Cards) -->
                     <TextView
                         android:layout_width="match_parent"
@@ -281,6 +245,42 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Modifica la velocidad y el ángulo de inclinación máximo del viento y la lluvia."
+                        android:textColor="@color/settings_text_tertiary"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Wind Direction -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Dirección del Viento (Lluvia/Nubes)"
+                        android:textColor="@color/settings_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerWindDirection"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Establece la dirección en la que sopla el viento, afectando el ángulo de caída de la lluvia y nubes."
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
