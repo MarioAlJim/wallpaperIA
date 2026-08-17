@@ -648,7 +648,7 @@
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeNoon"
                                 android:layout_width="92dp"
-                                android:layout_height="115dp"
+                                android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
@@ -659,12 +659,12 @@
                                     android:layout_height="match_parent"
                                     android:orientation="vertical"
                                     android:gravity="center"
-                                    android:padding="8dp">
+                                    android:padding="6dp">
                                     <View
                                         android:id="@+id/viewThemeNoonPreview"
-                                        android:layout_width="48dp"
-                                        android:layout_height="64dp"
-                                        android:layout_marginBottom="6dp" />
+                                        android:layout_width="38dp"
+                                        android:layout_height="50dp"
+                                        android:layout_marginBottom="4dp" />
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -679,7 +679,7 @@
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeSunset"
                                 android:layout_width="92dp"
-                                android:layout_height="115dp"
+                                android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
@@ -690,12 +690,12 @@
                                     android:layout_height="match_parent"
                                     android:orientation="vertical"
                                     android:gravity="center"
-                                    android:padding="8dp">
+                                    android:padding="6dp">
                                     <View
                                         android:id="@+id/viewThemeSunsetPreview"
-                                        android:layout_width="48dp"
-                                        android:layout_height="64dp"
-                                        android:layout_marginBottom="6dp" />
+                                        android:layout_width="38dp"
+                                        android:layout_height="50dp"
+                                        android:layout_marginBottom="4dp" />
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -710,7 +710,7 @@
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeDusk"
                                 android:layout_width="92dp"
-                                android:layout_height="115dp"
+                                android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
@@ -721,12 +721,12 @@
                                     android:layout_height="match_parent"
                                     android:orientation="vertical"
                                     android:gravity="center"
-                                    android:padding="8dp">
+                                    android:padding="6dp">
                                     <View
                                         android:id="@+id/viewThemeDuskPreview"
-                                        android:layout_width="48dp"
-                                        android:layout_height="64dp"
-                                        android:layout_marginBottom="6dp" />
+                                        android:layout_width="38dp"
+                                        android:layout_height="50dp"
+                                        android:layout_marginBottom="4dp" />
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -741,7 +741,7 @@
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeCustom"
                                 android:layout_width="92dp"
-                                android:layout_height="115dp"
+                                android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
                                 app:cardCornerRadius="12dp"
@@ -752,12 +752,12 @@
                                     android:layout_height="match_parent"
                                     android:orientation="vertical"
                                     android:gravity="center"
-                                    android:padding="8dp">
+                                    android:padding="6dp">
                                     <View
                                         android:id="@+id/viewThemeCustomPreview"
-                                        android:layout_width="48dp"
-                                        android:layout_height="64dp"
-                                        android:layout_marginBottom="6dp" />
+                                        android:layout_width="38dp"
+                                        android:layout_height="50dp"
+                                        android:layout_marginBottom="4dp" />
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
@@ -934,7 +934,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirL2R"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -945,12 +945,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
@@ -973,7 +973,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirR2L"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -984,12 +984,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
@@ -1012,7 +1012,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirStationary"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -1023,12 +1023,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
@@ -1051,7 +1051,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirRandom"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
                                     app:strokeColor="@color/settings_chip_bg_inactive"
@@ -1061,12 +1061,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
@@ -1168,7 +1168,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosTopLeft"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1179,12 +1179,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:layout_width="12dp"
                                                     android:layout_height="12dp"
@@ -1206,7 +1206,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosTopRight"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1217,12 +1217,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:layout_width="12dp"
                                                     android:layout_height="12dp"
@@ -1244,7 +1244,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosCenter"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1255,12 +1255,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:layout_width="12dp"
                                                     android:layout_height="12dp"
@@ -1281,7 +1281,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosLeft"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1292,12 +1292,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:layout_width="12dp"
                                                     android:layout_height="12dp"
@@ -1319,7 +1319,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosRight"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1330,12 +1330,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:layout_width="12dp"
                                                     android:layout_height="12dp"
@@ -1357,7 +1357,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosCustom"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
                                         app:strokeColor="@color/settings_chip_bg_inactive"
@@ -1367,12 +1367,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
@@ -1794,7 +1794,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase0"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1805,12 +1805,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -1830,7 +1830,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase1"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1841,12 +1841,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -1866,7 +1866,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase2"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1877,12 +1877,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -1902,7 +1902,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase3"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1913,12 +1913,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -1938,7 +1938,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase4"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1949,12 +1949,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -1974,7 +1974,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase5"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1985,12 +1985,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -2010,7 +2010,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase6"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2021,12 +2021,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -2046,7 +2046,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase7"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
                                         app:strokeColor="@color/settings_chip_bg_inactive"
@@ -2056,12 +2056,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <ImageView
                                                     android:layout_width="24dp"
                                                     android:layout_height="24dp"
@@ -2110,7 +2110,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirL2R"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2121,12 +2121,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
@@ -2148,7 +2148,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirR2L"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2159,12 +2159,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
@@ -2186,7 +2186,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirStatic"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2197,12 +2197,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
@@ -2224,7 +2224,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirRandom"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
                                         app:strokeColor="@color/settings_chip_bg_inactive"
@@ -2234,12 +2234,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
@@ -2337,7 +2337,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosTopLeft"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2348,12 +2348,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <View
                                                         android:layout_width="12dp"
                                                         android:layout_height="12dp"
@@ -2374,7 +2374,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosTopRight"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2385,12 +2385,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <View
                                                         android:layout_width="12dp"
                                                         android:layout_height="12dp"
@@ -2411,7 +2411,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosCenter"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2422,12 +2422,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <View
                                                         android:layout_width="12dp"
                                                         android:layout_height="12dp"
@@ -2447,7 +2447,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosMidLeft"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2458,12 +2458,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <View
                                                         android:layout_width="12dp"
                                                         android:layout_height="12dp"
@@ -2484,7 +2484,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosMidRight"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2495,12 +2495,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <View
                                                         android:layout_width="12dp"
                                                         android:layout_height="12dp"
@@ -2521,7 +2521,7 @@
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosCustom"
                                             android:layout_width="92dp"
-                                            android:layout_height="115dp"
+                                            android:layout_height="92dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
                                             app:strokeColor="@color/settings_chip_bg_inactive"
@@ -2531,12 +2531,12 @@
                                                 android:layout_height="match_parent"
                                                 android:orientation="vertical"
                                                 android:gravity="center"
-                                                android:padding="8dp">
+                                                android:padding="6dp">
                                                 <FrameLayout
-                                                    android:layout_width="48dp"
-                                                    android:layout_height="64dp"
+                                                    android:layout_width="38dp"
+                                                    android:layout_height="50dp"
                                                     android:background="@drawable/mini_screen_bg"
-                                                    android:layout_marginBottom="6dp">
+                                                    android:layout_marginBottom="4dp">
                                                     <TextView
                                                         android:layout_width="wrap_content"
                                                         android:layout_height="wrap_content"
@@ -2671,7 +2671,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorWhite"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2682,12 +2682,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorWhitePreview"
                                                     android:layout_width="20dp"
@@ -2707,7 +2707,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorBlue"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2718,12 +2718,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorBluePreview"
                                                     android:layout_width="20dp"
@@ -2743,7 +2743,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorWarm"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2754,12 +2754,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorWarmPreview"
                                                     android:layout_width="20dp"
@@ -2779,7 +2779,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorPink"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2790,12 +2790,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorPinkPreview"
                                                     android:layout_width="20dp"
@@ -2815,7 +2815,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorGreen"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2826,12 +2826,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorGreenPreview"
                                                     android:layout_width="20dp"
@@ -2851,7 +2851,7 @@
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorMixed"
                                         android:layout_width="92dp"
-                                        android:layout_height="115dp"
+                                        android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
                                         app:strokeColor="@color/settings_chip_bg_inactive"
@@ -2861,12 +2861,12 @@
                                             android:layout_height="match_parent"
                                             android:orientation="vertical"
                                             android:gravity="center"
-                                            android:padding="8dp">
+                                            android:padding="6dp">
                                             <FrameLayout
-                                                android:layout_width="48dp"
-                                                android:layout_height="64dp"
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
                                                 android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="6dp">
+                                                android:layout_marginBottom="4dp">
                                                 <View
                                                     android:id="@+id/viewStarColorMixedPreview"
                                                     android:layout_width="20dp"
@@ -3200,7 +3200,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase0"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3211,12 +3211,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3236,7 +3236,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase1"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3247,12 +3247,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3272,7 +3272,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase2"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3283,12 +3283,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3308,7 +3308,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase3"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3319,12 +3319,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3344,7 +3344,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase4"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3355,12 +3355,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3380,7 +3380,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase5"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3391,12 +3391,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3416,7 +3416,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase6"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3427,12 +3427,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3452,7 +3452,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase7"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
                                     app:strokeColor="@color/settings_chip_bg_inactive"
@@ -3462,12 +3462,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <ImageView
                                                 android:layout_width="24dp"
                                                 android:layout_height="24dp"
@@ -3516,7 +3516,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorWhite"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3527,12 +3527,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorWhitePreview"
                                                 android:layout_width="20dp"
@@ -3552,7 +3552,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorBlue"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3563,12 +3563,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorBluePreview"
                                                 android:layout_width="20dp"
@@ -3588,7 +3588,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorWarm"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3599,12 +3599,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorWarmPreview"
                                                 android:layout_width="20dp"
@@ -3624,7 +3624,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorPink"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3635,12 +3635,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorPinkPreview"
                                                 android:layout_width="20dp"
@@ -3660,7 +3660,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorGreen"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3671,12 +3671,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorGreenPreview"
                                                 android:layout_width="20dp"
@@ -3696,7 +3696,7 @@
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorMixed"
                                     android:layout_width="92dp"
-                                    android:layout_height="115dp"
+                                    android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
                                     app:strokeColor="@color/settings_chip_bg_inactive"
@@ -3706,12 +3706,12 @@
                                         android:layout_height="match_parent"
                                         android:orientation="vertical"
                                         android:gravity="center"
-                                        android:padding="8dp">
+                                        android:padding="6dp">
                                         <FrameLayout
-                                            android:layout_width="48dp"
-                                            android:layout_height="64dp"
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
                                             android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="6dp">
+                                            android:layout_marginBottom="4dp">
                                             <View
                                                 android:id="@+id/viewCombinedStarColorMixedPreview"
                                                 android:layout_width="20dp"

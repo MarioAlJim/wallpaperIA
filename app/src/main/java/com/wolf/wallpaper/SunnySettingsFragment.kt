@@ -1256,14 +1256,27 @@ class SunnySettingsFragment : Fragment() {
                 else -> "Blanco"
             }
             val starModeText = if (configManager.getStarMode() == 1) "Aleatorio" else "Estático"
+            val starDensityText = when {
+                starDensity <= 25 -> "Pocas"
+                starDensity <= 50 -> "Medio"
+                starDensity <= 75 -> "Mucho"
+                else -> "Cielo Estrellado"
+            }
             val shootingStarsText = if (configManager.isShootingStarsEnabled()) {
-                "Sí (${configManager.getShootingStarsDensity()}%)"
+                val densityVal = configManager.getShootingStarsDensity()
+                val densityLabel = when {
+                    densityVal <= 25 -> "Pocas"
+                    densityVal <= 50 -> "Media"
+                    densityVal <= 75 -> "Muchas"
+                    else -> "Frecuentes"
+                }
+                "Sí ($densityLabel)"
             } else {
                 "No"
             }
             val firefliesText = if (configManager.isFirefliesEnabled()) "Sí" else "No"
             summarySunnyMoon.text = Html.fromHtml(
-                "Fase: <font color='$accentColor'>$phaseText</font> • Estrellas: <font color='$accentColor'>$starColorText ($starDensity%)</font> • Modo: <font color='$accentColor'>$starModeText</font><br/>Fugaces: <font color='$accentColor'>$shootingStarsText</font> • Luciérnagas: <font color='$accentColor'>$firefliesText</font>",
+                "Fase: <font color='$accentColor'>$phaseText</font> • Estrellas: <font color='$accentColor'>$starColorText ($starDensityText)</font> • Modo: <font color='$accentColor'>$starModeText</font><br/>Fugaces: <font color='$accentColor'>$shootingStarsText</font> • Luciérnagas: <font color='$accentColor'>$firefliesText</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -1306,8 +1319,26 @@ class SunnySettingsFragment : Fragment() {
                 3 -> "Opuestos (Sol Der, Luna Izq)"
                 else -> "Mismo Sentido"
             }
+            val sunSizeVal = configManager.getCombinedSunSize()
+            val sunSizeText = when {
+                sunSizeVal <= 30 -> "Pequeño"
+                sunSizeVal <= 65 -> "Mediano"
+                else -> "Grande"
+            }
+            val moonSizeVal = configManager.getCombinedMoonSize()
+            val moonSizeText = when {
+                moonSizeVal <= 30 -> "Pequeña"
+                moonSizeVal <= 65 -> "Mediana"
+                else -> "Grande"
+            }
+            val combStarDensityText = when {
+                starDensity <= 25 -> "Pocas"
+                starDensity <= 50 -> "Medio"
+                starDensity <= 75 -> "Mucho"
+                else -> "Cielo Estrellado"
+            }
             summarySunnyCombined.text = Html.fromHtml(
-                "Ciclo: <font color='$accentColor'>$speedText ($speed%)</font> • Sol: <font color='$accentColor'>$sunSize%</font> • Luna: <font color='$accentColor'>$moonSize% ($phaseText)</font><br/>Estrellas: <font color='$accentColor'>$starColorText ($starDensity%)</font> • Trayecto: <font color='$accentColor'>$trajectoryText</font>",
+                "Ciclo: <font color='$accentColor'>$speedText</font> • Sol: <font color='$accentColor'>$sunSizeText</font> • Luna: <font color='$accentColor'>$moonSizeText ($phaseText)</font><br/>Estrellas: <font color='$accentColor'>$starColorText ($combStarDensityText)</font> • Trayecto: <font color='$accentColor'>$trajectoryText</font>",
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
