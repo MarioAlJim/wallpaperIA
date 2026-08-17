@@ -42,13 +42,9 @@ float noise(highp vec2 p) {
 }
 
 float fbm(highp vec2 p) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    for (int i = 0; i < 3; i++) {
-        value += amplitude * noise(p);
-        p *= 2.0;
-        amplitude *= 0.5;
-    }
+    float value = 0.5 * noise(p);
+    value += 0.25 * noise(p * 2.0);
+    value += 0.125 * noise(p * 4.0);
     return value;
 }
 
