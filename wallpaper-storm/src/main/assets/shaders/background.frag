@@ -239,10 +239,14 @@ float GetDarkGodRays(highp vec2 uv, highp vec2 lightPos, float flashIntensity, h
     const int SAMPLES = 6;
     highp float stepSize = dist / float(SAMPLES);
 
-    highp vec2 currentPos = uv;
+    // Precompute step vector and initial sampling position to reduce arithmetic operations inside the loop
+    highp vec2 stepVec = (rayDir / vec2(aspect, 1.0)) * stepSize;
+    highp vec2 samplePos = uv * 3.5 - vec2(time * 0.08, 0.0);
+    highp vec2 sampleStep = stepVec * 3.5;
+
     for (int i = 0; i < SAMPLES; i++) {
-        currentPos -= (rayDir / vec2(aspect, 1.0)) * stepSize;
-        float density = fbm(currentPos * 3.5 - vec2(time * 0.08, 0.0));
+        samplePos -= sampleStep;
+        float density = fbm(samplePos);
         shadow += smoothstep(0.35, 0.75, density);
     }
     shadow /= float(SAMPLES);
