@@ -348,7 +348,7 @@ class StormSettingsFragment : Fragment() {
         for (i in options.indices) {
             val optionText = options[i]
             val card = MaterialCardView(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(92.dpToPx(), 115.dpToPx()).apply {
+                layoutParams = LinearLayout.LayoutParams(92.dpToPx(), 92.dpToPx()).apply {
                     setMargins(0, 0, 10.dpToPx(), 0)
                 }
                 radius = 12.dpToPx().toFloat()
@@ -367,12 +367,12 @@ class StormSettingsFragment : Fragment() {
                 )
                 orientation = LinearLayout.VERTICAL
                 gravity = android.view.Gravity.CENTER
-                setPadding(8.dpToPx(), 8.dpToPx(), 8.dpToPx(), 8.dpToPx())
+                setPadding(6.dpToPx(), 6.dpToPx(), 6.dpToPx(), 6.dpToPx())
             }
 
             val previewFrame = android.widget.FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(48.dpToPx(), 64.dpToPx()).apply {
-                    setMargins(0, 0, 0, 6.dpToPx())
+                layoutParams = LinearLayout.LayoutParams(38.dpToPx(), 50.dpToPx()).apply {
+                    setMargins(0, 0, 0, 4.dpToPx())
                 }
                 background = GradientDrawable().apply {
                     shape = GradientDrawable.RECTANGLE
@@ -452,7 +452,7 @@ class StormSettingsFragment : Fragment() {
                         val path = customBgFile.absolutePath
                         var bitmap = backgroundBitmapCache[path]
                         if (bitmap == null) {
-                            bitmap = loadThumbnailFromAsset(requireContext(), path, 48.dpToPx(), 64.dpToPx())
+                            bitmap = loadThumbnailFromAsset(requireContext(), path, 38.dpToPx(), 50.dpToPx())
                             if (bitmap != null) {
                                 backgroundBitmapCache[path] = bitmap
                             }
@@ -464,7 +464,7 @@ class StormSettingsFragment : Fragment() {
                 } else {
                     var bitmap = backgroundBitmapCache[bgPath]
                     if (bitmap == null) {
-                        bitmap = loadThumbnailFromAsset(requireContext(), bgPath, 48.dpToPx(), 64.dpToPx())
+                        bitmap = loadThumbnailFromAsset(requireContext(), bgPath, 38.dpToPx(), 50.dpToPx())
                         if (bitmap != null) {
                             backgroundBitmapCache[bgPath] = bitmap
                         }
