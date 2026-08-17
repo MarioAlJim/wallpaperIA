@@ -63,12 +63,17 @@ class RainDrop(
         
         val angleDeg = windAngle + angleOffset
         val angleRad = angleDeg * DEG_TO_RAD_F
-        velocityY = -speed * kotlin.math.cos(angleRad)
-        velocityX = speed * kotlin.math.sin(angleRad)
+        val sinA = kotlin.math.sin(angleRad)
+        val cosA = kotlin.math.cos(angleRad)
         
-        val dirLength = kotlin.math.sqrt(velocityX * velocityX + velocityY * velocityY)
-        dirX = if (dirLength > 0f) velocityX / dirLength else 0f
-        dirY = if (dirLength > 0f) velocityY / dirLength else -1f
+        velocityY = -speed * cosA
+        velocityX = speed * sinA
+        
+        // dirLength mathematically equals speed. Since speed is positive (baseSpeed > 0),
+        // we can cancel out speed in velocityX/dirLength and velocityY/dirLength,
+        // avoiding a sqrt() and division calculations on every raindrop.
+        dirX = sinA
+        dirY = -cosA
     }
 
     fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: StormCloud? = null, allowFallbackToEdge: Boolean = true) {
