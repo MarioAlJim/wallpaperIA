@@ -547,14 +547,14 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun refreshStormCardPreviews(view: View) {
-        val rainIntensities = arrayOf("Nada (0%)", "Pocas (25%)", "Media (50%)", "Alta (75%)", "Muy alta (100%)")
+        val rainIntensities = arrayOf("Nada", "Pocas", "Media", "Alta", "Muy alta")
         val initialRainValue = configManager.getRainIntensity()
         val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
         setupDropdown(view, R.id.spinnerRainIntensity, rainIntensities, initialRainProgress) { position ->
             configManager.setRainIntensity(position * 25)
         }
 
-        val rainSpeeds = arrayOf("Baja (0%)", "Media (25%)", "Rápida (50%)")
+        val rainSpeeds = arrayOf("Baja", "Media", "Rápida")
         val currentSpeed = configManager.getRainSpeed()
         val initialSpeedIndex = when (currentSpeed) {
             0 -> 0
