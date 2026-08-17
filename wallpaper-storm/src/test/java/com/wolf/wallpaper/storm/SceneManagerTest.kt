@@ -228,9 +228,9 @@ class SceneManagerTest {
         assertEquals(50, field.get(sceneManager) as Int)
 
         // Change rainSpeed
-        mockConfig.mockRainSpeed = 80
+        mockConfig.mockRainSpeed = 25
         sceneManager.update(0.016f)
-        assertEquals(80, field.get(sceneManager) as Int)
+        assertEquals(25, field.get(sceneManager) as Int)
     }
 
     @Test

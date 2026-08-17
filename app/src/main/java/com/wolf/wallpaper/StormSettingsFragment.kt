@@ -124,9 +124,6 @@ class StormSettingsFragment : Fragment() {
         }
 
         // 3. Setup Lluvia Controls
-        setupSlider(view, R.id.seekBarRainSpeed, R.id.textViewRainSpeedValue, configManager.getRainSpeed()) { value ->
-            configManager.setRainSpeed(value)
-        }
 
         val switchScreenDroplets = view.findViewById<SwitchMaterial>(R.id.switchScreenDroplets)
         val layoutScreenDropletsSize = view.findViewById<View>(R.id.layoutScreenDropletsSize)
@@ -274,15 +271,7 @@ class StormSettingsFragment : Fragment() {
                 }
                 textView.text = "$value% • $desc"
             }
-            R.id.seekBarRainSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Lenta"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Rápida"
-                    else -> "Torrencial"
-                }
-                textView.text = "$value% • $desc"
-            }
+
             R.id.seekBarScreenDropletsSize -> {
                 val desc = when {
                     value <= 50 -> "Finas"
@@ -565,6 +554,31 @@ class StormSettingsFragment : Fragment() {
             configManager.setRainIntensity(position * 25)
         }
 
+        val rainSpeeds = arrayOf("Baja (0%)", "Media (25%)", "Rápida (50%)")
+        val currentSpeed = configManager.getRainSpeed()
+        val initialSpeedIndex = when (currentSpeed) {
+            0 -> 0
+            25 -> 1
+            50 -> 2
+            else -> {
+                when {
+                    currentSpeed < 12 -> 0
+                    currentSpeed < 37 -> 1
+                    else -> 2
+                }
+            }
+        }
+        setupDropdown(view, R.id.spinnerRainSpeed, rainSpeeds, initialSpeedIndex) { position ->
+            val selectedSpeed = when (position) {
+                0 -> 0
+                1 -> 25
+                2 -> 50
+                else -> 25
+            }
+            configManager.setRainSpeed(selectedSpeed)
+            refreshStormCardPreviews(view)
+        }
+
         val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
         setupDropdown(view, R.id.spinnerRainColor, rainColors, configManager.getRainColorIndex()) { position ->
             configManager.setRainColorIndex(position)
@@ -784,7 +798,7 @@ class StormSettingsFragment : Fragment() {
             R.id.seekBarWindIntensity,
             R.id.seekBarCloudDynamicsSpeed,
             R.id.spinnerRainIntensity,
-            R.id.seekBarRainSpeed,
+            R.id.spinnerRainSpeed,
             R.id.seekBarLightningFrequency,
             R.id.seekBarCloudFlashFrequency
         )
@@ -874,7 +888,12 @@ class StormSettingsFragment : Fragment() {
                         }
                     }
                 }
-                
+
+                R.id.spinnerRainSpeed -> {
+                    val speedCount = 12
+                    drawRaindropsForSpeed(canvas, w, h, speedCount, activeRainColor, activeWindDir, optionIndex)
+                }
+
                 R.id.spinnerRainIntensity -> {
                     val density = when (optionIndex) {
                         0 -> 0
@@ -1027,6 +1046,34 @@ class StormSettingsFragment : Fragment() {
                 val rx = random.nextFloat() * (w + Math.abs(dx)) - (if (dx > 0) dx else 0f)
                 val ry = random.nextFloat() * (h - 14.dpToPx())
                 val length = 8.dpToPx() + random.nextFloat() * 8.dpToPx()
+                canvas.drawLine(rx, ry, rx + dx * (length / h), ry + length, paint)
+            }
+        }
+
+        private fun drawRaindropsForSpeed(canvas: Canvas, w: Float, h: Float, count: Int, color: Int, windDir: Int, speedIndex: Int) {
+            paint.color = color
+            paint.strokeWidth = 1.5f.dpToPx().toFloat()
+            paint.style = Paint.Style.STROKE
+            paint.strokeCap = Paint.Cap.ROUND
+
+            val random = java.util.Random(optionIndex * 100L + 42)
+            val dx = when (windDir) {
+                0 -> -6.dpToPx().toFloat()
+                2 -> 6.dpToPx().toFloat()
+                else -> 0f
+            }
+
+            val lengthFactor = when (speedIndex) {
+                0 -> 0.5f
+                1 -> 1.0f
+                2 -> 1.8f
+                else -> 1.0f
+            }
+
+            for (i in 0 until count) {
+                val rx = random.nextFloat() * (w + Math.abs(dx)) - (if (dx > 0) dx else 0f)
+                val ry = random.nextFloat() * (h - 14.dpToPx())
+                val length = (8.dpToPx() + random.nextFloat() * 8.dpToPx()) * lengthFactor
                 canvas.drawLine(rx, ry, rx + dx * (length / h), ry + length, paint)
             }
         }

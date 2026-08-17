@@ -361,9 +361,20 @@ class SceneManager(
         }
 
         val targetRainSpeedVal = if (isVariable) {
-            mixInt(VARIABLE_RAIN_SPEED_CALM, VARIABLE_RAIN_SPEED_BURST, smoothFactor)
+            // Snaps rain speed to 0, 25, or 50 based on the variable cycle progress (calm, transition, burst)
+            when {
+                smoothFactor < 0.33f -> 0
+                smoothFactor < 0.66f -> 25
+                else -> 50
+            }
         } else {
-            configProvider.getRainSpeed()
+            // Static configuration: coerce/snap to the nearest allowed speed
+            val speed = configProvider.getRainSpeed()
+            when {
+                speed < 12 -> 0
+                speed < 37 -> 25
+                else -> 50
+            }
         }
 
         if (targetDensity != cloudDensity) {

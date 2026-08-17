@@ -541,37 +541,33 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Rain Speed -->
-                    <RelativeLayout
+                    <!-- Rain Speed (Cards) -->
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp">
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Velocidad de la Lluvia"
-                            android:textColor="@color/settings_text_primary"
-                            android:textSize="15sp"
-                            android:textStyle="bold" />
-                        <TextView
-                            android:id="@+id/textViewRainSpeedValue"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="50%"
-                            android:textColor="@color/settings_text_secondary"
-                            android:textSize="14sp"
-                            android:layout_alignParentEnd="true" />
-                    </RelativeLayout>
+                        android:text="Velocidad de la Lluvia"
+                        android:textColor="@color/settings_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/seekBarRainSpeed"
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:valueFrom="0"
-                        android:valueTo="100"
-                        android:stepSize="1"
-                        android:value="50"
-                        app:labelBehavior="gone" />
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerRainSpeed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -579,7 +575,6 @@
                         android:text="Ajusta qué tan rápido caen las gotas en su trayectoria descendente."
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
-                        android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
                     <!-- Rain Color -->
