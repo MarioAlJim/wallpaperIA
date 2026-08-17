@@ -92,15 +92,7 @@ class StormSettingsFragment : Fragment() {
             updateSummaries(view)
         }
 
-        val windDirections = arrayOf("Izquierda", "Neutro", "Derecha")
-        setupDropdown(view, R.id.spinnerWindDirection, windDirections, configManager.getWindDirection()) { position ->
-            configManager.setWindDirection(position)
-            refreshStormCardPreviews(view)
-        }
 
-        setupSlider(view, R.id.seekBarWindIntensity, R.id.textViewWindIntensityValue, configManager.getWindIntensity()) { value ->
-            configManager.setWindIntensity(value)
-        }
 
         setupSlider(view, R.id.seekBarCloudDynamicsSpeed, R.id.textViewCloudDynamicsSpeedValue, configManager.getCloudDynamicsSpeed()) { value ->
             configManager.setCloudDynamicsSpeed(value)
@@ -243,16 +235,7 @@ class StormSettingsFragment : Fragment() {
     private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
         when (sliderId) {
 
-            R.id.seekBarWindIntensity -> {
-                val desc = when {
-                    value <= 10 -> "Calma"
-                    value <= 35 -> "Brisa"
-                    value <= 65 -> "Moderado"
-                    value <= 85 -> "Fuerte"
-                    else -> "Vendaval"
-                }
-                textView.text = "$value% • $desc"
-            }
+
             R.id.seekBarCloudDynamicsSpeed -> {
                 val desc = when {
                     value <= 20 -> "Lento"
@@ -547,6 +530,45 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun refreshStormCardPreviews(view: View) {
+        val windDirections = arrayOf("Izquierda", "Derecha")
+        val initialWindDirIndex = if (configManager.getWindDirection() == 2) 1 else 0
+        setupDropdown(view, R.id.spinnerWindDirection, windDirections, initialWindDirIndex) { position ->
+            val dir = if (position == 1) 2 else 0
+            configManager.setWindDirection(dir)
+            refreshStormCardPreviews(view)
+        }
+
+        val windIntensities = arrayOf("Sin viento", "Lento", "Medio", "Rápido", "Muy rápido")
+        val currentWindIntensity = configManager.getWindIntensity()
+        val initialWindIntensityIndex = when (currentWindIntensity) {
+            0 -> 0
+            25 -> 1
+            50 -> 2
+            75 -> 3
+            100 -> 4
+            else -> {
+                when {
+                    currentWindIntensity < 12 -> 0
+                    currentWindIntensity < 37 -> 1
+                    currentWindIntensity < 62 -> 2
+                    currentWindIntensity < 87 -> 3
+                    else -> 4
+                }
+            }
+        }
+        setupDropdown(view, R.id.spinnerWindIntensity, windIntensities, initialWindIntensityIndex) { position ->
+            val selectedIntensity = when (position) {
+                0 -> 0
+                1 -> 25
+                2 -> 50
+                3 -> 75
+                4 -> 100
+                else -> 50
+            }
+            configManager.setWindIntensity(selectedIntensity)
+            refreshStormCardPreviews(view)
+        }
+
         val rainIntensities = arrayOf("Nada", "Pocas", "Media", "Alta", "Muy alta")
         val initialRainValue = configManager.getRainIntensity()
         val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
@@ -795,7 +817,7 @@ class StormSettingsFragment : Fragment() {
         val idsToLock = arrayOf(
             R.id.spinnerCloudDensity,
             R.id.spinnerWindDirection,
-            R.id.seekBarWindIntensity,
+            R.id.spinnerWindIntensity,
             R.id.seekBarCloudDynamicsSpeed,
             R.id.spinnerRainIntensity,
             R.id.spinnerRainSpeed,
@@ -806,17 +828,22 @@ class StormSettingsFragment : Fragment() {
         for (id in idsToLock) {
             val controlView = view.findViewById<View>(id)
             if (controlView != null) {
-                controlView.isEnabled = enabled
-                controlView.alpha = alpha
+                var controlEnabled = enabled
+                if (id == R.id.spinnerWindDirection && configManager.getWindIntensity() == 0) {
+                    controlEnabled = false
+                }
+                val controlAlpha = if (controlEnabled) 1.0f else 0.4f
+                controlView.isEnabled = controlEnabled
+                controlView.alpha = controlAlpha
                 if (controlView is ViewGroup) {
                     for (i in 0 until controlView.childCount) {
                         val child = controlView.getChildAt(i)
-                        child.isEnabled = enabled
-                        child.alpha = alpha
+                        child.isEnabled = controlEnabled
+                        child.alpha = controlAlpha
                         if (child is ViewGroup) {
                             for (j in 0 until child.childCount) {
-                                child.getChildAt(j).isEnabled = enabled
-                                child.getChildAt(j).alpha = alpha
+                                child.getChildAt(j).isEnabled = controlEnabled
+                                child.getChildAt(j).alpha = controlAlpha
                             }
                         }
                     }
@@ -869,22 +896,77 @@ class StormSettingsFragment : Fragment() {
                     paint.strokeWidth = 2.dpToPx().toFloat()
                     paint.style = Paint.Style.STROKE
                     paint.strokeCap = Paint.Cap.ROUND
-                    
+
                     when (optionIndex) {
-                        0 -> {
+                        0 -> { // Left
                             drawWindLine(canvas, w * 0.8f, h * 0.3f, w * 0.2f, h * 0.3f)
                             drawWindLine(canvas, w * 0.9f, h * 0.5f, w * 0.1f, h * 0.5f)
                             drawWindLine(canvas, w * 0.7f, h * 0.7f, w * 0.3f, h * 0.7f)
                         }
-                        1 -> {
-                            drawWindLine(canvas, w * 0.3f, h * 0.2f, w * 0.3f, h * 0.8f)
-                            drawWindLine(canvas, w * 0.5f, h * 0.1f, w * 0.5f, h * 0.9f)
-                            drawWindLine(canvas, w * 0.7f, h * 0.2f, w * 0.7f, h * 0.8f)
-                        }
-                        2 -> {
+                        1 -> { // Right
                             drawWindLine(canvas, w * 0.2f, h * 0.3f, w * 0.8f, h * 0.3f)
                             drawWindLine(canvas, w * 0.1f, h * 0.5f, w * 0.9f, h * 0.5f)
                             drawWindLine(canvas, w * 0.3f, h * 0.7f, w * 0.7f, h * 0.7f)
+                        }
+                    }
+                }
+
+                R.id.spinnerWindIntensity -> {
+                    paint.color = Color.parseColor("#8A2BE2")
+                    paint.strokeWidth = 2.dpToPx().toFloat()
+                    paint.style = Paint.Style.STROKE
+                    paint.strokeCap = Paint.Cap.ROUND
+
+                    val dirFactor = if (activeWindDir == 0) -1 else 1
+                    when (optionIndex) {
+                        0 -> {
+                            // Sin viento: draw a small center circle
+                            paint.style = Paint.Style.FILL
+                            canvas.drawCircle(w * 0.5f, h * 0.5f, 4.dpToPx().toFloat(), paint)
+                        }
+                        1 -> {
+                            // Lento: draw 1 wind line
+                            if (dirFactor < 0) {
+                                drawWindLine(canvas, w * 0.8f, h * 0.5f, w * 0.2f, h * 0.5f)
+                            } else {
+                                drawWindLine(canvas, w * 0.2f, h * 0.5f, w * 0.8f, h * 0.5f)
+                            }
+                        }
+                        2 -> {
+                            // Medio: draw 2 wind lines
+                            if (dirFactor < 0) {
+                                drawWindLine(canvas, w * 0.8f, h * 0.3f, w * 0.3f, h * 0.3f)
+                                drawWindLine(canvas, w * 0.7f, h * 0.7f, w * 0.2f, h * 0.7f)
+                            } else {
+                                drawWindLine(canvas, w * 0.2f, h * 0.3f, w * 0.7f, h * 0.3f)
+                                drawWindLine(canvas, w * 0.3f, h * 0.7f, w * 0.8f, h * 0.7f)
+                            }
+                        }
+                        3 -> {
+                            // Rápido: draw 3 wind lines
+                            if (dirFactor < 0) {
+                                drawWindLine(canvas, w * 0.8f, h * 0.3f, w * 0.2f, h * 0.3f)
+                                drawWindLine(canvas, w * 0.9f, h * 0.5f, w * 0.1f, h * 0.5f)
+                                drawWindLine(canvas, w * 0.7f, h * 0.7f, w * 0.3f, h * 0.7f)
+                            } else {
+                                drawWindLine(canvas, w * 0.2f, h * 0.3f, w * 0.8f, h * 0.3f)
+                                drawWindLine(canvas, w * 0.1f, h * 0.5f, w * 0.9f, h * 0.5f)
+                                drawWindLine(canvas, w * 0.3f, h * 0.7f, w * 0.7f, h * 0.7f)
+                            }
+                        }
+                        4 -> {
+                            // Muy rápido: draw 4 wind lines
+                            if (dirFactor < 0) {
+                                drawWindLine(canvas, w * 0.8f, h * 0.2f, w * 0.2f, h * 0.2f)
+                                drawWindLine(canvas, w * 0.9f, h * 0.4f, w * 0.1f, h * 0.4f)
+                                drawWindLine(canvas, w * 0.7f, h * 0.6f, w * 0.3f, h * 0.6f)
+                                drawWindLine(canvas, w * 0.8f, h * 0.8f, w * 0.2f, h * 0.8f)
+                            } else {
+                                drawWindLine(canvas, w * 0.2f, h * 0.2f, w * 0.8f, h * 0.2f)
+                                drawWindLine(canvas, w * 0.1f, h * 0.4f, w * 0.9f, h * 0.4f)
+                                drawWindLine(canvas, w * 0.3f, h * 0.6f, w * 0.7f, h * 0.6f)
+                                drawWindLine(canvas, w * 0.2f, h * 0.8f, w * 0.8f, h * 0.8f)
+                            }
                         }
                     }
                 }

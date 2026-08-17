@@ -351,13 +351,21 @@ class SceneManager(
         val targetWind = if (isVariable) {
             if (smoothFactor > 0.01f) currentBurstWindDirection else 0
         } else {
-            configProvider.getWindDirection()
+            val raw = configProvider.getWindDirection()
+            if (raw == 1) 0 else raw
         }
 
         val targetWindIntensity = if (isVariable) {
             mixInt(VARIABLE_WIND_INTENSITY_CALM, VARIABLE_WIND_INTENSITY_BURST, smoothFactor)
         } else {
-            configProvider.getWindIntensity()
+            val wind = configProvider.getWindIntensity()
+            when {
+                wind < 12 -> 0
+                wind < 37 -> 25
+                wind < 62 -> 50
+                wind < 87 -> 75
+                else -> 100
+            }
         }
 
         val targetRainSpeedVal = if (isVariable) {
