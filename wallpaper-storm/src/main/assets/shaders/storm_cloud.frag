@@ -92,7 +92,7 @@ void main() {
     vec4 texColor = texture(uTexture, distortedTexCoord);
     float depthBlur = (1.0 - uHeightFactor) * 1.6;
     if (depthBlur > 0.01) {
-        highp vec2 texel = 1.0 / vec2(textureSize(uTexture, 0));
+        highp vec2 texel = vec2(0.001953125); // 1.0 / 512.0 (maxSize loaded in Kotlin)
         highp vec2 offset = texel * depthBlur;
         vec4 blurred = texColor;
         blurred += texture(uTexture, distortedTexCoord + vec2(offset.x, 0.0));
