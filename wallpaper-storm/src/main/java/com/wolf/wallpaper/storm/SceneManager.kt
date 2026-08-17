@@ -271,9 +271,7 @@ class SceneManager(
 
     fun getClouds(): List<StormCloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
-    // Sorts the internal rain drop / wind line lists in place by depth (z), letting callers
-    // avoid re-sorting into a freshly allocated list every frame.
-    fun sortRainDropsByDepth() { rainDrops.sortBy { it.z } }
+    // Sorts the internal wind line / cloud lists in place by depth (z)
     fun sortWindLinesByDepth() { windLines.sortBy { it.z } }
     fun sortCloudsByDepth() { clouds.sortBy { it.z } }
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()

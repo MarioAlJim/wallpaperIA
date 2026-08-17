@@ -455,8 +455,6 @@ class StormRenderer(
         GLES30.glClear(GLES30.GL_COLOR_BUFFER_BIT or GLES30.GL_DEPTH_BUFFER_BIT)
 
         // Render layered elements in order: Fondo -> Gotas de Nube -> Rayos -> Nubes -> Gotas de Borde
-        // Sort once by depth (in place, no new list allocated) instead of sorting each subset separately
-        sceneManager.sortRainDropsByDepth()
         val allRain = sceneManager.getRainDrops()
         cloudRainBuffer.clear()
         edgeRainBuffer.clear()
