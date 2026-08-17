@@ -30,11 +30,10 @@ const float NOISE_TEX_SIZE = 64.0;
 
 out vec4 fragColor;
 
-// A simple pseudo-random hash function (used only by the on-screen droplet effect below)
+// Sample the prebaked noise texture to get a pseudo-random value between 0.0 and 1.0,
+// replacing the expensive per-pixel Hash math with cached hardware texture lookups.
 float Hash(highp vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + vec2(45.32, 45.32));
-    return fract(p.x * p.y);
+    return texture(uNoiseTexture, (p + vec2(0.5)) / NOISE_TEX_SIZE).r;
 }
 
 float noise(highp vec2 p) {
@@ -256,12 +255,11 @@ void main() {
     float unusedBorder = 1.0;
     float fadeVal = 1.0;
 
-    // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset).
-    vec4 droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
-    
-    // Apply lens refraction distortion if droplets are enabled
+    vec4 droplet = vec4(0.0);
     highp vec2 distortedUV = vTexCoord;
     if (uScreenDropletsEnabled > 0.5) {
+        // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset).
+        droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
         distortedUV = clamp(vTexCoord - droplet.xy, vec2(0.0), vec2(1.0));
     }
 

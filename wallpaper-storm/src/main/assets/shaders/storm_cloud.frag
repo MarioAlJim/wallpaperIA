@@ -19,9 +19,6 @@ uniform float uHeightFactor;
 // Refraction uniforms
 uniform highp float uTime;
 uniform highp float uAspectRatio;
-uniform float uScreenDropletsEnabled;
-uniform float uScreenDropletsSize;
-uniform vec3 uRainColor;
 
 // Scaling uniforms for matching background coordinates (feed texture-coordinate math)
 uniform highp vec2 uBgScale;
@@ -29,12 +26,6 @@ uniform highp vec2 uCloudScale;
 
 // Volumetric shadow rays uniform (feeds the noise-texture lookup in GetDarkGodRays)
 uniform highp vec2 uLightningPos;
-
-// Precomputed screen-space raindrop distortion mask (rendered once per frame by
-// raindrop_mask.frag) instead of recomputing the droplet loop per cloud fragment.
-uniform sampler2D uDropletMask;
-// Must match raindrop_mask.frag's DISTORTION_ENCODE_SCALE.
-const float DISTORTION_ENCODE_SCALE = 10.0;
 
 // Small tileable grid of prebaked random values used by noise()/fbm() for the
 // Dark God Rays shadowing. Sampling a texture (hardware-filtered) replaces the
@@ -95,16 +86,6 @@ void main() {
     highp vec2 bgTexCoord = vec2(ndc.x * uAspectRatio / uBgScale.x * 0.5 + 0.5, 0.5 - (ndc.y / uBgScale.y) * 0.5);
 
     highp vec2 distortedTexCoord = vTexCoord;
-    if (uScreenDropletsEnabled > 0.5) {
-        // Sample the precomputed droplet mask (rendered once per frame) instead of
-        // recomputing the droplet loop for every overlapping cloud fragment.
-        vec2 encodedDistortion = texture(uDropletMask, bgTexCoord).rg;
-        highp vec2 dropletDistortion = (encodedDistortion - 0.5) / DISTORTION_ENCODE_SCALE;
-
-        // Scale the background-space displacement to fit the cloud texture coordinates
-        highp vec2 cloudDistortion = dropletDistortion * (uBgScale * 2.0 / uCloudScale);
-        distortedTexCoord = clamp(vTexCoord + cloudDistortion, vec2(0.0), vec2(1.0));
-    }
 
     // Depth of field: background clouds (low uHeightFactor) get progressively softer while
     // foreground clouds stay perfectly sharp, pushing distant clouds further back visually.

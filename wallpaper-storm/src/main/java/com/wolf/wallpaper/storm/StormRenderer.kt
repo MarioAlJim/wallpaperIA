@@ -21,7 +21,6 @@ class StormRenderer(
     private var lightningProgram = 0
     private var backgroundProgram = 0
     private var windProgram = 0
-    private var raindropMaskProgram = 0
     private var elapsedTime = 0f
 
     // Texture IDs
@@ -30,10 +29,6 @@ class StormRenderer(
     private val lightningTextures = mutableListOf<Int>()
     private val backgroundTextures = IntArray(8)
 
-    // Offscreen target the raindrop distortion mask is rendered into once per frame,
-    // instead of every cloud fragment recomputing the droplet loop (see drawRaindropMask).
-    private var dropletMaskFbo = 0
-    private var dropletMaskTexture = 0
     private var viewportWidth = 0
     private var viewportHeight = 0
 
@@ -90,11 +85,6 @@ class StormRenderer(
 
     // Cached uniform locations, resolved once in onSurfaceCreated instead of being
     // re-queried via glGetUniformLocation (a string-hash lookup) on every single frame.
-    private var rdmEnabledHandle = -1
-    private var rdmTimeHandle = -1
-    private var rdmAspectHandle = -1
-    private var rdmSizeHandle = -1
-    private var rdmRainColorHandle = -1
 
     private var cloudMvpHandle = -1
     private var cloudOpacityHandle = -1
@@ -105,13 +95,9 @@ class StormRenderer(
     private var cloudHeightFactorHandle = -1
     private var cloudTimeHandle = -1
     private var cloudAspectHandle = -1
-    private var cloudDropletsEnabledHandle = -1
-    private var cloudDropletsSizeHandle = -1
-    private var cloudRainColorHandle = -1
     private var cloudLightningPosHandle = -1
     private var cloudBgScaleHandle = -1
     private var cloudCloudScaleHandle = -1
-    private var cloudDropletMaskHandle = -1
     private var cloudNoiseTextureHandle = -1
 
     private var rainMvpHandle = -1
@@ -169,10 +155,6 @@ class StormRenderer(
         val windVert = readAssetFile(context, "shaders/wind.vert")
         val windFrag = readAssetFile(context, "shaders/wind.frag")
         windProgram = createProgram(windVert, windFrag)
-
-        val raindropMaskVert = readAssetFile(context, "shaders/raindrop_mask.vert")
-        val raindropMaskFrag = readAssetFile(context, "shaders/raindrop_mask.frag")
-        raindropMaskProgram = createProgram(raindropMaskVert, raindropMaskFrag)
 
         cacheUniformLocations()
 
@@ -287,12 +269,6 @@ class StormRenderer(
     }
 
     private fun cacheUniformLocations() {
-        rdmEnabledHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsEnabled")
-        rdmTimeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uTime")
-        rdmAspectHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uAspectRatio")
-        rdmSizeHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uScreenDropletsSize")
-        rdmRainColorHandle = GLES30.glGetUniformLocation(raindropMaskProgram, "uRainColor")
-
         cloudMvpHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
         cloudOpacityHandle = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
         cloudTextureHandle = GLES30.glGetUniformLocation(cloudProgram, "uTexture")
@@ -302,13 +278,9 @@ class StormRenderer(
         cloudHeightFactorHandle = GLES30.glGetUniformLocation(cloudProgram, "uHeightFactor")
         cloudTimeHandle = GLES30.glGetUniformLocation(cloudProgram, "uTime")
         cloudAspectHandle = GLES30.glGetUniformLocation(cloudProgram, "uAspectRatio")
-        cloudDropletsEnabledHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsEnabled")
-        cloudDropletsSizeHandle = GLES30.glGetUniformLocation(cloudProgram, "uScreenDropletsSize")
-        cloudRainColorHandle = GLES30.glGetUniformLocation(cloudProgram, "uRainColor")
         cloudLightningPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uLightningPos")
         cloudBgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
         cloudCloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
-        cloudDropletMaskHandle = GLES30.glGetUniformLocation(cloudProgram, "uDropletMask")
         cloudNoiseTextureHandle = GLES30.glGetUniformLocation(cloudProgram, "uNoiseTexture")
 
         rainMvpHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
@@ -345,7 +317,6 @@ class StormRenderer(
         // Setup orthographic camera matrix (RF-006: Keeps proportions in rotation/scale)
         Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f, -1f, 1f)
         sceneManager.onSurfaceChanged(width, height)
-        setupDropletMaskTarget(width, height)
     }
 
     // Builds a small tileable grid of random single-channel values sampled by
@@ -375,36 +346,6 @@ class StormRenderer(
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
         return textureId
     }
-
-    private fun setupDropletMaskTarget(width: Int, height: Int) {
-        if (width <= 0 || height <= 0) return
-
-        if (dropletMaskTexture != 0) {
-            GLES30.glDeleteTextures(1, intArrayOf(dropletMaskTexture), 0)
-        }
-        if (dropletMaskFbo != 0) {
-            GLES30.glDeleteFramebuffers(1, intArrayOf(dropletMaskFbo), 0)
-        }
-
-        val textureIds = IntArray(1)
-        GLES30.glGenTextures(1, textureIds, 0)
-        dropletMaskTexture = textureIds[0]
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, dropletMaskTexture)
-        GLES30.glTexImage2D(GLES30.GL_TEXTURE_2D, 0, GLES30.GL_RGBA, width, height, 0, GLES30.GL_RGBA, GLES30.GL_UNSIGNED_BYTE, null)
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR)
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR)
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE)
-        GLES30.glTexParameteri(GLES30.GL_TEXTURE_2D, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE)
-
-        val fboIds = IntArray(1)
-        GLES30.glGenFramebuffers(1, fboIds, 0)
-        dropletMaskFbo = fboIds[0]
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, dropletMaskFbo)
-        GLES30.glFramebufferTexture2D(GLES30.GL_FRAMEBUFFER, GLES30.GL_COLOR_ATTACHMENT0, GLES30.GL_TEXTURE_2D, dropletMaskTexture, 0)
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, 0)
-    }
-
     override fun onUpdate(deltaTime: Float) {
         elapsedTime += deltaTime
         val lerpFactor = 5f * deltaTime
@@ -439,35 +380,6 @@ class StormRenderer(
             targetTiltX = 0f
             targetTiltY = 0f
         }
-    }
-
-    // Renders the screen-space raindrop distortion mask once per frame into an offscreen
-    // texture, so drawClouds() can read it with a single texture() lookup per cloud fragment
-    // instead of re-running the droplet loop for every overlapping cloud.
-    private fun drawRaindropMask() {
-        if (dropletMaskFbo == 0 || raindropMaskProgram == 0) return
-
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, dropletMaskFbo)
-        GLES30.glViewport(0, 0, viewportWidth, viewportHeight)
-
-        GLES30.glUseProgram(raindropMaskProgram)
-
-        GLES30.glUniform1f(rdmEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
-        GLES30.glUniform1f(rdmTimeHandle, elapsedTime)
-        GLES30.glUniform1f(rdmAspectHandle, aspectRatio)
-        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
-        GLES30.glUniform1f(rdmSizeHandle, sizeFactor)
-        val rainColor = getRainColor(sceneManager.getRainColorIndex())
-        GLES30.glUniform3f(rdmRainColorHandle, rainColor[0], rainColor[1], rainColor[2])
-
-        fullscreenQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
-        GLES30.glDisableVertexAttribArray(0)
-
-        GLES30.glBindFramebuffer(GLES30.GL_FRAMEBUFFER, 0)
-        GLES30.glViewport(0, 0, viewportWidth, viewportHeight)
     }
 
     /**
@@ -513,9 +425,6 @@ class StormRenderer(
     }
 
     private fun drawFrame(sceneManager: SceneManager) {
-        if (sceneManager.isScreenDropletsEnabled()) {
-            drawRaindropMask()
-        }
 
         // Clear background with deep dark storm color
         var clearR = 0.04f
@@ -605,20 +514,12 @@ class StormRenderer(
         // Bind additional uniforms for refraction and dark god rays
         val timeHandle = cloudTimeHandle
         val aspectHandle = cloudAspectHandle
-        val dropletsEnabledHandle = cloudDropletsEnabledHandle
-        val dropletsSizeHandle = cloudDropletsSizeHandle
-        val rainColorHandle = cloudRainColorHandle
         val lightningPosHandle = cloudLightningPosHandle
         val bgScaleHandle = cloudBgScaleHandle
         val cloudScaleHandle = cloudCloudScaleHandle
 
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, aspectRatio)
-        GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
-        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
-        GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
-        val rainColor = getRainColor(sceneManager.getRainColorIndex())
-        GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
 
         val cloudBrightest = cloudFlash.brightest
         if (cloudBrightest != null) {
@@ -656,14 +557,9 @@ class StormRenderer(
         GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         GLES30.glUniform1i(textureHandle, 0)
 
-        val dropletMaskHandle = cloudDropletMaskHandle
         GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
-        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, dropletMaskTexture)
-        GLES30.glUniform1i(dropletMaskHandle, 1)
-
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE2)
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
-        GLES30.glUniform1i(cloudNoiseTextureHandle, 2)
+        GLES30.glUniform1i(cloudNoiseTextureHandle, 1)
 
         val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
