@@ -135,8 +135,18 @@ class StormSettingsFragment : Fragment() {
         }
 
         // 4. Setup Rayos Controls
-        setupSlider(view, R.id.seekBarLightningFrequency, R.id.textViewLightningFrequencyValue, configManager.getLightningFrequency()) { value ->
+        val freqOptions = arrayOf("Muy raro", "Raro", "Medio", "Frecuente", "Muy frecuente")
+        val freqValues = intArrayOf(12, 31, 62, 87, 100)
+        
+        val initialLightningFreqIndex = getClosestFrequencyOptionIndex(configManager.getLightningFrequency())
+        val textViewLightningFrequencyValue = view.findViewById<TextView>(R.id.textViewLightningFrequencyValue)
+        textViewLightningFrequencyValue?.text = freqOptions.getOrNull(initialLightningFreqIndex) ?: "Medio"
+        
+        setupDropdown(view, R.id.spinnerLightningFrequency, freqOptions, initialLightningFreqIndex) { position ->
+            val value = freqValues[position]
             configManager.setLightningFrequency(value)
+            textViewLightningFrequencyValue?.text = freqOptions[position]
+            updateSummaries(view)
         }
 
         setupSlider(view, R.id.seekBarLightningDuration, R.id.textViewLightningDurationValue, configManager.getLightningDuration()) { value ->
@@ -144,8 +154,15 @@ class StormSettingsFragment : Fragment() {
         }
 
         // 4b. Setup Destellos en Nubes Controls
-        setupSlider(view, R.id.seekBarCloudFlashFrequency, R.id.textViewCloudFlashFrequencyValue, configManager.getCloudFlashFrequency()) { value ->
+        val initialCloudFlashIndex = getClosestFrequencyOptionIndex(configManager.getCloudFlashFrequency())
+        val textViewCloudFlashFrequencyValue = view.findViewById<TextView>(R.id.textViewCloudFlashFrequencyValue)
+        textViewCloudFlashFrequencyValue?.text = freqOptions.getOrNull(initialCloudFlashIndex) ?: "Medio"
+        
+        setupDropdown(view, R.id.spinnerCloudFlashFrequency, freqOptions, initialCloudFlashIndex) { position ->
+            val value = freqValues[position]
             configManager.setCloudFlashFrequency(value)
+            textViewCloudFlashFrequencyValue?.text = freqOptions[position]
+            updateSummaries(view)
         }
 
         val switchCloudFlash = view.findViewById<SwitchMaterial>(R.id.switchCloudFlash)
@@ -264,15 +281,7 @@ class StormSettingsFragment : Fragment() {
                 }
                 textView.text = "$value% • $desc"
             }
-            R.id.seekBarLightningFrequency -> {
-                val desc = when {
-                    value <= 20 -> "Raro"
-                    value <= 50 -> "Frecuente"
-                    value <= 80 -> "Constante"
-                    else -> "Tormenta eléctrica"
-                }
-                textView.text = "$value% • $desc"
-            }
+
             R.id.seekBarLightningDuration -> {
                 val desc = when {
                     value <= 20 -> "Instantáneo"
@@ -282,15 +291,7 @@ class StormSettingsFragment : Fragment() {
                 }
                 textView.text = "$value% • $desc"
             }
-            R.id.seekBarCloudFlashFrequency -> {
-                val desc = when {
-                    value <= 10 -> "Desactivado"
-                    value <= 40 -> "Ocasional"
-                    value <= 70 -> "Frecuente"
-                    else -> "Incesante"
-                }
-                textView.text = "$value% • $desc"
-            }
+
         }
     }
 
@@ -317,6 +318,16 @@ class StormSettingsFragment : Fragment() {
             }
         }
         return closestIndex
+    }
+
+    private fun getClosestFrequencyOptionIndex(value: Int): Int {
+        return when {
+            value <= 21 -> 0 // Muy raro (12)
+            value <= 46 -> 1 // Raro (31)
+            value <= 74 -> 2 // Medio (62)
+            value <= 93 -> 3 // Frecuente (87)
+            else -> 4        // Muy frecuente (100)
+        }
     }
 
     private fun setupDropdown(parent: View, viewId: Int, options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
@@ -758,14 +769,26 @@ class StormSettingsFragment : Fragment() {
 
         val lightningFreq = configManager.getLightningFrequency()
         val lightningText = when {
-            lightningFreq <= 0 -> "Inactivo"
-            lightningFreq <= 20 -> "Ocasional"
-            lightningFreq <= 50 -> "Frecuente"
-            lightningFreq <= 80 -> "Constante"
-            else -> "Tormenta activa"
+            lightningFreq <= 21 -> "Muy raro"
+            lightningFreq <= 46 -> "Raro"
+            lightningFreq <= 74 -> "Medio"
+            lightningFreq <= 93 -> "Frecuente"
+            else -> "Muy frecuente"
         }
-        val flashStatus = if (configManager.isCloudFlashEnabled()) "Activo" else "Inactivo"
-        val lightningLabel = if (isVariable) "Ciclo Activo" else "$lightningText ($lightningFreq%)"
+        val flashStatus = if (configManager.isCloudFlashEnabled()) {
+            val cloudFreq = configManager.getCloudFlashFrequency()
+            val cloudFreqText = when {
+                cloudFreq <= 21 -> "Muy raro"
+                cloudFreq <= 46 -> "Raro"
+                cloudFreq <= 74 -> "Medio"
+                cloudFreq <= 93 -> "Frecuente"
+                else -> "Muy frecuente"
+            }
+            "Activo ($cloudFreqText)"
+        } else {
+            "Inactivo"
+        }
+        val lightningLabel = if (isVariable) "Ciclo Activo" else lightningText
         summaryLightning.text = Html.fromHtml(
             "Frecuencia: <font color='$accentColor'>$lightningLabel</font> • Destellos: <font color='$accentColor'>$flashStatus</font>",
             Html.FROM_HTML_MODE_LEGACY
@@ -855,8 +878,8 @@ class StormSettingsFragment : Fragment() {
             R.id.seekBarCloudDynamicsSpeed,
             R.id.spinnerRainIntensity,
             R.id.spinnerRainSpeed,
-            R.id.seekBarLightningFrequency,
-            R.id.seekBarCloudFlashFrequency
+            R.id.spinnerLightningFrequency,
+            R.id.spinnerCloudFlashFrequency
         )
 
         for (id in idsToLock) {
