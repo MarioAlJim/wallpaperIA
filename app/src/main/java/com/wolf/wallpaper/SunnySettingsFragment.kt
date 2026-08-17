@@ -1344,13 +1344,5 @@ class SunnySettingsFragment : Fragment() {
         }
     }
 
-    private fun Int.dpToPx(): Int {
-        val density = resources.displayMetrics.density
-        return Math.round(this * density)
-    }
 
-    private fun Float.dpToPx(): Float {
-        val density = resources.displayMetrics.density
-        return this * density
-    }
 }
