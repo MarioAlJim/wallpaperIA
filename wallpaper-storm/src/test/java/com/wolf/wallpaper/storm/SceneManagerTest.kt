@@ -533,13 +533,13 @@ class SceneManagerTest {
         // Simulate to guarantee trigger
         for (i in 0 until 500) {
             sceneManager.update(0.05f)
-            val active = sceneManager.lightnings.filter { it.isActive }
-            for (l in active) {
-                assertTrue("Any active lightning must be internal only when lightningFreq is 0", l.isInternalOnly)
-                triggeredCloudFlash = true
+            for (cloud in sceneManager.getClouds()) {
+                if (cloud.flashIntensity > 0f) {
+                    triggeredCloudFlash = true
+                }
             }
         }
-        assertTrue("Cloud flashes should have triggered independently", triggeredCloudFlash)
+        assertTrue("Cloud flashes should have triggered independently on the clouds", triggeredCloudFlash)
 
         // 2. Set Lightning Frequency to 100 and Cloud Flash Frequency to 0
         mockConfig.mockLightningFrequency = 100
@@ -556,6 +556,10 @@ class SceneManagerTest {
         var triggeredNormalLightning = false
         for (i in 0 until 500) {
             sceneManager.update(0.05f)
+            // Verify that clouds do NOT have flashIntensity > 0 since cloudFlashFrequency is 0
+            for (cloud in sceneManager.getClouds()) {
+                assertEquals("Cloud flash intensity must be 0 when cloudFlash is disabled", 0f, cloud.flashIntensity)
+            }
             val active = sceneManager.lightnings.filter { it.isActive }
             for (l in active) {
                 assertTrue("Any active lightning must be normal (not internal) when cloudFlashFreq is 0", !l.isInternalOnly)

@@ -71,8 +71,6 @@ class SceneManager(
     
     private var timeSinceLastLightning = 0f
     private var nextLightningDelay = 0f
-    private var timeSinceLastCloudFlash = 0f
-    private var nextCloudFlashDelay = 0f
     private var aspectRatio = 1.0f
     private var viewWidth = 0
     private var viewHeight = 0
@@ -90,7 +88,6 @@ class SceneManager(
         currentWindAngle = targetWindAngle
         currentRainSpeed = targetRainSpeed
         setupNextLightningDelay()
-        setupNextCloudFlashDelay()
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
@@ -163,8 +160,18 @@ class SceneManager(
             else -> 0f
         }
         val dynamicsSpeed = configProvider.getCloudDynamicsSpeed() / 100f
+        val isCloudFlashEnabled = configProvider.isCloudFlashEnabled()
+        val flashFrequency = configProvider.getCloudFlashFrequency()
+        val flashColorIndex = configProvider.getCloudFlashColorIndex()
         for (cloud in clouds) {
-            cloud.update(deltaTime, windSpeed, dynamicsSpeed)
+            cloud.update(
+                deltaTime,
+                windSpeed,
+                dynamicsSpeed,
+                isCloudFlashEnabled,
+                flashFrequency,
+                flashColorIndex
+            )
             val halfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
@@ -249,25 +256,6 @@ class SceneManager(
             }
         }
 
-        val currentCloudFlashFreq = configProvider.getCloudFlashFrequency()
-        if (configProvider.isCloudFlashEnabled() && currentCloudFlashFreq > 0) {
-            timeSinceLastCloudFlash += deltaTime
-            if (timeSinceLastCloudFlash >= nextCloudFlashDelay) {
-                val inactiveLightning = lightnings.firstOrNull { !it.isActive }
-                if (inactiveLightning != null) {
-                    val colorToUse = configProvider.getCloudFlashColorIndex()
-                    inactiveLightning.trigger(
-                        aspectRatio,
-                        getLightningTextureCount(),
-                        colorToUse,
-                        configProvider.getLightningDuration(),
-                        isInternalOnly = true
-                    )
-                }
-                timeSinceLastCloudFlash = 0f
-                setupNextCloudFlashDelay()
-            }
-        }
     }
 
     fun getClouds(): List<StormCloud> = clouds
@@ -416,8 +404,6 @@ class SceneManager(
 
         if (targetCloudFlashFreq != cloudFlashFrequency) {
             cloudFlashFrequency = targetCloudFlashFreq
-            timeSinceLastCloudFlash = 0f
-            setupNextCloudFlashDelay()
         }
     }
 
@@ -529,10 +515,6 @@ class SceneManager(
 
     private fun setupNextLightningDelay() {
         nextLightningDelay = frequencyToDelay(lightningFrequency)
-    }
-
-    private fun setupNextCloudFlashDelay() {
-        nextCloudFlashDelay = frequencyToDelay(cloudFlashFrequency)
     }
 
     fun queueTouch(x: Float, y: Float) {

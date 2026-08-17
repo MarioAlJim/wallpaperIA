@@ -30,12 +30,54 @@ class StormCloud(
     val speedZFactor: Float
         get() = 0.15f + ((z - 0.3f) / 0.7f) * 1.30f
 
-    override fun update(deltaTime: Float) {
-        // Default call using 0f windSpeed and 1f dynamicsSpeed to satisfy StormObject contract
-        update(deltaTime, 0f, 1.0f)
+    var flashIntensity: Float = 0f
+        private set
+    val flashColor: FloatArray = floatArrayOf(1.0f, 1.0f, 1.0f)
+    
+    private var flashTimer = 0f
+    private var flashDuration = 0f
+    private var timeSinceLastFlash = 0f
+    private var nextFlashDelay = 0f
+    private var isFlashActive = false
+
+    private fun frequencyToDelay(frequency: Int): Float {
+        if (frequency <= 0) return Float.MAX_VALUE
+
+        val baseDelay = when {
+            frequency <= 25 -> {
+                val t = frequency / 25f
+                if (t <= 0.05f) 3600f else 60f - t * 40f
+            }
+            frequency <= 50 -> {
+                val t = (frequency - 25) / 25f
+                20f - t * 15f
+            }
+            frequency <= 75 -> {
+                val t = (frequency - 50) / 25f
+                5f - t * 3f
+            }
+            else -> {
+                val t = (frequency - 75) / 25f
+                2f - t * 1.75f
+            }
+        }
+        val variance = 0.7f + Random.nextFloat() * 0.6f
+        return baseDelay * variance
     }
 
-    fun update(deltaTime: Float, windSpeed: Float, dynamicsSpeed: Float = 1.0f) {
+    override fun update(deltaTime: Float) {
+        // Default call using 0f windSpeed and 1f dynamicsSpeed to satisfy StormObject contract
+        update(deltaTime, 0f, 1.0f, false, 0, 0)
+    }
+
+    fun update(
+        deltaTime: Float,
+        windSpeed: Float,
+        dynamicsSpeed: Float = 1.0f,
+        isCloudFlashEnabled: Boolean = false,
+        flashFrequency: Int = 0,
+        flashColorIndex: Int = 0
+    ) {
         val windFactorOpacity = 1.0f + abs(windSpeed) * 2.5f
         val windFactorBreathing = 1.0f + abs(windSpeed) * 1.25f
         pulseTime += deltaTime * windFactorBreathing * 0.1f * dynamicsSpeed
@@ -65,6 +107,71 @@ class StormCloud(
             } else if (opacity > targetOpacity) {
                 opacity = (opacity - activeFadeSpeed * deltaTime).coerceAtLeast(targetOpacity)
             }
+        }
+
+        // Individual cloud flash logic
+        if (isCloudFlashEnabled && flashFrequency > 0) {
+            if (nextFlashDelay <= 0f) {
+                nextFlashDelay = frequencyToDelay(flashFrequency)
+            }
+            if (isFlashActive) {
+                flashTimer += deltaTime
+                if (flashTimer >= flashDuration) {
+                    isFlashActive = false
+                    flashIntensity = 0f
+                } else {
+                    // Realistic double flash effect
+                    val progress = flashTimer / flashDuration
+                    flashIntensity = if (progress < 0.15f) {
+                        progress / 0.15f
+                    } else if (progress < 0.35f) {
+                        1.0f - (progress - 0.15f) / 0.20f
+                    } else if (progress < 0.55f) {
+                        (progress - 0.35f) / 0.20f * 0.8f
+                    } else {
+                        (1.0f - (progress - 0.55f) / 0.45f) * 0.8f
+                    }
+                }
+            } else {
+                timeSinceLastFlash += deltaTime
+                if (timeSinceLastFlash >= nextFlashDelay) {
+                    isFlashActive = true
+                    flashTimer = 0f
+                    val baseMin = 0.24f
+                    val baseMax = 0.39f
+                    flashDuration = Random.nextFloat() * (baseMax - baseMin) + baseMin
+                    
+                    if (flashColorIndex == 6) {
+                        val r = Random.nextFloat()
+                        val g = Random.nextFloat()
+                        val b = Random.nextFloat()
+                        val max = maxOf(r, maxOf(g, b))
+                        flashColor[0] = if (max > 0f) r / max else 1.0f
+                        flashColor[1] = if (max > 0f) g / max else 1.0f
+                        flashColor[2] = if (max > 0f) b / max else 1.0f
+                    } else {
+                        val colors = arrayOf(
+                            floatArrayOf(1.0f, 1.0f, 1.0f),
+                            floatArrayOf(0.4f, 0.6f, 1.0f),
+                            floatArrayOf(1.0f, 0.9f, 0.2f),
+                            floatArrayOf(1.0f, 0.2f, 0.2f),
+                            floatArrayOf(0.2f, 1.0f, 0.2f),
+                            floatArrayOf(0.8f, 0.3f, 1.0f)
+                        )
+                        val c = colors.getOrElse(flashColorIndex) { colors[0] }
+                        flashColor[0] = c[0]
+                        flashColor[1] = c[1]
+                        flashColor[2] = c[2]
+                    }
+                    timeSinceLastFlash = 0f
+                    nextFlashDelay = frequencyToDelay(flashFrequency)
+                }
+            }
+        } else {
+            isFlashActive = false
+            flashIntensity = 0f
+            nextFlashDelay = 0f
+            timeSinceLastFlash = 0f
         }
     }
 

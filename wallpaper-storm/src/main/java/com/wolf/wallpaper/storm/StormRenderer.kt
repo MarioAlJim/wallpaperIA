@@ -487,26 +487,9 @@ class StormRenderer(
         val heightFactorHandle = cloudHeightFactorHandle
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
 
-        // Distinct from stormFlash in drawFrame(): clouds react to *either* real lightning
-        // (gated by lightningFlashEnabled) or the internal cloud-only flash (gated by
-        // cloudFlashEnabled), so this aggregate genuinely needs its own predicate/pass.
-        val cloudFlash = aggregateLightningFlash(lightnings) { lightning ->
-            lightning.isActive && (
-                (!lightning.isInternalOnly && lightningFlashEnabled) ||
-                (lightning.isInternalOnly && cloudFlashEnabled)
-            )
-        }
-
-        GLES30.glUniform1f(flashIntensityHandle, cloudFlash.maxIntensity)
-        if (cloudFlash.activeCount > 0) {
-            GLES30.glUniform3f(
-                flashColorHandle,
-                (cloudFlash.resolvedR / cloudFlash.activeCount).coerceIn(0f, 1f),
-                (cloudFlash.resolvedG / cloudFlash.activeCount).coerceIn(0f, 1f),
-                (cloudFlash.resolvedB / cloudFlash.activeCount).coerceIn(0f, 1f)
-            )
-        } else {
-            GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
+        // Clouds react to global real lightnings (not internalOnly)
+        val globalLightningFlash = aggregateLightningFlash(lightnings) { lightning ->
+            lightning.isActive && !lightning.isInternalOnly && lightningFlashEnabled
         }
 
         // Bind additional uniforms for refraction and dark god rays
@@ -519,7 +502,7 @@ class StormRenderer(
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, aspectRatio)
 
-        val cloudBrightest = cloudFlash.brightest
+        val cloudBrightest = globalLightningFlash.brightest
         if (cloudBrightest != null) {
             GLES30.glUniform2f(lightningPosHandle, cloudBrightest.positionX, cloudBrightest.positionY)
         } else {
@@ -564,6 +547,22 @@ class StormRenderer(
 
         // Already sorted by depth in place by SceneManager.sortCloudsByDepth()
         for (cloud in clouds) {
+            val finalIntensity = (globalLightningFlash.maxIntensity + cloud.flashIntensity).coerceIn(0f, 1.5f)
+            val finalR: Float
+            val finalG: Float
+            val finalB: Float
+            if (globalLightningFlash.maxIntensity > cloud.flashIntensity) {
+                finalR = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedR / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+                finalG = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedG / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+                finalB = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedB / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+            } else {
+                finalR = cloud.flashColor[0]
+                finalG = cloud.flashColor[1]
+                finalB = cloud.flashColor[2]
+            }
+            GLES30.glUniform1f(flashIntensityHandle, finalIntensity)
+            GLES30.glUniform3f(flashColorHandle, finalR, finalG, finalB)
+
             GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
             if (cloudTextures.isNotEmpty()) {
                 GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
