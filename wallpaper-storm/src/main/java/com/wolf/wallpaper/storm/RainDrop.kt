@@ -18,9 +18,9 @@ class RainDrop(
     companion object {
         // Cloud-spawned drops scale with both cloud scale and depth (z), which otherwise
         // makes drops from close-up (high z) clouds look oversized. Cap their length at the
-        // same maximum edge-rain drops can reach — (0.0525 + 0.030) * 1.12 * zMax(1.0), see
+        // same maximum edge-rain drops can reach — (0.09492 + 0.04368) * zMax(1.0), see
         // resetEdgeRain() below — so neither source can produce a bigger drop than the other.
-        private const val MAX_CLOUD_RAIN_LENGTH = 0.0924f
+        private const val MAX_CLOUD_RAIN_LENGTH = 0.1386f
 
         // updateVelocity() runs for every active raindrop (up to MAX_RAIN_DROP_COUNT) every
         // frame. Math.toRadians() takes/returns Double, so calling it here would promote to
@@ -91,7 +91,7 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        length = (spawnCloud.baseScale * 0.1344f * z).coerceAtMost(MAX_CLOUD_RAIN_LENGTH) // 0.168 * 0.8 = 20% shorter, capped for close-up clouds
+        length = (spawnCloud.baseScale * 0.2016f * z).coerceAtMost(MAX_CLOUD_RAIN_LENGTH) // 0.1344 * 1.5 = 0.2016 (50% longer base, capped for close-up clouds)
         
         parentCloud = spawnCloud
         spawnFromCloud = true
@@ -128,8 +128,8 @@ class RainDrop(
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Base length for edge-rain drops (net +12%: 1.4 * 0.8 = 1.12)
-        length = (Random.nextFloat() * 0.0525f + 0.030f) * 1.12f * z
+        // Base length for edge-rain drops: min increased by 30% to 0.04368, max increased by 50% to 0.1386.
+        length = (Random.nextFloat() * 0.09492f + 0.04368f) * z
         
         parentCloud = null
         spawnFromCloud = false

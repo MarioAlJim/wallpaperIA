@@ -635,9 +635,9 @@ class StormRenderer(
         for (drop in sortedDrops) {
             val zDepth = drop.z
             // halfW is set to R * drop.length (R=0.50 in rain.frag) so the
-            // head circle maps to a round shape. Multiplier 0.20 narrows the
+            // head circle maps to a round shape. Multiplier 0.12 narrows the
             // drop significantly so it looks thin and elegant.
-            val halfW = (drop.length * 0.20f * zDepth).coerceAtLeast(0.001f)
+            val halfW = (drop.length * 0.12f * zDepth).coerceAtLeast(0.001f)
             
             val x1 = drop.positionX
             val y1 = drop.positionY
