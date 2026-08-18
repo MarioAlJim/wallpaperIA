@@ -22,6 +22,8 @@ uniform vec3 uRainColor;
 // New uniform for lightning position (Dark God Rays and Rim Lighting)
 uniform highp vec2 uLightningPos;
 
+uniform vec2 uTexCoordScale;
+
 // Small tileable grid of prebaked random values used by noise()/fbm() for the
 // Dark God Rays shadowing. Sampling a texture (hardware-filtered) replaces the
 // per-fragment sin()/fract() hash math previously used to compute value noise.
@@ -258,9 +260,12 @@ void main() {
     vec4 droplet = vec4(0.0);
     highp vec2 distortedUV = vTexCoord;
     if (uScreenDropletsEnabled > 0.5) {
-        // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset).
-        droplet = GetDropletEffects(vTexCoord, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
-        distortedUV = clamp(vTexCoord - droplet.xy, vec2(0.0), vec2(1.0));
+        // Convert screen coordinates to screen-space UV (0 to 1) for isotropic droplet calculations
+        highp vec2 screenUV = vec2((vScreenPos.x + 1.0) * 0.5, (vScreenPos.y + 1.0) * 0.5);
+        // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset in screen-space UV).
+        droplet = GetDropletEffects(screenUV, uTime, uAspectRatio, uScreenDropletsSize, uRainColor, unusedBorder, fadeVal);
+        // Convert distortion from screen-space UV to texture coordinate space using uTexCoordScale
+        distortedUV = clamp(vTexCoord - droplet.xy * uTexCoordScale, vec2(0.0), vec2(1.0));
     }
 
     // Sample the background texture

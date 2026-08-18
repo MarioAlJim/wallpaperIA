@@ -124,6 +124,7 @@ class StormRenderer(
     private var bgRainColorHandle = -1
     private var bgLightningPosHandle = -1
     private var bgNoiseTextureHandle = -1
+    private var bgTexCoordScaleHandle = -1
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -307,6 +308,7 @@ class StormRenderer(
         bgRainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
         bgLightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
         bgNoiseTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNoiseTexture")
+        bgTexCoordScaleHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexCoordScale")
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -1017,6 +1019,9 @@ class StormRenderer(
             scaleY = 1.0f
         }
 
+        val texCoordScaleX = screenAspect / scaleX
+        val texCoordScaleY = 1.0f / scaleY
+
         Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
 
         val modelViewProjection = scratchMVPMatrix
@@ -1038,6 +1043,7 @@ class StormRenderer(
         }
         GLES30.glUniform1f(timeHandle, elapsedTime)
         GLES30.glUniform1f(aspectHandle, screenAspect)
+        GLES30.glUniform2f(bgTexCoordScaleHandle, texCoordScaleX, texCoordScaleY)
         GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
         val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
         GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)

@@ -521,13 +521,84 @@ class SunnySettingsFragment : Fragment() {
 
     private fun saveCustomSunnyBackground(uri: android.net.Uri) {
         try {
-            val inputStream = requireContext().contentResolver.openInputStream(uri) ?: return
-            val outputFile = File(requireContext().filesDir, "custom_sunny_background.png")
-            inputStream.use { input ->
-                FileOutputStream(outputFile).use { output ->
-                    input.copyTo(output)
+            val context = requireContext()
+            
+            // 1. Get EXIF orientation
+            var orientation = android.media.ExifInterface.ORIENTATION_NORMAL
+            try {
+                context.contentResolver.openInputStream(uri)?.use { stream ->
+                    val exif = android.media.ExifInterface(stream)
+                    orientation = exif.getAttributeInt(
+                        android.media.ExifInterface.TAG_ORIENTATION,
+                        android.media.ExifInterface.ORIENTATION_NORMAL
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            // 2. Determine scale/sample size to avoid OOM
+            val boundsOpts = android.graphics.BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+                inScaled = false
+            }
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                android.graphics.BitmapFactory.decodeStream(stream, null, boundsOpts)
+            }
+            val origW = boundsOpts.outWidth
+            val origH = boundsOpts.outHeight
+            
+            val maxSize = 2048
+            var sampleSize = 1
+            while (origW / (sampleSize * 2) >= maxSize && origH / (sampleSize * 2) >= maxSize) {
+                sampleSize *= 2
+            }
+            
+            val decodeOpts = android.graphics.BitmapFactory.Options().apply {
+                inScaled = false
+                inSampleSize = sampleSize
+            }
+            
+            // 3. Decode the bitmap safely using fully qualified name
+            var bitmap = context.contentResolver.openInputStream(uri)?.use { stream ->
+                android.graphics.BitmapFactory.decodeStream(stream, null, decodeOpts)
+            } ?: return
+
+            // 4. Scale exactly to maxSize if it's still larger on either dimension
+            val maxDim = maxOf(bitmap.width, bitmap.height)
+            if (maxDim > maxSize) {
+                val scale = maxSize.toFloat() / maxDim
+                val newW = (bitmap.width * scale).toInt().coerceAtLeast(1)
+                val newH = (bitmap.height * scale).toInt().coerceAtLeast(1)
+                val scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, newW, newH, true)
+                bitmap.recycle()
+                bitmap = scaled
+            }
+
+            // 5. Rotate based on EXIF orientation
+            val rotationDegrees = when (orientation) {
+                android.media.ExifInterface.ORIENTATION_ROTATE_90 -> 90
+                android.media.ExifInterface.ORIENTATION_ROTATE_180 -> 180
+                android.media.ExifInterface.ORIENTATION_ROTATE_270 -> 270
+                else -> 0
+            }
+
+            if (rotationDegrees != 0) {
+                val matrix = android.graphics.Matrix().apply { postRotate(rotationDegrees.toFloat()) }
+                val rotatedBitmap = android.graphics.Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+                if (rotatedBitmap != bitmap) {
+                    bitmap.recycle()
+                    bitmap = rotatedBitmap
                 }
             }
+
+            // 6. Save as PNG to internal storage
+            val outputFile = File(context.filesDir, "custom_sunny_background.png")
+            FileOutputStream(outputFile).use { output ->
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 90, output)
+            }
+            bitmap.recycle()
+
             configManager.setSunnyBackgroundIndex(8)
             view?.let {
                 updateCustomSunnyBackgroundViewsVisibility(it, 8)
