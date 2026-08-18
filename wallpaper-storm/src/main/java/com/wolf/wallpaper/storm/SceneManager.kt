@@ -201,7 +201,7 @@ class SceneManager(
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f) ||
                 (drop.length == 0f && drop.spawnDelay <= 0f)
             if (needsReset) {
-                val existingSpawnX = rainDrops.filter { it !== drop && it.isActive }.map { it.spawnX }
+                val existingSpawnX = rainDrops.filter { it !== drop }.map { it.spawnX }
                 drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingSpawnX = existingSpawnX)
             }
         }
