@@ -336,7 +336,7 @@ class StormSettingsFragment : Fragment() {
 
         val bgPath = when (optionIndex) {
             0 -> "black"
-            1 -> "background/background_01.png"
+            1 -> "background/background.jpg"
             2 -> "background/background_02.png"
             3 -> "background/background_03.png"
             4 -> "background/background_04.png"
