@@ -21,4 +21,7 @@ internal class CombinedConfigStore(prefs: SharedPreferences) : CachedPrefStore(p
 
     fun getCombinedPathDirection(): Int = cachedInt(ConfigManager.KEY_COMBINED_PATH_DIRECTION, ConfigManager.DEFAULT_COMBINED_PATH_DIRECTION)
     fun setCombinedPathDirection(dir: Int) { putInt(ConfigManager.KEY_COMBINED_PATH_DIRECTION, dir.coerceIn(0, 3)) }
+
+    fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_COMBINED_MOON_PHASE_AUTO_ADVANCE, ConfigManager.DEFAULT_COMBINED_MOON_PHASE_AUTO_ADVANCE)
+    fun setCombinedMoonPhaseAutoAdvanceEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_COMBINED_MOON_PHASE_AUTO_ADVANCE, enabled) }
 }

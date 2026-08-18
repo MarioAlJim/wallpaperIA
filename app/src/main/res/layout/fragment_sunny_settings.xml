@@ -3335,6 +3335,35 @@
                             android:textStyle="bold"
                             android:layout_marginTop="12dp"
                             android:layout_marginBottom="8dp" />
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@+id/switchCombinedMoonPhaseAutoAdvance"
+                                android:text="Avanzar fase con cada ciclo"
+                                android:textColor="@color/settings_text_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchCombinedMoonPhaseAutoAdvance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="false" />
+                        </RelativeLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="La luna pasa a la siguiente fase cada vez que se completa un ciclo de día y noche; la selección manual de abajo queda desactivada."
+                            android:textColor="@color/settings_text_tertiary"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="12dp" />
+
                         <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"

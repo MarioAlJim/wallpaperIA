@@ -55,7 +55,8 @@ interface ConfigProvider {
     fun getCombinedStarDensity(): Int   // 0–100
     fun getCombinedStarColorIndex(): Int // 0–5
     fun getCombinedPathDirection(): Int // 0 = L2R both, 1 = R2L both, 2 = Sun L2R Moon R2L, 3 = Sun R2L Moon L2R
-    
+    fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean // when true, the renderer advances the moon phase itself each completed day+night cycle, ignoring getCombinedMoonPhase() after the first read
+
     fun getMoonPhase(): Int             // 0–7
     fun getMoonPathDirection(): Int     // 0 = IzqaDer, 1 = DeraIzq, 2 = Estático, 3 = Aleatorio
     fun getMoonMoveSpeed(): Int         // 0–100

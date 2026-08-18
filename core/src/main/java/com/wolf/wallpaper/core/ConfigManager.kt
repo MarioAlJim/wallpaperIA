@@ -94,6 +94,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_COMBINED_STAR_DENSITY = "combined_star_density"
         const val KEY_COMBINED_STAR_COLOR_INDEX = "combined_star_color_index"
         const val KEY_COMBINED_PATH_DIRECTION = "combined_path_direction"
+        const val KEY_COMBINED_MOON_PHASE_AUTO_ADVANCE = "combined_moon_phase_auto_advance"
 
         const val DEFAULT_TIME_MODE = 0
         const val DEFAULT_MOON_PHASE = 4
@@ -112,6 +113,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_COMBINED_STAR_DENSITY = 60
         const val DEFAULT_COMBINED_STAR_COLOR_INDEX = 0
         const val DEFAULT_COMBINED_PATH_DIRECTION = 0
+        const val DEFAULT_COMBINED_MOON_PHASE_AUTO_ADVANCE = false
 
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
@@ -365,4 +367,7 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getCombinedPathDirection(): Int = combined.getCombinedPathDirection()
     fun setCombinedPathDirection(dir: Int) = combined.setCombinedPathDirection(dir)
+
+    override fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean = combined.isCombinedMoonPhaseAutoAdvanceEnabled()
+    fun setCombinedMoonPhaseAutoAdvanceEnabled(enabled: Boolean) = combined.setCombinedMoonPhaseAutoAdvanceEnabled(enabled)
 }

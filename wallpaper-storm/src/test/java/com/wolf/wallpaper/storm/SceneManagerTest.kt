@@ -99,6 +99,7 @@ class SceneManagerTest {
         override fun getCombinedStarDensity(): Int = 60
         override fun getCombinedStarColorIndex(): Int = 0
         override fun getCombinedPathDirection(): Int = 0
+        override fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean = false
         override fun isShootingStarsEnabled(): Boolean = true
         override fun getShootingStarsDensity(): Int = 50
         override fun isFirefliesEnabled(): Boolean = true

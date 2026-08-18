@@ -274,6 +274,13 @@ class SunnyRenderer(
     private var combinedDayIntensity = 1f
     private var combinedNightIntensity = 0f
 
+    // Combined-mode moon phase auto-advance (see ConfigProvider.isCombinedMoonPhaseAutoAdvanceEnabled):
+    // when enabled, the phase is no longer read from config every frame - it's tracked here and
+    // bumped by one each time a full day+night cycle completes (see completeCombinedNightCycle).
+    // -1 means "not yet initialized since the toggle was last off", so it re-syncs from the saved
+    // config value the next time it's needed instead of carrying over a stale in-memory phase.
+    private var autoAdvanceMoonPhase = -1
+
     // Tracks the last density passed to adjustClouds/adjustNightClouds so they only
     // re-run their cloud-count bookkeeping (filtering, spawning/fading) when the
     // configured density actually changes, instead of every frame regardless.
@@ -640,12 +647,14 @@ class SunnyRenderer(
                     if (moonPathX > 1.3f) {
                         isCombinedNight = false
                         sunPathX = if (sunL2R) -1.3f else 1.3f
+                        advanceCombinedMoonPhaseIfEnabled()
                     }
                 } else {
                     moonPathX -= deltaTime * moveSpeed
                     if (moonPathX < -1.3f) {
                         isCombinedNight = false
                         sunPathX = if (sunL2R) -1.3f else 1.3f
+                        advanceCombinedMoonPhaseIfEnabled()
                     }
                 }
                 
@@ -778,7 +787,7 @@ class SunnyRenderer(
 
         // Night / Combined mode: update moon and night clouds
         if (timeMode == 1 || timeMode == 2) {
-            moon.phase = if (timeMode == 2) configProvider.getCombinedMoonPhase() else configProvider.getMoonPhase()
+            moon.phase = if (timeMode == 2) effectiveCombinedMoonPhase() else configProvider.getMoonPhase()
             moon.moveSpeed = configProvider.getMoonMoveSpeed()
             moon.stationaryPosition = configProvider.getMoonStationaryPosition()
             moon.customX = configProvider.getMoonCustomX()
@@ -993,6 +1002,30 @@ class SunnyRenderer(
 
         // Rare subtle-rainbow simulation update (day skies only, see updateRainbow)
         updateRainbow(deltaTime)
+    }
+
+    /**
+     * The moon phase (0-7) to actually render/use for lighting in Combined mode: the configured
+     * [ConfigProvider.getCombinedMoonPhase] normally, or the auto-advancing in-memory phase when
+     * [ConfigProvider.isCombinedMoonPhaseAutoAdvanceEnabled] is on (see [autoAdvanceMoonPhase]).
+     * Re-syncs from the saved config value the first time it's called after the toggle turns on
+     * (or on first use), so flipping the switch never starts from a stale/arbitrary phase.
+     */
+    private fun effectiveCombinedMoonPhase(): Int {
+        if (!configProvider.isCombinedMoonPhaseAutoAdvanceEnabled()) {
+            autoAdvanceMoonPhase = -1
+            return configProvider.getCombinedMoonPhase()
+        }
+        if (autoAdvanceMoonPhase < 0) {
+            autoAdvanceMoonPhase = configProvider.getCombinedMoonPhase()
+        }
+        return autoAdvanceMoonPhase
+    }
+
+    /** Bumps the auto-advance phase by one (wrapping 0-7) once a full day+night cycle completes, if enabled. */
+    private fun advanceCombinedMoonPhaseIfEnabled() {
+        if (!configProvider.isCombinedMoonPhaseAutoAdvanceEnabled()) return
+        autoAdvanceMoonPhase = (effectiveCombinedMoonPhase() + 1) % 8
     }
 
     private fun generateRandomPath() {
@@ -1848,7 +1881,7 @@ class SunnyRenderer(
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
         
         val currentPhase = if (configProvider.getTimeMode() == 2) {
-            configProvider.getCombinedMoonPhase()
+            effectiveCombinedMoonPhase()
         } else {
             configProvider.getMoonPhase()
         }

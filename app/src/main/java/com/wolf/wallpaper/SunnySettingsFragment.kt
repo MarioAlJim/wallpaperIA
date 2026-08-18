@@ -996,13 +996,37 @@ class SunnySettingsFragment : Fragment() {
             }
         }
 
+        // When auto-advance is on, the phase is controlled entirely by the renderer (see
+        // SunnyRenderer.effectiveCombinedMoonPhase) - the manual cards become inert, dimmed
+        // pickers reflecting whatever phase was last saved, matching the pattern already used
+        // for Storm's variable-mode lock (StormSettingsFragment.updateControlsLockState).
+        fun updateLockState(autoAdvanceEnabled: Boolean) {
+            cards.forEach { card ->
+                card ?: return@forEach
+                card.isEnabled = !autoAdvanceEnabled
+                card.alpha = if (autoAdvanceEnabled) 0.4f else 1.0f
+            }
+        }
+
         selectPhase(configManager.getCombinedMoonPhase())
         scrollCardIntoView(cards.getOrNull(configManager.getCombinedMoonPhase()))
+        updateLockState(configManager.isCombinedMoonPhaseAutoAdvanceEnabled())
 
         cards.forEachIndexed { i, card ->
             card?.setOnClickListener {
+                if (configManager.isCombinedMoonPhaseAutoAdvanceEnabled()) return@setOnClickListener
                 configManager.setCombinedMoonPhase(i)
                 selectPhase(i)
+                updateSummaries(parent)
+            }
+        }
+
+        val switchAutoAdvance = parent.findViewById<SwitchMaterial>(R.id.switchCombinedMoonPhaseAutoAdvance)
+        if (switchAutoAdvance != null) {
+            switchAutoAdvance.isChecked = configManager.isCombinedMoonPhaseAutoAdvanceEnabled()
+            switchAutoAdvance.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setCombinedMoonPhaseAutoAdvanceEnabled(isChecked)
+                updateLockState(isChecked)
                 updateSummaries(parent)
             }
         }
@@ -1315,16 +1339,20 @@ class SunnySettingsFragment : Fragment() {
             }
             val sunSize = configManager.getCombinedSunSize()
             val moonSize = configManager.getCombinedMoonSize()
-            val phaseText = when (configManager.getCombinedMoonPhase()) {
-                0 -> "Luna Nueva"
-                1 -> "Creciente Cóncava"
-                2 -> "Cuarto Creciente"
-                3 -> "Creciente Convexa"
-                4 -> "Luna Llena"
-                5 -> "Menguante Convexa"
-                6 -> "Cuarto Menguante"
-                7 -> "Menguante Cóncava"
-                else -> "Luna Llena"
+            val phaseText = if (configManager.isCombinedMoonPhaseAutoAdvanceEnabled()) {
+                "Automática"
+            } else {
+                when (configManager.getCombinedMoonPhase()) {
+                    0 -> "Luna Nueva"
+                    1 -> "Creciente Cóncava"
+                    2 -> "Cuarto Creciente"
+                    3 -> "Creciente Convexa"
+                    4 -> "Luna Llena"
+                    5 -> "Menguante Convexa"
+                    6 -> "Cuarto Menguante"
+                    7 -> "Menguante Cóncava"
+                    else -> "Luna Llena"
+                }
             }
             val starDensity = configManager.getCombinedStarDensity()
             val starColorText = when (configManager.getCombinedStarColorIndex()) {

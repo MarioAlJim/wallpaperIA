@@ -146,4 +146,17 @@ class ConfigStoresTest {
         store.setCombinedPathDirection(9)
         assertEquals(3, store.getCombinedPathDirection())
     }
+
+    @Test
+    fun combined_moonPhaseAutoAdvance_defaultsToDisabled() {
+        val store = CombinedConfigStore(prefs)
+        assertFalse(store.isCombinedMoonPhaseAutoAdvanceEnabled())
+    }
+
+    @Test
+    fun combined_setMoonPhaseAutoAdvanceEnabled_roundTrips() {
+        val store = CombinedConfigStore(prefs)
+        store.setCombinedMoonPhaseAutoAdvanceEnabled(true)
+        assertTrue(store.isCombinedMoonPhaseAutoAdvanceEnabled())
+    }
 }
