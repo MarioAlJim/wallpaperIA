@@ -63,6 +63,20 @@ class ConfigStoresTest {
         assertFalse(store.isInteractiveLightningEnabled())
     }
 
+    @Test
+    fun storm_setLightningSpawnMode_roundTrips() {
+        val store = StormConfigStore(prefs)
+        store.setLightningSpawnMode(1)
+        assertEquals(1, store.getLightningSpawnMode())
+    }
+
+    @Test
+    fun storm_setLightningSpawnMode_clampsAboveRange() {
+        val store = StormConfigStore(prefs)
+        store.setLightningSpawnMode(5)
+        assertEquals(2, store.getLightningSpawnMode())
+    }
+
     // --- SunnyConfigStore ---
 
     @Test

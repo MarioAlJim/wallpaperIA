@@ -30,6 +30,7 @@ class SceneManagerTest {
         var mockLightningFlashEnabled = true
         var mockCloudFlashEnabled = true
         var mockInteractiveLightningEnabled = true
+        var mockLightningSpawnMode = 0
         var mockActiveEffect = 0
         var mockSunSize = 50
         var mockSunSpeed = 50
@@ -79,6 +80,7 @@ class SceneManagerTest {
         override fun isScreenDropletsEnabled(): Boolean = false
         override fun getScreenDropletsSize(): Int = 100
         override fun getRainSpawnMode(): Int = 0
+        override fun getLightningSpawnMode(): Int = mockLightningSpawnMode
         override fun isWindLinesEnabled(): Boolean = mockWindLinesEnabled
         override fun getWindLinesIntensity(): Int = mockWindLinesIntensity
         override fun getTimeMode(): Int = 0
@@ -866,5 +868,56 @@ class SceneManagerTest {
         assertEquals(15, rainField.get(sceneManager) as Int)
         assertEquals(10, lightningField.get(sceneManager) as Int)
         assertEquals(15, windField.get(sceneManager) as Int)
+    }
+
+    @Test
+    fun testCloudLightningSpawningAndFallback() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        // 1. Spawning Mode = 1 (Clouds only), with clouds present (Density = 50 -> 5 clouds)
+        mockConfig.mockLightningSpawnMode = 1
+        mockConfig.mockCloudDensity = 50
+        mockConfig.mockLightningFrequency = 100 // triggers lightning immediately
+        sceneManager.update(0.016f) // triggers layout adjustments and spawns clouds
+
+        // Deactivate all lightnings so we start clean
+        for (l in sceneManager.lightnings) {
+            val field = l.javaClass.getDeclaredField("isActive").apply { isAccessible = true }
+            field.set(l, false)
+        }
+
+        // Force a lightning trigger
+        val delayField = SceneManager::class.java.getDeclaredField("nextLightningDelay").apply { isAccessible = true }
+        delayField.set(sceneManager, 0.0f)
+        val timeField = SceneManager::class.java.getDeclaredField("timeSinceLastLightning").apply { isAccessible = true }
+        timeField.set(sceneManager, 10.0f)
+
+        sceneManager.update(0.1f)
+
+        // One lightning should be active, and its parentCloud should NOT be null!
+        val activeLightnings = sceneManager.lightnings.filter { it.isActive }
+        assertEquals(1, activeLightnings.size)
+        val l = activeLightnings[0]
+        assertNotNull("Lightning should be attached to a parent cloud", l.parentCloud)
+
+        // 2. Spawning Mode = 1 (Clouds only), but NO clouds present (Density = 0)
+        mockConfig.mockCloudDensity = 0
+        sceneManager.update(10.0f) // let all clouds fade out and get removed
+        
+        // Deactivate the lightning
+        val activeField = l.javaClass.getDeclaredField("isActive").apply { isAccessible = true }
+        activeField.set(l, false)
+        l.parentCloud = null
+
+        // Trigger another lightning
+        timeField.set(sceneManager, 10.0f)
+        sceneManager.update(0.1f)
+
+        // One lightning should be active, but its parentCloud should be null (fallback to screen border)!
+        val activeLightningsFallback = sceneManager.lightnings.filter { it.isActive }
+        assertEquals(1, activeLightningsFallback.size)
+        val lFallback = activeLightningsFallback[0]
+        assertNull("Lightning should fallback to screen borders and have no parent cloud", lFallback.parentCloud)
     }
 }

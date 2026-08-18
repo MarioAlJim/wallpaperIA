@@ -70,5 +70,6 @@ interface ConfigProvider {
     fun getShootingStarsDensity(): Int   // 0–100
     fun isFirefliesEnabled(): Boolean
     fun isStormVariableEnabled(): Boolean
+    fun getLightningSpawnMode(): Int
 }
 

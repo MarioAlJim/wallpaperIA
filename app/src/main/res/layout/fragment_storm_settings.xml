@@ -347,15 +347,23 @@
                                 android:textSize="14sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarWindLinesIntensity"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="4dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerWindLinesIntensity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -388,15 +396,23 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/seekBarCloudDynamicsSpeed"
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:valueFrom="0"
-                        android:valueTo="100"
-                        android:stepSize="1"
-                        android:value="100"
-                        app:labelBehavior="gone" />
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="4dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerCloudDynamicsSpeed"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"
@@ -713,15 +729,23 @@
                                 android:textSize="14sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarScreenDropletsSize"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="10"
-                            android:valueTo="200"
-                            android:stepSize="1"
-                            android:value="100"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="4dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerScreenDropletsSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
@@ -911,6 +935,43 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
 
+                    <!-- Lightning Spawn Mode -->
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Origen de los Rayos"
+                        android:textColor="@color/settings_text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="6dp" />
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerLightningSpawnMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Elige si los rayos se originan en los bordes de la pantalla, desde las nubes o una mezcla de ambos."
+                        android:textColor="@color/settings_text_tertiary"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="16dp" />
+
                     <!-- Lightning Duration -->
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -933,15 +994,23 @@
                             android:layout_alignParentEnd="true" />
                     </RelativeLayout>
 
-                    <com.google.android.material.slider.Slider
-                        android:id="@+id/seekBarLightningDuration"
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:valueFrom="0"
-                        android:valueTo="100"
-                        android:stepSize="1"
-                        android:value="50"
-                        app:labelBehavior="gone" />
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="4dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerLightningDuration"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <TextView
                         android:layout_width="match_parent"

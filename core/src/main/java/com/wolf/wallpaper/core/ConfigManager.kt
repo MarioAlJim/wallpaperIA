@@ -170,6 +170,10 @@ class ConfigManager(context: Context) : ConfigProvider {
         // Storm Variable
         const val KEY_STORM_VARIABLE_ENABLED = "storm_variable_enabled"
         const val DEFAULT_STORM_VARIABLE_ENABLED = false
+
+        // Lightning Spawn Mode
+        const val KEY_LIGHTNING_SPAWN_MODE = "lightning_spawn_mode"
+        const val DEFAULT_LIGHTNING_SPAWN_MODE = 0
     }
 
     // Storm mode
@@ -238,6 +242,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun isStormVariableEnabled(): Boolean = storm.isStormVariableEnabled()
     fun setStormVariableEnabled(enabled: Boolean) = storm.setStormVariableEnabled(enabled)
+
+    override fun getLightningSpawnMode(): Int = storm.getLightningSpawnMode()
+    fun setLightningSpawnMode(mode: Int) = storm.setLightningSpawnMode(mode)
 
     // Sunny (day) mode
     override fun getActiveEffect(): Int = sunny.getActiveEffect()

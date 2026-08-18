@@ -18,16 +18,28 @@ class Lightning(
 ) : StormObject {
 
     var customColor: FloatArray? = null
+    var parentCloud: StormCloud? = null
+    var z: Float = 1.0f
+    var relativeOffsetX: Float = 0f
+    var relativeOffsetY: Float = 0f
 
     private var age = 0f
     var isActive = false
         private set
-
     override fun update(deltaTime: Float) {
         if (!isActive) return
+
+        val parent = parentCloud
+        if (parent != null && !parent.isFadingOut) {
+            positionX = parent.positionX + relativeOffsetX
+            positionY = (parent.positionY + relativeOffsetY) - scaleY * 0.5f
+            z = parent.z
+        }
+
         age += deltaTime
         if (age >= duration) {
             isActive = false
+            parentCloud = null
         } else {
             // Calculate growth progress (takes first 20% of duration)
             val growthFraction = 0.20f
@@ -54,13 +66,16 @@ class Lightning(
     override fun render() {
         // Coordinated by StormRenderer
     }
-
     fun trigger(aspectRatio: Float, textureCount: Int, colorIndex: Int, durationPercentage: Int = 30, isInternalOnly: Boolean = false) {
         this.isInternalOnly = isInternalOnly
         isActive = true
         age = 0f
         intensity = 1.0f
         growthProgress = 0.0f
+        parentCloud = null
+        z = 1.0f
+        relativeOffsetX = 0f
+        relativeOffsetY = 0f
         
         val baseMin = if (durationPercentage <= 50) {
             0.15f + (durationPercentage / 50f) * 0.15f
@@ -131,6 +146,10 @@ class Lightning(
         age = 0f
         intensity = 1.0f
         growthProgress = 0.0f
+        parentCloud = null
+        z = 1.0f
+        relativeOffsetX = 0f
+        relativeOffsetY = 0f
         
         val baseMin = if (durationPercentage <= 50) {
             0.15f + (durationPercentage / 50f) * 0.15f
@@ -209,6 +228,66 @@ class Lightning(
             else -> startX.coerceIn(-aspectRatio + maxOffset, aspectRatio - maxOffset) // Top border
         }
         positionY = startY - scaleY * 0.5f
+    }
+
+    fun triggerFromCloud(
+        cloud: StormCloud,
+        aspectRatio: Float,
+        textureCount: Int,
+        colorIndex: Int,
+        durationPercentage: Int = 30,
+        isInternalOnly: Boolean = false
+    ) {
+        this.isInternalOnly = isInternalOnly
+        isActive = true
+        age = 0f
+        intensity = 1.0f
+        growthProgress = 0.0f
+        
+        val baseMin = if (durationPercentage <= 50) {
+            0.15f + (durationPercentage / 50f) * 0.15f
+        } else {
+            0.30f + ((durationPercentage - 50) / 50f) * 0.70f
+        }
+        val baseMax = baseMin + 0.15f
+        duration = kotlin.random.Random.nextFloat() * (baseMax - baseMin) + baseMin
+        
+        selectedTextureIndex = getNextTextureIndex(textureCount)
+        selectedColorIndex = colorIndex
+        if (colorIndex == 6) {
+            val r = kotlin.random.Random.nextFloat()
+            val g = kotlin.random.Random.nextFloat()
+            val b = kotlin.random.Random.nextFloat()
+            val max = maxOf(r, maxOf(g, b))
+            val normR = if (max > 0f) r / max else 1.0f
+            val normG = if (max > 0f) g / max else 1.0f
+            val normB = if (max > 0f) b / max else 1.0f
+            customColor = floatArrayOf(normR, normG, normB, 1.0f)
+        } else {
+            customColor = null
+        }
+        
+        parentCloud = cloud
+        z = cloud.z
+        
+        // Center with slight random offset under the cloud
+        val cloudWidth = cloud.scale * 2.4f
+        relativeOffsetX = (kotlin.random.Random.nextFloat() * 2.0f - 1.0f) * (cloudWidth * 0.25f)
+        relativeOffsetY = -cloud.scale * 0.1f // spawn slightly below the center
+        
+        positionX = cloud.positionX + relativeOffsetX
+        positionY = cloud.positionY + relativeOffsetY
+        
+        // Scale vertical length based on depth z
+        val minHeight = 2.0f * 0.225f * z
+        val maxHeight = 2.0f * 1.125f * z
+        scaleY = (kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight).coerceAtLeast(0.15f)
+        scaleX = scaleY * 0.75f // Strict 3:4 aspect ratio
+        
+        rotationAngle = kotlin.random.Random.nextFloat() * 20f - 10f // -10 to +10 degrees
+        
+        // Adjust positionY so that the lightning shoots downwards from its starting point
+        positionY = positionY - scaleY * 0.5f
     }
 
     companion object {

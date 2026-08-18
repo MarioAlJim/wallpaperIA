@@ -896,6 +896,10 @@ class StormRenderer(
         GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, lightningQuadBuffer)
         GLES30.glEnableVertexAttribArray(1)
 
+        val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
+        val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
+        val maxSwipeShift = aspectRatio * 0.3f
+
         for (lightning in activeLightnings) {
             if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
                 GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
@@ -906,8 +910,17 @@ class StormRenderer(
                 val modelMatrix = scratchModelMatrix
                 Matrix.setIdentityM(modelMatrix, 0)
 
+                // Gyroscope depth-based parallax shift
+                val depthFactor = 0.2f + 0.8f * ((lightning.z - 0.3f) / 0.7f).coerceIn(0f, 1f)
+                val lightningGyroX = gyroX * depthFactor
+                val lightningGyroY = gyroY * depthFactor
+                val lightningSwipeX = -swipeOffset * maxSwipeShift * depthFactor
+
+                val posX = lightning.positionX + lightningGyroX + lightningSwipeX
+                val posY = lightning.positionY + lightningGyroY
+
                 // Apply world translation
-                Matrix.translateM(modelMatrix, 0, lightning.positionX, lightning.positionY, 0f)
+                Matrix.translateM(modelMatrix, 0, posX, posY, 0f)
 
                 if (lightning.rotationAngle != 0f) {
                     val halfHeight = lightning.scaleY * 0.5f

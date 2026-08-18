@@ -243,19 +243,39 @@ class SceneManager(
                 val inactiveLightning = lightnings.firstOrNull { !it.isActive }
                 if (inactiveLightning != null) {
                     val colorToUse = configProvider.getLightningColorIndex()
-                    inactiveLightning.trigger(
-                        aspectRatio,
-                        getLightningTextureCount(),
-                        colorToUse,
-                        configProvider.getLightningDuration(),
-                        isInternalOnly = false
-                    )
+                    val spawnMode = configProvider.getLightningSpawnMode() // 0: Bordes, 1: Nubes, 2: Ambos
+                    
+                    val useCloud = when (spawnMode) {
+                        1 -> true
+                        2 -> Random.nextBoolean()
+                        else -> false
+                    }
+                    
+                    val activeClouds = clouds.filter { !it.isFadingOut }
+                    if (useCloud && activeClouds.isNotEmpty()) {
+                        val selectedCloud = activeClouds.random()
+                        inactiveLightning.triggerFromCloud(
+                            selectedCloud,
+                            aspectRatio,
+                            getLightningTextureCount(),
+                            colorToUse,
+                            configProvider.getLightningDuration(),
+                            isInternalOnly = false
+                        )
+                    } else {
+                        inactiveLightning.trigger(
+                            aspectRatio,
+                            getLightningTextureCount(),
+                            colorToUse,
+                            configProvider.getLightningDuration(),
+                            isInternalOnly = false
+                        )
+                    }
                 }
                 timeSinceLastLightning = 0f
                 setupNextLightningDelay()
             }
         }
-
     }
 
     fun getClouds(): List<StormCloud> = clouds

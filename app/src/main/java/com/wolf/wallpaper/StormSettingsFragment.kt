@@ -27,7 +27,6 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.slider.Slider
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.wolf.wallpaper.core.ConfigManager
 import java.io.File
@@ -94,8 +93,15 @@ class StormSettingsFragment : Fragment() {
 
 
 
-        setupSlider(view, R.id.seekBarCloudDynamicsSpeed, R.id.textViewCloudDynamicsSpeedValue, configManager.getCloudDynamicsSpeed()) { value ->
-            configManager.setCloudDynamicsSpeed(value)
+        val cloudDynamicsOptions = arrayOf("Estático", "Lento", "Normal", "Rápido", "Extremo")
+        val cloudDynamicsValues = intArrayOf(0, 25, 50, 75, 100)
+        val initialCloudDynamicsIndex = SettingsCardSelectorHelper.closestValueIndex(cloudDynamicsValues, configManager.getCloudDynamicsSpeed())
+        val textViewCloudDynamicsSpeedValue = view.findViewById<TextView>(R.id.textViewCloudDynamicsSpeedValue)
+        textViewCloudDynamicsSpeedValue?.text = cloudDynamicsOptions.getOrNull(initialCloudDynamicsIndex) ?: "Extremo"
+        setupDropdown(view, R.id.spinnerCloudDynamicsSpeed, cloudDynamicsOptions, initialCloudDynamicsIndex) { position ->
+            configManager.setCloudDynamicsSpeed(cloudDynamicsValues[position])
+            textViewCloudDynamicsSpeedValue?.text = cloudDynamicsOptions[position]
+            updateSummaries(view)
         }
 
         val switchWindLines = view.findViewById<SwitchMaterial>(R.id.switchWindLines)
@@ -111,8 +117,15 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
-        setupSlider(view, R.id.seekBarWindLinesIntensity, R.id.textViewWindLinesIntensityValue, configManager.getWindLinesIntensity()) { value ->
-            configManager.setWindLinesIntensity(value)
+        val windLinesOptions = arrayOf("Sin líneas", "Sutil", "Normal", "Llamativo", "Muy denso")
+        val windLinesValues = intArrayOf(0, 25, 50, 75, 100)
+        val initialWindLinesIndex = SettingsCardSelectorHelper.closestValueIndex(windLinesValues, configManager.getWindLinesIntensity())
+        val textViewWindLinesIntensityValue = view.findViewById<TextView>(R.id.textViewWindLinesIntensityValue)
+        textViewWindLinesIntensityValue?.text = windLinesOptions.getOrNull(initialWindLinesIndex) ?: "Normal"
+        setupDropdown(view, R.id.spinnerWindLinesIntensity, windLinesOptions, initialWindLinesIndex) { position ->
+            configManager.setWindLinesIntensity(windLinesValues[position])
+            textViewWindLinesIntensityValue?.text = windLinesOptions[position]
+            updateSummaries(view)
         }
 
         // 3. Setup Lluvia Controls
@@ -130,8 +143,15 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
-        setupSlider(view, R.id.seekBarScreenDropletsSize, R.id.textViewScreenDropletsSizeValue, configManager.getScreenDropletsSize()) { value ->
-            configManager.setScreenDropletsSize(value)
+        val dropletsSizeOptions = arrayOf("Diminutas", "Finas", "Medianas", "Grandes", "Gigantes")
+        val dropletsSizeValues = intArrayOf(10, 55, 100, 150, 200)
+        val initialDropletsSizeIndex = SettingsCardSelectorHelper.closestValueIndex(dropletsSizeValues, configManager.getScreenDropletsSize())
+        val textViewScreenDropletsSizeValue = view.findViewById<TextView>(R.id.textViewScreenDropletsSizeValue)
+        textViewScreenDropletsSizeValue?.text = dropletsSizeOptions.getOrNull(initialDropletsSizeIndex) ?: "Medianas"
+        setupDropdown(view, R.id.spinnerScreenDropletsSize, dropletsSizeOptions, initialDropletsSizeIndex) { position ->
+            configManager.setScreenDropletsSize(dropletsSizeValues[position])
+            textViewScreenDropletsSizeValue?.text = dropletsSizeOptions[position]
+            updateSummaries(view)
         }
 
         // 4. Setup Rayos Controls
@@ -149,8 +169,15 @@ class StormSettingsFragment : Fragment() {
             updateSummaries(view)
         }
 
-        setupSlider(view, R.id.seekBarLightningDuration, R.id.textViewLightningDurationValue, configManager.getLightningDuration()) { value ->
-            configManager.setLightningDuration(value)
+        val lightningDurationOptions = arrayOf("Instantáneo", "Muy corto", "Normal", "Prolongado", "Persistente")
+        val lightningDurationValues = intArrayOf(0, 25, 50, 75, 100)
+        val initialLightningDurationIndex = SettingsCardSelectorHelper.closestValueIndex(lightningDurationValues, configManager.getLightningDuration())
+        val textViewLightningDurationValue = view.findViewById<TextView>(R.id.textViewLightningDurationValue)
+        textViewLightningDurationValue?.text = lightningDurationOptions.getOrNull(initialLightningDurationIndex) ?: "Normal"
+        setupDropdown(view, R.id.spinnerLightningDuration, lightningDurationOptions, initialLightningDurationIndex) { position ->
+            configManager.setLightningDuration(lightningDurationValues[position])
+            textViewLightningDurationValue?.text = lightningDurationOptions[position]
+            updateSummaries(view)
         }
 
         // 4b. Setup Destellos en Nubes Controls
@@ -229,72 +256,6 @@ class StormSettingsFragment : Fragment() {
         updateSummaries(view)
     }
 
-    private fun setupSlider(parent: View, viewId: Int, textViewId: Int, initialValue: Int, onProgressChanged: (Int) -> Unit) {
-        val slider = parent.findViewById<Slider>(viewId)
-        val textView = parent.findViewById<TextView>(textViewId)
-        if (slider != null) {
-            slider.value = initialValue.toFloat()
-            slider.addOnChangeListener { _, value, fromUser ->
-                if (fromUser) {
-                    onProgressChanged(value.toInt())
-                }
-                if (textView != null) {
-                    updateTextView(viewId, textView, value.toInt())
-                    updateSummaries(parent)
-                }
-            }
-            if (textView != null) {
-                updateTextView(viewId, textView, initialValue)
-            }
-        }
-    }
-
-    private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
-        when (sliderId) {
-
-
-            R.id.seekBarCloudDynamicsSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Lento"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Rápido"
-                    else -> "Extremo"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarWindLinesIntensity -> {
-                val desc = when {
-                    value <= 20 -> "Sutil"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Llamativo"
-                    else -> "Muy denso"
-                }
-                textView.text = "$value% • $desc"
-            }
-
-            R.id.seekBarScreenDropletsSize -> {
-                val desc = when {
-                    value <= 50 -> "Finas"
-                    value <= 100 -> "Medianas"
-                    value <= 150 -> "Grandes"
-                    else -> "Gigantes"
-                }
-                textView.text = "$value% • $desc"
-            }
-
-            R.id.seekBarLightningDuration -> {
-                val desc = when {
-                    value <= 20 -> "Instantáneo"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Prolongado"
-                    else -> "Destello persistente"
-                }
-                textView.text = "$value% • $desc"
-            }
-
-        }
-    }
-
     private fun getClosestCloudOptionIndex(density: Int): Int {
         val targets = intArrayOf(0, 1, 2, 4, 6, 8, 10)
         val actualClouds = if (density > 10) {
@@ -345,198 +306,98 @@ class StormSettingsFragment : Fragment() {
         }
     }
 
-    private fun populateCardSelector(parent: View, container: LinearLayout, options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
-        container.removeAllViews()
-        val cardViews = ArrayList<MaterialCardView>()
+    private fun rainColorHex(colorIndex: Int): String = when (colorIndex) {
+        0 -> "#1E90FF"
+        1 -> "#FFFFFF"
+        2 -> "#FF3030"
+        3 -> "#00FF7F"
+        4 -> "#FFD700"
+        5 -> "#8A2BE2"
+        else -> "#1E90FF"
+    }
 
-        val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
-        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_primary)
-        val activeBgColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active)
-        val inactiveBgColor = ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt)
-        val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-        val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
+    private fun lightningColorHex(colorIndex: Int): String = when (colorIndex) {
+        0 -> "#FFFFFF"
+        1 -> "#6699FF"
+        2 -> "#FFE533"
+        3 -> "#FF3333"
+        4 -> "#33FF33"
+        5 -> "#CC4DFF"
+        6 -> "#FFE533"
+        else -> "#FFFFFF"
+    }
 
-        for (i in options.indices) {
-            val optionText = options[i]
-            val card = MaterialCardView(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(92.dpToPx(), 92.dpToPx()).apply {
-                    setMargins(0, 0, 10.dpToPx(), 0)
-                }
-                radius = 12.dpToPx().toFloat()
-                strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                strokeColor = strokeInactiveColor
-                cardElevation = 0f
-                setCardBackgroundColor(inactiveBgColor)
-                isClickable = true
-                isFocusable = true
-            }
-
-            val innerLayout = LinearLayout(requireContext()).apply {
-                layoutParams = android.widget.FrameLayout.LayoutParams(
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                    android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-                )
-                orientation = LinearLayout.VERTICAL
-                gravity = android.view.Gravity.CENTER
-                setPadding(6.dpToPx(), 6.dpToPx(), 6.dpToPx(), 6.dpToPx())
-            }
-
-            val previewFrame = android.widget.FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(38.dpToPx(), 50.dpToPx()).apply {
-                    setMargins(0, 0, 0, 4.dpToPx())
-                }
-                background = GradientDrawable().apply {
-                    shape = GradientDrawable.RECTANGLE
-                    cornerRadius = 6 * resources.displayMetrics.density
-                    setColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt2))
-                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
-                }
-            }
-
-            val activeRainColorHex = when (configManager.getRainColorIndex()) {
-                0 -> "#1E90FF"
-                1 -> "#FFFFFF"
-                2 -> "#FF3030"
-                3 -> "#00FF7F"
-                4 -> "#FFD700"
-                5 -> "#8A2BE2"
-                else -> "#1E90FF"
-            }
-            val activeRainColor = Color.parseColor(activeRainColorHex)
-
-            val activeLightningColorHex = when (configManager.getLightningColorIndex()) {
-                0 -> "#FFFFFF"
-                1 -> "#6699FF"
-                2 -> "#FFE533"
-                3 -> "#FF3333"
-                4 -> "#33FF33"
-                5 -> "#CC4DFF"
-                6 -> "#FFE533"
-                else -> "#FFFFFF"
-            }
-            val activeLightningColor = Color.parseColor(activeLightningColorHex)
-            val activeWindDir = configManager.getWindDirection()
-
-            if (container.id != R.id.spinnerBackgroundMode) {
-                val stormPreview = StormCardPreviewView(
-                    requireContext(),
-                    container.id,
-                    i,
-                    activeRainColor,
-                    activeWindDir,
-                    activeLightningColor
-                ).apply {
-                    layoutParams = android.widget.FrameLayout.LayoutParams(
-                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-                    )
-                }
-                previewFrame.addView(stormPreview)
-            } else {
-                val previewImage = ImageView(requireContext()).apply {
-                    layoutParams = android.widget.FrameLayout.LayoutParams(
-                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT,
-                        android.widget.FrameLayout.LayoutParams.MATCH_PARENT
-                    )
-                    scaleType = ImageView.ScaleType.CENTER_CROP
-                    clipToOutline = true
-                }
-                
-                val bgPath = when (i) {
-                    0 -> "black"
-                    1 -> "background/background_01.png"
-                    2 -> "background/background_02.png"
-                    3 -> "background/background_03.png"
-                    4 -> "background/background_04.png"
-                    5 -> "background/background_05.png"
-                    6 -> "background/background_06.png"
-                    7 -> "background/background_07.png"
-                    8 -> "custom"
-                    else -> "black"
-                }
-
-                if (bgPath == "black") {
-                    previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt3))
-                } else if (bgPath == "custom") {
-                    val customBgFile = File(requireContext().filesDir, "custom_background.png")
-                    if (customBgFile.exists()) {
-                        val path = customBgFile.absolutePath
-                        var bitmap = backgroundBitmapCache[path]
-                        if (bitmap == null) {
-                            bitmap = loadThumbnailFromAsset(requireContext(), path, 38.dpToPx(), 50.dpToPx())
-                            if (bitmap != null) {
-                                backgroundBitmapCache[path] = bitmap
-                            }
-                        }
-                        previewImage.setImageBitmap(bitmap)
-                    } else {
-                        previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                    }
-                } else {
-                    var bitmap = backgroundBitmapCache[bgPath]
-                    if (bitmap == null) {
-                        bitmap = loadThumbnailFromAsset(requireContext(), bgPath, 38.dpToPx(), 50.dpToPx())
-                        if (bitmap != null) {
-                            backgroundBitmapCache[bgPath] = bitmap
-                        }
-                    }
-                    previewImage.setImageBitmap(bitmap)
-                }
-                previewFrame.addView(previewImage)
-            }
-
-            val titleText = TextView(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                text = optionText
-                setTextColor(if (i == initialIndex) activeColor else inactiveColor)
-                textSize = 10f
-                gravity = android.view.Gravity.CENTER
-                setTypeface(null, android.graphics.Typeface.BOLD)
-            }
-
-            innerLayout.addView(previewFrame)
-            innerLayout.addView(titleText)
-            card.addView(innerLayout)
-
-            if (i == initialIndex) {
-                card.strokeColor = strokeActiveColor
-                card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                card.setCardBackgroundColor(activeBgColor)
-            }
-
-            card.setOnClickListener {
-                onSelected(i)
-                updateSummaries(parent)
-                
-                for (j in cardViews.indices) {
-                    val c = cardViews[j]
-                    val childLayout = c.getChildAt(0) as LinearLayout
-                    val titleTv = childLayout.getChildAt(1) as TextView
-                    if (j == i) {
-                        c.strokeColor = strokeActiveColor
-                        c.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        c.setCardBackgroundColor(activeBgColor)
-                        titleTv.setTextColor(activeColor)
-                    } else {
-                        c.strokeColor = strokeInactiveColor
-                        c.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        c.setCardBackgroundColor(inactiveBgColor)
-                        titleTv.setTextColor(inactiveColor)
-                    }
-                }
-            }
-
-            container.addView(card)
-            cardViews.add(card)
+    /** Builds the `spinnerBackgroundMode` preview (thumbnail ImageView instead of a Canvas-drawn StormCardPreviewView). */
+    private fun buildBackgroundPreviewImage(optionIndex: Int): ImageView {
+        val previewImage = ImageView(requireContext()).apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            clipToOutline = true
         }
 
-        cardViews.getOrNull(initialIndex)?.let { selectedCard ->
-            (container.parent as? HorizontalScrollView)?.let { scrollView ->
-                SettingsAccordionHelper.scrollToSelected(scrollView, selectedCard)
+        val bgPath = when (optionIndex) {
+            0 -> "black"
+            1 -> "background/background_01.png"
+            2 -> "background/background_02.png"
+            3 -> "background/background_03.png"
+            4 -> "background/background_04.png"
+            5 -> "background/background_05.png"
+            6 -> "background/background_06.png"
+            7 -> "background/background_07.png"
+            8 -> "custom"
+            else -> "black"
+        }
+
+        if (bgPath == "black") {
+            previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt3))
+        } else if (bgPath == "custom") {
+            val customBgFile = File(requireContext().filesDir, "custom_background.png")
+            if (customBgFile.exists()) {
+                val path = customBgFile.absolutePath
+                var bitmap = backgroundBitmapCache[path]
+                if (bitmap == null) {
+                    bitmap = loadThumbnailFromAsset(requireContext(), path, 38.dpToPx(), 50.dpToPx())
+                    if (bitmap != null) {
+                        backgroundBitmapCache[path] = bitmap
+                    }
+                }
+                previewImage.setImageBitmap(bitmap)
+            } else {
+                previewImage.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
             }
+        } else {
+            var bitmap = backgroundBitmapCache[bgPath]
+            if (bitmap == null) {
+                bitmap = loadThumbnailFromAsset(requireContext(), bgPath, 38.dpToPx(), 50.dpToPx())
+                if (bitmap != null) {
+                    backgroundBitmapCache[bgPath] = bitmap
+                }
+            }
+            previewImage.setImageBitmap(bitmap)
+        }
+        return previewImage
+    }
+
+    private fun populateCardSelector(parent: View, container: LinearLayout, options: Array<String>, initialIndex: Int, onSelected: (Int) -> Unit) {
+        val containerId = container.id
+        val activeRainColor = Color.parseColor(rainColorHex(configManager.getRainColorIndex()))
+        val activeLightningColor = Color.parseColor(lightningColorHex(configManager.getLightningColorIndex()))
+        val activeWindDir = configManager.getWindDirection()
+
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialIndex,
+            previewFactory = { index ->
+                if (containerId != R.id.spinnerBackgroundMode) {
+                    StormCardPreviewView(requireContext(), containerId, index, activeRainColor, activeWindDir, activeLightningColor)
+                } else {
+                    buildBackgroundPreviewImage(index)
+                }
+            }
+        ) { position ->
+            onSelected(position)
+            updateSummaries(parent)
         }
     }
 
@@ -627,6 +488,11 @@ class StormSettingsFragment : Fragment() {
         setupDropdown(view, R.id.spinnerLightningColor, lightningColors, configManager.getLightningColorIndex()) { position ->
             configManager.setLightningColorIndex(position)
             refreshStormCardPreviews(view)
+        }
+
+        val lightningSpawnModes = arrayOf("Bordes Pantalla", "Desde las Nubes", "Ambos")
+        setupDropdown(view, R.id.spinnerLightningSpawnMode, lightningSpawnModes, configManager.getLightningSpawnMode()) { position ->
+            configManager.setLightningSpawnMode(position)
         }
 
         setupDropdown(view, R.id.spinnerCloudFlashColor, lightningColors, configManager.getCloudFlashColorIndex()) { position ->
@@ -946,7 +812,7 @@ class StormSettingsFragment : Fragment() {
             R.id.spinnerCloudDensity,
             R.id.spinnerWindDirection,
             R.id.spinnerWindIntensity,
-            R.id.seekBarCloudDynamicsSpeed,
+            R.id.spinnerCloudDynamicsSpeed,
             R.id.spinnerRainIntensity,
             R.id.spinnerRainSpeed,
             R.id.spinnerLightningFrequency,
@@ -1216,6 +1082,127 @@ class StormSettingsFragment : Fragment() {
                     canvas.drawCircle(w/2f, h/2f, glowRadius, paint)
                     paint.shader = null
                     drawCloudShapeCentered(canvas, w, h)
+                }
+
+                R.id.spinnerLightningSpawnMode -> {
+                    when (optionIndex) {
+                        0 -> {
+                            paint.color = activeLightningColor
+                            paint.style = Paint.Style.STROKE
+                            paint.strokeWidth = 2.dpToPx().toFloat()
+                            paint.strokeJoin = Paint.Join.ROUND
+                            paint.strokeCap = Paint.Cap.ROUND
+                            val lPath = Path().apply {
+                                moveTo(w * 0.5f, 4.dpToPx().toFloat())
+                                lineTo(w * 0.45f, h * 0.45f)
+                                lineTo(w * 0.55f, h * 0.45f)
+                                lineTo(w * 0.48f, h * 0.85f)
+                            }
+                            canvas.drawPath(lPath, paint)
+                        }
+                        1 -> {
+                            drawCloudShape(canvas, w, h)
+                            paint.color = activeLightningColor
+                            paint.style = Paint.Style.STROKE
+                            paint.strokeWidth = 1.5f.dpToPx().toFloat()
+                            paint.strokeJoin = Paint.Join.ROUND
+                            paint.strokeCap = Paint.Cap.ROUND
+                            val lPath = Path().apply {
+                                moveTo(w * 0.5f, 12.dpToPx().toFloat())
+                                lineTo(w * 0.45f, h * 0.5f)
+                                lineTo(w * 0.55f, h * 0.5f)
+                                lineTo(w * 0.48f, h * 0.85f)
+                            }
+                            canvas.drawPath(lPath, paint)
+                        }
+                        2 -> {
+                            drawCloudShape(canvas, w, h)
+                            paint.color = activeLightningColor
+                            paint.style = Paint.Style.STROKE
+                            paint.strokeWidth = 1.5f.dpToPx().toFloat()
+                            paint.strokeJoin = Paint.Join.ROUND
+                            paint.strokeCap = Paint.Cap.ROUND
+                            val path1 = Path().apply {
+                                moveTo(w * 0.5f, 12.dpToPx().toFloat())
+                                lineTo(w * 0.46f, h * 0.45f)
+                                lineTo(w * 0.54f, h * 0.45f)
+                                lineTo(w * 0.48f, h * 0.8f)
+                            }
+                            canvas.drawPath(path1, paint)
+                            val path2 = Path().apply {
+                                moveTo(w * 0.8f, 4.dpToPx().toFloat())
+                                lineTo(w * 0.74f, h * 0.35f)
+                                lineTo(w * 0.82f, h * 0.35f)
+                                lineTo(w * 0.76f, h * 0.7f)
+                            }
+                            canvas.drawPath(path2, paint)
+                        }
+                    }
+                }
+
+                R.id.spinnerWindLinesIntensity -> {
+                    val lineColor = Color.parseColor("#8A2BE2")
+                    paint.style = Paint.Style.STROKE
+                    paint.strokeCap = Paint.Cap.ROUND
+                    if (optionIndex == 0) {
+                        paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+                        paint.strokeWidth = 1.dpToPx().toFloat()
+                        canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
+                    } else {
+                        val alphas = floatArrayOf(0f, 0.35f, 0.55f, 0.8f, 1.0f)
+                        val widths = floatArrayOf(1f, 1f, 1f, 1.5f, 2f)
+                        paint.color = adjustAlpha(lineColor, alphas[optionIndex])
+                        paint.strokeWidth = widths[optionIndex].dpToPx()
+                        val ys = when (optionIndex) {
+                            1 -> floatArrayOf(0.5f)
+                            2 -> floatArrayOf(0.35f, 0.65f)
+                            3 -> floatArrayOf(0.25f, 0.5f, 0.75f)
+                            else -> floatArrayOf(0.15f, 0.35f, 0.55f, 0.75f, 0.9f)
+                        }
+                        for (yFrac in ys) {
+                            canvas.drawLine(w * 0.85f, h * yFrac, w * 0.15f, h * yFrac, paint)
+                        }
+                    }
+                }
+
+                R.id.spinnerCloudDynamicsSpeed -> {
+                    drawCloudShapeCentered(canvas, w, h)
+                    val ringCount = intArrayOf(0, 1, 2, 3, 4).getOrElse(optionIndex) { 0 }
+                    if (ringCount > 0) {
+                        paint.style = Paint.Style.STROKE
+                        paint.strokeWidth = 1.dpToPx().toFloat()
+                        paint.color = adjustAlpha(ContextCompat.getColor(context, R.color.settings_text_primary), 0.4f)
+                        val baseRadius = 11.dpToPx()
+                        val gap = 3.5f.dpToPx()
+                        for (i in 1..ringCount) {
+                            canvas.drawCircle(w * 0.5f, h * 0.5f, baseRadius + gap * i, paint)
+                        }
+                    }
+                }
+
+                R.id.spinnerScreenDropletsSize -> {
+                    val radii = floatArrayOf(2f, 3.5f, 5f, 7f, 9f)
+                    val r = radii.getOrElse(optionIndex) { 5f }.dpToPx()
+                    paint.style = Paint.Style.FILL
+                    paint.color = adjustAlpha(activeRainColor, 0.55f)
+                    canvas.drawCircle(w * 0.5f, h * 0.55f, r, paint)
+                    paint.color = adjustAlpha(Color.WHITE, 0.8f)
+                    canvas.drawCircle(w * 0.5f - r * 0.3f, h * 0.55f - r * 0.3f, (r * 0.25f).coerceAtLeast(1.dpToPx().toFloat()), paint)
+                }
+
+                R.id.spinnerLightningDuration -> {
+                    val haloAlphas = floatArrayOf(0f, 0.15f, 0.30f, 0.45f, 0.60f)
+                    val haloAlpha = haloAlphas.getOrElse(optionIndex) { 0f }
+                    if (haloAlpha > 0f) {
+                        val glowColor2 = adjustAlpha(activeLightningColor, haloAlpha)
+                        val glowColors = intArrayOf(glowColor2, adjustAlpha(activeLightningColor, 0f))
+                        val glowRadius2 = w * 0.45f
+                        paint.shader = RadialGradient(w / 2f, h / 2f, glowRadius2, glowColors, null, Shader.TileMode.CLAMP)
+                        paint.style = Paint.Style.FILL
+                        canvas.drawCircle(w / 2f, h / 2f, glowRadius2, paint)
+                        paint.shader = null
+                    }
+                    drawStylizedLightning(canvas, w, h, activeLightningColor, isRainbow = false)
                 }
             }
         }
