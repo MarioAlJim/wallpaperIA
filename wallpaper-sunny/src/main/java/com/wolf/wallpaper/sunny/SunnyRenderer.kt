@@ -963,7 +963,10 @@ class SunnyRenderer(
                 }
             } else {
                 val density = configProvider.getShootingStarsDensity()
-                val spawnRate = 0.2f + (density / 100f) * 1.4f
+                // Whole curve scaled by 1.5x (was 0.2..1.6/sec) so the max density ("Lluvia de
+                // estrellas", density=100) spawns 50% more shooting stars/sec, in both Night and
+                // Combined mode (this is the single shared spawn point for both).
+                val spawnRate = 0.3f + (density / 100f) * 2.1f
                 if (kotlin.random.Random.nextFloat() < spawnRate * deltaTime) {
                     val rand = kotlin.random.Random
                     val startX = rand.nextFloat() * (aspectRatio * 1.6f) - (aspectRatio * 0.8f)
