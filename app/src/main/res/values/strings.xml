@@ -1,17 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="act_auto">Auto</string>
+    <string name="act_claro">Claro</string>
+    <string name="act_da_y_noche">Día y Noche</string>
+    <string name="act_efecto_de_clima">Efecto de Clima</string>
+    <string name="act_establecer_fondo_de_pantalla">Establecer Fondo de Pantalla</string>
+    <string name="act_oscuro">Oscuro</string>
+    <string name="act_tormenta">Tormenta</string>
     <string name="app_name">wallpaper</string>
+    <string name="cloud_density_label">Densidad de Nubes</string>
+    <string name="color_ajuste_manual_rgb">Ajuste Manual (RGB)</string>
+    <string name="color_b_255">B: 255</string>
+    <string name="color_cdigo_hexadecimal">Código Hexadecimal</string>
+    <string name="color_g_255">G: 255</string>
+    <string name="color_paleta_rpida">Paleta Rápida</string>
+    <string name="color_r_255">R: 255</string>
+    <string name="color_seleccionar_color">Seleccionar Color</string>
+    <string name="lightning_color_label">Color de los Rayos</string>
+    <string name="lightning_duration_label">Duración de los Rayos</string>
+    <string name="lightning_frequency_label">Frecuencia de Rayos</string>
+    <string name="rain_color_label">Color de la Lluvia</string>
+    <string name="rain_intensity_label">Densidad de Lluvia</string>
+    <string name="rain_speed_label">Velocidad de la Lluvia</string>
     <string name="settings_title">Configuración de Fondo Animado</string>
     <string name="settings_title_storm">Configuración de Tormenta</string>
     <string name="settings_title_sunny">Configuración de Día y Noche</string>
-    <string name="cloud_density_label">Densidad de Nubes</string>
-    <string name="rain_intensity_label">Densidad de Lluvia</string>
-    <string name="wind_direction_label">Dirección de la Lluvia</string>
-    <string name="wind_intensity_label">Fuerza del Viento</string>
-    <string name="rain_color_label">Color de la Lluvia</string>
-    <string name="rain_speed_label">Velocidad de la Lluvia</string>
-    <string name="lightning_frequency_label">Frecuencia de Rayos</string>
-    <string name="lightning_color_label">Color de los Rayos</string>
-    <string name="lightning_duration_label">Duración de los Rayos</string>
+    <string name="storm_5_nubes">5 nubes</string>
+    <string name="storm_activa_o_desactiva_los_destellos_y">Activa o desactiva los destellos y la iluminación interna de las nubes.</string>
+    <string name="storm_activa_o_desactiva_los_destellos_y_1">Activa o desactiva los destellos y la iluminación en pantalla completa producidos por los rayos.</string>
+    <string name="storm_ajusta_el_dimetro_del_efecto_lente">Ajusta el diámetro del efecto lente de las gotas sobre el cristal.</string>
+    <string name="storm_ajusta_el_tiempo_de_permanencia_de">Ajusta el tiempo de permanencia de la animación completa de cada rayo.</string>
+    <string name="storm_ajusta_la_cantidad_y_frecuencia_de">Ajusta la cantidad y frecuencia de las líneas de viento.</string>
+    <string name="storm_ajusta_la_velocidad_del_efecto_de_r">Ajusta la velocidad del efecto de respiración de tamaño y transiciones de opacidad en las nubes (0% para desactivar).</string>
+    <string name="storm_ajusta_qu_tan_rpido_caen_las_gotas">Ajusta qué tan rápido caen las gotas en su trayectoria descendente.</string>
+    <string name="storm_alterna_ciclos_de_calma_y_rfagas_de">Alterna ciclos de calma y ráfagas de viento y rayos</string>
+    <string name="storm_cantidad_de_nubes">Cantidad de Nubes</string>
+    <string name="storm_cargando">Cargando...</string>
+    <string name="storm_color_de_destellos_en_nubes">Color de Destellos en Nubes</string>
+    <string name="storm_configura_el_tono_cromtico_de_los_d">Configura el tono cromático de los destellos y ramificaciones de los rayos.</string>
+    <string name="storm_configura_el_tono_cromtico_de_los_d_1">Configura el tono cromático de los destellos internos en las nubes.</string>
+    <string name="storm_controla_la_cantidad_de_gotas_simul">Controla la cantidad de gotas simultáneas mostradas en la pantalla.</string>
+    <string name="storm_controla_la_cantidad_de_nubes_visib">Controla la cantidad de nubes visibles en simultáneo en pantalla (0 a 10 nubes).</string>
+    <string name="storm_define_la_frecuencia_con_la_que_apa">Define la frecuencia con la que aparecen los relámpagos y rayos en la pantalla.</string>
+    <string name="storm_define_la_frecuencia_con_la_que_ocu">Define la frecuencia con la que ocurren los relámpagos internos dentro de las nubes (independiente de los rayos externos).</string>
+    <string name="storm_destellos_de_los_rayos">Destellos de los Rayos</string>
+    <string name="storm_destellos_en_las_nubes">Destellos en las Nubes</string>
+    <string name="storm_direccin_del_viento_lluvianubes">Dirección del Viento (Lluvia/Nubes)</string>
+    <string name="storm_elige_la_tonalidad_cromtica_de_las">Elige la tonalidad cromática de las gotas de lluvia.</string>
+    <string name="storm_elige_si_las_gotas_de_lluvia_se_ori">Elige si las gotas de lluvia se originan en el borde superior de la pantalla, debajo de las nubes o una mezcla de ambas.</string>
+    <string name="storm_elige_si_los_rayos_se_originan_en_l">Elige si los rayos se originan en los bordes de la pantalla, desde las nubes o una mezcla de ambos.</string>
+    <string name="storm_elige_si_se_muestra_la_imagen_de_fo">Elige si se muestra la imagen de fondo de la tormenta (background.jpg) o se mantiene el color oscuro sólido original.</string>
+    <string name="storm_establece_la_direccin_en_la_que_sop">Establece la dirección en la que sopla el viento, afectando el ángulo de caída de la lluvia y nubes.</string>
+    <string name="storm_fondo">Fondo</string>
+    <string name="storm_frecuencia_de_destellos_en_nubes">Frecuencia de Destellos en Nubes</string>
+    <string name="storm_gotas_en_pantalla">Gotas en Pantalla</string>
+    <string name="storm_habilita_el_efecto_de_gotas_de_agua">Habilita el efecto de gotas de agua chocando y deslizándose en la pantalla.</string>
+    <string name="storm_intensidad_de_lneas_de_viento">Intensidad de Líneas de Viento</string>
+    <string name="storm_lluvia">Lluvia</string>
+    <string name="storm_lneas_de_viento">Líneas de Viento</string>
+    <string name="storm_modifica_la_velocidad_y_el_ngulo_de">Modifica la velocidad y el ángulo de inclinación máximo del viento y la lluvia.</string>
+    <string name="storm_modo_de_fondo">Modo de Fondo</string>
+    <string name="storm_muestra_lneas_horizontales_ocasiona">Muestra líneas horizontales ocasionales que van en dirección del viento.</string>
+    <string name="storm_no_se_ha_seleccionado_ninguna_image">No se ha seleccionado ninguna imagen</string>
+    <string name="storm_nubes_y_viento">Nubes y Viento</string>
+    <string name="storm_origen_de_la_lluvia">Origen de la Lluvia</string>
+    <string name="storm_origen_de_los_rayos">Origen de los Rayos</string>
+    <string name="storm_permite_invocar_rayos_al_tocar_la_p">Permite invocar rayos al tocar la pantalla. El rayo caerá cerca del punto tocado.</string>
+    <string name="storm_rayos_interactivos_tctil">Rayos Interactivos (Táctil)</string>
+    <string name="storm_rayos_y_tormenta">Rayos y Tormenta</string>
+    <string name="storm_respiracin_y_opacidad">Respiración y Opacidad</string>
+    <string name="storm_seleccionar_imagen_de_la_galera">Seleccionar Imagen de la Galería</string>
+    <string name="storm_tamao_de_las_gotas_en_pantalla">Tamaño de las Gotas en Pantalla</string>
+    <string name="storm_tormenta_variable_ciclos">Tormenta Variable (Ciclos)</string>
+    <string name="summary_active">Activo</string>
+    <string name="summary_active_cycle">Ciclo Activo</string>
+    <string name="summary_active_with_val">Activo (%1$s)</string>
+    <string name="summary_background_format">"Fondo: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt;"</string>
+    <string name="summary_cloud_clear">Despejado</string>
+    <string name="summary_cloud_cloudy">Nublado</string>
+    <string name="summary_cloud_few">Pocas nubes</string>
+    <string name="summary_cloud_n_clouds">%1$d nubes</string>
+    <string name="summary_cloud_one_cloud">1 nube</string>
+    <string name="summary_cloud_overcast">Cielo Cubierto</string>
+    <string name="summary_cloud_very_cloudy">Muy nublado</string>
+    <string name="summary_clouds_wind_format">"Nubes: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Viento: &lt;font color='%1$s'&gt;%3$s (%4$s)&lt;/font&gt;"</string>
+    <string name="summary_combined_phase_auto">Automática</string>
+    <string name="summary_density_high">Alto</string>
+    <string name="summary_density_low">Poco</string>
+    <string name="summary_density_medium">Medio</string>
+    <string name="summary_density_very_high">Muy Alto</string>
+    <string name="summary_inactive">Inactivo</string>
+    <string name="summary_lightning_format">"Frecuencia: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Destellos: &lt;font color='%1$s'&gt;%3$s&lt;/font&gt;"</string>
+    <string name="summary_no">No</string>
+    <string name="summary_rain_drizzle">Llovizna</string>
+    <string name="summary_rain_format">"Densidad: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Velocidad: &lt;font color='%1$s'&gt;%3$s&lt;/font&gt; • Color: &lt;font color='%1$s'&gt;%4$s&lt;/font&gt;"</string>
+    <string name="summary_rain_heavy">Lluvia fuerte</string>
+    <string name="summary_rain_medium">Lluvia media</string>
+    <string name="summary_rain_none">Sin lluvia</string>
+    <string name="summary_rain_torrential">Torrencial</string>
+    <string name="summary_shooting_stars_active">Sí (%1$s)</string>
+    <string name="summary_shooting_stars_frequent">Frecuentes</string>
+    <string name="summary_size_large">Grande</string>
+    <string name="summary_size_large_fem">Grande</string>
+    <string name="summary_size_medium">Mediano</string>
+    <string name="summary_size_medium_fem">Mediana</string>
+    <string name="summary_size_small">Pequeño</string>
+    <string name="summary_size_small_fem">Pequeña</string>
+    <string name="summary_speed_fast">Rápido</string>
+    <string name="summary_speed_normal">Normal</string>
+    <string name="summary_speed_very_fast">Muy rápido</string>
+    <string name="summary_speed_very_slow">Muy lento</string>
+    <string name="summary_star_random">Aleatorio</string>
+    <string name="summary_star_static">Estático</string>
+    <string name="summary_stars_few">Pocas</string>
+    <string name="summary_stars_full_sky">Cielo Estrellado</string>
+    <string name="summary_stars_many">Mucho</string>
+    <string name="summary_stars_medium">Medio</string>
+    <string name="summary_sun_l2r">Izquierda a Derecha</string>
+    <string name="summary_sun_r2l">Derecha a Izquierda</string>
+    <string name="summary_sun_random">Aleatorio</string>
+    <string name="summary_sun_static">Estático</string>
+    <string name="summary_sunny_combined_format">"Ciclo: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Sol: &lt;font color='%1$s'&gt;%3$s&lt;/font&gt; • Luna: &lt;font color='%1$s'&gt;%4$s (%5$s)&lt;/font&gt;&lt;br/&gt;Estrellas: &lt;font color='%1$s'&gt;%6$s (%7$s)&lt;/font&gt; • Trayecto: &lt;font color='%1$s'&gt;%8$s&lt;/font&gt;"</string>
+    <string name="summary_sunny_env_format">"Nubes: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Fondo: &lt;font color='%1$s'&gt;%3$s&lt;/font&gt; • Giroscopio: &lt;font color='%1$s'&gt;%4$s&lt;/font&gt;"</string>
+    <string name="summary_sunny_moon_format">"Fase: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Estrellas: &lt;font color='%1$s'&gt;%3$s (%4$s)&lt;/font&gt; • Modo: &lt;font color='%1$s'&gt;%5$s&lt;/font&gt;&lt;br/&gt;Fugaces: &lt;font color='%1$s'&gt;%6$s&lt;/font&gt; • Luciérnagas: &lt;font color='%1$s'&gt;%7$s&lt;/font&gt;"</string>
+    <string name="summary_sunny_sun_format">"Tema: &lt;font color='%1$s'&gt;%2$s&lt;/font&gt; • Sol: &lt;font color='%1$s'&gt;%3$s&lt;/font&gt;&lt;br/&gt;Rayos: &lt;font color='%1$s'&gt;%4$s&lt;/font&gt; • Destellos: &lt;font color='%1$s'&gt;%5$s&lt;/font&gt;"</string>
+    <string name="summary_theme_custom">Personalizado</string>
+    <string name="summary_theme_dusk">Anochecer</string>
+    <string name="summary_theme_noon">Mediodía</string>
+    <string name="summary_theme_sunset">Atardecer</string>
+    <string name="summary_wind_calm">Calma</string>
+    <string name="summary_wind_fast">Rápido</string>
+    <string name="summary_wind_left">Izquierda</string>
+    <string name="summary_wind_medium">Medio</string>
+    <string name="summary_wind_none">Sin viento</string>
+    <string name="summary_wind_right">Derecha</string>
+    <string name="summary_wind_slow">Lento</string>
+    <string name="summary_wind_very_fast">Muy rápido</string>
+    <string name="summary_yes">Sí</string>
+    <string name="sunny_aade_reflejos_dinmicos_que_se_mueve">Añade reflejos dinámicos que se mueven en dirección opuesta al sol cuando deslizas el launcher.</string>
+    <string name="sunny_ajusta_la_densidad_de_nubes_en_el_c">Ajusta la densidad de nubes en el cielo (Poco, Medio, Alto o Muy Alto).</string>
+    <string name="sunny_ajuste_de_entorno">Ajuste de Entorno</string>
+    <string name="sunny_al_tocar_el_disco_solar_se_genera_u">Al tocar el disco solar se genera una pulsación de brillo y un estallido de partículas.</string>
+    <string name="sunny_aleatorio">Aleatorio</string>
+    <string name="sunny_alto">Alto</string>
+    <string name="sunny_anochecer">Anochecer</string>
+    <string name="sunny_atardecer">Atardecer</string>
+    <string name="sunny_avanzar_fase_con_cada_ciclo">Avanzar fase con cada ciclo</string>
+    <string name="sunny_azul">Azul</string>
+    <string name="sunny_blanco">Blanco</string>
+    <string name="sunny_borde_der">Borde Der.</string>
+    <string name="sunny_borde_izq">Borde Izq.</string>
+    <string name="sunny_catico">Caótico</string>
+    <string name="sunny_celeste">Celeste</string>
+    <string name="sunny_centro">Centro</string>
+    <string name="sunny_ciclo_danoche">Ciclo Día/Noche</string>
+    <string name="sunny_clido">Cálido</string>
+    <string name="sunny_color_de_estrellas">Color de Estrellas</string>
+    <string name="sunny_colores_del_degradado">Colores del Degradado</string>
+    <string name="sunny_combinado">Combinado</string>
+    <string name="sunny_configuracin_de_luna_y_estrellas">Configuración de Luna y Estrellas</string>
+    <string name="sunny_configuracin_de_transicin">Configuración de Transición</string>
+    <string name="sunny_configuracin_del_sol">Configuración del Sol</string>
+    <string name="sunny_crecientencncava">Creciente\nCóncava</string>
+    <string name="sunny_crecientenconvexa">Creciente\nConvexa</string>
+    <string name="sunny_cuartoncreciente">Cuarto\nCreciente</string>
+    <string name="sunny_cuartonmenguante">Cuarto\nMenguante</string>
+    <string name="sunny_da">Día</string>
+    <string name="sunny_densidad_de_estrellas">Densidad de Estrellas</string>
+    <string name="sunny_densidad_de_estrellas_fugaces">Densidad de Estrellas Fugaces</string>
+    <string name="sunny_der_a_izq">Der. a Izq.</string>
+    <string name="sunny_destellos_de_lente_lens_flare">Destellos de Lente (Lens Flare)</string>
+    <string name="sunny_efecto_de_inclinacin_3d_giroscopio">Efecto de Inclinación 3D (Giroscopio)</string>
+    <string name="sunny_efectos_visuales_avanzados_sol_bajo">Efectos Visuales Avanzados (Sol Bajo)</string>
+    <string name="sunny_elegir_imagen_de_galera">Elegir Imagen de Galería</string>
+    <string name="sunny_estrellas_fugaces">Estrellas Fugaces</string>
+    <string name="sunny_esttico">Estático</string>
+    <string name="sunny_fase_de_la_luna">Fase de la Luna</string>
+    <string name="sunny_fase_lunar">Fase Lunar</string>
+    <string name="sunny_fondo_silueta_minimalista">Fondo Silueta Minimalista</string>
+    <string name="sunny_genera_haces_de_luz_desde_detrs_del">Genera haces de luz desde detrás del fondo y las nubes cuando el sol está bajo.</string>
+    <string name="sunny_haces_de_luz_god_rays">Haces de Luz (God Rays)</string>
+    <string name="sunny_inferior">Inferior</string>
+    <string name="sunny_intensidad_de_destellos">Intensidad de Destellos</string>
+    <string name="sunny_intensidad_de_rayos">Intensidad de Rayos</string>
+    <string name="sunny_izq_a_der">Izq. a Der.</string>
+    <string name="sunny_la_luna_pasa_a_la_siguiente_fase_ca">La luna pasa a la siguiente fase cada vez que se completa un ciclo de día y noche; la selección manual de abajo queda desactivada.</string>
+    <string name="sunny_lucirnagas">Luciérnagas</string>
+    <string name="sunny_luna_llena">Luna Llena</string>
+    <string name="sunny_luna_nueva">Luna Nueva</string>
+    <string name="sunny_medio">Medio</string>
+    <string name="sunny_menguantencncava">Menguante\nCóncava</string>
+    <string name="sunny_menguantenconvexa">Menguante\nConvexa</string>
+    <string name="sunny_mixto">Mixto</string>
+    <string name="sunny_modo_de_estrellas">Modo de Estrellas</string>
+    <string name="sunny_modo_de_tiempo">Modo de Tiempo</string>
+    <string name="sunny_muy_alto">Muy Alto</string>
+    <string name="sunny_noche">Noche</string>
+    <string name="sunny_personalizado">Personalizado</string>
+    <string name="sunny_poco">Poco</string>
+    <string name="sunny_posicin_de_la_luna_esttica">Posición de la Luna (Estática)</string>
+    <string name="sunny_posicin_del_sol_esttico">Posición del Sol (Estático)</string>
+    <string name="sunny_posicin_horizontal_x">Posición Horizontal (X)</string>
+    <string name="sunny_posicin_vertical_y">Posición Vertical (Y)</string>
+    <string name="sunny_rfaga_solar_al_tocar">Ráfaga Solar al Tocar</string>
+    <string name="sunny_rosa">Rosa</string>
+    <string name="sunny_selecciona_el_tema_de_color_degrada">Selecciona el tema de color degradado para el cielo soleado.</string>
+    <string name="sunny_sup_der">Sup. Der.</string>
+    <string name="sunny_sup_izq">Sup. Izq.</string>
+    <string name="sunny_superior">Superior</string>
+    <string name="sunny_tamao_de_la_luna">Tamaño de la Luna</string>
+    <string name="sunny_tamao_del_sol">Tamaño del Sol</string>
+    <string name="sunny_tema_del_cielo">Tema del Cielo</string>
+    <string name="sunny_trayectoria_de_la_luna">Trayectoria de la Luna</string>
+    <string name="sunny_trayectoria_del_sol_y_la_luna">Trayectoria del Sol y la Luna</string>
+    <string name="sunny_trayectoriamovimiento_del_sol">Trayectoria/Movimiento del Sol</string>
+    <string name="sunny_usa_el_giroscopioacelermetro_para_s">Usa el giroscopio/acelerómetro para simular profundidad moviendo las capas del fondo.</string>
+    <string name="sunny_velocidad_de_movimiento">Velocidad de Movimiento</string>
+    <string name="sunny_velocidad_del_ciclo_danoche">Velocidad del Ciclo Día-Noche</string>
+    <string name="sunny_velocidad_del_pulso">Velocidad del Pulso</string>
+    <string name="sunny_verde">Verde</string>
+    <string name="sunny_x_y">X, Y</string>
     <string name="wallpaper_description">Simulador interactivo de tormenta con nubes animadas, lluvia y rayos procedimentales.</string>
     <string name="wallpaper_label">Tormenta OpenGL</string>
+    <string name="wind_direction_label">Dirección de la Lluvia</string>
+    <string name="wind_intensity_label">Fuerza del Viento</string>
+
+    <string-array name="background_modes">
+        <item>Color Oscuro (Sin Imagen)</item>
+        <item>Montaña</item>
+        <item>Valle</item>
+        <item>Bosque</item>
+        <item>Pico Rocoso</item>
+        <item>Lago Nebloso</item>
+        <item>Picos y Pinos</item>
+        <item>Acantilado Costero</item>
+        <item>Imagen de la Galería</item>
+    </string-array>
+    <string-array name="cloud_dynamics_options">
+        <item>Estático</item>
+        <item>Lento</item>
+        <item>Normal</item>
+        <item>Rápido</item>
+        <item>Extremo</item>
+    </string-array>
+    <string-array name="cloud_options">
+        <item>0 nubes</item>
+        <item>1 nube</item>
+        <item>2 nubes</item>
+        <item>4 nubes</item>
+        <item>6 nubes</item>
+        <item>8 nubes</item>
+        <item>10 nubes</item>
+    </string-array>
+    <string-array name="combined_star_density_options">
+        <item>Ninguna</item>
+        <item>Pocas</item>
+        <item>Normal</item>
+        <item>Muchas</item>
+        <item>Lluvia de estrellas</item>
+    </string-array>
+    <string-array name="combined_trajectories">
+        <item>Mismo Sentido (Izquierda a Derecha)</item>
+        <item>Mismo Sentido (Derecha a Izquierda)</item>
+        <item>Sentidos Opuestos (Sol Izq a Der, Luna Der a Izq)</item>
+        <item>Sentidos Opuestos (Sol Der a Izq, Luna Izq a Der)</item>
+    </string-array>
+    <string-array name="droplets_size_options">
+        <item>Diminutas</item>
+        <item>Finas</item>
+        <item>Medianas</item>
+        <item>Grandes</item>
+        <item>Gigantes</item>
+    </string-array>
+    <string-array name="frequency_options">
+        <item>Muy raro</item>
+        <item>Raro</item>
+        <item>Medio</item>
+        <item>Frecuente</item>
+        <item>Muy frecuente</item>
+    </string-array>
+    <string-array name="god_rays_intensity_options">
+        <item>Sin rayos</item>
+        <item>Tenue</item>
+        <item>Normal</item>
+        <item>Brillante</item>
+        <item>Resplandor total</item>
+    </string-array>
+    <string-array name="gradient_cycle_speed_options">
+        <item>Congelado</item>
+        <item>Muy lento</item>
+        <item>Normal</item>
+        <item>Rápido</item>
+        <item>Muy rápido</item>
+    </string-array>
+    <string-array name="lens_flare_intensity_options">
+        <item>Sin destellos</item>
+        <item>Sutil</item>
+        <item>Normal</item>
+        <item>Llamativo</item>
+        <item>Destello total</item>
+    </string-array>
+    <string-array name="lightning_colors">
+        <item>Blanco</item>
+        <item>Azul</item>
+        <item>Amarillo</item>
+        <item>Rojo</item>
+        <item>Verde</item>
+        <item>Morado</item>
+        <item>Aleatorio</item>
+    </string-array>
+    <string-array name="lightning_duration_options">
+        <item>Instantáneo</item>
+        <item>Muy corto</item>
+        <item>Normal</item>
+        <item>Prolongado</item>
+        <item>Persistente</item>
+    </string-array>
+    <string-array name="lightning_spawn_modes">
+        <item>Bordes Pantalla</item>
+        <item>Desde las Nubes</item>
+        <item>Ambos</item>
+    </string-array>
+    <string-array name="moon_move_speed_options">
+        <item>Detenida</item>
+        <item>Lenta</item>
+        <item>Normal</item>
+        <item>Rápida</item>
+        <item>Extrema</item>
+    </string-array>
+    <string-array name="moon_phases">
+        <item>Luna Nueva</item>
+        <item>Creciente Cóncava</item>
+        <item>Cuarto Creciente</item>
+        <item>Creciente Convexa</item>
+        <item>Luna Llena</item>
+        <item>Menguante Convexa</item>
+        <item>Cuarto Menguante</item>
+        <item>Menguante Cóncava</item>
+    </string-array>
+    <string-array name="moon_size_options">
+        <item>Mínimo</item>
+        <item>Pequeño</item>
+        <item>Normal</item>
+        <item>Grande</item>
+        <item>Gigante</item>
+    </string-array>
+    <string-array name="night_cloud_density_options">
+        <item>Mínima</item>
+        <item>Pequeña</item>
+        <item>Normal</item>
+        <item>Grande</item>
+        <item>Gigante</item>
+    </string-array>
+    <string-array name="rain_colors">
+        <item>Azul</item>
+        <item>Blanco</item>
+        <item>Rojo</item>
+        <item>Verde</item>
+        <item>Amarillo</item>
+        <item>Morado</item>
+    </string-array>
+    <string-array name="rain_intensities">
+        <item>Nada</item>
+        <item>Pocas</item>
+        <item>Media</item>
+        <item>Alta</item>
+        <item>Muy alta</item>
+    </string-array>
+    <string-array name="rain_spawn_modes">
+        <item>Borde Superior</item>
+        <item>Debajo de las Nubes</item>
+        <item>Todos Lados</item>
+    </string-array>
+    <string-array name="rain_speeds">
+        <item>Baja</item>
+        <item>Media</item>
+        <item>Rápida</item>
+    </string-array>
+    <string-array name="shooting_star_density_options">
+        <item>Sin estrellas</item>
+        <item>Pocas</item>
+        <item>Normal</item>
+        <item>Muchas</item>
+        <item>Cielo lleno</item>
+    </string-array>
+    <string-array name="star_color_index">
+        <item>Blanco</item>
+        <item>Azul</item>
+        <item>Cálido</item>
+        <item>Rosa</item>
+        <item>Verde</item>
+        <item>Mixto</item>
+    </string-array>
+    <string-array name="star_density_options">
+        <item>Sin estrellas</item>
+        <item>Pocas</item>
+        <item>Normal</item>
+        <item>Muchas</item>
+        <item>Cielo lleno</item>
+    </string-array>
+    <string-array name="sun_move_speed_options">
+        <item>Detenido</item>
+        <item>Lento</item>
+        <item>Normal</item>
+        <item>Rápido</item>
+        <item>Extremo</item>
+    </string-array>
+    <string-array name="sun_size_options">
+        <item>Mínimo</item>
+        <item>Pequeño</item>
+        <item>Normal</item>
+        <item>Grande</item>
+        <item>Gigante</item>
+    </string-array>
+    <string-array name="sun_speed_options">
+        <item>Estático</item>
+        <item>Lento</item>
+        <item>Normal</item>
+        <item>Rápido</item>
+        <item>Extremo</item>
+    </string-array>
+    <string-array name="sunny_backgrounds">
+        <item>Solo degradado</item>
+        <item>Montañas</item>
+        <item>Campos de Trigo</item>
+        <item>Lago y Bosque</item>
+        <item>Bosque y Río (Color)</item>
+        <item>Silueta de Ciudad</item>
+        <item>Valle de Flores (Color)</item>
+        <item>Cascada y Acantilado (Color)</item>
+        <item>Imagen de la Galería</item>
+    </string-array>
+    <string-array name="wind_directions">
+        <item>Izquierda</item>
+        <item>Derecha</item>
+    </string-array>
+    <string-array name="wind_intensities">
+        <item>Sin viento</item>
+        <item>Lento</item>
+        <item>Medio</item>
+        <item>Rápido</item>
+        <item>Muy rápido</item>
+    </string-array>
+    <string-array name="wind_lines_options">
+        <item>Sin líneas</item>
+        <item>Sutil</item>
+        <item>Normal</item>
+        <item>Llamativo</item>
+        <item>Muy denso</item>
+    </string-array>
 </resources>

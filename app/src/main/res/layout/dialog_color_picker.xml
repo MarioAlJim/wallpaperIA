@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Seleccionar Color"
+        android:text="@string/color_seleccionar_color"
         android:textColor="#E0E0E6"
         android:textSize="18sp"
         android:textStyle="bold"
@@ -47,7 +47,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Código Hexadecimal"
+                    android:text="@string/color_cdigo_hexadecimal"
                     android:textColor="#6C6C75"
                     android:textSize="11sp" />
 
@@ -71,7 +71,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Paleta Rápida"
+        android:text="@string/color_paleta_rpida"
         android:textColor="#6C6C75"
         android:textSize="12sp"
         android:layout_marginBottom="8dp" />
@@ -118,7 +118,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ajuste Manual (RGB)"
+        android:text="@string/color_ajuste_manual_rgb"
         android:textColor="#6C6C75"
         android:textSize="12sp"
         android:layout_marginBottom="8dp" />
@@ -135,7 +135,7 @@
             android:id="@+id/labelR"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:text="R: 255"
+            android:text="@string/color_r_255"
             android:textColor="#E0E0E6"
             android:textSize="12sp" />
 
@@ -162,7 +162,7 @@
             android:id="@+id/labelG"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:text="G: 255"
+            android:text="@string/color_g_255"
             android:textColor="#E0E0E6"
             android:textSize="12sp" />
 
@@ -188,7 +188,7 @@
             android:id="@+id/labelB"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
-            android:text="B: 255"
+            android:text="@string/color_b_255"
             android:textColor="#E0E0E6"
             android:textSize="12sp" />
 

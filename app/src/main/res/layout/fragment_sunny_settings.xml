@@ -60,7 +60,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ajuste de Entorno"
+                            android:text="@string/sunny_ajuste_de_entorno"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -69,7 +69,7 @@
                             android:id="@+id/summarySunnyEnvironment"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -109,7 +109,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Densidad de Nubes"
+                            android:text="@string/cloud_density_label"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -137,7 +137,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Poco" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_poco" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityMedio"
@@ -147,7 +147,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Medio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_medio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityAlto"
@@ -157,7 +157,7 @@
                             android:layout_marginEnd="4dp"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                         <com.google.android.material.card.MaterialCardView
                             android:id="@+id/cardCloudDensityMuyAlto"
@@ -166,14 +166,14 @@
                             android:layout_weight="1"
                             app:cardCornerRadius="8dp"
                             app:strokeWidth="1dp">
-                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Muy Alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_muy_alto" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                         </com.google.android.material.card.MaterialCardView>
                     </LinearLayout>
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta la densidad de nubes en el cielo (Poco, Medio, Alto o Muy Alto)."
+                        android:text="@string/sunny_ajusta_la_densidad_de_nubes_en_el_c"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp"
@@ -191,7 +191,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Fondo Silueta Minimalista"
+                        android:text="@string/sunny_fondo_silueta_minimalista"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -223,7 +223,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:layout_marginTop="4dp"
-                        android:text="Elegir Imagen de Galería"
+                        android:text="@string/sunny_elegir_imagen_de_galera"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:backgroundTint="@color/accent_storm"
@@ -239,7 +239,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="6dp"
                         android:layout_marginBottom="12dp"
-                        android:text="No se ha seleccionado ninguna imagen"
+                        android:text="@string/storm_no_se_ha_seleccionado_ninguna_image"
                         android:textColor="@color/settings_text_secondary"
                         android:textSize="12sp"
                         android:gravity="center"
@@ -264,7 +264,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Efecto de Inclinación 3D (Giroscopio)"
+                            android:text="@string/sunny_efecto_de_inclinacin_3d_giroscopio"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -280,7 +280,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Usa el giroscopio/acelerómetro para simular profundidad moviendo las capas del fondo."
+                        android:text="@string/sunny_usa_el_giroscopioacelermetro_para_s"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
@@ -309,7 +309,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Modo de Tiempo"
+                    android:text="@string/sunny_modo_de_tiempo"
                     android:textColor="@color/settings_text_primary"
                     android:textSize="15sp"
                     android:textStyle="bold"
@@ -354,7 +354,7 @@
                                     android:id="@+id/textTimeModeDay"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Día"
+                                    android:text="@string/sunny_da"
                                     android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
@@ -396,7 +396,7 @@
                                     android:id="@+id/textTimeModeNight"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Noche"
+                                    android:text="@string/sunny_noche"
                                     android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
@@ -437,7 +437,7 @@
                                     android:id="@+id/textTimeModeCombined"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Combinado"
+                                    android:text="@string/sunny_combinado"
                                     android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"
@@ -496,7 +496,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Configuración del Sol"
+                            android:text="@string/sunny_configuracin_del_sol"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -505,7 +505,7 @@
                             android:id="@+id/summarySunnySun"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -558,7 +558,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Tamaño del Sol"
+                                android:text="@string/sunny_tamao_del_sol"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -598,7 +598,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Velocidad del Pulso"
+                                android:text="@string/sunny_velocidad_del_pulso"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -635,7 +635,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="Tema del Cielo"
+                        android:text="@string/sunny_tema_del_cielo"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -682,7 +682,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Celeste"
+                                        android:text="@string/sunny_celeste"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
@@ -713,7 +713,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Atardecer"
+                                        android:text="@string/sunny_atardecer"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
@@ -744,7 +744,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Anochecer"
+                                        android:text="@string/sunny_anochecer"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
@@ -775,7 +775,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Personalizado"
+                                        android:text="@string/sunny_personalizado"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="11sp"
                                         android:gravity="center" />
@@ -797,7 +797,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Colores del Degradado"
+                            android:text="@string/sunny_colores_del_degradado"
                             android:textColor="@color/settings_text_tertiary"
                             android:textSize="12sp"
                             android:layout_marginBottom="8dp" />
@@ -839,7 +839,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Superior"
+                                            android:text="@string/sunny_superior"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:textStyle="bold" />
@@ -885,7 +885,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Inferior"
+                                            android:text="@string/sunny_inferior"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:textStyle="bold" />
@@ -906,7 +906,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Selecciona el tema de color degradado para el cielo soleado."
+                        android:text="@string/sunny_selecciona_el_tema_de_color_degrada"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="12dp" />
@@ -921,7 +921,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp"
-                            android:text="Trayectoria/Movimiento del Sol"
+                            android:text="@string/sunny_trayectoriamovimiento_del_sol"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
@@ -976,7 +976,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Izq. a Der."
+                                            android:text="@string/sunny_izq_a_der"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1015,7 +1015,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Der. a Izq."
+                                            android:text="@string/sunny_der_a_izq"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1054,7 +1054,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Estático"
+                                            android:text="@string/sunny_esttico"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1094,7 +1094,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Aleatorio"
+                                            android:text="@string/sunny_aleatorio"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1132,7 +1132,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Caótico"
+                                            android:text="@string/sunny_catico"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1157,7 +1157,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="Velocidad de Movimiento"
+                                    android:text="@string/sunny_velocidad_de_movimiento"
                                     android:textColor="@color/settings_text_primary"
                                     android:textSize="15sp"
                                     android:textStyle="bold" />
@@ -1202,7 +1202,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Posición del Sol (Estático)"
+                                android:text="@string/sunny_posicin_del_sol_esttico"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
@@ -1255,7 +1255,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Sup. Izq."
+                                                android:text="@string/sunny_sup_izq"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1293,7 +1293,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Sup. Der."
+                                                android:text="@string/sunny_sup_der"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1330,7 +1330,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Centro"
+                                                android:text="@string/sunny_centro"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1368,7 +1368,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Borde Izq."
+                                                android:text="@string/sunny_borde_izq"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1406,7 +1406,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Borde Der."
+                                                android:text="@string/sunny_borde_der"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1436,7 +1436,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="X, Y"
+                                                    android:text="@string/sunny_x_y"
                                                     android:textColor="#FFC107"
                                                     android:textSize="14sp"
                                                     android:textStyle="bold"
@@ -1445,7 +1445,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Personalizado"
+                                                android:text="@string/sunny_personalizado"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1472,7 +1472,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Posición Horizontal (X)"
+                                        android:text="@string/sunny_posicin_horizontal_x"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
@@ -1504,7 +1504,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Posición Vertical (Y)"
+                                        android:text="@string/sunny_posicin_vertical_y"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
@@ -1537,7 +1537,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Efectos Visuales Avanzados (Sol Bajo)"
+                        android:text="@string/sunny_efectos_visuales_avanzados_sol_bajo"
                         android:textColor="@color/settings_section_warning"
                         android:textSize="16sp"
                         android:textStyle="bold"
@@ -1554,7 +1554,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Haces de Luz (God Rays)"
+                            android:text="@string/sunny_haces_de_luz_god_rays"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1570,7 +1570,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Genera haces de luz desde detrás del fondo y las nubes cuando el sol está bajo."
+                        android:text="@string/sunny_genera_haces_de_luz_desde_detrs_del"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
@@ -1589,7 +1589,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Intensidad de Rayos"
+                                android:text="@string/sunny_intensidad_de_rayos"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -1631,7 +1631,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Destellos de Lente (Lens Flare)"
+                            android:text="@string/sunny_destellos_de_lente_lens_flare"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1647,7 +1647,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Añade reflejos dinámicos que se mueven en dirección opuesta al sol cuando deslizas el launcher."
+                        android:text="@string/sunny_aade_reflejos_dinmicos_que_se_mueve"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
@@ -1666,7 +1666,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Intensidad de Destellos"
+                                android:text="@string/sunny_intensidad_de_destellos"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -1710,7 +1710,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Ráfaga Solar al Tocar"
+                            android:text="@string/sunny_rfaga_solar_al_tocar"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1726,7 +1726,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Al tocar el disco solar se genera una pulsación de brillo y un estallido de partículas."
+                        android:text="@string/sunny_al_tocar_el_disco_solar_se_genera_u"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
@@ -1784,7 +1784,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Configuración de Luna y Estrellas"
+                            android:text="@string/sunny_configuracin_de_luna_y_estrellas"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -1793,7 +1793,7 @@
                             android:id="@+id/summarySunnyMoon"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -1842,7 +1842,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Fase Lunar"
+                                android:text="@string/sunny_fase_lunar"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
@@ -1894,7 +1894,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Luna Nueva"
+                                                android:text="@string/sunny_luna_nueva"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1930,7 +1930,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Creciente\nCóncava"
+                                                android:text="@string/sunny_crecientencncava"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -1966,7 +1966,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Cuarto\nCreciente"
+                                                android:text="@string/sunny_cuartoncreciente"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2002,7 +2002,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Creciente\nConvexa"
+                                                android:text="@string/sunny_crecientenconvexa"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2038,7 +2038,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Luna Llena"
+                                                android:text="@string/sunny_luna_llena"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2074,7 +2074,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Menguante\nConvexa"
+                                                android:text="@string/sunny_menguantenconvexa"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2110,7 +2110,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Cuarto\nMenguante"
+                                                android:text="@string/sunny_cuartonmenguante"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2145,7 +2145,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Menguante\nCóncava"
+                                                android:text="@string/sunny_menguantencncava"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2158,7 +2158,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Trayectoria de la Luna"
+                                android:text="@string/sunny_trayectoria_de_la_luna"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
@@ -2212,7 +2212,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Izq. a Der."
+                                                android:text="@string/sunny_izq_a_der"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2250,7 +2250,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Der. a Izq."
+                                                android:text="@string/sunny_der_a_izq"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2288,7 +2288,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Estático"
+                                                android:text="@string/sunny_esttico"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2327,7 +2327,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Aleatorio"
+                                                android:text="@string/sunny_aleatorio"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2365,7 +2365,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Caótico"
+                                                android:text="@string/sunny_catico"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2388,7 +2388,7 @@
                                     <TextView
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
-                                        android:text="Velocidad de Movimiento"
+                                        android:text="@string/sunny_velocidad_de_movimiento"
                                         android:textColor="@color/settings_text_primary"
                                         android:textSize="14sp"
                                         android:textStyle="bold" />
@@ -2433,7 +2433,7 @@
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:text="Posición de la Luna (Estática)"
+                                    android:text="@string/sunny_posicin_de_la_luna_esttica"
                                     android:textColor="@color/settings_text_primary"
                                     android:textSize="15sp"
                                     android:textStyle="bold"
@@ -2484,7 +2484,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Sup. Izq."
+                                                    android:text="@string/sunny_sup_izq"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2521,7 +2521,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Sup. Der."
+                                                    android:text="@string/sunny_sup_der"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2557,7 +2557,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Centro"
+                                                    android:text="@string/sunny_centro"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2594,7 +2594,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Borde Izq."
+                                                    android:text="@string/sunny_borde_izq"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2631,7 +2631,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Borde Der."
+                                                    android:text="@string/sunny_borde_der"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2660,7 +2660,7 @@
                                                     <TextView
                                                         android:layout_width="wrap_content"
                                                         android:layout_height="wrap_content"
-                                                        android:text="X, Y"
+                                                        android:text="@string/sunny_x_y"
                                                         android:textColor="#FFC107"
                                                         android:textSize="14sp"
                                                         android:textStyle="bold"
@@ -2669,7 +2669,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="Personalizado"
+                                                    android:text="@string/sunny_personalizado"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="11sp"
                                                     android:gravity="center" />
@@ -2695,7 +2695,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Posición Horizontal (X)"
+                                            android:text="@string/sunny_posicin_horizontal_x"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="14sp"
                                             android:textStyle="bold" />
@@ -2727,7 +2727,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Posición Vertical (Y)"
+                                            android:text="@string/sunny_posicin_vertical_y"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="14sp"
                                             android:textStyle="bold" />
@@ -2765,7 +2765,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Color de Estrellas"
+                                android:text="@string/sunny_color_de_estrellas"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold"
@@ -2817,7 +2817,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Blanco"
+                                                android:text="@string/sunny_blanco"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2853,7 +2853,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Azul"
+                                                android:text="@string/sunny_azul"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2889,7 +2889,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Cálido"
+                                                android:text="@string/sunny_clido"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2925,7 +2925,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Rosa"
+                                                android:text="@string/sunny_rosa"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2961,7 +2961,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Verde"
+                                                android:text="@string/sunny_verde"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2996,7 +2996,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Mixto"
+                                                android:text="@string/sunny_mixto"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -3007,7 +3007,7 @@
 
                             <!-- Star Density -->
                             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_densidad_de_estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                                 <TextView android:id="@+id/textViewStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
                             <HorizontalScrollView
@@ -3033,7 +3033,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Modo de Estrellas"
+                            android:text="@string/sunny_modo_de_estrellas"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
@@ -3053,7 +3053,7 @@
                                 android:layout_marginEnd="4dp"
                                 app:cardCornerRadius="8dp"
                                 app:strokeWidth="1dp">
-                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Estático" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_esttico" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                             </com.google.android.material.card.MaterialCardView>
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardStarModeRandom"
@@ -3062,7 +3062,7 @@
                                 android:layout_weight="1"
                                 app:cardCornerRadius="8dp"
                                 app:strokeWidth="1dp">
-                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="Aleatorio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
+                                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:text="@string/sunny_aleatorio" android:gravity="center" android:textColor="@color/settings_text_muted" android:textSize="12sp" android:textStyle="bold" />
                             </com.google.android.material.card.MaterialCardView>
                         </LinearLayout>
 
@@ -3077,7 +3077,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
-                                android:text="Estrellas Fugaces"
+                                android:text="@string/sunny_estrellas_fugaces"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -3097,7 +3097,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
                             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas Fugaces" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_densidad_de_estrellas_fugaces" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                                 <TextView android:id="@+id/textViewShootingStarsDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
                             <HorizontalScrollView
@@ -3130,7 +3130,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentStart="true"
                                 android:layout_centerVertical="true"
-                                android:text="Luciérnagas"
+                                android:text="@string/sunny_lucirnagas"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -3198,7 +3198,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Configuración de Transición"
+                            android:text="@string/sunny_configuracin_de_transicin"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -3207,7 +3207,7 @@
                             android:id="@+id/summarySunnyCombined"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -3251,14 +3251,14 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Velocidad del Ciclo Día-Noche"
+                            android:text="@string/sunny_velocidad_del_ciclo_danoche"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="8dp" />
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ciclo Día/Noche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_ciclo_danoche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <HorizontalScrollView
@@ -3281,7 +3281,7 @@
 
                         <!-- Combined Sun Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño del Sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_tamao_del_sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <HorizontalScrollView
@@ -3304,7 +3304,7 @@
 
                         <!-- Combined Moon Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño de la Luna" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_tamao_de_la_luna" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedMoonSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <HorizontalScrollView
@@ -3329,7 +3329,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Fase de la Luna"
+                            android:text="@string/sunny_fase_de_la_luna"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
@@ -3344,7 +3344,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_toStartOf="@+id/switchCombinedMoonPhaseAutoAdvance"
-                                android:text="Avanzar fase con cada ciclo"
+                                android:text="@string/sunny_avanzar_fase_con_cada_ciclo"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
@@ -3359,7 +3359,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="La luna pasa a la siguiente fase cada vez que se completa un ciclo de día y noche; la selección manual de abajo queda desactivada."
+                            android:text="@string/sunny_la_luna_pasa_a_la_siguiente_fase_ca"
                             android:textColor="@color/settings_text_tertiary"
                             android:textSize="12sp"
                             android:layout_marginBottom="12dp" />
@@ -3410,7 +3410,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Luna Nueva"
+                                            android:text="@string/sunny_luna_nueva"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3446,7 +3446,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Creciente\nCóncava"
+                                            android:text="@string/sunny_crecientencncava"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3482,7 +3482,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Cuarto\nCreciente"
+                                            android:text="@string/sunny_cuartoncreciente"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3518,7 +3518,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Creciente\nConvexa"
+                                            android:text="@string/sunny_crecientenconvexa"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3554,7 +3554,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Luna Llena"
+                                            android:text="@string/sunny_luna_llena"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3590,7 +3590,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Menguante\nConvexa"
+                                            android:text="@string/sunny_menguantenconvexa"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3626,7 +3626,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Cuarto\nMenguante"
+                                            android:text="@string/sunny_cuartonmenguante"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3661,7 +3661,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Menguante\nCóncava"
+                                            android:text="@string/sunny_menguantencncava"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3674,7 +3674,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Color de Estrellas"
+                            android:text="@string/sunny_color_de_estrellas"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"
@@ -3726,7 +3726,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Blanco"
+                                            android:text="@string/sunny_blanco"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3762,7 +3762,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Azul"
+                                            android:text="@string/sunny_azul"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3798,7 +3798,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Cálido"
+                                            android:text="@string/sunny_clido"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3834,7 +3834,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Rosa"
+                                            android:text="@string/sunny_rosa"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3870,7 +3870,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Verde"
+                                            android:text="@string/sunny_verde"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3905,7 +3905,7 @@
                                         <TextView
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
-                                            android:text="Mixto"
+                                            android:text="@string/sunny_mixto"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -3916,7 +3916,7 @@
 
                         <!-- Combined Star Density -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_densidad_de_estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
                         <HorizontalScrollView
@@ -3941,7 +3941,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Trayectoria del Sol y la Luna"
+                            android:text="@string/sunny_trayectoria_del_sol_y_la_luna"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold"

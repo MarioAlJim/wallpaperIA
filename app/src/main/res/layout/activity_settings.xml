@@ -11,7 +11,7 @@
         android:id="@+id/textViewTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Efecto de Clima"
+        android:text="@string/act_efecto_de_clima"
         android:textColor="@color/settings_text_primary"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -44,7 +44,7 @@
                 android:id="@+id/textThemeAuto"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Auto"
+                android:text="@string/act_auto"
                 android:gravity="center"
                 android:textColor="@color/settings_text_muted"
                 android:textSize="12sp"
@@ -68,7 +68,7 @@
                 android:id="@+id/textThemeLight"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Claro"
+                android:text="@string/act_claro"
                 android:gravity="center"
                 android:textColor="@color/settings_text_muted"
                 android:textSize="12sp"
@@ -91,7 +91,7 @@
                 android:id="@+id/textThemeDark"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:text="Oscuro"
+                android:text="@string/act_oscuro"
                 android:gravity="center"
                 android:textColor="@color/settings_text_muted"
                 android:textSize="12sp"
@@ -128,12 +128,12 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Tormenta" />
+                android:text="@string/act_tormenta" />
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Día y Noche" />
+                android:text="@string/act_da_y_noche" />
 
         </com.google.android.material.tabs.TabLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -151,7 +151,7 @@
         android:id="@+id/buttonApplyWallpaper"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Establecer Fondo de Pantalla"
+        android:text="@string/act_establecer_fondo_de_pantalla"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"

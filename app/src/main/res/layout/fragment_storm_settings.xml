@@ -51,7 +51,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Tormenta Variable (Ciclos)"
+                        android:text="@string/storm_tormenta_variable_ciclos"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -59,7 +59,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Alterna ciclos de calma y ráfagas de viento y rayos"
+                        android:text="@string/storm_alterna_ciclos_de_calma_y_rfagas_de"
                         android:textColor="@color/settings_text_secondary"
                         android:textSize="12sp"
                         android:layout_marginTop="2dp" />
@@ -122,7 +122,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Nubes y Viento"
+                            android:text="@string/storm_nubes_y_viento"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -131,7 +131,7 @@
                             android:id="@+id/summaryCloudsWind"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -173,7 +173,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cantidad de Nubes"
+                            android:text="@string/storm_cantidad_de_nubes"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -181,7 +181,7 @@
                             android:id="@+id/textViewCloudDensityValue"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="5 nubes"
+                            android:text="@string/storm_5_nubes"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="14sp"
                             android:layout_alignParentEnd="true" />
@@ -208,7 +208,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Controla la cantidad de nubes visibles en simultáneo en pantalla (0 a 10 nubes)."
+                        android:text="@string/storm_controla_la_cantidad_de_nubes_visib"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -217,7 +217,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Fuerza del Viento"
+                        android:text="@string/wind_intensity_label"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -244,7 +244,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Modifica la velocidad y el ángulo de inclinación máximo del viento y la lluvia."
+                        android:text="@string/storm_modifica_la_velocidad_y_el_ngulo_de"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -253,7 +253,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Dirección del Viento (Lluvia/Nubes)"
+                        android:text="@string/storm_direccin_del_viento_lluvianubes"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -280,7 +280,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Establece la dirección en la que sopla el viento, afectando el ángulo de caída de la lluvia y nubes."
+                        android:text="@string/storm_establece_la_direccin_en_la_que_sop"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -301,14 +301,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Líneas de Viento"
+                                android:text="@string/storm_lneas_de_viento"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Muestra líneas horizontales ocasionales que van en dirección del viento."
+                                android:text="@string/storm_muestra_lneas_horizontales_ocasiona"
                                 android:textColor="@color/settings_text_tertiary"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp" />
@@ -334,7 +334,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Intensidad de Líneas de Viento"
+                                android:text="@string/storm_intensidad_de_lneas_de_viento"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -367,7 +367,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Ajusta la cantidad y frecuencia de las líneas de viento."
+                            android:text="@string/storm_ajusta_la_cantidad_y_frecuencia_de"
                             android:textColor="@color/settings_text_tertiary"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp" />
@@ -382,7 +382,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Respiración y Opacidad"
+                            android:text="@string/storm_respiracin_y_opacidad"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -417,7 +417,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta la velocidad del efecto de respiración de tamaño y transiciones de opacidad en las nubes (0% para desactivar)."
+                        android:text="@string/storm_ajusta_la_velocidad_del_efecto_de_r"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -474,7 +474,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lluvia"
+                            android:text="@string/storm_lluvia"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -483,7 +483,7 @@
                             android:id="@+id/summaryRain"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -521,7 +521,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Densidad de Lluvia"
+                        android:text="@string/rain_intensity_label"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -548,7 +548,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Controla la cantidad de gotas simultáneas mostradas en la pantalla."
+                        android:text="@string/storm_controla_la_cantidad_de_gotas_simul"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -557,7 +557,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Velocidad de la Lluvia"
+                        android:text="@string/rain_speed_label"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -584,7 +584,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta qué tan rápido caen las gotas en su trayectoria descendente."
+                        android:text="@string/storm_ajusta_qu_tan_rpido_caen_las_gotas"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -593,7 +593,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Color de la Lluvia"
+                        android:text="@string/rain_color_label"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -620,7 +620,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Elige la tonalidad cromática de las gotas de lluvia."
+                        android:text="@string/storm_elige_la_tonalidad_cromtica_de_las"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp" />
 
@@ -628,7 +628,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Origen de la Lluvia"
+                        android:text="@string/storm_origen_de_la_lluvia"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -656,7 +656,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Elige si las gotas de lluvia se originan en el borde superior de la pantalla, debajo de las nubes o una mezcla de ambas."
+                        android:text="@string/storm_elige_si_las_gotas_de_lluvia_se_ori"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp" />
 
@@ -683,14 +683,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Gotas en Pantalla"
+                                android:text="@string/storm_gotas_en_pantalla"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Habilita el efecto de gotas de agua chocando y deslizándose en la pantalla."
+                                android:text="@string/storm_habilita_el_efecto_de_gotas_de_agua"
                                 android:textColor="@color/settings_text_tertiary"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp" />
@@ -716,7 +716,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Tamaño de las Gotas en Pantalla"
+                                android:text="@string/storm_tamao_de_las_gotas_en_pantalla"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
@@ -749,7 +749,7 @@
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Ajusta el diámetro del efecto lente de las gotas sobre el cristal."
+                            android:text="@string/storm_ajusta_el_dimetro_del_efecto_lente"
                             android:textColor="@color/settings_text_tertiary"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp" />
@@ -807,7 +807,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Rayos y Tormenta"
+                            android:text="@string/storm_rayos_y_tormenta"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -816,7 +816,7 @@
                             android:id="@+id/summaryLightning"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -858,7 +858,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Frecuencia de Rayos"
+                            android:text="@string/lightning_frequency_label"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -893,7 +893,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Define la frecuencia con la que aparecen los relámpagos y rayos en la pantalla."
+                        android:text="@string/storm_define_la_frecuencia_con_la_que_apa"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp"
@@ -903,7 +903,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Color de los Rayos"
+                        android:text="@string/lightning_color_label"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -930,7 +930,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Configura el tono cromático de los destellos y ramificaciones de los rayos."
+                        android:text="@string/storm_configura_el_tono_cromtico_de_los_d"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -939,7 +939,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Origen de los Rayos"
+                        android:text="@string/storm_origen_de_los_rayos"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -967,7 +967,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Elige si los rayos se originan en los bordes de la pantalla, desde las nubes o una mezcla de ambos."
+                        android:text="@string/storm_elige_si_los_rayos_se_originan_en_l"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -980,7 +980,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Duración de los Rayos"
+                            android:text="@string/lightning_duration_label"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1015,7 +1015,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Ajusta el tiempo de permanencia de la animación completa de cada rayo."
+                        android:text="@string/storm_ajusta_el_tiempo_de_permanencia_de"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -1029,7 +1029,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Frecuencia de Destellos en Nubes"
+                            android:text="@string/storm_frecuencia_de_destellos_en_nubes"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1064,7 +1064,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Define la frecuencia con la que ocurren los relámpagos internos dentro de las nubes (independiente de los rayos externos)."
+                        android:text="@string/storm_define_la_frecuencia_con_la_que_ocu"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp"
@@ -1074,7 +1074,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Color de Destellos en Nubes"
+                        android:text="@string/storm_color_de_destellos_en_nubes"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -1101,7 +1101,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Configura el tono cromático de los destellos internos en las nubes."
+                        android:text="@string/storm_configura_el_tono_cromtico_de_los_d_1"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -1117,7 +1117,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Destellos en las Nubes"
+                            android:text="@string/storm_destellos_en_las_nubes"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1133,7 +1133,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Activa o desactiva los destellos y la iluminación interna de las nubes."
+                        android:text="@string/storm_activa_o_desactiva_los_destellos_y"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -1149,7 +1149,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Destellos de los Rayos"
+                            android:text="@string/storm_destellos_de_los_rayos"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1165,7 +1165,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Activa o desactiva los destellos y la iluminación en pantalla completa producidos por los rayos."
+                        android:text="@string/storm_activa_o_desactiva_los_destellos_y_1"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -1181,7 +1181,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:text="Rayos Interactivos (Táctil)"
+                            android:text="@string/storm_rayos_interactivos_tctil"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -1197,7 +1197,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Permite invocar rayos al tocar la pantalla. El rayo caerá cerca del punto tocado."
+                        android:text="@string/storm_permite_invocar_rayos_al_tocar_la_p"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
@@ -1254,7 +1254,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Fondo"
+                            android:text="@string/storm_fondo"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold" />
@@ -1263,7 +1263,7 @@
                             android:id="@+id/summaryBackground"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cargando..."
+                            android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -1301,7 +1301,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Modo de Fondo"
+                        android:text="@string/storm_modo_de_fondo"
                         android:textColor="@color/settings_text_primary"
                         android:textSize="15sp"
                         android:textStyle="bold"
@@ -1331,7 +1331,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="Seleccionar Imagen de la Galería"
+                        android:text="@string/storm_seleccionar_imagen_de_la_galera"
                         android:textColor="@color/white"
                         android:textSize="14sp"
                         android:textStyle="bold"
@@ -1347,7 +1347,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="12dp"
-                        android:text="No se ha seleccionado ninguna imagen"
+                        android:text="@string/storm_no_se_ha_seleccionado_ninguna_image"
                         android:textColor="@color/settings_text_secondary"
                         android:textSize="12sp"
                         android:gravity="center"
@@ -1356,7 +1356,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Elige si se muestra la imagen de fondo de la tormenta (background.jpg) o se mantiene el color oscuro sólido original."
+                        android:text="@string/storm_elige_si_se_muestra_la_imagen_de_fo"
                         android:textColor="@color/settings_text_tertiary"
                         android:textSize="12sp" />
 
