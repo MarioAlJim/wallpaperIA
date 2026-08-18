@@ -77,7 +77,7 @@ class StormSettingsFragment : Fragment() {
         )
 
         // 2. Setup Nubes y Viento Controls
-        val cloudOptions = arrayOf("0 nubes", "1 nube", "2 nubes", "4 nubes", "6 nubes", "8 nubes", "10 nubes")
+        val cloudOptions = resources.getStringArray(R.array.cloud_options)
         val cloudCounts = intArrayOf(0, 1, 2, 4, 6, 8, 10)
         val initialCloudIndex = getClosestCloudOptionIndex(configManager.getCloudDensity())
 
@@ -93,7 +93,7 @@ class StormSettingsFragment : Fragment() {
 
 
 
-        val cloudDynamicsOptions = arrayOf("Estático", "Lento", "Normal", "Rápido", "Extremo")
+        val cloudDynamicsOptions = resources.getStringArray(R.array.cloud_dynamics_options)
         val cloudDynamicsValues = intArrayOf(0, 25, 50, 75, 100)
         val initialCloudDynamicsIndex = SettingsCardSelectorHelper.closestValueIndex(cloudDynamicsValues, configManager.getCloudDynamicsSpeed())
         val textViewCloudDynamicsSpeedValue = view.findViewById<TextView>(R.id.textViewCloudDynamicsSpeedValue)
@@ -117,7 +117,7 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
-        val windLinesOptions = arrayOf("Sin líneas", "Sutil", "Normal", "Llamativo", "Muy denso")
+        val windLinesOptions = resources.getStringArray(R.array.wind_lines_options)
         val windLinesValues = intArrayOf(0, 25, 50, 75, 100)
         val initialWindLinesIndex = SettingsCardSelectorHelper.closestValueIndex(windLinesValues, configManager.getWindLinesIntensity())
         val textViewWindLinesIntensityValue = view.findViewById<TextView>(R.id.textViewWindLinesIntensityValue)
@@ -143,7 +143,7 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
-        val dropletsSizeOptions = arrayOf("Diminutas", "Finas", "Medianas", "Grandes", "Gigantes")
+        val dropletsSizeOptions = resources.getStringArray(R.array.droplets_size_options)
         val dropletsSizeValues = intArrayOf(10, 55, 100, 150, 200)
         val initialDropletsSizeIndex = SettingsCardSelectorHelper.closestValueIndex(dropletsSizeValues, configManager.getScreenDropletsSize())
         val textViewScreenDropletsSizeValue = view.findViewById<TextView>(R.id.textViewScreenDropletsSizeValue)
@@ -155,7 +155,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         // 4. Setup Rayos Controls
-        val freqOptions = arrayOf("Muy raro", "Raro", "Medio", "Frecuente", "Muy frecuente")
+        val freqOptions = resources.getStringArray(R.array.frequency_options)
         val freqValues = intArrayOf(12, 31, 62, 87, 100)
         
         val initialLightningFreqIndex = getClosestFrequencyOptionIndex(configManager.getLightningFrequency())
@@ -169,7 +169,7 @@ class StormSettingsFragment : Fragment() {
             updateSummaries(view)
         }
 
-        val lightningDurationOptions = arrayOf("Instantáneo", "Muy corto", "Normal", "Prolongado", "Persistente")
+        val lightningDurationOptions = resources.getStringArray(R.array.lightning_duration_options)
         val lightningDurationValues = intArrayOf(0, 25, 50, 75, 100)
         val initialLightningDurationIndex = SettingsCardSelectorHelper.closestValueIndex(lightningDurationValues, configManager.getLightningDuration())
         val textViewLightningDurationValue = view.findViewById<TextView>(R.id.textViewLightningDurationValue)
@@ -219,17 +219,7 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
-        val backgroundModes = arrayOf(
-            "Color Oscuro (Sin Imagen)",
-            "Montaña",
-            "Valle",
-            "Bosque",
-            "Pico Rocoso",
-            "Lago Nebloso",
-            "Picos y Pinos",
-            "Acantilado Costero",
-            "Imagen de la Galería"
-        )
+        val backgroundModes = resources.getStringArray(R.array.background_modes)
         setupDropdown(view, R.id.spinnerBackgroundMode, backgroundModes, configManager.getBackgroundIndex()) { position ->
             configManager.setBackgroundIndex(position)
             updateCustomBackgroundViewsVisibility(view, position)
@@ -402,7 +392,7 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun refreshStormCardPreviews(view: View) {
-        val windDirections = arrayOf("Izquierda", "Derecha")
+        val windDirections = resources.getStringArray(R.array.wind_directions)
         val initialWindDirIndex = if (configManager.getWindDirection() == 2) 1 else 0
         setupDropdown(view, R.id.spinnerWindDirection, windDirections, initialWindDirIndex) { position ->
             val dir = if (position == 1) 2 else 0
@@ -410,7 +400,7 @@ class StormSettingsFragment : Fragment() {
             refreshStormCardPreviews(view)
         }
 
-        val windIntensities = arrayOf("Sin viento", "Lento", "Medio", "Rápido", "Muy rápido")
+        val windIntensities = resources.getStringArray(R.array.wind_intensities)
         val currentWindIntensity = configManager.getWindIntensity()
         val initialWindIntensityIndex = when (currentWindIntensity) {
             0 -> 0
@@ -441,14 +431,14 @@ class StormSettingsFragment : Fragment() {
             refreshStormCardPreviews(view)
         }
 
-        val rainIntensities = arrayOf("Nada", "Pocas", "Media", "Alta", "Muy alta")
+        val rainIntensities = resources.getStringArray(R.array.rain_intensities)
         val initialRainValue = configManager.getRainIntensity()
         val initialRainProgress = (initialRainValue / 25).coerceIn(0, 4)
         setupDropdown(view, R.id.spinnerRainIntensity, rainIntensities, initialRainProgress) { position ->
             configManager.setRainIntensity(position * 25)
         }
 
-        val rainSpeeds = arrayOf("Baja", "Media", "Rápida")
+        val rainSpeeds = resources.getStringArray(R.array.rain_speeds)
         val currentSpeed = configManager.getRainSpeed()
         val initialSpeedIndex = when (currentSpeed) {
             0 -> 0
@@ -473,24 +463,24 @@ class StormSettingsFragment : Fragment() {
             refreshStormCardPreviews(view)
         }
 
-        val rainColors = arrayOf("Azul", "Blanco", "Rojo", "Verde", "Amarillo", "Morado")
+        val rainColors = resources.getStringArray(R.array.rain_colors)
         setupDropdown(view, R.id.spinnerRainColor, rainColors, configManager.getRainColorIndex()) { position ->
             configManager.setRainColorIndex(position)
             refreshStormCardPreviews(view)
         }
 
-        val rainSpawnModes = arrayOf("Borde Superior", "Debajo de las Nubes", "Todos Lados")
+        val rainSpawnModes = resources.getStringArray(R.array.rain_spawn_modes)
         setupDropdown(view, R.id.spinnerRainSpawnMode, rainSpawnModes, configManager.getRainSpawnMode()) { position ->
             configManager.setRainSpawnMode(position)
         }
 
-        val lightningColors = arrayOf("Blanco", "Azul", "Amarillo", "Rojo", "Verde", "Morado", "Aleatorio")
+        val lightningColors = resources.getStringArray(R.array.lightning_colors)
         setupDropdown(view, R.id.spinnerLightningColor, lightningColors, configManager.getLightningColorIndex()) { position ->
             configManager.setLightningColorIndex(position)
             refreshStormCardPreviews(view)
         }
 
-        val lightningSpawnModes = arrayOf("Bordes Pantalla", "Desde las Nubes", "Ambos")
+        val lightningSpawnModes = resources.getStringArray(R.array.lightning_spawn_modes)
         setupDropdown(view, R.id.spinnerLightningSpawnMode, lightningSpawnModes, configManager.getLightningSpawnMode()) { position ->
             configManager.setLightningSpawnMode(position)
         }
@@ -616,136 +606,117 @@ class StormSettingsFragment : Fragment() {
             0xFFFFFF and ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
         )
 
+        // Preload arrays for summaries
+        val freqOptions = resources.getStringArray(R.array.frequency_options)
+        val rainColors = resources.getStringArray(R.array.rain_colors)
+        val rainSpeeds = resources.getStringArray(R.array.rain_speeds)
+        val backgroundModes = resources.getStringArray(R.array.background_modes)
+
         val density = configManager.getCloudDensity()
         val densityText = if (density <= 15) {
             when (density) {
-                0 -> "Despejado"
-                1 -> "1 nube"
-                else -> "$density nubes"
+                0 -> getString(R.string.summary_cloud_clear)
+                1 -> getString(R.string.summary_cloud_one_cloud)
+                else -> getString(R.string.summary_cloud_n_clouds, density)
             }
         } else {
             when {
-                density <= 0 -> "Despejado"
-                density <= 25 -> "Pocas nubes"
-                density <= 50 -> "Nublado"
-                density <= 75 -> "Muy nublado"
-                else -> "Cielo Cubierto"
+                density <= 0 -> getString(R.string.summary_cloud_clear)
+                density <= 25 -> getString(R.string.summary_cloud_few)
+                density <= 50 -> getString(R.string.summary_cloud_cloudy)
+                density <= 75 -> getString(R.string.summary_cloud_very_cloudy)
+                else -> getString(R.string.summary_cloud_overcast)
             }
         }
         val windDir = when (configManager.getWindDirection()) {
-            0 -> "Izquierda"
-            2 -> "Derecha"
-            else -> "Calma"
+            0 -> getString(R.string.summary_wind_left)
+            2 -> getString(R.string.summary_wind_right)
+            else -> getString(R.string.summary_wind_calm)
         }
         val windSpeed = configManager.getWindIntensity()
         val isVariable = configManager.isStormVariableEnabled()
-        val densityLabel = if (isVariable) "Ciclo Activo" else densityText
-        val windDirLabel = if (isVariable) "Ciclo Activo" else windDir
+        val densityLabel = if (isVariable) getString(R.string.summary_active_cycle) else densityText
+        val windDirLabel = if (isVariable) getString(R.string.summary_active_cycle) else windDir
         
         val windSpeedText = when (windSpeed) {
-            0 -> "Sin viento"
-            25 -> "Lento"
-            50 -> "Medio"
-            75 -> "Rápido"
-            100 -> "Muy rápido"
+            0 -> getString(R.string.summary_wind_none)
+            25 -> getString(R.string.summary_wind_slow)
+            50 -> getString(R.string.summary_wind_medium)
+            75 -> getString(R.string.summary_wind_fast)
+            100 -> getString(R.string.summary_wind_very_fast)
             else -> {
                 when {
-                    windSpeed < 12 -> "Sin viento"
-                    windSpeed < 37 -> "Lento"
-                    windSpeed < 62 -> "Medio"
-                    windSpeed < 87 -> "Rápido"
-                    else -> "Muy rápido"
+                    windSpeed < 12 -> getString(R.string.summary_wind_none)
+                    windSpeed < 37 -> getString(R.string.summary_wind_slow)
+                    windSpeed < 62 -> getString(R.string.summary_wind_medium)
+                    windSpeed < 87 -> getString(R.string.summary_wind_fast)
+                    else -> getString(R.string.summary_wind_very_fast)
                 }
             }
         }
-        val windSpeedLabel = if (isVariable) "Ciclo Activo" else windSpeedText
+        val windSpeedLabel = if (isVariable) getString(R.string.summary_active_cycle) else windSpeedText
 
         summaryCloudsWind.text = Html.fromHtml(
-            "Nubes: <font color='$accentColor'>$densityLabel</font> • Viento: <font color='$accentColor'>$windDirLabel ($windSpeedLabel)</font>",
+            getString(R.string.summary_clouds_wind_format, accentColor, densityLabel, windDirLabel, windSpeedLabel),
             Html.FROM_HTML_MODE_LEGACY
         )
 
         val rainIntensity = configManager.getRainIntensity()
         val rainText = when {
-            rainIntensity <= 0 -> "Sin lluvia"
-            rainIntensity <= 25 -> "Llovizna"
-            rainIntensity <= 50 -> "Lluvia media"
-            rainIntensity <= 75 -> "Lluvia fuerte"
-            else -> "Torrencial"
+            rainIntensity <= 0 -> getString(R.string.summary_rain_none)
+            rainIntensity <= 25 -> getString(R.string.summary_rain_drizzle)
+            rainIntensity <= 50 -> getString(R.string.summary_rain_medium)
+            rainIntensity <= 75 -> getString(R.string.summary_rain_heavy)
+            else -> getString(R.string.summary_rain_torrential)
         }
-        val rainColorText = when (configManager.getRainColorIndex()) {
-            0 -> "Azul"
-            1 -> "Blanco"
-            2 -> "Rojo"
-            3 -> "Verde"
-            4 -> "Amarillo"
-            5 -> "Morado"
-            else -> "Azul"
-        }
+        val rainColorText = rainColors.getOrNull(configManager.getRainColorIndex()) ?: (rainColors.getOrNull(0) ?: "")
         val rainSpeedVal = configManager.getRainSpeed()
-        val rainSpeedText = when (rainSpeedVal) {
-            0 -> "Baja"
-            25 -> "Media"
-            50 -> "Rápida"
-            else -> {
-                when {
-                    rainSpeedVal < 12 -> "Baja"
-                    rainSpeedVal < 37 -> "Media"
-                    else -> "Rápida"
-                }
-            }
+        val rainSpeedIndex = when {
+            rainSpeedVal < 12 -> 0
+            rainSpeedVal < 37 -> 1
+            else -> 2
         }
+        val rainSpeedText = rainSpeeds.getOrNull(rainSpeedIndex) ?: ""
 
-        val rainLabel = if (isVariable) "Ciclo Activo" else rainText
-        val rainSpeedLabel = if (isVariable) "Ciclo Activo" else rainSpeedText
+        val rainLabel = if (isVariable) getString(R.string.summary_active_cycle) else rainText
+        val rainSpeedLabel = if (isVariable) getString(R.string.summary_active_cycle) else rainSpeedText
 
         summaryRain.text = Html.fromHtml(
-            "Densidad: <font color='$accentColor'>$rainLabel</font> • Velocidad: <font color='$accentColor'>$rainSpeedLabel</font> • Color: <font color='$accentColor'>$rainColorText</font>",
+            getString(R.string.summary_rain_format, accentColor, rainLabel, rainSpeedLabel, rainColorText),
             Html.FROM_HTML_MODE_LEGACY
         )
 
         val lightningFreq = configManager.getLightningFrequency()
         val lightningText = when {
-            lightningFreq <= 21 -> "Muy raro"
-            lightningFreq <= 46 -> "Raro"
-            lightningFreq <= 74 -> "Medio"
-            lightningFreq <= 93 -> "Frecuente"
-            else -> "Muy frecuente"
+            lightningFreq <= 21 -> freqOptions.getOrNull(0) ?: ""
+            lightningFreq <= 46 -> freqOptions.getOrNull(1) ?: ""
+            lightningFreq <= 74 -> freqOptions.getOrNull(2) ?: ""
+            lightningFreq <= 93 -> freqOptions.getOrNull(3) ?: ""
+            else -> freqOptions.getOrNull(4) ?: ""
         }
         val flashStatus = if (configManager.isCloudFlashEnabled()) {
             val cloudFreq = configManager.getCloudFlashFrequency()
             val cloudFreqText = when {
-                cloudFreq <= 21 -> "Muy raro"
-                cloudFreq <= 46 -> "Raro"
-                cloudFreq <= 74 -> "Medio"
-                cloudFreq <= 93 -> "Frecuente"
-                else -> "Muy frecuente"
+                cloudFreq <= 21 -> freqOptions.getOrNull(0) ?: ""
+                cloudFreq <= 46 -> freqOptions.getOrNull(1) ?: ""
+                cloudFreq <= 74 -> freqOptions.getOrNull(2) ?: ""
+                cloudFreq <= 93 -> freqOptions.getOrNull(3) ?: ""
+                else -> freqOptions.getOrNull(4) ?: ""
             }
-            "Activo ($cloudFreqText)"
+            getString(R.string.summary_active_with_val, cloudFreqText)
         } else {
-            "Inactivo"
+            getString(R.string.summary_inactive)
         }
-        val lightningLabel = if (isVariable) "Ciclo Activo" else lightningText
+        val lightningLabel = if (isVariable) getString(R.string.summary_active_cycle) else lightningText
         summaryLightning.text = Html.fromHtml(
-            "Frecuencia: <font color='$accentColor'>$lightningLabel</font> • Destellos: <font color='$accentColor'>$flashStatus</font>",
+            getString(R.string.summary_lightning_format, accentColor, lightningLabel, flashStatus),
             Html.FROM_HTML_MODE_LEGACY
         )
 
         val bgIndex = configManager.getBackgroundIndex()
-        val bgText = when (bgIndex) {
-            0 -> "Color Oscuro (Sin Imagen)"
-            1 -> "Montaña"
-            2 -> "Valle"
-            3 -> "Bosque"
-            4 -> "Pico Rocoso"
-            5 -> "Lago Nebloso"
-            6 -> "Picos y Pinos"
-            7 -> "Acantilado Costero"
-            8 -> "Galería de Fotos"
-            else -> "Color Oscuro"
-        }
+        val bgText = backgroundModes.getOrNull(bgIndex) ?: ""
         summaryBackground.text = Html.fromHtml(
-            "Fondo: <font color='$accentColor'>$bgText</font>",
+            getString(R.string.summary_background_format, accentColor, bgText),
             Html.FROM_HTML_MODE_LEGACY
         )
     }

@@ -71,13 +71,13 @@ class SunnySettingsFragment : Fragment() {
         // 3. Setup Sunny Main controls
         setupValueCardSelector(
             view, R.id.spinnerSunSize, R.id.textViewSunSizeValue,
-            arrayOf("Mínimo", "Pequeño", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.sun_size_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getSunSize()
         ) { value -> configManager.setSunSize(value) }
 
         setupValueCardSelector(
             view, R.id.spinnerSunSpeed, R.id.textViewSunSpeedValue,
-            arrayOf("Estático", "Lento", "Normal", "Rápido", "Extremo"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.sun_speed_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getSunSpeed()
         ) { value -> configManager.setSunSpeed(value) }
 
@@ -86,23 +86,13 @@ class SunnySettingsFragment : Fragment() {
 
         setupValueCardSelector(
             view, R.id.spinnerSunMoveSpeed, R.id.textViewSunMoveSpeedValue,
-            arrayOf("Detenido", "Lento", "Normal", "Rápido", "Extremo"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.sun_move_speed_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getSunMoveSpeed()
         ) { value -> configManager.setSunMoveSpeed(value) }
         setupSunStationaryCards(view)
         updateSunMoveSpeedSliderVisibility(view, configManager.getSunPathDirection())
 
-        val sunnyBackgrounds = arrayOf(
-            "Solo degradado",
-            "Montañas",
-            "Campos de Trigo",
-            "Lago y Bosque",
-            "Bosque y Río (Color)",
-            "Silueta de Ciudad",
-            "Valle de Flores (Color)",
-            "Cascada y Acantilado (Color)",
-            "Imagen de la Galería"
-        )
+        val sunnyBackgrounds = resources.getStringArray(R.array.sunny_backgrounds)
         setupDropdown(view, R.id.spinnerSunnyBackground, sunnyBackgrounds, configManager.getSunnyBackgroundIndex()) { position ->
             configManager.setSunnyBackgroundIndex(position)
             updateCustomSunnyBackgroundViewsVisibility(view, position)
@@ -128,7 +118,7 @@ class SunnySettingsFragment : Fragment() {
         }
         setupValueCardSelector(
             view, R.id.spinnerSunnyGodRaysIntensity, R.id.textViewSunnyGodRaysIntensityValue,
-            arrayOf("Sin rayos", "Tenue", "Normal", "Brillante", "Resplandor total"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.god_rays_intensity_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getSunnyGodRaysIntensity()
         ) { value -> configManager.setSunnyGodRaysIntensity(value) }
 
@@ -147,7 +137,7 @@ class SunnySettingsFragment : Fragment() {
         }
         setupValueCardSelector(
             view, R.id.spinnerSunnyLensFlareIntensity, R.id.textViewSunnyLensFlareIntensityValue,
-            arrayOf("Sin destellos", "Sutil", "Normal", "Llamativo", "Destello total"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.lens_flare_intensity_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getSunnyLensFlareIntensity()
         ) { value -> configManager.setSunnyLensFlareIntensity(value) }
 
@@ -913,33 +903,33 @@ class SunnySettingsFragment : Fragment() {
     private fun setupNightAndCombinedSliders(parent: View) {
         setupValueCardSelector(
             parent, R.id.spinnerMoonMoveSpeed, R.id.textViewMoonMoveSpeedValue,
-            arrayOf("Detenida", "Lenta", "Normal", "Rápida", "Extrema"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.moon_move_speed_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getMoonMoveSpeed()
         ) { value -> configManager.setMoonMoveSpeed(value) }
         setupValueCardSelector(
             parent, R.id.spinnerStarDensity, R.id.textViewStarDensityValue,
-            arrayOf("Sin estrellas", "Pocas", "Normal", "Muchas", "Cielo lleno"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.star_density_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getStarDensity()
         ) { value -> configManager.setStarDensity(value) }
 
         setupValueCardSelector(
             parent, R.id.spinnerGradientCycleSpeed, R.id.textViewGradientCycleSpeedValue,
-            arrayOf("Congelado", "Muy lento", "Normal", "Rápido", "Muy rápido"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.gradient_cycle_speed_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getGradientCycleSpeed()
         ) { value -> configManager.setGradientCycleSpeed(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedSunSize, R.id.textViewCombinedSunSizeValue,
-            arrayOf("Mínimo", "Pequeño", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.sun_size_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getCombinedSunSize()
         ) { value -> configManager.setCombinedSunSize(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedMoonSize, R.id.textViewCombinedMoonSizeValue,
-            arrayOf("Mínima", "Pequeña", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.night_cloud_density_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getCombinedMoonSize()
         ) { value -> configManager.setCombinedMoonSize(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedStarDensity, R.id.textViewCombinedStarDensityValue,
-            arrayOf("Sin estrellas", "Pocas", "Normal", "Muchas", "Cielo lleno"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.star_density_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getCombinedStarDensity()
         ) { value -> configManager.setCombinedStarDensity(value) }
 
@@ -959,7 +949,7 @@ class SunnySettingsFragment : Fragment() {
 
         setupValueCardSelector(
             parent, R.id.spinnerShootingStarsDensity, R.id.textViewShootingStarsDensityValue,
-            arrayOf("Ninguna", "Pocas", "Normal", "Muchas", "Lluvia de estrellas"), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.combined_star_density_options), intArrayOf(0, 25, 50, 75, 100),
             configManager.getShootingStarsDensity()
         ) { value -> configManager.setShootingStarsDensity(value) }
 
@@ -1097,12 +1087,7 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupCombinedTrajectory(parent: View) {
-        val combinedTrajectories = arrayOf(
-            "Mismo Sentido (Izquierda a Derecha)",
-            "Mismo Sentido (Derecha a Izquierda)",
-            "Sentidos Opuestos (Sol Izq a Der, Luna Der a Izq)",
-            "Sentidos Opuestos (Sol Der a Izq, Luna Izq a Der)"
-        )
+        val combinedTrajectories = resources.getStringArray(R.array.combined_trajectories)
         setupDropdown(parent, R.id.spinnerCombinedTrajectory, combinedTrajectories, configManager.getCombinedPathDirection()) { position ->
             configManager.setCombinedPathDirection(position)
         }
@@ -1228,30 +1213,24 @@ class SunnySettingsFragment : Fragment() {
             0xFFFFFF and ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
         )
 
+        val sunnyBackgrounds = resources.getStringArray(R.array.sunny_backgrounds)
+        val moonPhases = resources.getStringArray(R.array.moon_phases)
+        val starColors = resources.getStringArray(R.array.star_color_index)
+        val combinedTrajectories = resources.getStringArray(R.array.combined_trajectories)
+
         if (summarySunnyEnvironment != null) {
             val density = configManager.getCloudDensity()
             val densityText = when (density) {
-                25 -> "Poco"
-                50 -> "Medio"
-                75 -> "Alto"
-                100 -> "Muy Alto"
-                else -> "Medio"
+                25 -> getString(R.string.summary_density_low)
+                50 -> getString(R.string.summary_density_medium)
+                75 -> getString(R.string.summary_density_high)
+                100 -> getString(R.string.summary_density_very_high)
+                else -> getString(R.string.summary_density_medium)
             }
-            val sunBg = when (configManager.getSunnyBackgroundIndex()) {
-                0 -> "Solo degradado"
-                1 -> "Montañas"
-                2 -> "Campos"
-                3 -> "Lago y Bosque"
-                4 -> "Bosque y Río"
-                5 -> "Silueta de Ciudad"
-                6 -> "Valle de Flores"
-                7 -> "Cascada"
-                8 -> "Galería"
-                else -> "Degradado"
-            }
-            val gyroStatus = if (configManager.isSunnyGyroEnabled()) "Sí" else "No"
+            val sunBg = sunnyBackgrounds.getOrNull(configManager.getSunnyBackgroundIndex()) ?: ""
+            val gyroStatus = if (configManager.isSunnyGyroEnabled()) getString(R.string.summary_yes) else getString(R.string.summary_no)
             summarySunnyEnvironment.text = Html.fromHtml(
-                "Nubes: <font color='$accentColor'>$densityText</font> • Fondo: <font color='$accentColor'>$sunBg</font> • Giroscopio: <font color='$accentColor'>$gyroStatus</font>",
+                getString(R.string.summary_sunny_env_format, accentColor, densityText, sunBg, gyroStatus),
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -1259,72 +1238,54 @@ class SunnySettingsFragment : Fragment() {
         if (summarySunnySun != null) {
             val theme = configManager.getSunnyTheme()
             val themeText = when (theme) {
-                0 -> "Mediodía"
-                1 -> "Atardecer"
-                2 -> "Anochecer"
-                3 -> "Personalizado"
-                else -> "Mediodía"
+                0 -> getString(R.string.summary_theme_noon)
+                1 -> getString(R.string.summary_theme_sunset)
+                2 -> getString(R.string.summary_theme_dusk)
+                3 -> getString(R.string.summary_theme_custom)
+                else -> getString(R.string.summary_theme_noon)
             }
             val sunDir = when (configManager.getSunPathDirection()) {
-                0 -> "Izquierda a Derecha"
-                1 -> "Derecha a Izquierda"
-                2 -> "Estático"
-                3 -> "Aleatorio"
-                else -> "Izquierda a Derecha"
+                0 -> getString(R.string.summary_sun_l2r)
+                1 -> getString(R.string.summary_sun_r2l)
+                2 -> getString(R.string.summary_sun_static)
+                3 -> getString(R.string.summary_sun_random)
+                else -> getString(R.string.summary_sun_l2r)
             }
-            val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) "Activo" else "Inactivo"
-            val lensFlareStatus = if (configManager.isSunnyLensFlareEnabled()) "Activo" else "Inactivo"
+            val godRaysStatus = if (configManager.isSunnyGodRaysEnabled()) getString(R.string.summary_active) else getString(R.string.summary_inactive)
+            val lensFlareStatus = if (configManager.isSunnyLensFlareEnabled()) getString(R.string.summary_active) else getString(R.string.summary_inactive)
 
             summarySunnySun.text = Html.fromHtml(
-                "Tema: <font color='$accentColor'>$themeText</font> • Sol: <font color='$accentColor'>$sunDir</font><br/>Rayos: <font color='$accentColor'>$godRaysStatus</font> • Destellos: <font color='$accentColor'>$lensFlareStatus</font>",
+                getString(R.string.summary_sunny_sun_format, accentColor, themeText, sunDir, godRaysStatus, lensFlareStatus),
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
 
         if (summarySunnyMoon != null) {
-            val phaseText = when (configManager.getMoonPhase()) {
-                0 -> "Luna Nueva"
-                1 -> "Creciente Cóncava"
-                2 -> "Cuarto Creciente"
-                3 -> "Creciente Convexa"
-                4 -> "Luna Llena"
-                5 -> "Menguante Convexa"
-                6 -> "Cuarto Menguante"
-                7 -> "Menguante Cóncava"
-                else -> "Luna Llena"
-            }
+            val phaseText = moonPhases.getOrNull(configManager.getMoonPhase()) ?: ""
             val starDensity = configManager.getStarDensity()
-            val starColorText = when (configManager.getStarColorIndex()) {
-                0 -> "Blanco"
-                1 -> "Azul"
-                2 -> "Cálido"
-                3 -> "Rosa"
-                4 -> "Verde"
-                5 -> "Mixto"
-                else -> "Blanco"
-            }
-            val starModeText = if (configManager.getStarMode() == 1) "Aleatorio" else "Estático"
+            val starColorText = starColors.getOrNull(configManager.getStarColorIndex()) ?: ""
+            val starModeText = if (configManager.getStarMode() == 1) getString(R.string.summary_star_random) else getString(R.string.summary_star_static)
             val starDensityText = when {
-                starDensity <= 25 -> "Pocas"
-                starDensity <= 50 -> "Medio"
-                starDensity <= 75 -> "Mucho"
-                else -> "Cielo Estrellado"
+                starDensity <= 25 -> getString(R.string.summary_stars_few)
+                starDensity <= 50 -> getString(R.string.summary_stars_medium)
+                starDensity <= 75 -> getString(R.string.summary_stars_many)
+                else -> getString(R.string.summary_stars_full_sky)
             }
             val shootingStarsText = if (configManager.isShootingStarsEnabled()) {
                 val densityVal = configManager.getShootingStarsDensity()
                 val densityLabel = when {
-                    densityVal <= 25 -> "Pocas"
-                    densityVal <= 50 -> "Media"
-                    densityVal <= 75 -> "Muchas"
-                    else -> "Frecuentes"
+                    densityVal <= 25 -> getString(R.string.summary_stars_few)
+                    densityVal <= 50 -> getString(R.string.summary_stars_medium)
+                    densityVal <= 75 -> getString(R.string.summary_stars_many)
+                    else -> getString(R.string.summary_shooting_stars_frequent)
                 }
-                "Sí ($densityLabel)"
+                getString(R.string.summary_shooting_stars_active, densityLabel)
             } else {
-                "No"
+                getString(R.string.summary_no)
             }
-            val firefliesText = if (configManager.isFirefliesEnabled()) "Sí" else "No"
+            val firefliesText = if (configManager.isFirefliesEnabled()) getString(R.string.summary_yes) else getString(R.string.summary_no)
             summarySunnyMoon.text = Html.fromHtml(
-                "Fase: <font color='$accentColor'>$phaseText</font> • Estrellas: <font color='$accentColor'>$starColorText ($starDensityText)</font> • Modo: <font color='$accentColor'>$starModeText</font><br/>Fugaces: <font color='$accentColor'>$shootingStarsText</font> • Luciérnagas: <font color='$accentColor'>$firefliesText</font>",
+                getString(R.string.summary_sunny_moon_format, accentColor, phaseText, starColorText, starDensityText, starModeText, shootingStarsText, firefliesText),
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -1332,65 +1293,41 @@ class SunnySettingsFragment : Fragment() {
         if (summarySunnyCombined != null) {
             val speed = configManager.getGradientCycleSpeed()
             val speedText = when {
-                speed <= 20 -> "Muy lento"
-                speed <= 50 -> "Normal"
-                speed <= 85 -> "Rápido"
-                else -> "Muy rápido"
+                speed <= 20 -> getString(R.string.summary_speed_very_slow)
+                speed <= 50 -> getString(R.string.summary_speed_normal)
+                speed <= 85 -> getString(R.string.summary_speed_fast)
+                else -> getString(R.string.summary_speed_very_fast)
             }
             val sunSize = configManager.getCombinedSunSize()
             val moonSize = configManager.getCombinedMoonSize()
             val phaseText = if (configManager.isCombinedMoonPhaseAutoAdvanceEnabled()) {
-                "Automática"
+                getString(R.string.summary_combined_phase_auto)
             } else {
-                when (configManager.getCombinedMoonPhase()) {
-                    0 -> "Luna Nueva"
-                    1 -> "Creciente Cóncava"
-                    2 -> "Cuarto Creciente"
-                    3 -> "Creciente Convexa"
-                    4 -> "Luna Llena"
-                    5 -> "Menguante Convexa"
-                    6 -> "Cuarto Menguante"
-                    7 -> "Menguante Cóncava"
-                    else -> "Luna Llena"
-                }
+                moonPhases.getOrNull(configManager.getCombinedMoonPhase()) ?: ""
             }
             val starDensity = configManager.getCombinedStarDensity()
-            val starColorText = when (configManager.getCombinedStarColorIndex()) {
-                0 -> "Blanco"
-                1 -> "Azul"
-                2 -> "Cálido"
-                3 -> "Rosa"
-                4 -> "Verde"
-                5 -> "Mixto"
-                else -> "Blanco"
-            }
-            val trajectoryText = when (configManager.getCombinedPathDirection()) {
-                0 -> "Mismo Sentido (Izq a Der)"
-                1 -> "Mismo Sentido (Der a Izq)"
-                2 -> "Opuestos (Sol Izq, Luna Der)"
-                3 -> "Opuestos (Sol Der, Luna Izq)"
-                else -> "Mismo Sentido"
-            }
+            val starColorText = starColors.getOrNull(configManager.getCombinedStarColorIndex()) ?: ""
+            val trajectoryText = combinedTrajectories.getOrNull(configManager.getCombinedPathDirection()) ?: ""
             val sunSizeVal = configManager.getCombinedSunSize()
             val sunSizeText = when {
-                sunSizeVal <= 30 -> "Pequeño"
-                sunSizeVal <= 65 -> "Mediano"
-                else -> "Grande"
+                sunSizeVal <= 30 -> getString(R.string.summary_size_small)
+                sunSizeVal <= 65 -> getString(R.string.summary_size_medium)
+                else -> getString(R.string.summary_size_large)
             }
             val moonSizeVal = configManager.getCombinedMoonSize()
             val moonSizeText = when {
-                moonSizeVal <= 30 -> "Pequeña"
-                moonSizeVal <= 65 -> "Mediana"
-                else -> "Grande"
+                moonSizeVal <= 30 -> getString(R.string.summary_size_small_fem)
+                moonSizeVal <= 65 -> getString(R.string.summary_size_medium_fem)
+                else -> getString(R.string.summary_size_large_fem)
             }
             val combStarDensityText = when {
-                starDensity <= 25 -> "Pocas"
-                starDensity <= 50 -> "Medio"
-                starDensity <= 75 -> "Mucho"
-                else -> "Cielo Estrellado"
+                starDensity <= 25 -> getString(R.string.summary_stars_few)
+                starDensity <= 50 -> getString(R.string.summary_stars_medium)
+                starDensity <= 75 -> getString(R.string.summary_stars_many)
+                else -> getString(R.string.summary_stars_full_sky)
             }
             summarySunnyCombined.text = Html.fromHtml(
-                "Ciclo: <font color='$accentColor'>$speedText</font> • Sol: <font color='$accentColor'>$sunSizeText</font> • Luna: <font color='$accentColor'>$moonSizeText ($phaseText)</font><br/>Estrellas: <font color='$accentColor'>$starColorText ($combStarDensityText)</font> • Trayecto: <font color='$accentColor'>$trajectoryText</font>",
+                getString(R.string.summary_sunny_combined_format, accentColor, speedText, sunSizeText, moonSizeText, phaseText, starColorText, combStarDensityText, trajectoryText),
                 Html.FROM_HTML_MODE_LEGACY
             )
         }
@@ -1399,11 +1336,6 @@ class SunnySettingsFragment : Fragment() {
 
 }
 
-/**
- * Canvas-drawn preview for Sunny's card selectors (see [SunnySettingsFragment.setupValueCardSelector]),
- * mirroring the shape of Storm's `StormCardPreviewView`: one small static icon per option index,
- * keyed by the container id. Not `inner` - it needs nothing from the fragment, only a [Context].
- */
 private class SunnyCardPreviewView(
     context: Context,
     private val containerId: Int,

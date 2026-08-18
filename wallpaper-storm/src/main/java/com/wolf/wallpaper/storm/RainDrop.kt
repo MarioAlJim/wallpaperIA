@@ -18,9 +18,9 @@ class RainDrop(
     companion object {
         // Cloud-spawned drops scale with both cloud scale and depth (z), which otherwise
         // makes drops from close-up (high z) clouds look oversized. Cap their length at the
-        // same maximum edge-rain drops can reach — (0.16422 + 0.04368) * zMax(1.0), see
+        // same maximum edge-rain drops can reach — (0.09492 + 0.04368) * zMax(1.0), see
         // resetEdgeRain() below — so neither source can produce a bigger drop than the other.
-        private const val MAX_CLOUD_RAIN_LENGTH = 0.2079f
+        private const val MAX_CLOUD_RAIN_LENGTH = 0.1386f
 
         // updateVelocity() runs for every active raindrop (up to MAX_RAIN_DROP_COUNT) every
         // frame. Math.toRadians() takes/returns Double, so calling it here would promote to
@@ -41,8 +41,16 @@ class RainDrop(
     override fun update(deltaTime: Float) {
         if (spawnDelay > 0f) {
             spawnDelay -= deltaTime
-            positionY = 999f // Keep it off-screen while waiting to spawn
-            return
+            if (spawnDelay <= 0f) {
+                val overflowTime = -spawnDelay
+                isActive = true
+                positionX = spawnX + velocityX * overflowTime
+                positionY = spawnY + velocityY * overflowTime
+                return
+            } else {
+                positionY = 999f // Keep it off-screen while waiting to spawn
+                return
+            }
         }
         if (!isActive) {
             isActive = true
@@ -76,22 +84,29 @@ class RainDrop(
         dirY = -cosA
     }
 
-    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: StormCloud? = null, allowFallbackToEdge: Boolean = true, existingSpawnX: List<Float> = emptyList()) {
+    fun getProjectedX(): Float {
+        if (dirY == 0f) return spawnX
+        val refX = if (positionY > 100f) spawnX else positionX
+        val refY = if (positionY > 100f) spawnY else positionY
+        return refX + (1.05f - refY) * (dirX / dirY)
+    }
+
+    fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: StormCloud? = null, allowFallbackToEdge: Boolean = true, existingProjectedX: FloatArray = FloatArray(0), activeCount: Int = 0) {
         if (spawnCloud != null) {
-            resetCloudRain(spawnCloud, aspectRatio, windAngle, rainSpeed, startOnScreen, existingSpawnX)
+            resetCloudRain(spawnCloud, aspectRatio, windAngle, rainSpeed, startOnScreen, existingProjectedX, activeCount)
         } else {
-            resetEdgeRain(aspectRatio, windAngle, rainSpeed, startOnScreen, allowFallbackToEdge, existingSpawnX)
+            resetEdgeRain(aspectRatio, windAngle, rainSpeed, startOnScreen, allowFallbackToEdge, existingProjectedX, activeCount)
         }
     }
 
-    private fun resetCloudRain(spawnCloud: StormCloud, aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean, existingSpawnX: List<Float>) {
+    private fun resetCloudRain(spawnCloud: StormCloud, aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean, existingProjectedX: FloatArray, activeCount: Int) {
         z = spawnCloud.z
-        baseSpeed = Random.nextFloat() * 1.5f + 3.0f
-        angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f // +/- 2.5 degrees deviation
+        baseSpeed = Random.nextFloat() * 2.0f + 3.0f // range [3.0, 5.0]
+        angleOffset = (Random.nextFloat() * 2f - 1f) * 4.5f // +/- 4.5 degrees deviation
         
         updateVelocity(windAngle, rainSpeed)
         
-        length = (spawnCloud.baseScale * 0.3024f * z).coerceAtMost(MAX_CLOUD_RAIN_LENGTH) // 0.2016 * 1.5 = 0.3024 (capped for close-up clouds)
+        length = (spawnCloud.baseScale * 0.2016f * z).coerceAtMost(MAX_CLOUD_RAIN_LENGTH)
         
         parentCloud = spawnCloud
         spawnFromCloud = true
@@ -101,19 +116,28 @@ class RainDrop(
         // Mitchell's Best-Candidate algorithm to find best spawnX to avoid overlapping paths
         var bestSpawnX = spawnCloud.positionX
         var bestMinDist = -1f
-        val numCandidates = 5
+        val numCandidates = 15
+        val candidateSpawnY = spawnCloud.positionY.coerceAtMost(1.05f)
         for (cand in 0 until numCandidates) {
             val offsetPercent = Random.nextFloat() * 2.0f - 1.0f // Uniformly between -1 and 1
             val candidateX = spawnCloud.positionX + halfWidth * offsetPercent
             
-            if (existingSpawnX.isEmpty()) {
+            // Project candidate X to reference Y = 1.05f
+            val candidateProjectedX = if (dirY != 0f) {
+                candidateX + (1.05f - candidateSpawnY) * (dirX / dirY)
+            } else {
+                candidateX
+            }
+            
+            if (activeCount == 0) {
                 bestSpawnX = candidateX
                 break
             }
             
             var minDist = Float.MAX_VALUE
-            for (otherX in existingSpawnX) {
-                val dist = kotlin.math.abs(candidateX - otherX)
+            for (i in 0 until activeCount) {
+                val otherProjectedX = existingProjectedX[i]
+                val dist = kotlin.math.abs(candidateProjectedX - otherProjectedX)
                 if (dist < minDist) {
                     minDist = dist
                 }
@@ -126,6 +150,9 @@ class RainDrop(
         }
         
         spawnX = bestSpawnX
+        // Add a bit of depth jitter so drops from the same cloud don't move at the 
+        // exact same speed, making line-pairing much less obvious.
+        z = (spawnCloud.z + (Random.nextFloat() * 0.04f - 0.02f)).coerceIn(0.2f, 1.0f)
         spawnY = spawnCloud.positionY.coerceAtMost(1.05f)
         
         if (startOnScreen) {
@@ -140,22 +167,22 @@ class RainDrop(
                 positionX -= distanceFallen * (dirX / dirY)
             }
         } else {
-            spawnDelay = Random.nextFloat() * 2.0f
+            spawnDelay = Random.nextFloat() * 3.0f // up to 3 seconds delay for better distribution
             isActive = false
             positionX = spawnX
             positionY = 999f
         }
     }
 
-    private fun resetEdgeRain(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean, allowFallbackToEdge: Boolean, existingSpawnX: List<Float>) {
+    private fun resetEdgeRain(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean, allowFallbackToEdge: Boolean, existingProjectedX: FloatArray, activeCount: Int) {
         z = Random.nextFloat() * 0.8f + 0.2f
-        baseSpeed = Random.nextFloat() * 1.5f + 3.0f
-        angleOffset = (Random.nextFloat() * 2f - 1f) * 2.5f
+        baseSpeed = Random.nextFloat() * 2.0f + 3.0f // range [3.0, 5.0]
+        angleOffset = (Random.nextFloat() * 2f - 1f) * 4.5f // +/- 4.5 degrees deviation
         
         updateVelocity(windAngle, rainSpeed)
         
-        // Base length for edge-rain drops: min increased by 30% to 0.04368, max increased by another 50% to 0.2079.
-        length = (Random.nextFloat() * 0.16422f + 0.04368f) * z
+        // Base length for edge-rain drops: min increased by 30% to 0.04368, max increased by 50% to 0.1386.
+        length = (Random.nextFloat() * 0.09492f + 0.04368f) * z
         
         parentCloud = null
         spawnFromCloud = false
@@ -166,7 +193,6 @@ class RainDrop(
             spawnY = 999f
             spawnDelay = Random.nextFloat() * 0.5f + 0.1f // check again soon
             isActive = false
-            spawnFromCloud = true
             return
         }
         
@@ -176,7 +202,7 @@ class RainDrop(
         // Mitchell's Best-Candidate algorithm to find best spawnX to avoid overlapping paths
         var bestSpawnX = 0f
         var bestMinDist = -1f
-        val numCandidates = 5
+        val numCandidates = 15
         for (cand in 0 until numCandidates) {
             val candidateX = if (velocityX < 0f) {
                 Random.nextFloat() * (2f * aspectRatio + absHorizontalTravel) - aspectRatio
@@ -186,14 +212,17 @@ class RainDrop(
                 Random.nextFloat() * 2f * aspectRatio - aspectRatio
             }
             
-            if (existingSpawnX.isEmpty()) {
+            val candidateProjectedX = candidateX
+            
+            if (activeCount == 0) {
                 bestSpawnX = candidateX
                 break
             }
             
             var minDist = Float.MAX_VALUE
-            for (otherX in existingSpawnX) {
-                val dist = kotlin.math.abs(candidateX - otherX)
+            for (i in 0 until activeCount) {
+                val otherProjectedX = existingProjectedX[i]
+                val dist = kotlin.math.abs(candidateProjectedX - otherProjectedX)
                 if (dist < minDist) {
                     minDist = dist
                 }
@@ -220,7 +249,7 @@ class RainDrop(
                 positionX -= distanceFallen * (dirX / dirY)
             }
         } else {
-            spawnDelay = Random.nextFloat() * 2.0f // up to 2 seconds delay
+            spawnDelay = Random.nextFloat() * 3.0f // up to 3 seconds delay for better distribution
             isActive = false
             positionX = spawnX
             positionY = 999f

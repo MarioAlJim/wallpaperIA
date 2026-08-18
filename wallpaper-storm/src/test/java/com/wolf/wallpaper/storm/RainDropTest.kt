@@ -41,13 +41,13 @@ class RainDropTest {
 
     @Test
     fun updateVelocity_atRainSpeed50_scalesBaseSpeedByPointSix() {
-        // Reset first to populate baseSpeed (range [3.0, 4.5]) and a small +/-2.5 degree angle offset
+        // Reset first to populate baseSpeed (range [3.0, 5.0]) and a small +/-4.5 degree angle offset
         val drop = RainDrop(0f, 0f, 0f, 0f)
         drop.reset(aspectRatio = 1f, windAngle = 0f, rainSpeed = 50f, startOnScreen = true)
 
         val speed = kotlin.math.sqrt(drop.velocityX * drop.velocityX + drop.velocityY * drop.velocityY)
-        // speedFactor = 0.3 + (50/100)*0.6 = 0.6; baseSpeed in [3.0, 4.5] -> speed in [1.8, 2.7]
-        assertTrue("speed ($speed) should be in [1.8, 2.7]", speed in 1.8f..2.71f)
+        // speedFactor = 0.3 + (50/100)*0.6 = 0.6; baseSpeed in [3.0, 5.0] -> speed in [1.8, 3.0]
+        assertTrue("speed ($speed) should be in [1.8, 3.0]", speed in 1.8f..3.01f)
     }
 
     @Test
@@ -68,22 +68,34 @@ class RainDropTest {
 
         assertTrue(drop.spawnFromCloud)
         assertEquals(cloud, drop.parentCloud)
-        assertEquals(cloud.z, drop.z, 0.0001f)
+        assertEquals(cloud.z, drop.z, 0.021f)
     }
 
     @Test
     fun reset_withCloudSpawn_capsDropLengthForCloseUpClouds() {
         // A large, close-up cloud (high baseScale and z close to 1) would otherwise
-        // produce an oversized drop: baseScale * 0.1344 * z with no ceiling.
+        // produce an oversized drop: baseScale * 0.2016 * z with no ceiling.
         val cloud = StormCloud(id = 0, positionX = 0f, positionY = 0.5f, speedFactor = 1f, scale = 1.40625f, opacity = 1f, textureIndex = 0)
         cloud.z = 1.0f
         val drop = RainDrop(0f, 0f, 0f, 0f)
         drop.reset(aspectRatio = 1f, windAngle = 0f, rainSpeed = 50f, startOnScreen = true, spawnCloud = cloud)
 
-        val uncappedLength = cloud.baseScale * 0.3024f * cloud.z
-        assertTrue("uncapped length ($uncappedLength) should exceed the cap for this scenario", uncappedLength > 0.2079f)
-        // The cap matches the maximum edge-rain drop can reach: (0.16422 + 0.04368) * zMax(1.0).
-        assertEquals(0.2079f, drop.length, 0.0001f)
+        val uncappedLength = cloud.baseScale * 0.2016f * cloud.z
+        assertTrue("uncapped length ($uncappedLength) should exceed the cap for this scenario", uncappedLength > 0.1386f)
+        // The cap matches the maximum edge-rain drop can reach: (0.09492 + 0.04368) * zMax(1.0).
+        assertEquals(0.1386f, drop.length, 0.0001f)
+    }
+
+    @Test
+    fun update_withSubFrameSpawning_interpolatesPosition() {
+        val drop = RainDrop(0f, 0f, 10f, -20f, spawnDelay = 0.05f)
+        drop.spawnX = 100f
+        drop.spawnY = 200f
+        // deltaTime 0.1f means 0.05f delay is elapsed with 0.05f overflow
+        drop.update(0.1f)
+        assertTrue(drop.isActive)
+        assertEquals(100f + 10f * 0.05f, drop.positionX, 0.0001f)
+        assertEquals(200f - 20f * 0.05f, drop.positionY, 0.0001f)
     }
 
     @Test

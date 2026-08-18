@@ -52,6 +52,7 @@ class SceneManager(
 
     private val clouds = mutableListOf<StormCloud>()
     private val rainDrops = mutableListOf<RainDrop>()
+    private val rainProjectedXBuffer = FloatArray(MAX_RAIN_DROP_COUNT)
     private val windLines = mutableListOf<WindLine>()
     val lightnings = List(6) { Lightning() }
     val lightning: Lightning get() = lightnings[0]
@@ -101,8 +102,12 @@ class SceneManager(
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
         }
         val allowFallback = configProvider.getRainSpawnMode() != 1
+        var activeCount = 0
         for (drop in rainDrops) {
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback)
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingProjectedX = rainProjectedXBuffer, activeCount = activeCount)
+            if (activeCount < rainProjectedXBuffer.size) {
+                rainProjectedXBuffer[activeCount++] = drop.getProjectedX()
+            }
         }
         windLines.clear()
     }
@@ -192,6 +197,7 @@ class SceneManager(
 
         // 2. Update Rain
         val allowFallback = configProvider.getRainSpawnMode() != 1
+        
         for (drop in rainDrops) {
             drop.updateVelocity(currentWindAngle, currentRainSpeed)
             drop.update(deltaTime)
@@ -201,8 +207,15 @@ class SceneManager(
                 (drop.velocityX > 0f && drop.positionX > aspectRatio + 0.1f) ||
                 (drop.length == 0f && drop.spawnDelay <= 0f)
             if (needsReset) {
-                val existingSpawnX = rainDrops.filter { it !== drop }.map { it.spawnX }
-                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingSpawnX = existingSpawnX)
+                var activeCount = 0
+                for (otherDrop in rainDrops) {
+                    if (otherDrop !== drop) {
+                        if (activeCount < rainProjectedXBuffer.size) {
+                            rainProjectedXBuffer[activeCount++] = otherDrop.getProjectedX()
+                        }
+                    }
+                }
+                drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = false, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingProjectedX = rainProjectedXBuffer, activeCount = activeCount)
             }
         }
 
@@ -489,8 +502,13 @@ class SceneManager(
         val allowFallback = configProvider.getRainSpawnMode() != 1
         while (rainDrops.size < targetCount) {
             val drop = RainDrop(0f, 0f, 0f, 0f)
-            val existingSpawnX = rainDrops.map { it.spawnX }
-            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingSpawnX = existingSpawnX)
+            var activeCount = 0
+            for (otherDrop in rainDrops) {
+                if (activeCount < rainProjectedXBuffer.size) {
+                    rainProjectedXBuffer[activeCount++] = otherDrop.getProjectedX()
+                }
+            }
+            drop.reset(aspectRatio, currentWindAngle, currentRainSpeed, startOnScreen = true, spawnCloud = getSpawnCloudForDrop(), allowFallbackToEdge = allowFallback, existingProjectedX = rainProjectedXBuffer, activeCount = activeCount)
             rainDrops.add(drop)
         }
         

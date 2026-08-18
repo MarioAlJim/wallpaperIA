@@ -19,31 +19,31 @@ void main() {
     float y = vTexCoord.y;
 
     // R: radius of the circular head in texture space.
-    // The circle is centered at y=1 (leading edge), so the front
+    // The circle is centered at y=0.8 (junction), so the front
     // is bulbous and the rear (y=0) tapers to a sharp point.
-    float R   = 0.50;
-    float y_t = 1.0 - R; // y where the tail region ends and head begins
+    float R   = 0.60;
+    float y_t = 0.80; // The head occupies the bottom 20%, the tail occupies the top 80%
 
     float width = 0.0;
     vec3 normal = vec3(0.0, 0.0, 1.0);
 
     if (y >= y_t) {
         // ---- Rounded head (front of travel, leading edge) ----
-        // Circle centred at y=1. dy = distance from that centre.
-        float dy  = 1.0 - y;
-        width     = sqrt(max(0.0, R * R - dy * dy));
+        // dy normalized in the range [0, 1] from the junction (y=0.8) to the front (y=1.0)
+        float dy  = (y - y_t) / 0.20;
+        width     = R * sqrt(max(0.0, 1.0 - dy * dy));
 
         // Spherical normal for 3-D ball lighting
-        float r2 = (x * x + dy * dy) / (R * R);
+        float r2 = (x / R) * (x / R) + dy * dy;
         float nz = sqrt(max(0.0, 1.0 - r2));
-        normal   = vec3(x / R, -dy / R, nz);
+        normal   = vec3(x / R, dy, nz);
     } else {
         // ---- Tapered tail (trailing edge) ----
         // normalizedY: 0 = pointed tip (y=0), 1 = junction with head (y=y_t)
         float normalizedY = y / y_t;
         // Power 0.65: tail stays wide until very close to the tip,
         // then collapses to a sharp geometric point at y=0.
-        width = R * pow(normalizedY, 0.65);
+        width = R * pow(max(0.0, normalizedY), 0.65);
 
         // Cylindrical normal for edge lighting on the tail
         float x_norm = x / max(width, 0.001);
@@ -71,7 +71,7 @@ void main() {
     // tail tip (y=0) fades to 10% opacity (90% transparent).
     // Using pow with exponent 0.4 keeps the body mostly opaque and
     // only the very tip becomes strongly transparent.
-    float verticalGradient = 0.10 + 0.90 * pow(y, 0.4);
+    float verticalGradient = 0.10 + 0.90 * pow(max(0.0, y), 0.4);
 
     // Lens glow: brightest at the centre of the head
     float lensGlow = 0.4 + 0.6 * normal.z;
