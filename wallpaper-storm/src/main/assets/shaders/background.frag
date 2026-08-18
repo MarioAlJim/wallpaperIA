@@ -103,7 +103,7 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
     // 3 nearest columns are checked for every row instead.
     // We also check one row below (y = 1) to prevent the top half of spawning droplets from
     // being clipped by the cell boundary at t=0, making them appear instantaneously.
-    for (int y = -9; y <= 1; y++) {
+    for (int y = -1; y <= 9; y++) {
         for (int x = -1; x <= 1; x++) {
             highp vec2 neighbor = vec2(float(x), float(y));
             highp vec2 cell = ip + neighbor;
@@ -158,15 +158,15 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             // Position relative to the droplet's current center: starts at the top of its
             // spawn cell and moves straight down by fallDist cells as t goes 0 -> 1.
             highp vec2 localPos = fp - neighbor - vec2(laneOffsetX, 0.0);
-            localPos.y -= (t * fallDist - 0.5);
+            localPos.y += (t * fallDist - 0.5);
 
-            // Bounding box check (pruning): wider on the trailing (negative-y) side to cover
+            // Bounding box check (pruning): wider on the trailing (positive-y) side to cover
             // the tail's maximum reach (up to trailingReach), plus a margin so the tail's soft
             // edge (edgeFade below) is never culled before it has faded out.
-            if (abs(localPos.x) > radius * 1.3 || localPos.y > radius * 1.3 || localPos.y < -trailingReach * 1.1) continue;
+            if (abs(localPos.x) > radius * 1.3 || localPos.y < -radius * 1.3 || localPos.y > trailingReach * 1.1) continue;
 
             float yComp = localPos.y;
-            if (yComp < 0.0) {
+            if (yComp > 0.0) {
                 yComp *= radius / trailingReach;
             }
             highp vec2 shapePos = vec2(localPos.x * 1.2, yComp);
