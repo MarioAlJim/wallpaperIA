@@ -572,15 +572,22 @@
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
 
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarSunSize"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerSunSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
 
                         <!-- Sun Pulsation Speed -->
                         <RelativeLayout
@@ -605,15 +612,22 @@
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
 
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarSunSpeed"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerSunSpeed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
                     </LinearLayout>
 
                     <!-- Sky Theme Dropdown -->
@@ -1047,11 +1061,12 @@
                                     </LinearLayout>
                                 </com.google.android.material.card.MaterialCardView>
 
-                                <!-- Card 3: Random -->
+                                 <!-- Card 3: Random -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirRandom"
                                     android:layout_width="92dp"
                                     android:layout_height="92dp"
+                                    android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
                                     app:strokeColor="@color/settings_chip_bg_inactive"
@@ -1080,6 +1095,44 @@
                                             android:layout_width="wrap_content"
                                             android:layout_height="wrap_content"
                                             android:text="Aleatorio"
+                                            android:textColor="@color/settings_text_primary"
+                                            android:textSize="11sp"
+                                            android:gravity="center" />
+                                    </LinearLayout>
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <!-- Card 4: Chaotic -->
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardSunDirChaotic"
+                                    android:layout_width="92dp"
+                                    android:layout_height="92dp"
+                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                    app:cardCornerRadius="12dp"
+                                    app:strokeColor="@color/settings_chip_bg_inactive"
+                                    app:strokeWidth="1dp">
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:orientation="vertical"
+                                        android:gravity="center"
+                                        android:padding="6dp">
+                                        <FrameLayout
+                                            android:layout_width="38dp"
+                                            android:layout_height="50dp"
+                                            android:background="@drawable/mini_screen_bg"
+                                            android:layout_marginBottom="4dp">
+                                            <TextView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="🌀"
+                                                android:textColor="#FF5722"
+                                                android:textSize="18sp"
+                                                android:layout_gravity="center" />
+                                        </FrameLayout>
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Caótico"
                                             android:textColor="@color/settings_text_primary"
                                             android:textSize="11sp"
                                             android:gravity="center" />
@@ -1118,15 +1171,22 @@
                                     android:layout_alignParentEnd="true" />
                             </RelativeLayout>
 
-                            <com.google.android.material.slider.Slider
-                                android:id="@+id/seekBarSunMoveSpeed"
+                            <HorizontalScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:valueFrom="0"
-                                android:valueTo="100"
-                                android:stepSize="1"
-                                android:value="50"
-                                app:labelBehavior="gone" />
+                                android:scrollbars="none"
+                                android:requiresFadingEdge="horizontal"
+                                android:fadingEdgeLength="24dp">
+                                <LinearLayout
+                                    android:id="@+id/spinnerSunMoveSpeed"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="4dp"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="4dp" />
+                            </HorizontalScrollView>
                         </LinearLayout>
 
                         <!-- Sun Stationary Position Section (Horizontal Cards List) -->
@@ -1542,15 +1602,22 @@
                                 android:textSize="13sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarSunnyGodRaysIntensity"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerSunnyGodRaysIntensity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
                     </LinearLayout>
 
                     <!-- Lens Flare Switch -->
@@ -1612,15 +1679,22 @@
                                 android:textSize="13sp"
                                 android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarSunnyLensFlareIntensity"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerSunnyLensFlareIntensity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
                     </LinearLayout>
 
 
@@ -2225,6 +2299,7 @@
                                         android:id="@+id/cardMoonDirRandom"
                                         android:layout_width="92dp"
                                         android:layout_height="92dp"
+                                        android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
                                         app:strokeColor="@color/settings_chip_bg_inactive"
@@ -2253,6 +2328,44 @@
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
                                                 android:text="Aleatorio"
+                                                android:textColor="@color/settings_text_primary"
+                                                android:textSize="11sp"
+                                                android:gravity="center" />
+                                        </LinearLayout>
+                                    </com.google.android.material.card.MaterialCardView>
+
+                                    <!-- Card 4: Chaotic -->
+                                    <com.google.android.material.card.MaterialCardView
+                                        android:id="@+id/cardMoonDirChaotic"
+                                        android:layout_width="92dp"
+                                        android:layout_height="92dp"
+                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                        app:cardCornerRadius="12dp"
+                                        app:strokeColor="@color/settings_chip_bg_inactive"
+                                        app:strokeWidth="1dp">
+                                        <LinearLayout
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:orientation="vertical"
+                                            android:gravity="center"
+                                            android:padding="6dp">
+                                            <FrameLayout
+                                                android:layout_width="38dp"
+                                                android:layout_height="50dp"
+                                                android:background="@drawable/mini_screen_bg"
+                                                android:layout_marginBottom="4dp">
+                                                <TextView
+                                                    android:layout_width="wrap_content"
+                                                    android:layout_height="wrap_content"
+                                                    android:text="🌀"
+                                                    android:textColor="#FF5722"
+                                                    android:textSize="18sp"
+                                                    android:layout_gravity="center" />
+                                            </FrameLayout>
+                                            <TextView
+                                                android:layout_width="wrap_content"
+                                                android:layout_height="wrap_content"
+                                                android:text="Caótico"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:gravity="center" />
@@ -2289,16 +2402,23 @@
                                         android:layout_alignParentEnd="true" />
                                 </RelativeLayout>
 
-                                <com.google.android.material.slider.Slider
-                                    android:id="@+id/seekBarMoonMoveSpeed"
+                                <HorizontalScrollView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:valueFrom="0"
-                                    android:valueTo="100"
-                                    android:stepSize="1"
-                                    android:value="50"
-                                    app:labelBehavior="gone"
-                                    android:layout_marginBottom="8dp" />
+                                    android:scrollbars="none"
+                                    android:requiresFadingEdge="horizontal"
+                                    android:fadingEdgeLength="24dp"
+                                    android:layout_marginBottom="8dp">
+                                    <LinearLayout
+                                        android:id="@+id/spinnerMoonMoveSpeed"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:paddingBottom="8dp"
+                                        android:paddingTop="4dp"
+                                        android:paddingStart="4dp"
+                                        android:paddingEnd="4dp" />
+                                </HorizontalScrollView>
                             </LinearLayout>
 
                             <!-- Moon Stationary Position Section -->
@@ -2890,16 +3010,23 @@
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                                 <TextView android:id="@+id/textViewStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
-                            <com.google.android.material.slider.Slider
-                                android:id="@+id/seekBarStarDensity"
+                            <HorizontalScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:valueFrom="0"
-                                android:valueTo="100"
-                                android:stepSize="1"
-                                android:value="60"
-                                app:labelBehavior="gone"
-                                android:layout_marginBottom="8dp" />
+                                android:scrollbars="none"
+                                android:requiresFadingEdge="horizontal"
+                                android:fadingEdgeLength="24dp"
+                                android:layout_marginBottom="8dp">
+                                <LinearLayout
+                                    android:id="@+id/spinnerStarDensity"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="4dp"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="4dp" />
+                            </HorizontalScrollView>
                         </LinearLayout>
 
                         <!-- Star Mode -->
@@ -2973,16 +3100,23 @@
                                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas Fugaces" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                                 <TextView android:id="@+id/textViewShootingStarsDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                             </RelativeLayout>
-                            <com.google.android.material.slider.Slider
-                                android:id="@+id/seekBarShootingStarsDensity"
+                            <HorizontalScrollView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:valueFrom="0"
-                                android:valueTo="100"
-                                android:stepSize="1"
-                                android:value="50"
-                                app:labelBehavior="gone"
-                                android:layout_marginBottom="8dp" />
+                                android:scrollbars="none"
+                                android:requiresFadingEdge="horizontal"
+                                android:fadingEdgeLength="24dp"
+                                android:layout_marginBottom="8dp">
+                                <LinearLayout
+                                    android:id="@+id/spinnerShootingStarsDensity"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="4dp"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="4dp" />
+                            </HorizontalScrollView>
                         </LinearLayout>
 
                         <!-- Fireflies Title/Toggle -->
@@ -3127,48 +3261,69 @@
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ciclo Día/Noche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarGradientCycleSpeed"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="30"
-                            app:labelBehavior="gone"
-                            android:layout_marginBottom="8dp" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerGradientCycleSpeed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
 
                         <!-- Combined Sun Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño del Sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarCombinedSunSize"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone"
-                            android:layout_marginBottom="8dp" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerCombinedSunSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
 
                         <!-- Combined Moon Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tamaño de la Luna" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedMoonSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarCombinedMoonSize"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="50"
-                            app:labelBehavior="gone"
-                            android:layout_marginBottom="8dp" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerCombinedMoonSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
 
                         <!-- Combined Moon Phase -->
                         <TextView
@@ -3735,16 +3890,23 @@
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Densidad de Estrellas" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedStarDensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="60%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
                         </RelativeLayout>
-                        <com.google.android.material.slider.Slider
-                            android:id="@+id/seekBarCombinedStarDensity"
+                        <HorizontalScrollView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:valueFrom="0"
-                            android:valueTo="100"
-                            android:stepSize="1"
-                            android:value="60"
-                            app:labelBehavior="gone"
-                            android:layout_marginBottom="8dp" />
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerCombinedStarDensity"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
 
                         <!-- Trajectory Direction -->
                         <TextView

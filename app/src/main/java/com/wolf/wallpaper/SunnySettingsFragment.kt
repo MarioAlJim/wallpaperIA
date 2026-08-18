@@ -1,7 +1,12 @@
 package com.wolf.wallpaper
 
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Html
@@ -64,20 +69,26 @@ class SunnySettingsFragment : Fragment() {
         setupCloudDensityCards(view)
 
         // 3. Setup Sunny Main controls
-        setupSlider(view, R.id.seekBarSunSize, R.id.textViewSunSizeValue, configManager.getSunSize()) { value ->
-            configManager.setSunSize(value)
-        }
+        setupValueCardSelector(
+            view, R.id.spinnerSunSize, R.id.textViewSunSizeValue,
+            arrayOf("Mínimo", "Pequeño", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getSunSize()
+        ) { value -> configManager.setSunSize(value) }
 
-        setupSlider(view, R.id.seekBarSunSpeed, R.id.textViewSunSpeedValue, configManager.getSunSpeed()) { value ->
-            configManager.setSunSpeed(value)
-        }
+        setupValueCardSelector(
+            view, R.id.spinnerSunSpeed, R.id.textViewSunSpeedValue,
+            arrayOf("Estático", "Lento", "Normal", "Rápido", "Extremo"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getSunSpeed()
+        ) { value -> configManager.setSunSpeed(value) }
 
         setupSunnyThemeCards(view)
         setupSunDirectionCards(view)
 
-        setupSlider(view, R.id.seekBarSunMoveSpeed, R.id.textViewSunMoveSpeedValue, configManager.getSunMoveSpeed()) { value ->
-            configManager.setSunMoveSpeed(value)
-        }
+        setupValueCardSelector(
+            view, R.id.spinnerSunMoveSpeed, R.id.textViewSunMoveSpeedValue,
+            arrayOf("Detenido", "Lento", "Normal", "Rápido", "Extremo"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getSunMoveSpeed()
+        ) { value -> configManager.setSunMoveSpeed(value) }
         setupSunStationaryCards(view)
         updateSunMoveSpeedSliderVisibility(view, configManager.getSunPathDirection())
 
@@ -115,9 +126,11 @@ class SunnySettingsFragment : Fragment() {
                 updateSummaries(view)
             }
         }
-        setupSlider(view, R.id.seekBarSunnyGodRaysIntensity, R.id.textViewSunnyGodRaysIntensityValue, configManager.getSunnyGodRaysIntensity()) { value ->
-            configManager.setSunnyGodRaysIntensity(value)
-        }
+        setupValueCardSelector(
+            view, R.id.spinnerSunnyGodRaysIntensity, R.id.textViewSunnyGodRaysIntensityValue,
+            arrayOf("Sin rayos", "Tenue", "Normal", "Brillante", "Resplandor total"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getSunnyGodRaysIntensity()
+        ) { value -> configManager.setSunnyGodRaysIntensity(value) }
 
         // Setup Sunny Lens Flare
         val switchSunnyLensFlare = view.findViewById<SwitchMaterial>(R.id.switchSunnyLensFlare)
@@ -132,9 +145,11 @@ class SunnySettingsFragment : Fragment() {
                 updateSummaries(view)
             }
         }
-        setupSlider(view, R.id.seekBarSunnyLensFlareIntensity, R.id.textViewSunnyLensFlareIntensityValue, configManager.getSunnyLensFlareIntensity()) { value ->
-            configManager.setSunnyLensFlareIntensity(value)
-        }
+        setupValueCardSelector(
+            view, R.id.spinnerSunnyLensFlareIntensity, R.id.textViewSunnyLensFlareIntensityValue,
+            arrayOf("Sin destellos", "Sutil", "Normal", "Llamativo", "Destello total"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getSunnyLensFlareIntensity()
+        ) { value -> configManager.setSunnyLensFlareIntensity(value) }
 
         // Setup Sunny Gyroscope Parallax
         val switchSunnyGyro = view.findViewById<SwitchMaterial>(R.id.switchSunnyGyro)
@@ -202,118 +217,9 @@ class SunnySettingsFragment : Fragment() {
 
     private fun updateTextView(sliderId: Int, textView: TextView, value: Int) {
         when (sliderId) {
-            R.id.seekBarSunSize -> {
-                val desc = when {
-                    value <= 20 -> "Pequeño"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Grande"
-                    else -> "Gigante"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarSunSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Lento"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Rápido"
-                    else -> "Pulsación extrema"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarSunMoveSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Lento"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Rápido"
-                    else -> "Extremo"
-                }
-                textView.text = "$value% • $desc"
-            }
             R.id.seekBarSunCustomX, R.id.seekBarSunCustomY,
             R.id.seekBarMoonCustomX, R.id.seekBarMoonCustomY -> {
                 textView.text = "$value%"
-            }
-            R.id.seekBarSunnyGodRaysIntensity -> {
-                val desc = when {
-                    value <= 20 -> "Tenue"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Brillante"
-                    else -> "Resplandor total"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarSunnyLensFlareIntensity -> {
-                val desc = when {
-                    value <= 20 -> "Sutil"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Llamativo"
-                    else -> "Destello total"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarMoonMoveSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Lento"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Rápido"
-                    else -> "Extremo"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarStarDensity -> {
-                val desc = when {
-                    value <= 20 -> "Pocas"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Muchas"
-                    else -> "Cielo lleno"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarShootingStarsDensity -> {
-                val desc = when {
-                    value <= 20 -> "Pocas"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Muchas"
-                    else -> "Lluvia de estrellas"
-                }
-                textView.text = "$value% • $desc"
-            }
-
-            R.id.seekBarGradientCycleSpeed -> {
-                val desc = when {
-                    value <= 20 -> "Muy lento"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Rápido"
-                    else -> "Muy rápido"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarCombinedSunSize -> {
-                val desc = when {
-                    value <= 20 -> "Pequeño"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Grande"
-                    else -> "Gigante"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarCombinedMoonSize -> {
-                val desc = when {
-                    value <= 20 -> "Pequeña"
-                    value <= 50 -> "Normal"
-                    value <= 80 -> "Grande"
-                    else -> "Gigante"
-                }
-                textView.text = "$value% • $desc"
-            }
-            R.id.seekBarCombinedStarDensity -> {
-                val desc = when {
-                    value <= 20 -> "Pocas"
-                    value <= 50 -> "Normal"
-                    value <= 85 -> "Muchas"
-                    else -> "Cielo lleno"
-                }
-                textView.text = "$value% • $desc"
             }
         }
     }
@@ -328,6 +234,39 @@ class SunnySettingsFragment : Fragment() {
                 onSelected(position)
                 updateSummaries(parent)
             }
+        }
+    }
+
+    /**
+     * Card-selector replacement for [setupSlider], used by the 12 controls converted from
+     * sliders to 5-card rows (see SettingsCardSelectorHelper). Not built on top of
+     * [setupDropdown] because that one targets `AutoCompleteTextView` (spinnerSunnyBackground /
+     * spinnerCombinedTrajectory); this targets an empty `LinearLayout` container instead.
+     */
+    private fun setupValueCardSelector(
+        parent: View,
+        containerId: Int,
+        valueTextViewId: Int,
+        options: Array<String>,
+        values: IntArray,
+        currentValue: Int,
+        onValueSelected: (Int) -> Unit
+    ) {
+        val container = parent.findViewById<LinearLayout>(containerId) ?: return
+        val valueTv = parent.findViewById<TextView>(valueTextViewId)
+        val initialIndex = SettingsCardSelectorHelper.closestValueIndex(values, currentValue)
+        valueTv?.text = options.getOrNull(initialIndex)
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialIndex,
+            previewFactory = { index -> SunnyCardPreviewView(requireContext(), containerId, index) },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg
+        ) { position ->
+            onValueSelected(values[position])
+            valueTv?.text = options[position]
+            updateSummaries(parent)
         }
     }
 
@@ -972,25 +911,37 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupNightAndCombinedSliders(parent: View) {
-        setupSlider(parent, R.id.seekBarMoonMoveSpeed, R.id.textViewMoonMoveSpeedValue, configManager.getMoonMoveSpeed()) { value ->
-            configManager.setMoonMoveSpeed(value)
-        }
-        setupSlider(parent, R.id.seekBarStarDensity, R.id.textViewStarDensityValue, configManager.getStarDensity()) { value ->
-            configManager.setStarDensity(value)
-        }
+        setupValueCardSelector(
+            parent, R.id.spinnerMoonMoveSpeed, R.id.textViewMoonMoveSpeedValue,
+            arrayOf("Detenida", "Lenta", "Normal", "Rápida", "Extrema"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getMoonMoveSpeed()
+        ) { value -> configManager.setMoonMoveSpeed(value) }
+        setupValueCardSelector(
+            parent, R.id.spinnerStarDensity, R.id.textViewStarDensityValue,
+            arrayOf("Sin estrellas", "Pocas", "Normal", "Muchas", "Cielo lleno"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getStarDensity()
+        ) { value -> configManager.setStarDensity(value) }
 
-        setupSlider(parent, R.id.seekBarGradientCycleSpeed, R.id.textViewGradientCycleSpeedValue, configManager.getGradientCycleSpeed()) { value ->
-            configManager.setGradientCycleSpeed(value)
-        }
-        setupSlider(parent, R.id.seekBarCombinedSunSize, R.id.textViewCombinedSunSizeValue, configManager.getCombinedSunSize()) { value ->
-            configManager.setCombinedSunSize(value)
-        }
-        setupSlider(parent, R.id.seekBarCombinedMoonSize, R.id.textViewCombinedMoonSizeValue, configManager.getCombinedMoonSize()) { value ->
-            configManager.setCombinedMoonSize(value)
-        }
-        setupSlider(parent, R.id.seekBarCombinedStarDensity, R.id.textViewCombinedStarDensityValue, configManager.getCombinedStarDensity()) { value ->
-            configManager.setCombinedStarDensity(value)
-        }
+        setupValueCardSelector(
+            parent, R.id.spinnerGradientCycleSpeed, R.id.textViewGradientCycleSpeedValue,
+            arrayOf("Congelado", "Muy lento", "Normal", "Rápido", "Muy rápido"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getGradientCycleSpeed()
+        ) { value -> configManager.setGradientCycleSpeed(value) }
+        setupValueCardSelector(
+            parent, R.id.spinnerCombinedSunSize, R.id.textViewCombinedSunSizeValue,
+            arrayOf("Mínimo", "Pequeño", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getCombinedSunSize()
+        ) { value -> configManager.setCombinedSunSize(value) }
+        setupValueCardSelector(
+            parent, R.id.spinnerCombinedMoonSize, R.id.textViewCombinedMoonSizeValue,
+            arrayOf("Mínima", "Pequeña", "Normal", "Grande", "Gigante"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getCombinedMoonSize()
+        ) { value -> configManager.setCombinedMoonSize(value) }
+        setupValueCardSelector(
+            parent, R.id.spinnerCombinedStarDensity, R.id.textViewCombinedStarDensityValue,
+            arrayOf("Sin estrellas", "Pocas", "Normal", "Muchas", "Cielo lleno"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getCombinedStarDensity()
+        ) { value -> configManager.setCombinedStarDensity(value) }
 
         // Setup Shooting Stars switch and slider
         val switchShootingStars = parent.findViewById<SwitchMaterial>(R.id.switchShootingStars)
@@ -1006,9 +957,11 @@ class SunnySettingsFragment : Fragment() {
             }
         }
 
-        setupSlider(parent, R.id.seekBarShootingStarsDensity, R.id.textViewShootingStarsDensityValue, configManager.getShootingStarsDensity()) { value ->
-            configManager.setShootingStarsDensity(value)
-        }
+        setupValueCardSelector(
+            parent, R.id.spinnerShootingStarsDensity, R.id.textViewShootingStarsDensityValue,
+            arrayOf("Ninguna", "Pocas", "Normal", "Muchas", "Lluvia de estrellas"), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getShootingStarsDensity()
+        ) { value -> configManager.setShootingStarsDensity(value) }
 
         // Setup Fireflies switch
         val switchFireflies = parent.findViewById<SwitchMaterial>(R.id.switchFireflies)
@@ -1416,4 +1369,262 @@ class SunnySettingsFragment : Fragment() {
     }
 
 
+}
+
+/**
+ * Canvas-drawn preview for Sunny's card selectors (see [SunnySettingsFragment.setupValueCardSelector]),
+ * mirroring the shape of Storm's `StormCardPreviewView`: one small static icon per option index,
+ * keyed by the container id. Not `inner` - it needs nothing from the fragment, only a [Context].
+ */
+private class SunnyCardPreviewView(
+    context: Context,
+    private val containerId: Int,
+    private val optionIndex: Int
+) : View(context) {
+
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val density = context.resources.displayMetrics.density
+    private fun Int.px(): Float = this * density
+    private fun Float.px(): Float = this * density
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        val w = width.toFloat()
+        val h = height.toFloat()
+        if (w <= 0 || h <= 0) return
+
+        when (containerId) {
+            R.id.spinnerSunSize, R.id.spinnerCombinedSunSize -> {
+                val radii = floatArrayOf(3f, 5f, 7f, 9f, 11f)
+                drawSunDisc(canvas, w * 0.5f, h * 0.5f, radii.getOrElse(optionIndex) { 7f }.px())
+            }
+            R.id.spinnerCombinedMoonSize -> {
+                val radii = floatArrayOf(3f, 5f, 7f, 9f, 11f)
+                drawMoonDisc(canvas, w * 0.5f, h * 0.5f, radii.getOrElse(optionIndex) { 7f }.px())
+            }
+            R.id.spinnerSunSpeed -> {
+                drawSunDisc(canvas, w * 0.5f, h * 0.5f, 5f.px())
+                drawPulseRings(canvas, w * 0.5f, h * 0.5f, 5f.px())
+            }
+            R.id.spinnerSunMoveSpeed -> drawTrajectoryPreview(canvas, w, h, isSun = true)
+            R.id.spinnerMoonMoveSpeed -> drawTrajectoryPreview(canvas, w, h, isSun = false)
+            R.id.spinnerSunnyGodRaysIntensity -> drawGodRaysPreview(canvas, w, h)
+            R.id.spinnerSunnyLensFlareIntensity -> drawLensFlarePreview(canvas, w, h)
+            R.id.spinnerStarDensity, R.id.spinnerCombinedStarDensity -> drawStarField(canvas, w, h)
+            R.id.spinnerShootingStarsDensity -> drawShootingStarsPreview(canvas, w, h)
+            R.id.spinnerGradientCycleSpeed -> drawCyclePreview(canvas, w, h)
+        }
+    }
+
+    private fun drawSunDisc(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+        paint.shader = null
+        val glowColors = intArrayOf(adjustAlpha(SUN_GLOW, 0.35f), adjustAlpha(SUN_GLOW, 0f))
+        paint.style = Paint.Style.FILL
+        paint.shader = RadialGradient(cx, cy, radius * 2.2f, glowColors, null, Shader.TileMode.CLAMP)
+        canvas.drawCircle(cx, cy, radius * 2.2f, paint)
+        paint.shader = null
+        paint.color = SUN_COLOR
+        canvas.drawCircle(cx, cy, radius, paint)
+    }
+
+    /** A disc with a bite taken out of it (in the frame's own background color) to read as a crescent. */
+    private fun drawMoonDisc(canvas: Canvas, cx: Float, cy: Float, radius: Float) {
+        paint.shader = null
+        paint.style = Paint.Style.FILL
+        paint.color = MOON_COLOR
+        canvas.drawCircle(cx, cy, radius, paint)
+        paint.color = FRAME_BG
+        canvas.drawCircle(cx + radius * 0.55f, cy - radius * 0.3f, radius * 0.85f, paint)
+    }
+
+    private fun drawPulseRings(canvas: Canvas, cx: Float, cy: Float, baseRadius: Float) {
+        val ringCount = intArrayOf(0, 1, 2, 3, 4).getOrElse(optionIndex) { 0 }
+        if (ringCount <= 0) return
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1f.px()
+        paint.color = adjustAlpha(SUN_GLOW, 0.5f)
+        val gaps = floatArrayOf(0f, 5f, 4f, 3.2f, 2.6f)
+        val gap = gaps.getOrElse(optionIndex) { 4f }.px()
+        for (i in 1..ringCount) {
+            canvas.drawCircle(cx, cy, baseRadius + gap * i, paint)
+        }
+    }
+
+    /** Sun/moon body with trailing motion-dashes behind it; dash count grows with speed. */
+    private fun drawTrajectoryPreview(canvas: Canvas, w: Float, h: Float, isSun: Boolean) {
+        val bodyR = 5f.px()
+        val bodyCx = w * 0.68f
+        val bodyCy = h * 0.4f
+        if (isSun) drawSunDisc(canvas, bodyCx, bodyCy, bodyR) else drawMoonDisc(canvas, bodyCx, bodyCy, bodyR)
+
+        val dashCount = intArrayOf(0, 1, 2, 3, 4).getOrElse(optionIndex) { 0 }
+        if (dashCount > 0) {
+            paint.shader = null
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1.3f.px()
+            paint.strokeCap = Paint.Cap.ROUND
+            paint.color = adjustAlpha(if (isSun) SUN_COLOR else MOON_COLOR, 0.55f)
+            var x = bodyCx - bodyR - 3f.px()
+            for (i in 0 until dashCount) {
+                val dashLen = (3 + i).px()
+                canvas.drawLine(x, bodyCy, x - dashLen, bodyCy, paint)
+                x -= dashLen + 2.5f.px()
+            }
+        } else {
+            paint.shader = null
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1f.px()
+            paint.color = adjustAlpha(Color.WHITE, 0.25f)
+            canvas.drawLine(w * 0.2f, h * 0.85f, w * 0.8f, h * 0.85f, paint)
+        }
+    }
+
+    private fun drawGodRaysPreview(canvas: Canvas, w: Float, h: Float) {
+        val cx = w * 0.5f
+        val cy = h * 0.32f
+        val rayCounts = intArrayOf(0, 3, 5, 7, 9)
+        val alphas = floatArrayOf(0f, 0.35f, 0.55f, 0.8f, 1.0f)
+        val count = rayCounts.getOrElse(optionIndex) { 0 }
+        if (count > 0) {
+            paint.shader = null
+            paint.style = Paint.Style.STROKE
+            paint.strokeCap = Paint.Cap.ROUND
+            paint.strokeWidth = 1.3f.px()
+            paint.color = adjustAlpha(SUN_RAY, alphas.getOrElse(optionIndex) { 1f })
+            val len = (6 + optionIndex * 2).px()
+            val innerR = 7f.px()
+            for (i in 0 until count) {
+                val t = if (count == 1) 0.5 else i.toDouble() / (count - 1)
+                val angle = Math.PI * (0.15 + 0.7 * t)
+                val sx = cx + (innerR * Math.cos(angle)).toFloat()
+                val sy = cy + (innerR * Math.sin(angle)).toFloat()
+                val ex = cx + ((innerR + len) * Math.cos(angle)).toFloat()
+                val ey = cy + ((innerR + len) * Math.sin(angle)).toFloat()
+                canvas.drawLine(sx, sy, ex, ey, paint)
+            }
+        }
+        drawSunDisc(canvas, cx, cy, 6f.px())
+    }
+
+    private fun drawLensFlarePreview(canvas: Canvas, w: Float, h: Float) {
+        val alphas = floatArrayOf(0f, 0.25f, 0.45f, 0.65f, 0.85f)
+        val ghostCounts = intArrayOf(0, 1, 2, 3, 3)
+        val alpha = alphas.getOrElse(optionIndex) { 0f }
+        val cx = w * 0.3f
+        val cy = h * 0.3f
+        if (alpha > 0f) {
+            paint.style = Paint.Style.FILL
+            val glowColors = intArrayOf(adjustAlpha(FLARE_COLOR, alpha), adjustAlpha(FLARE_COLOR, 0f))
+            val glowRadius = w * 0.42f
+            paint.shader = RadialGradient(cx, cy, glowRadius, glowColors, null, Shader.TileMode.CLAMP)
+            canvas.drawCircle(cx, cy, glowRadius, paint)
+            paint.shader = null
+        }
+        paint.style = Paint.Style.FILL
+        paint.color = adjustAlpha(FLARE_COLOR, alpha * 0.7f)
+        val ghosts = ghostCounts.getOrElse(optionIndex) { 0 }
+        for (i in 1..ghosts) {
+            val t = i / 4f
+            canvas.drawCircle(cx + (w * 0.5f) * t, cy + (h * 0.5f) * t, (5 - i).coerceAtLeast(1).px(), paint)
+        }
+    }
+
+    private fun drawStarField(canvas: Canvas, w: Float, h: Float) {
+        val counts = intArrayOf(0, 4, 9, 18, 30)
+        val count = counts.getOrElse(optionIndex) { 9 }
+        paint.shader = null
+        if (count <= 0) return
+        val random = java.util.Random(optionIndex * 100L + 11)
+        paint.style = Paint.Style.FILL
+        for (i in 0 until count) {
+            paint.color = adjustAlpha(STAR_COLOR, 0.6f + random.nextFloat() * 0.4f)
+            val r = (0.8f + random.nextFloat() * 0.8f).px()
+            canvas.drawCircle(random.nextFloat() * w, random.nextFloat() * h, r, paint)
+        }
+        if (optionIndex >= 3) {
+            paint.color = STAR_COLOR
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1f.px()
+            val cx = w * 0.5f
+            val cy = h * 0.3f
+            val s = 5f.px()
+            canvas.drawLine(cx - s, cy, cx + s, cy, paint)
+            canvas.drawLine(cx, cy - s, cx, cy + s, paint)
+        }
+    }
+
+    private fun drawShootingStarsPreview(canvas: Canvas, w: Float, h: Float) {
+        paint.shader = null
+        // A handful of faint static stars so index 0 (no shooting stars) isn't a bare frame.
+        val bgRandom = java.util.Random(7)
+        paint.style = Paint.Style.FILL
+        for (i in 0 until 5) {
+            paint.color = adjustAlpha(STAR_COLOR, 0.25f)
+            canvas.drawCircle(bgRandom.nextFloat() * w, bgRandom.nextFloat() * h * 0.6f, 0.8f.px(), paint)
+        }
+        val counts = intArrayOf(0, 1, 2, 3, 5)
+        val count = counts.getOrElse(optionIndex) { 0 }
+        if (count <= 0) return
+        val random = java.util.Random(optionIndex * 100L + 21)
+        for (i in 0 until count) {
+            val headX = random.nextFloat() * w * 0.6f + w * 0.3f
+            val headY = random.nextFloat() * h * 0.4f
+            val length = 10f.px() + random.nextFloat() * 6f.px()
+            val tailX = headX - length
+            val tailY = headY + length * 0.55f
+            paint.style = Paint.Style.STROKE
+            paint.strokeCap = Paint.Cap.ROUND
+            paint.strokeWidth = 1.2f.px()
+            paint.shader = LinearGradient(headX, headY, tailX, tailY, STAR_COLOR, adjustAlpha(STAR_COLOR, 0f), Shader.TileMode.CLAMP)
+            canvas.drawLine(headX, headY, tailX, tailY, paint)
+            paint.shader = null
+            paint.style = Paint.Style.FILL
+            paint.color = STAR_COLOR
+            canvas.drawCircle(headX, headY, 1.3f.px(), paint)
+        }
+    }
+
+    private fun drawCyclePreview(canvas: Canvas, w: Float, h: Float) {
+        paint.style = Paint.Style.FILL
+        paint.shader = LinearGradient(0f, 0f, 0f, h, CYCLE_NIGHT, CYCLE_DAY, Shader.TileMode.CLAMP)
+        canvas.drawRect(0f, 0f, w, h, paint)
+        paint.shader = null
+
+        val count = intArrayOf(0, 1, 2, 3, 4).getOrElse(optionIndex) { 0 }
+        if (count == 0) {
+            paint.style = Paint.Style.FILL
+            paint.color = adjustAlpha(Color.WHITE, 0.85f)
+            canvas.drawRect(w * 0.42f, h * 0.42f, w * 0.47f, h * 0.58f, paint)
+            canvas.drawRect(w * 0.53f, h * 0.42f, w * 0.58f, h * 0.58f, paint)
+        } else {
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1.3f.px()
+            paint.strokeCap = Paint.Cap.ROUND
+            paint.color = adjustAlpha(Color.WHITE, 0.85f)
+            val cy = h * 0.5f
+            val startX = w * 0.5f - (count - 1) * 4f.px()
+            for (i in 0 until count) {
+                val cx = startX + i * 8f.px()
+                canvas.drawLine(cx - 3f.px(), cy - 4f.px(), cx + 3f.px(), cy, paint)
+                canvas.drawLine(cx + 3f.px(), cy, cx - 3f.px(), cy + 4f.px(), paint)
+            }
+        }
+    }
+
+    private fun adjustAlpha(color: Int, factor: Float): Int {
+        val alpha = Math.round(Color.alpha(color) * factor)
+        return Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color))
+    }
+
+    companion object {
+        private val SUN_COLOR = Color.parseColor("#FFC107")
+        private val SUN_GLOW = Color.parseColor("#FFD54F")
+        private val SUN_RAY = Color.parseColor("#FFD54F")
+        private val MOON_COLOR = Color.parseColor("#ECEFF1")
+        private val FRAME_BG = Color.parseColor("#1A1A24")
+        private val STAR_COLOR = Color.WHITE
+        private val FLARE_COLOR = Color.parseColor("#FFF3E0")
+        private val CYCLE_NIGHT = Color.parseColor("#1A0D40")
+        private val CYCLE_DAY = Color.parseColor("#F2731A")
+    }
 }
