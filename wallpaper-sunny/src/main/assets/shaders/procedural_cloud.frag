@@ -50,52 +50,29 @@ void main() {
     // Seed based on the variation uniform
     float seed = uVariation;
 
-    // --- Weights to dynamically enable/disable ellipses (adding more or fewer ellipses) ---
-    float w1 = 1.0; // Main body (always present)
-    float w2 = 1.0; // Left body (always present)
-    float w3 = 1.0; // Right body (always present)
-    
-    // Ellipses 4 & 5 are optional (present in ~70% and ~65% of clouds respectively)
-    float w4 = hash(seed + 40.0) > 0.3 ? 1.0 : 0.0;
-    float w5 = hash(seed + 50.0) > 0.35 ? 1.0 : 0.0;
-    
-    // Ellipses 6, 7 & 8 are extra optional domes to add complexity to some clouds
-    float w6 = hash(seed + 60.0) > 0.6 ? 1.0 : 0.0; // Extra far-left dome (~40% chance)
-    float w7 = hash(seed + 70.0) > 0.6 ? 1.0 : 0.0; // Extra far-right dome (~40% chance)
-    float w8 = hash(seed + 80.0) > 0.7 ? 1.0 : 0.0; // Extra upper-center dome (~30% chance)
+    // --- Weights to dynamically enable/disable ellipses (varying from 1 to 4 ellipses) ---
+    float randVal = hash(seed + 99.0);
+    float w1 = 1.0;                            // Siempre activo (Cuerpo Principal)
+    float w2 = randVal > 0.25 ? 1.0 : 0.0;     // Activo para >= 2 elipses
+    float w3 = randVal > 0.50 ? 1.0 : 0.0;     // Activo para >= 3 elipses
+    float w4 = randVal > 0.75 ? 1.0 : 0.0;     // Activo para 4 elipses
 
     // --- Dynamic variations based on uVariation ---
-    // Ellipse 1 (Main body)
-    vec2 c1 = vec2(0.0, 0.0);
-    vec2 r1 = vec2(0.5125, 0.3125) * (0.9 + 0.2 * hash(seed + 1.15));
+    // Ellipse 1 (Main body - E1)
+    vec2 c1 = vec2((hash(seed + 1.0) - 0.5) * 0.08, (hash(seed + 2.0) - 0.5) * 0.04);
+    vec2 r1 = vec2(0.42 + 0.16 * hash(seed + 3.0), 0.24 + 0.08 * hash(seed + 4.0));
 
-    // Ellipse 2 (Left)
-    vec2 c2 = vec2(-0.375 - 0.05 * hash(seed + 2.25), -0.0875 + 0.04 * hash(seed + 3.35));
-    vec2 r2 = vec2(0.3625, 0.25) * (0.85 + 0.3 * hash(seed + 4.45));
+    // Ellipse 2 (Left body - E2)
+    vec2 c2 = vec2(c1.x - r1.x * (0.45 + 0.25 * hash(seed + 5.0)), c1.y - 0.05 + 0.05 * hash(seed + 6.0));
+    vec2 r2 = r1 * (0.55 + 0.35 * hash(seed + 7.0));
 
-    // Ellipse 3 (Right)
-    vec2 c3 = vec2(0.375 + 0.05 * hash(seed + 5.55), -0.0875 + 0.04 * hash(seed + 6.65));
-    vec2 r3 = vec2(0.3625, 0.25) * (0.85 + 0.3 * hash(seed + 7.75));
+    // Ellipse 3 (Right body - E3)
+    vec2 c3 = vec2(c1.x + r1.x * (0.45 + 0.25 * hash(seed + 8.0)), c1.y - 0.05 + 0.05 * hash(seed + 9.0));
+    vec2 r3 = r1 * (0.55 + 0.35 * hash(seed + 10.0));
 
-    // Ellipse 4 (Top-Left)
-    vec2 c4 = vec2(-0.1875 - 0.04 * hash(seed + 8.85), 0.1875 + 0.04 * hash(seed + 9.95));
-    vec2 r4 = vec2(0.325, 0.25) * (0.85 + 0.3 * hash(seed + 10.05));
-
-    // Ellipse 5 (Top-Right)
-    vec2 c5 = vec2(0.1875 + 0.04 * hash(seed + 11.15), 0.15 + 0.04 * hash(seed + 12.25));
-    vec2 r5 = vec2(0.30, 0.23125) * (0.85 + 0.3 * hash(seed + 13.35));
-
-    // Ellipse 6 (Extra far-left dome)
-    vec2 c6 = vec2(-0.45 - 0.03 * hash(seed + 61.15), -0.05 + 0.03 * hash(seed + 62.25));
-    vec2 r6 = vec2(0.24, 0.18) * (0.8 + 0.3 * hash(seed + 63.35));
-
-    // Ellipse 7 (Extra far-right dome)
-    vec2 c7 = vec2(0.45 + 0.03 * hash(seed + 71.15), -0.05 + 0.03 * hash(seed + 72.25));
-    vec2 r7 = vec2(0.24, 0.18) * (0.8 + 0.3 * hash(seed + 73.35));
-
-    // Ellipse 8 (Extra upper-center dome)
-    vec2 c8 = vec2(0.0 + 0.05 * (hash(seed + 81.15) - 0.5), 0.22 + 0.03 * hash(seed + 82.25));
-    vec2 r8 = vec2(0.28, 0.20) * (0.8 + 0.3 * hash(seed + 83.35));
+    // Ellipse 4 (Top dome - E4)
+    vec2 c4 = vec2(c1.x + (hash(seed + 11.0) - 0.5) * r1.x * 0.5, c1.y + r1.y * (0.35 + 0.35 * hash(seed + 12.0)));
+    vec2 r4 = r1 * (0.45 + 0.35 * hash(seed + 13.0));
 
     // --- Body Ellipses ---
     float bodyAlpha = 0.0;
@@ -103,10 +80,6 @@ void main() {
     bodyAlpha = max(bodyAlpha, w2 * ellipseAlpha(p, c2, r2));
     bodyAlpha = max(bodyAlpha, w3 * ellipseAlpha(p, c3, r3));
     bodyAlpha = max(bodyAlpha, w4 * ellipseAlpha(p, c4, r4));
-    bodyAlpha = max(bodyAlpha, w5 * ellipseAlpha(p, c5, r5));
-    bodyAlpha = max(bodyAlpha, w6 * ellipseAlpha(p, c6, r6));
-    bodyAlpha = max(bodyAlpha, w7 * ellipseAlpha(p, c7, r7));
-    bodyAlpha = max(bodyAlpha, w8 * ellipseAlpha(p, c8, r8));
 
     // --- Shadow Ellipses ---
     // The shadow is shifted by vec2(0.0, -0.0625) and is slightly larger by vec2(0.0125, 0.0125)
@@ -118,10 +91,6 @@ void main() {
     shadowAlpha = max(shadowAlpha, w2 * ellipseAlpha(p, c2 + sShift, r2 + sGrow));
     shadowAlpha = max(shadowAlpha, w3 * ellipseAlpha(p, c3 + sShift, r3 + sGrow));
     shadowAlpha = max(shadowAlpha, w4 * ellipseAlpha(p, c4 + sShift, r4 + sGrow));
-    shadowAlpha = max(shadowAlpha, w5 * ellipseAlpha(p, c5 + sShift, r5 + sGrow));
-    shadowAlpha = max(shadowAlpha, w6 * ellipseAlpha(p, c6 + sShift, r6 + sGrow));
-    shadowAlpha = max(shadowAlpha, w7 * ellipseAlpha(p, c7 + sShift, r7 + sGrow));
-    shadowAlpha = max(shadowAlpha, w8 * ellipseAlpha(p, c8 + sShift, r8 + sGrow));
 
     // --- Color Blending ---
     // Shadow color in JS: rgb(160, 195, 230). Tinted by cloud color to adapt to night/day transitions.
