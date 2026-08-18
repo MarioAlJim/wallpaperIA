@@ -8,7 +8,9 @@ uniform float uOpacity;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
 uniform vec3 uCloudColor;
-uniform float uVariation; // Seed for cloud shape variation
+// highp: fed into hash()'s sin() call at values in the hundreds (see Cloud.shapeSeed), which
+// needs enough precision to stay well-distributed - see the note on hash() below.
+uniform highp float uVariation; // Seed for cloud shape variation
 uniform vec2 uMoonPos;
 uniform vec2 uCloudPos;
 uniform float uCloudScale;
@@ -16,7 +18,13 @@ uniform float uSilverLiningIntensity; // 0.0 for day, > 0.0 for night
 
 out vec4 fragColor;
 
-float hash(float n) {
+// sin()-based hash needs highp: at mediump precision the seed (uVariation can be in the
+// hundreds, see Cloud.shapeSeed) loses enough precision inside sin() that the result stops
+// being uniformly distributed - it skews toward low values instead. That was invisible while
+// w2/w3 were unconditionally 1.0 (pre-4-ellipse-composition shader), but the 1/2/3/4-ellipse
+// split below reads a single hash() against three hard cutoffs (0.25/0.50/0.75), so any skew
+// shows up directly as "almost every cloud lands in the first bucket" - i.e. lone ellipses.
+highp float hash(highp float n) {
     return fract(sin(n) * 43758.5453123);
 }
 
@@ -48,7 +56,7 @@ void main() {
     }
 
     // Seed based on the variation uniform
-    float seed = uVariation;
+    highp float seed = uVariation;
 
     // --- Weights to dynamically enable/disable ellipses (varying from 1 to 4 ellipses) ---
     float randVal = hash(seed + 99.0);
