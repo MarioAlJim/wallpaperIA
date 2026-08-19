@@ -306,6 +306,15 @@ class SceneManager(
     fun isWindLinesEnabled(): Boolean = configProvider.isWindLinesEnabled()
     fun getWindIntensity(): Int = windIntensity
     fun getRainIntensity(): Int = rainIntensity
+    fun getCurrentWindAngle(): Float = currentWindAngle
+
+    fun applySwipeWindImpulse(velocity: Float) {
+        // A swipe to the right (positive velocity) generates wind to the left (negative angle impulse).
+        // Scale velocity to degrees: e.g., velocity of 5.0 -> impulse of -45.0 degrees.
+        val impulse = -velocity * 9f
+        val cappedImpulse = impulse.coerceIn(-45f, 45f)
+        currentWindAngle = (currentWindAngle + cappedImpulse).coerceIn(-90f, 90f)
+    }
 
     private var cachedLightningTextureCount: Int? = null
     private var cachedCloudTextureCount: Int? = null

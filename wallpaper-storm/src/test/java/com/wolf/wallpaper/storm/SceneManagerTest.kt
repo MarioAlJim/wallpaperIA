@@ -919,4 +919,19 @@ class SceneManagerTest {
         val lFallback = activeLightningsFallback[0]
         assertNull("Lightning should fallback to screen borders and have no parent cloud", lFallback.parentCloud)
     }
+
+    @Test
+    fun testApplySwipeWindImpulse_adjustsWindAngle() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.update(0.016f)
+
+        val initialAngle = sceneManager.getCurrentWindAngle()
+        sceneManager.applySwipeWindImpulse(2.0f)
+        val afterPositiveAngle = sceneManager.getCurrentWindAngle()
+        assertTrue("Wind angle should decrease after positive swipe", afterPositiveAngle < initialAngle)
+
+        sceneManager.applySwipeWindImpulse(-4.0f)
+        val afterNegativeAngle = sceneManager.getCurrentWindAngle()
+        assertTrue("Wind angle should increase after negative swipe", afterNegativeAngle > afterPositiveAngle)
+    }
 }
