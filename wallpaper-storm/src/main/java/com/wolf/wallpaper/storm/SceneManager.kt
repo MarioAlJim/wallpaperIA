@@ -305,6 +305,7 @@ class SceneManager(
     fun getWindLines(): List<WindLine> = windLines
     fun isWindLinesEnabled(): Boolean = configProvider.isWindLinesEnabled()
     fun getWindIntensity(): Int = windIntensity
+    fun getRainIntensity(): Int = rainIntensity
 
     private var cachedLightningTextureCount: Int? = null
     private var cachedCloudTextureCount: Int? = null

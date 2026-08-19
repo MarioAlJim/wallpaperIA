@@ -122,6 +122,7 @@ class StormRenderer(
     private var bgDropletsEnabledHandle = -1
     private var bgDropletsSizeHandle = -1
     private var bgRainColorHandle = -1
+    private var bgRainIntensityHandle = -1
     private var bgLightningPosHandle = -1
     private var bgNoiseTextureHandle = -1
     private var bgTexCoordScaleHandle = -1
@@ -306,6 +307,7 @@ class StormRenderer(
         bgDropletsEnabledHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsEnabled")
         bgDropletsSizeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsSize")
         bgRainColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainColor")
+        bgRainIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uRainIntensity")
         bgLightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
         bgNoiseTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNoiseTexture")
         bgTexCoordScaleHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexCoordScale")
@@ -999,6 +1001,7 @@ class StormRenderer(
         val dropletsEnabledHandle = bgDropletsEnabledHandle
         val dropletsSizeHandle = bgDropletsSizeHandle
         val rainColorHandle = bgRainColorHandle
+        val rainIntensityHandle = bgRainIntensityHandle
 
         backgroundQuadBuffer.position(0)
         GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, backgroundQuadBuffer)
@@ -1058,10 +1061,11 @@ class StormRenderer(
         GLES30.glUniform1f(aspectHandle, screenAspect)
         GLES30.glUniform2f(bgTexCoordScaleHandle, texCoordScaleX, texCoordScaleY)
         GLES30.glUniform1f(dropletsEnabledHandle, if (sceneManager.isScreenDropletsEnabled()) 1.0f else 0.0f)
-        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 2.0f
+        val sizeFactor = (sceneManager.getScreenDropletsSize() / 100f) * 3.0f
         GLES30.glUniform1f(dropletsSizeHandle, sizeFactor)
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
+        GLES30.glUniform1f(rainIntensityHandle, sceneManager.getRainIntensity() / 100.0f)
 
         // Pass lightning position for Rim Lighting and Dark God Rays
         val bgBrightest = flash.brightest

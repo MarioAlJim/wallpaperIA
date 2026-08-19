@@ -17,6 +17,7 @@ uniform highp float uAspectRatio;
 // New uniforms for configurable screen droplets
 uniform float uScreenDropletsEnabled;
 uniform float uScreenDropletsSize;
+uniform float uRainIntensity;
 uniform vec3 uRainColor;
 
 // New uniform for lightning position (Dark God Rays and Rim Lighting)
@@ -109,8 +110,9 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             highp vec2 cell = ip + neighbor;
             float h_cell = Hash(cell);
 
-            // ~45% of lanes are active at any given moment; the rest stay empty.
-            if (h_cell < 0.55) continue;
+            // Droplets density scales proportionally with rain intensity (up to 45% active lanes at maximum intensity)
+            float threshold = 1.0 - (0.45 * uRainIntensity);
+            if (h_cell < threshold) continue;
 
             // This lane's fall distance and speed are fixed for its whole lifetime; only its
             // vertical position (via t below) changes from one frame to the next. Kept highp:
