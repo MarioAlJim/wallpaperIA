@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="storm_bg_brightness_title">Brillo de fondo</string>
+    <string name="storm_bg_brightness_desc">Ajusta qué tan oscuro se ve el fondo por defecto (aumentará con los relámpagos).</string>
+    <string-array name="bg_brightness_options">
+        <item>Muy oscuro</item>
+        <item>Oscuro</item>
+        <item>Normal</item>
+        <item>Claro</item>
+    </string-array>
     <string name="act_auto">Auto</string>
     <string name="act_claro">Claro</string>
     <string name="act_da_y_noche">Día y Noche</string>

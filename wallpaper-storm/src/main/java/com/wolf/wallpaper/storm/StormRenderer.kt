@@ -127,6 +127,7 @@ class StormRenderer(
     private var bgLightningPosHandle = -1
     private var bgNoiseTextureHandle = -1
     private var bgTexCoordScaleHandle = -1
+    private var bgBrightnessHandle = -1
 
     init {
         Matrix.setIdentityM(viewMatrix, 0)
@@ -312,6 +313,7 @@ class StormRenderer(
         bgLightningPosHandle = GLES30.glGetUniformLocation(backgroundProgram, "uLightningPos")
         bgNoiseTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uNoiseTexture")
         bgTexCoordScaleHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexCoordScale")
+        bgBrightnessHandle = GLES30.glGetUniformLocation(backgroundProgram, "uBgBrightness")
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -1080,6 +1082,7 @@ class StormRenderer(
         val rainColor = getRainColor(sceneManager.getRainColorIndex())
         GLES30.glUniform3f(rainColorHandle, rainColor[0], rainColor[1], rainColor[2])
         GLES30.glUniform1f(rainIntensityHandle, sceneManager.getRainIntensity() / 100.0f)
+        GLES30.glUniform1f(bgBrightnessHandle, sceneManager.getBgBrightness())
 
         // Pass lightning position for Rim Lighting and Dark God Rays
         val bgBrightest = flash.brightest

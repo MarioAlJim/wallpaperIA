@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="storm_bg_brightness_title">Background brightness</string>
+    <string name="storm_bg_brightness_desc">Adjust how dark the background looks by default (increases with lightning).</string>
+    <string-array name="bg_brightness_options">
+        <item>Very dark</item>
+        <item>Dark</item>
+        <item>Normal</item>
+        <item>Bright</item>
+    </string-array>
     <string name="act_auto">Auto</string>
     <string name="act_claro">Light</string>
     <string name="act_da_y_noche">Day &amp; Night</string>

@@ -225,6 +225,17 @@ class StormSettingsFragment : Fragment() {
             updateCustomBackgroundViewsVisibility(view, position)
         }
 
+        val bgBrightnessOptions = resources.getStringArray(R.array.bg_brightness_options)
+        val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
+        val initialBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
+        val textViewBgBrightnessValue = view.findViewById<TextView>(R.id.textViewBgBrightnessValue)
+        textViewBgBrightnessValue?.text = bgBrightnessOptions.getOrNull(initialBgBrightnessIndex) ?: "Normal"
+        setupDropdown(view, R.id.spinnerBgBrightness, bgBrightnessOptions, initialBgBrightnessIndex) { position ->
+            configManager.setBgBrightness(bgBrightnessValues[position])
+            textViewBgBrightnessValue?.text = bgBrightnessOptions[position]
+            updateSummaries(view)
+        }
+
         view.findViewById<Button>(R.id.btnSelectCustomBg)?.setOnClickListener {
             pickImageLauncher.launch("image/*")
         }
@@ -715,8 +726,14 @@ class StormSettingsFragment : Fragment() {
 
         val bgIndex = configManager.getBackgroundIndex()
         val bgText = backgroundModes.getOrNull(bgIndex) ?: ""
+        val bgBrightnessOptions = resources.getStringArray(R.array.bg_brightness_options)
+        val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
+        val initialBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
+        val bgBrightnessText = bgBrightnessOptions.getOrNull(initialBgBrightnessIndex) ?: ""
+        val combinedBgText = if (bgBrightnessText.isNotEmpty()) "$bgText ($bgBrightnessText)" else bgText
+
         summaryBackground.text = Html.fromHtml(
-            getString(R.string.summary_background_format, accentColor, bgText),
+            getString(R.string.summary_background_format, accentColor, combinedBgText),
             Html.FROM_HTML_MODE_LEGACY
         )
     }
@@ -975,6 +992,15 @@ class StormSettingsFragment : Fragment() {
                     }
                     val optionColor = Color.parseColor(colorHex)
                     drawRaindrops(canvas, w, h, 12, optionColor, activeWindDir)
+                }
+
+                R.id.spinnerBgBrightness -> {
+                    val bgColors = arrayOf("#0A0A0E", "#15151F", "#2A2A38", "#4A4A5F")
+                    val colorHex = bgColors.getOrElse(optionIndex) { bgColors[2] }
+                    paint.color = Color.parseColor(colorHex)
+                    paint.style = Paint.Style.FILL
+                    canvas.drawRoundRect(0f, 0f, w, h, 8.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
+                    drawLightningBolt(canvas, w, h, Color.parseColor("#FFE533"))
                 }
 
                 R.id.spinnerRainSpawnMode -> {

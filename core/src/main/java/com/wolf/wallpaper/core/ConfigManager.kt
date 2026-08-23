@@ -49,6 +49,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_LIGHTNING_FLASH_ENABLED = "lightning_flash_enabled"
         const val KEY_CLOUD_FLASH_ENABLED = "cloud_flash_enabled"
         const val KEY_INTERACTIVE_LIGHTNING_ENABLED = "interactive_lightning_enabled"
+        const val KEY_BG_BRIGHTNESS = "bg_brightness"
 
         // New keys
         const val KEY_ACTIVE_EFFECT = "active_effect"
@@ -131,6 +132,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_LIGHTNING_FLASH_ENABLED = true
         const val DEFAULT_CLOUD_FLASH_ENABLED = true
         const val DEFAULT_INTERACTIVE_LIGHTNING_ENABLED = true
+        const val DEFAULT_BG_BRIGHTNESS = 100
 
         // New defaults
         const val DEFAULT_ACTIVE_EFFECT = 0
@@ -247,6 +249,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getLightningSpawnMode(): Int = storm.getLightningSpawnMode()
     fun setLightningSpawnMode(mode: Int) = storm.setLightningSpawnMode(mode)
+
+    override fun getBgBrightness(): Int = storm.getBgBrightness()
+    fun setBgBrightness(brightness: Int) = storm.setBgBrightness(brightness)
 
     // Sunny (day) mode
     override fun getActiveEffect(): Int = sunny.getActiveEffect()

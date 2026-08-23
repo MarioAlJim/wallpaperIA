@@ -40,6 +40,7 @@ class SceneManagerTest {
         var mockSunnyBackgroundIndex = 0
         var mockWindLinesEnabled = true
         var mockWindLinesIntensity = 50
+        var mockBgBrightness = 100
  
         override fun getCloudDensity(): Int = mockCloudDensity
         override fun getRainIntensity(): Int = mockRainIntensity
@@ -105,6 +106,7 @@ class SceneManagerTest {
         override fun isFirefliesEnabled(): Boolean = true
         var mockStormVariableEnabled = false
         override fun isStormVariableEnabled(): Boolean = mockStormVariableEnabled
+        override fun getBgBrightness(): Int = mockBgBrightness
     }
 
     @Test

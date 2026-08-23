@@ -24,6 +24,7 @@ uniform vec3 uRainColor;
 uniform highp vec2 uLightningPos;
 
 uniform vec2 uTexCoordScale;
+uniform float uBgBrightness;
 
 // Small tileable grid of prebaked random values used by noise()/fbm() for the
 // Dark God Rays shadowing. Sampling a texture (hardware-filtered) replaces the
@@ -292,7 +293,7 @@ void main() {
 
     // Base storm dimming (dark stormy night look, with a vertical gradient: darker at the top, lighter at the bottom)
     float normY = (vScreenPos.y + 1.0) * 0.5;
-    float darkFactor = mix(0.32, 0.10, normY);
+    float darkFactor = mix(0.32, 0.10, normY) * uBgBrightness;
     vec3 baseColor = baseTexColor * vec3(darkFactor, darkFactor, darkFactor * 1.22);
 
     // Add lightning illumination (up to +1.5 brightness with flash color)

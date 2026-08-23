@@ -72,4 +72,7 @@ internal class StormConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
 
     fun getLightningSpawnMode(): Int = cachedInt(ConfigManager.KEY_LIGHTNING_SPAWN_MODE, ConfigManager.DEFAULT_LIGHTNING_SPAWN_MODE)
     fun setLightningSpawnMode(mode: Int) { putInt(ConfigManager.KEY_LIGHTNING_SPAWN_MODE, mode.coerceIn(0, 2)) }
+
+    fun getBgBrightness(): Int = cachedInt(ConfigManager.KEY_BG_BRIGHTNESS, ConfigManager.DEFAULT_BG_BRIGHTNESS)
+    fun setBgBrightness(brightness: Int) { putInt(ConfigManager.KEY_BG_BRIGHTNESS, brightness.coerceIn(10, 200)) }
 }

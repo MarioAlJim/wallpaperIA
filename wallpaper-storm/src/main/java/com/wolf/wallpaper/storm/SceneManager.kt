@@ -298,6 +298,7 @@ class SceneManager(
     fun sortCloudsByDepth() { clouds.sortBy { it.z } }
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
+    fun getBgBrightness(): Float = configProvider.getBgBrightness() / 100f
     fun isLightningFlashEnabled(): Boolean = configProvider.isLightningFlashEnabled()
     fun isCloudFlashEnabled(): Boolean = configProvider.isCloudFlashEnabled()
     fun isScreenDropletsEnabled(): Boolean = configProvider.isScreenDropletsEnabled()

@@ -1353,6 +1353,61 @@
                         android:gravity="center"
                         android:visibility="gone" />
 
+                    <!-- Background Brightness Selector -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/settings_stroke"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/storm_bg_brightness_title"
+                            android:textColor="@color/settings_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/textViewBgBrightnessValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Normal"
+                            android:textColor="@color/settings_text_secondary"
+                            android:textSize="14sp"
+                            android:layout_alignParentEnd="true" />
+                    </RelativeLayout>
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp"
+                        android:layout_marginBottom="4dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerBgBrightness"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/storm_bg_brightness_desc"
+                        android:textColor="@color/settings_text_tertiary"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="12dp" />
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
