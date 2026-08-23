@@ -11,7 +11,7 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun setMoonPhase(phase: Int) { putInt(ConfigManager.KEY_MOON_PHASE, phase.coerceIn(0, 7)) }
 
     fun getMoonPathDirection(): Int = cachedInt(ConfigManager.KEY_MOON_PATH_DIRECTION, ConfigManager.DEFAULT_MOON_PATH_DIRECTION)
-    fun setMoonPathDirection(dir: Int) { putInt(ConfigManager.KEY_MOON_PATH_DIRECTION, dir.coerceIn(0, 3)) }
+    fun setMoonPathDirection(dir: Int) { putInt(ConfigManager.KEY_MOON_PATH_DIRECTION, dir.coerceIn(0, 4)) }
 
     fun getMoonMoveSpeed(): Int = cachedInt(ConfigManager.KEY_MOON_MOVE_SPEED, ConfigManager.DEFAULT_MOON_MOVE_SPEED)
     fun setMoonMoveSpeed(speed: Int) { putInt(ConfigManager.KEY_MOON_MOVE_SPEED, speed.coerceIn(0, 100)) }

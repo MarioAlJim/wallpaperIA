@@ -265,6 +265,15 @@ class SunnyRenderer(
     private var randomProgress = 0f
     private var isRandomPathInitialized = false
 
+    // Chaotic path movement state: a Lissajous-like drift with randomized phase/frequency,
+    // wandering erratically instead of jumping edge-to-edge like Random (see Moon.kt for the
+    // equivalent moon implementation).
+    private var chaoticTime = 0f
+    private var chaoticSeedX = kotlin.random.Random.nextFloat() * 6.2832f
+    private var chaoticSeedY = kotlin.random.Random.nextFloat() * 6.2832f
+    private var chaoticFreqX = 0.13f + kotlin.random.Random.nextFloat() * 0.17f
+    private var chaoticFreqY = 0.09f + kotlin.random.Random.nextFloat() * 0.15f
+
     // Night / Combined mode state
     private val moon = Moon()
     private val nightClouds = mutableListOf<Cloud>()
@@ -698,6 +707,12 @@ class SunnyRenderer(
                 }
                 sunX = randomStartX + (randomEndX - randomStartX) * randomProgress
                 sunY = randomStartY + (randomEndY - randomStartY) * randomProgress
+            } else if (direction == 4) { // Chaotic
+                val cSpeed = 0.2f + (configProvider.getSunMoveSpeed() / 100f) * 0.8f
+                chaoticTime += deltaTime * cSpeed
+                val rangeX = aspectRatio * 0.9f
+                sunX = kotlin.math.sin(chaoticTime * chaoticFreqX * 6.2832f + chaoticSeedX) * rangeX
+                sunY = 0.45f + kotlin.math.sin(chaoticTime * chaoticFreqY * 6.2832f + chaoticSeedY) * 0.4f
             } else { // Stationary (2)
                 when (configProvider.getSunStationaryPosition()) {
                     0 -> { // Top Left (Esquina superior izquierda)

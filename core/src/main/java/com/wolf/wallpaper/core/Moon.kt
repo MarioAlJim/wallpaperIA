@@ -8,7 +8,7 @@ class Moon {
     var positionX = 0f
     var positionY = 0f
     var phase = 4        // 0-7, default full moon
-    var pathDirection = 0 // 0=L2R, 1=R2L, 2=Static, 3=Random
+    var pathDirection = 0 // 0=L2R, 1=R2L, 2=Static, 3=Random, 4=Chaotic
     var moveSpeed = 30   // 0-100
     var stationaryPosition = 2 // 0-5
     var customX = 50     // 0-100
@@ -26,6 +26,14 @@ class Moon {
     private var randomEndY = 0f
     private var randomProgress = 0f
     private var isRandomInitialized = false
+
+    // For chaotic path: a Lissajous-like drift with randomized phase/frequency per instance,
+    // so it wanders erratically across the screen instead of jumping edge-to-edge like Random.
+    private var chaoticTime = 0f
+    private var chaoticSeedX = Random.nextFloat() * 6.2832f
+    private var chaoticSeedY = Random.nextFloat() * 6.2832f
+    private var chaoticFreqX = 0.13f + Random.nextFloat() * 0.17f
+    private var chaoticFreqY = 0.09f + Random.nextFloat() * 0.15f
 
     fun update(deltaTime: Float, aspectRatio: Float) {
         val speed = 0.008f + (moveSpeed / 100f) * 0.35f
@@ -63,6 +71,13 @@ class Moon {
                 positionX = randomStartX + (randomEndX - randomStartX) * randomProgress
                 positionY = randomStartY + (randomEndY - randomStartY) * randomProgress
             }
+            4 -> { // Chaotic
+                val cSpeed = 0.2f + (moveSpeed / 100f) * 0.8f
+                chaoticTime += deltaTime * cSpeed
+                val rangeX = aspectRatio * 0.9f
+                positionX = sin(chaoticTime * chaoticFreqX * 6.2832f + chaoticSeedX) * rangeX
+                positionY = 0.45f + sin(chaoticTime * chaoticFreqY * 6.2832f + chaoticSeedY) * 0.4f
+            }
         }
     }
 
@@ -71,6 +86,13 @@ class Moon {
         isRandomInitialized = false
         pathX = if (direction == 1) 1.3f else -1.3f
         if (direction == 2) applyStationary(aspectRatio)
+        if (direction == 4) {
+            chaoticTime = 0f
+            chaoticSeedX = Random.nextFloat() * 6.2832f
+            chaoticSeedY = Random.nextFloat() * 6.2832f
+            chaoticFreqX = 0.13f + Random.nextFloat() * 0.17f
+            chaoticFreqY = 0.09f + Random.nextFloat() * 0.15f
+        }
         hasHaloRing = kotlin.random.Random.nextFloat() < 0.5f
     }
 

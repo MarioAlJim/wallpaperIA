@@ -17,7 +17,7 @@ internal class SunnyConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun setSunnyTheme(theme: Int) { putInt(ConfigManager.KEY_SUNNY_THEME, theme.coerceIn(0, 3)) }
 
     fun getSunPathDirection(): Int = cachedInt(ConfigManager.KEY_SUN_PATH_DIRECTION, ConfigManager.DEFAULT_SUN_PATH_DIRECTION)
-    fun setSunPathDirection(direction: Int) { putInt(ConfigManager.KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 3)) }
+    fun setSunPathDirection(direction: Int) { putInt(ConfigManager.KEY_SUN_PATH_DIRECTION, direction.coerceIn(0, 4)) }
 
     fun getSunMoveSpeed(): Int = cachedInt(ConfigManager.KEY_SUN_MOVE_SPEED, ConfigManager.DEFAULT_SUN_MOVE_SPEED)
     fun setSunMoveSpeed(speed: Int) { putInt(ConfigManager.KEY_SUN_MOVE_SPEED, speed.coerceIn(0, 100)) }

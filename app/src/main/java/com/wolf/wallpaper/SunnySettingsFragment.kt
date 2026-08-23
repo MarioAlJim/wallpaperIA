@@ -354,7 +354,8 @@ class SunnySettingsFragment : Fragment() {
         val cardR2L = parent.findViewById<MaterialCardView>(R.id.cardSunDirR2L)
         val cardStationary = parent.findViewById<MaterialCardView>(R.id.cardSunDirStationary)
         val cardRandom = parent.findViewById<MaterialCardView>(R.id.cardSunDirRandom)
-        val cards = listOf(cardL2R, cardR2L, cardStationary, cardRandom)
+        val cardChaotic = parent.findViewById<MaterialCardView>(R.id.cardSunDirChaotic)
+        val cards = listOf(cardL2R, cardR2L, cardStationary, cardRandom, cardChaotic)
 
         fun updateCardSelection(selectedDir: Int) {
             cards.forEachIndexed { index, card ->
@@ -745,7 +746,8 @@ class SunnySettingsFragment : Fragment() {
         val cardR2L = parent.findViewById<MaterialCardView>(R.id.cardMoonDirR2L)
         val cardStatic = parent.findViewById<MaterialCardView>(R.id.cardMoonDirStatic)
         val cardRandom = parent.findViewById<MaterialCardView>(R.id.cardMoonDirRandom)
-        val cards = listOf(cardL2R, cardR2L, cardStatic, cardRandom)
+        val cardChaotic = parent.findViewById<MaterialCardView>(R.id.cardMoonDirChaotic)
+        val cards = listOf(cardL2R, cardR2L, cardStatic, cardRandom, cardChaotic)
 
         fun selectDir(dir: Int) {
             cards.forEachIndexed { i, card ->

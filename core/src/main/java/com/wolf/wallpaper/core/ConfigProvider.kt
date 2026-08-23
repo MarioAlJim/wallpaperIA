@@ -23,7 +23,7 @@ interface ConfigProvider {
     fun getSunSize(): Int // 0-100
     fun getSunSpeed(): Int // 0-100
     fun getSunnyTheme(): Int // 0: Noon Blue, 1: Sunset Orange, 2: Purple Dusk
-    fun getSunPathDirection(): Int // 0: Left-to-Right, 1: Right-to-Left, 2: Stationary
+    fun getSunPathDirection(): Int // 0: Left-to-Right, 1: Right-to-Left, 2: Stationary, 3: Random, 4: Chaotic
     fun getSunMoveSpeed(): Int // 0-100
     fun getSunnyBackgroundIndex(): Int // 0: None, 1: Mountains, 2: Fields, 3: Lake/Forest, 4: Gallery
     fun getSunStationaryPosition(): Int // 0: Top Left, 1: Top Right, 2: Center, 3: Left Edge, 4: Right Edge
@@ -58,7 +58,7 @@ interface ConfigProvider {
     fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean // when true, the renderer advances the moon phase itself each completed day+night cycle, ignoring getCombinedMoonPhase() after the first read
 
     fun getMoonPhase(): Int             // 0–7
-    fun getMoonPathDirection(): Int     // 0 = IzqaDer, 1 = DeraIzq, 2 = Estático, 3 = Aleatorio
+    fun getMoonPathDirection(): Int     // 0 = IzqaDer, 1 = DeraIzq, 2 = Estático, 3 = Aleatorio, 4 = Caótico
     fun getMoonMoveSpeed(): Int         // 0–100
     fun getMoonStationaryPosition(): Int // 0–5
     fun getStarColorIndex(): Int        // 0–5
