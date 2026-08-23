@@ -123,12 +123,12 @@ class Lightning(
             }
         }
 
-        val minHeight = 2.0f * 0.225f // 22.5% of screen height (0.45f)
-        val maxHeight = 2.0f * 1.125f // 112.5% of screen height (2.25f, increased by 50% from 1.5f)
+        val minHeight = 2.0f * 0.30f // 30% of screen height (0.60f)
+        val maxHeight = 2.0f * 1.50f // 150% of screen height (3.00f)
         scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
         
-        // Increased lightning thickness/width
-        scaleX = scaleY * 1.4f
+        // Proper aspect ratio to prevent stretching
+        scaleX = scaleY * 0.30f
 
         // Adjust positionX so that the lightning is cut off but always visible
         val maxOffset = (scaleX * 0.25f).coerceAtMost(aspectRatio * 0.5f)
@@ -174,8 +174,8 @@ class Lightning(
             customColor = null
         }
 
-        val minHeight = 2.0f * 0.225f // 0.45f
-        val maxHeight = 2.0f * 1.125f // 2.25f
+        val minHeight = 2.0f * 0.30f // 30% of screen height (0.60f)
+        val maxHeight = 2.0f * 1.50f // 150% of screen height (3.00f)
 
         val borderType = if (touchY > 0.4f) {
             0 // Top border only
@@ -217,8 +217,8 @@ class Lightning(
             }
         }
 
-        // Increased lightning thickness/width
-        scaleX = scaleY * 1.4f
+        // Proper aspect ratio to prevent stretching
+        scaleX = scaleY * 0.30f
 
         // Adjust positionX so that the lightning is cut off but always visible
         val maxOffset = (scaleX * 0.25f).coerceAtMost(aspectRatio * 0.5f)
@@ -279,10 +279,12 @@ class Lightning(
         positionY = cloud.positionY + relativeOffsetY
         
         // Scale vertical length based on depth z
-        val minHeight = 2.0f * 0.225f * z
-        val maxHeight = 2.0f * 1.125f * z
+        val minHeight = 2.0f * 0.30f * z
+        val maxHeight = 2.0f * 1.50f * z
         scaleY = (kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight).coerceAtLeast(0.15f)
-        scaleX = scaleY * 1.4f // Increased lightning thickness/width
+        
+        // Proper aspect ratio to prevent stretching
+        scaleX = scaleY * 0.30f
         
         rotationAngle = kotlin.random.Random.nextFloat() * 20f - 10f // -10 to +10 degrees
         

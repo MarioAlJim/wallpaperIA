@@ -289,9 +289,9 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
-            assertTrue("ScaleY should be in range [0.45f, 2.25f]", sceneManager.lightning.scaleY in 0.45f..2.26f)
-            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.62f..3.16f)
-            assertEquals("Aspect ratio should be exactly 1.4", 1.4f, sceneManager.lightning.scaleX / sceneManager.lightning.scaleY, 1e-4f)
+            assertTrue("ScaleY should be in range [0.60f, 3.00f]", sceneManager.lightning.scaleY in 0.60f..3.01f)
+            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.18f..0.91f)
+            assertEquals("Aspect ratio should be exactly 0.3", 0.3f, sceneManager.lightning.scaleX / sceneManager.lightning.scaleY, 1e-4f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }
