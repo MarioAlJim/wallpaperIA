@@ -128,7 +128,7 @@ class Lightning(
         scaleY = kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight
         
         // Proper aspect ratio to prevent stretching
-        scaleX = scaleY * 0.30f
+        scaleX = scaleY * 0.60f
 
         // Adjust positionX so that the lightning is cut off but always visible
         val maxOffset = (scaleX * 0.25f).coerceAtMost(aspectRatio * 0.5f)
@@ -218,7 +218,7 @@ class Lightning(
         }
 
         // Proper aspect ratio to prevent stretching
-        scaleX = scaleY * 0.30f
+        scaleX = scaleY * 0.60f
 
         // Adjust positionX so that the lightning is cut off but always visible
         val maxOffset = (scaleX * 0.25f).coerceAtMost(aspectRatio * 0.5f)
@@ -284,7 +284,7 @@ class Lightning(
         scaleY = (kotlin.random.Random.nextFloat() * (maxHeight - minHeight) + minHeight).coerceAtLeast(0.15f)
         
         // Proper aspect ratio to prevent stretching
-        scaleX = scaleY * 0.30f
+        scaleX = scaleY * 0.60f
         
         rotationAngle = kotlin.random.Random.nextFloat() * 20f - 10f // -10 to +10 degrees
         

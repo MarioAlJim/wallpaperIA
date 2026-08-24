@@ -293,8 +293,8 @@ class SceneManagerTest {
         for (i in 0 until 100) {
             sceneManager.lightning.trigger(1.0f, 1, 0)
             assertTrue("ScaleY should be in range [0.60f, 3.00f]", sceneManager.lightning.scaleY in 0.60f..3.01f)
-            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.18f..0.91f)
-            assertEquals("Aspect ratio should be exactly 0.3", 0.3f, sceneManager.lightning.scaleX / sceneManager.lightning.scaleY, 1e-4f)
+            assertTrue("ScaleX should be set correctly", sceneManager.lightning.scaleX in 0.36f..1.81f)
+            assertEquals("Aspect ratio should be exactly 0.6", 0.6f, sceneManager.lightning.scaleX / sceneManager.lightning.scaleY, 1e-4f)
             assertTrue("Rotation angle should be in bounds [-45, 45]", sceneManager.lightning.rotationAngle in -45f..45f)
         }
     }
