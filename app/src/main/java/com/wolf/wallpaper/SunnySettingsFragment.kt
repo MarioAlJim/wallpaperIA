@@ -34,6 +34,11 @@ import java.io.FileOutputStream
 
 class SunnySettingsFragment : Fragment() {
 
+    companion object {
+        /** Cache of decoded background thumbnails (index -> bitmap), reused across settings sessions. */
+        private val backgroundAssetThumbnailCache = mutableMapOf<Int, android.graphics.Bitmap>()
+    }
+
     private lateinit var configManager: ConfigManager
 
     private val pickSunnyImageLauncher = registerForActivityResult(
@@ -92,11 +97,7 @@ class SunnySettingsFragment : Fragment() {
         setupSunStationaryCards(view)
         updateSunMoveSpeedSliderVisibility(view, configManager.getSunPathDirection())
 
-        val sunnyBackgrounds = resources.getStringArray(R.array.sunny_backgrounds)
-        setupDropdown(view, R.id.spinnerSunnyBackground, sunnyBackgrounds, configManager.getSunnyBackgroundIndex()) { position ->
-            configManager.setSunnyBackgroundIndex(position)
-            updateCustomSunnyBackgroundViewsVisibility(view, position)
-        }
+        setupSunnyBackgroundCards(view)
 
         view.findViewById<Button>(R.id.btnSelectCustomSunnyBg)?.setOnClickListener {
             pickSunnyImageLauncher.launch("image/*")
@@ -238,8 +239,8 @@ class SunnySettingsFragment : Fragment() {
     /**
      * Card-selector replacement for [setupSlider], used by the 12 controls converted from
      * sliders to 5-card rows (see SettingsCardSelectorHelper). Not built on top of
-     * [setupDropdown] because that one targets `AutoCompleteTextView` (spinnerSunnyBackground /
-     * spinnerCombinedTrajectory); this targets an empty `LinearLayout` container instead.
+     * [setupDropdown] because that one targets `AutoCompleteTextView` (spinnerCombinedTrajectory);
+     * this targets an empty `LinearLayout` container instead.
      */
     private fun setupValueCardSelector(
         parent: View,
@@ -265,6 +266,117 @@ class SunnySettingsFragment : Fragment() {
             onValueSelected(values[position])
             valueTv?.text = options[position]
             updateSummaries(parent)
+        }
+    }
+
+    /**
+     * Card-selector for the sunny background, showing real thumbnails (decoded from the
+     * `background/sunny_background_0N.png` assets, the user's custom gallery image, or a small
+     * sky-gradient swatch for the "solo degradado" option) instead of a plain text dropdown.
+     */
+    private fun setupSunnyBackgroundCards(parent: View) {
+        val container = parent.findViewById<LinearLayout>(R.id.spinnerSunnyBackground) ?: return
+        val options = resources.getStringArray(R.array.sunny_backgrounds)
+        val initialIndex = configManager.getSunnyBackgroundIndex().coerceIn(0, options.size - 1)
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialIndex,
+            previewFactory = { index -> createSunnyBackgroundPreview(index) },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg
+        ) { position ->
+            configManager.setSunnyBackgroundIndex(position)
+            updateCustomSunnyBackgroundViewsVisibility(parent, position)
+            updateSummaries(parent)
+        }
+    }
+
+    private fun createSunnyBackgroundPreview(index: Int): View {
+        val context = requireContext()
+        val corner = 4 * resources.displayMetrics.density
+        return when (index) {
+            0 -> {
+                val (top, bottom) = currentSkyGradientColors()
+                View(context).apply {
+                    background = GradientDrawable(
+                        GradientDrawable.Orientation.TOP_BOTTOM,
+                        intArrayOf(top, bottom)
+                    ).apply { cornerRadius = corner }
+                }
+            }
+            8 -> ImageView(context).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                val bitmap = loadCustomSunnyBackgroundThumbnail(context)
+                if (bitmap != null) {
+                    setImageBitmap(bitmap)
+                    background = GradientDrawable().apply { cornerRadius = corner }
+                } else {
+                    setImageResource(R.drawable.ic_background)
+                    scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    setColorFilter(ContextCompat.getColor(context, R.color.settings_text_secondary))
+                    background = GradientDrawable().apply {
+                        setColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt2))
+                        cornerRadius = corner
+                    }
+                }
+                clipToOutline = true
+                outlineProvider = android.view.ViewOutlineProvider.BACKGROUND
+            }
+            else -> ImageView(context).apply {
+                scaleType = ImageView.ScaleType.CENTER_CROP
+                loadSunnyBackgroundAssetThumbnail(context, index)?.let { setImageBitmap(it) }
+                background = GradientDrawable().apply { cornerRadius = corner }
+                clipToOutline = true
+                outlineProvider = android.view.ViewOutlineProvider.BACKGROUND
+            }
+        }
+    }
+
+    /** Sky colors used for the "solo degradado" (no image) thumbnail, mirroring [setupSunnyThemeCards]. */
+    private fun currentSkyGradientColors(): Pair<Int, Int> = when (configManager.getSunnyTheme()) {
+        0 -> 0xFF0566D9.toInt() to 0xFF8DCCEF.toInt()
+        1 -> 0xFF1A0D40.toInt() to 0xFFF2731A.toInt()
+        2 -> 0xFF261A59.toInt() to 0xFFE6808C.toInt()
+        else -> configManager.getSunnyCustomSkyTopColor() to configManager.getSunnyCustomSkyBottomColor()
+    }
+
+    /** Small decoded thumbnail for `background/sunny_background_0{index}.png`, cached across calls. */
+    private fun loadSunnyBackgroundAssetThumbnail(context: Context, index: Int): android.graphics.Bitmap? {
+        backgroundAssetThumbnailCache[index]?.let { return it }
+        val assetPath = "background/sunny_background_%02d.png".format(index)
+        return try {
+            context.assets.open(assetPath).use { stream ->
+                android.graphics.BitmapFactory.decodeStream(
+                    stream,
+                    null,
+                    android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 }
+                )
+            }?.also { backgroundAssetThumbnailCache[index] = it }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    /** Decoded (and downsampled) thumbnail for the user's custom gallery background, if one was saved. */
+    private fun loadCustomSunnyBackgroundThumbnail(context: Context): android.graphics.Bitmap? {
+        val file = File(context.filesDir, "custom_sunny_background.png")
+        if (!file.exists()) return null
+        return try {
+            val boundsOpts = android.graphics.BitmapFactory.Options().apply { inJustDecodeBounds = true }
+            android.graphics.BitmapFactory.decodeFile(file.absolutePath, boundsOpts)
+            var sampleSize = 1
+            while (boundsOpts.outWidth / (sampleSize * 2) >= 200 && boundsOpts.outHeight / (sampleSize * 2) >= 200) {
+                sampleSize *= 2
+            }
+            android.graphics.BitmapFactory.decodeFile(
+                file.absolutePath,
+                android.graphics.BitmapFactory.Options().apply { inSampleSize = sampleSize }
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 
@@ -540,6 +652,7 @@ class SunnySettingsFragment : Fragment() {
             configManager.setSunnyBackgroundIndex(8)
             view?.let {
                 updateCustomSunnyBackgroundViewsVisibility(it, 8)
+                setupSunnyBackgroundCards(it)
                 updateSummaries(it)
             }
         } catch (e: Exception) {

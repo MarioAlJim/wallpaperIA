@@ -197,25 +197,23 @@
                         android:textStyle="bold"
                         android:layout_marginBottom="6dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
+                    <HorizontalScrollView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                         android:layout_marginBottom="12dp"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        app:hintEnabled="false">
-                        <AutoCompleteTextView
-                             android:id="@+id/spinnerSunnyBackground"
-                             android:layout_width="match_parent"
-                             android:layout_height="wrap_content"
-                             android:inputType="none"
-                             android:textColor="@color/settings_text_primary"
-                             android:textSize="15sp"
-                             android:padding="14dp" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:fadingEdgeLength="24dp">
+                        <LinearLayout
+                            android:id="@+id/spinnerSunnyBackground"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingBottom="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingStart="4dp"
+                            android:paddingEnd="4dp" />
+                    </HorizontalScrollView>
 
                     <!-- Gallery Background Selector for Sunny -->
                     <com.google.android.material.button.MaterialButton
