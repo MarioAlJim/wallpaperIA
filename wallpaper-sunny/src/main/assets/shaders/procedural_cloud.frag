@@ -3,17 +3,15 @@
 precision mediump float;
 
 in vec2 vTexCoord;
+in float vOpacity;
+in float vVariation;
+in vec2 vCloudPos;
+in float vCloudScale;
 
-uniform float uOpacity;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
 uniform vec3 uCloudColor;
-// highp: fed into hash()'s sin() call at values in the hundreds (see Cloud.shapeSeed), which
-// needs enough precision to stay well-distributed - see the note on hash() below.
-uniform highp float uVariation; // Seed for cloud shape variation
 uniform vec2 uMoonPos;
-uniform vec2 uCloudPos;
-uniform float uCloudScale;
 uniform float uSilverLiningIntensity; // 0.0 for day, > 0.0 for night
 
 out vec4 fragColor;
@@ -55,7 +53,7 @@ void main() {
     }
 
     // Seed based on the variation uniform
-    highp float seed = uVariation;
+    highp float seed = vVariation;
 
     // --- Weights to dynamically enable/disable ellipses (varying from 1 to 8 ellipses) ---
     float randVal = hash(seed + 99.0);
@@ -138,8 +136,8 @@ void main() {
     bodyColor += flashLight;
 
     // Calculate opacities
-    float sA = shadowAlpha * (uOpacity * 0.45);
-    float bA = bodyAlpha * uOpacity;
+    float sA = shadowAlpha * (vOpacity * 0.45);
+    float bA = bodyAlpha * vOpacity;
 
     // Normal alpha blending: body on top of shadow
     float combinedAlpha = bA + sA * (1.0 - bA);
@@ -148,7 +146,7 @@ void main() {
     // --- Silver Lining (Moonlight edge glow) ---
     if (uSilverLiningIntensity > 0.001) {
         // Calculate the world position of the current pixel
-        vec2 pixelWorldPos = uCloudPos + p * uCloudScale;
+        vec2 pixelWorldPos = vCloudPos + p * vCloudScale;
         
         // Distance from this pixel to the moon
         float distToMoon = distance(pixelWorldPos, uMoonPos);
@@ -169,7 +167,7 @@ void main() {
             mixedColor = mix(mixedColor, silverLiningColor, liningStrength * 0.95);
             
             // Ensure the glowing edge is opaque enough to stand out
-            combinedAlpha = max(combinedAlpha, liningStrength * uOpacity);
+            combinedAlpha = max(combinedAlpha, liningStrength * vOpacity);
         }
     }
 

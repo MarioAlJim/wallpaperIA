@@ -62,6 +62,13 @@ class SunnyRenderer(
     private lateinit var particleInstanceBuffer: FloatBuffer
     private lateinit var fireflyInstanceBuffer: FloatBuffer
 
+    // Instanced-draw geometry for clouds: 4-vertex GL_TRIANGLE_STRIP quad
+    // (locations 0/1, divisor 0) plus per-instance attributes packed as
+    // [posX, posY, scale, opacity, variation] (locations 2-5, divisor 1) uploaded once per frame.
+    private val cloudFloatsPerEntry = 5
+    private val maxCloudInstances = 128
+    private lateinit var cloudInstanceBuffer: FloatBuffer
+
     // Handles for sunny_background.frag
     private var bgThemeHandle = -1
     private var bgSunPosHandle = -1
@@ -414,6 +421,9 @@ class SunnyRenderer(
         fireflyInstanceBuffer = ByteBuffer.allocateDirect(maxFireflyInstances * instanceFloatsPerEntry * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
+        cloudInstanceBuffer = ByteBuffer.allocateDirect(maxCloudInstances * cloudFloatsPerEntry * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
 
         // Compile and link cloud shader
         val cloudVert = readAssetFile(context, "shaders/procedural_cloud.vert")
@@ -421,14 +431,10 @@ class SunnyRenderer(
         cloudProgram = createProgram(cloudVert, cloudFrag)
 
         cloudMvpMatrixHandle = GLES30.glGetUniformLocation(cloudProgram, "uMVPMatrix")
-        cloudOpacityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uOpacity")
         cloudFlashIntensityHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashIntensity")
         cloudFlashColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uFlashColor")
         cloudCloudColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
-        cloudVariationHandle = GLES30.glGetUniformLocation(cloudProgram, "uVariation")
         cloudMoonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
-        cloudCloudPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudPos")
-        cloudCloudScaleHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
         cloudSilverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
 
         // Compile and link background shader
@@ -1500,32 +1506,19 @@ class SunnyRenderer(
         GLES30.glUseProgram(cloudProgram)
 
         val mvpMatrixHandle = cloudMvpMatrixHandle
-        val opacityHandle = cloudOpacityHandleCached
         val flashIntensityHandle = cloudFlashIntensityHandleCached
         val flashColorHandle = cloudFlashColorHandleCached
         val cloudColorHandle = cloudCloudColorHandleCached
-        val variationHandle = cloudVariationHandle
         val moonPosHandle = cloudMoonPosHandle
-        val cloudPosHandle = cloudCloudPosHandle
-        val cloudScaleHandle = cloudCloudScaleHandleCached
         val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
 
         // Night clouds color: slightly darker/cooler/blue-ish gray tint
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
         GLES30.glUniform3f(cloudColorHandle, 0.35f, 0.42f, 0.55f)
         GLES30.glUniform1f(flashIntensityHandle, 0f)
         GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
         GLES30.glUniform2f(moonPosHandle, moon.positionX, moon.positionY)
         GLES30.glUniform1f(silverLiningIntensityHandle, intensity)
-
-        // Bind positions attribute (location 0)
-        cloudQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-
-        // Bind UV coordinates attribute (location 1)
-        cloudQuadBuffer.position(2)
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(1)
 
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
@@ -1537,26 +1530,19 @@ class SunnyRenderer(
             nightCloudsDirty = false
         }
 
-        for (cloud in sortedNightClouds) {
-            val modelMatrix = scratchModelMatrix
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
-            Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
-
-            val modelViewProjection = scratchMVPMatrix
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-
-            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
-            GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
-            GLES30.glUniform1f(variationHandle, cloud.shapeSeed)
-            GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
-            GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
-
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        val count = sortedNightClouds.size.coerceAtMost(maxCloudInstances)
+        cloudInstanceBuffer.clear()
+        for (i in 0 until count) {
+            val cloud = sortedNightClouds[i]
+            cloudInstanceBuffer.put(cloud.positionX + gyroX)
+            cloudInstanceBuffer.put(cloud.positionY + gyroY)
+            cloudInstanceBuffer.put(cloud.scale)
+            cloudInstanceBuffer.put(cloud.opacity * intensity)
+            cloudInstanceBuffer.put(cloud.shapeSeed)
         }
+        cloudInstanceBuffer.position(0)
 
-        GLES30.glDisableVertexAttribArray(0)
-        GLES30.glDisableVertexAttribArray(1)
+        drawInstancedClouds(cloudInstanceBuffer, count)
     }
 
     private fun adjustNightClouds(density: Int) {
@@ -1594,20 +1580,18 @@ class SunnyRenderer(
     }
 
     private fun drawClouds(intensity: Float = 1f) {
-        if (clouds.isEmpty()) return
+        if (clouds.isEmpty() || cloudProgram == 0) return
 
         GLES30.glUseProgram(cloudProgram)
+
         val mvpMatrixHandle = cloudMvpMatrixHandle
-        val opacityHandle = cloudOpacityHandleCached
         val flashIntensityHandle = cloudFlashIntensityHandleCached
         val flashColorHandle = cloudFlashColorHandleCached
         val cloudColorHandle = cloudCloudColorHandleCached
-        val variationHandle = cloudVariationHandle
         val moonPosHandle = cloudMoonPosHandle
-        val cloudPosHandle = cloudCloudPosHandle
-        val cloudScaleHandle = cloudCloudScaleHandleCached
         val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
 
+        GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
         GLES30.glUniform2f(moonPosHandle, 0f, 0f)
         GLES30.glUniform1f(silverLiningIntensityHandle, 0f) // Disabled during day
 
@@ -1631,16 +1615,6 @@ class SunnyRenderer(
         GLES30.glUniform1f(flashIntensityHandle, 0f)
         GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
 
-        // Bind positions attribute (location 0)
-        cloudQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-
-        // Bind UV coordinates attribute (location 1)
-        cloudQuadBuffer.position(2)
-        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
-        GLES30.glEnableVertexAttribArray(1)
-
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
 
@@ -1651,26 +1625,19 @@ class SunnyRenderer(
             cloudsDirty = false
         }
 
-        for (cloud in sortedClouds) {
-            val modelMatrix = scratchModelMatrix
-            Matrix.setIdentityM(modelMatrix, 0)
-            Matrix.translateM(modelMatrix, 0, cloud.positionX + gyroX, cloud.positionY + gyroY, 0f)
-            Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
-
-            val modelViewProjection = scratchMVPMatrix
-            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
-
-            GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
-            GLES30.glUniform1f(opacityHandle, cloud.opacity * intensity)
-            GLES30.glUniform1f(variationHandle, cloud.shapeSeed)
-            GLES30.glUniform2f(cloudPosHandle, cloud.positionX + gyroX, cloud.positionY + gyroY)
-            GLES30.glUniform1f(cloudScaleHandle, cloud.scale)
-
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        val count = sortedClouds.size.coerceAtMost(maxCloudInstances)
+        cloudInstanceBuffer.clear()
+        for (i in 0 until count) {
+            val cloud = sortedClouds[i]
+            cloudInstanceBuffer.put(cloud.positionX + gyroX)
+            cloudInstanceBuffer.put(cloud.positionY + gyroY)
+            cloudInstanceBuffer.put(cloud.scale)
+            cloudInstanceBuffer.put(cloud.opacity * intensity)
+            cloudInstanceBuffer.put(cloud.shapeSeed)
         }
+        cloudInstanceBuffer.position(0)
 
-        GLES30.glDisableVertexAttribArray(0)
-        GLES30.glDisableVertexAttribArray(1)
+        drawInstancedClouds(cloudInstanceBuffer, count)
     }
 
     private fun drawParticles(intensity: Float = 1f) {
@@ -1769,6 +1736,59 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(5)
         // Reset divisors so these locations behave as regular per-vertex attributes if
         // reused by a subsequent non-instanced draw call using the same slots.
+        GLES30.glVertexAttribDivisor(2, 0)
+        GLES30.glVertexAttribDivisor(3, 0)
+        GLES30.glVertexAttribDivisor(4, 0)
+        GLES30.glVertexAttribDivisor(5, 0)
+    }
+
+    private fun drawInstancedClouds(instanceBuffer: FloatBuffer, count: Int) {
+        if (count <= 0) return
+
+        // Shared quad geometry (locations 0/1, divisor 0 -> same 4 vertices for every instance)
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        val stride = cloudFloatsPerEntry * 4
+
+        // aInstancePos (location 2, size 2)
+        instanceBuffer.position(0)
+        GLES30.glVertexAttribPointer(2, 2, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(2)
+        GLES30.glVertexAttribDivisor(2, 1)
+
+        // aInstanceScale (location 3, size 1)
+        instanceBuffer.position(2)
+        GLES30.glVertexAttribPointer(3, 1, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(3)
+        GLES30.glVertexAttribDivisor(3, 1)
+
+        // aInstanceOpacity (location 4, size 1)
+        instanceBuffer.position(3)
+        GLES30.glVertexAttribPointer(4, 1, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(4)
+        GLES30.glVertexAttribDivisor(4, 1)
+
+        // aInstanceVariation (location 5, size 1)
+        instanceBuffer.position(4)
+        GLES30.glVertexAttribPointer(5, 1, GLES30.GL_FLOAT, false, stride, instanceBuffer)
+        GLES30.glEnableVertexAttribArray(5)
+        GLES30.glVertexAttribDivisor(5, 1)
+
+        GLES30.glDrawArraysInstanced(GLES30.GL_TRIANGLE_STRIP, 0, 4, count)
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+        GLES30.glDisableVertexAttribArray(2)
+        GLES30.glDisableVertexAttribArray(3)
+        GLES30.glDisableVertexAttribArray(4)
+        GLES30.glDisableVertexAttribArray(5)
+
+        // Reset divisors
         GLES30.glVertexAttribDivisor(2, 0)
         GLES30.glVertexAttribDivisor(3, 0)
         GLES30.glVertexAttribDivisor(4, 0)
