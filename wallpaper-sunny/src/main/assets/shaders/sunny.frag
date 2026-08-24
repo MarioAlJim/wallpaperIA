@@ -47,26 +47,101 @@ void main() {
     vec3 sunColor;
     vec3 sunGlowColor;
 
+    vec3 dayTop, dayBottom, daySun, dayGlow;
+    vec3 sunsetTop, sunsetBottom, sunsetSun, sunsetGlow;
+    vec3 dawnTop, dawnBottom, dawnSun, dawnGlow;
+
     if (uTheme == 0) { // Noon Blue
-        skyTop = vec3(0.05, 0.4, 0.85);      // Deep blue
-        skyBottom = vec3(0.55, 0.8, 0.95);    // Light sky blue
-        sunColor = vec3(1.0, 1.0, 0.9);       // Yellow-white
-        sunGlowColor = vec3(1.0, 0.7, 0.2);   // Golden
+        dayTop = vec3(0.05, 0.4, 0.85);
+        dayBottom = vec3(0.55, 0.8, 0.95);
+        daySun = vec3(1.0, 1.0, 0.9);
+        dayGlow = vec3(1.0, 0.7, 0.2);
+
+        // Sunset/Dusk intermediate: Sunset Orange
+        sunsetTop = vec3(0.1, 0.05, 0.25);
+        sunsetBottom = vec3(0.95, 0.45, 0.1);
+        sunsetSun = vec3(1.0, 0.95, 0.7);
+        sunsetGlow = vec3(0.9, 0.2, 0.05);
+
+        // Sunrise/Dawn intermediate: Purple Dusk
+        dawnTop = vec3(0.15, 0.1, 0.35);
+        dawnBottom = vec3(0.9, 0.5, 0.55);
+        dawnSun = vec3(1.0, 0.9, 0.95);
+        dawnGlow = vec3(0.8, 0.3, 0.6);
     } else if (uTheme == 1) { // Sunset Orange
-        skyTop = vec3(0.1, 0.05, 0.25);       // Dark indigo
-        skyBottom = vec3(0.95, 0.45, 0.1);    // Bright orange
-        sunColor = vec3(1.0, 0.95, 0.7);      // Warm yellow-white
-        sunGlowColor = vec3(0.9, 0.2, 0.05);  // Deep red-orange
-    } else if (uTheme == 2) { // Purple Dusk (Theme 2)
-        skyTop = vec3(0.15, 0.1, 0.35);       // Violet
-        skyBottom = vec3(0.9, 0.5, 0.55);     // Peach/pink
-        sunColor = vec3(1.0, 0.9, 0.95);      // White pink
-        sunGlowColor = vec3(0.8, 0.3, 0.6);   // Magenta
-    } else { // Custom (Theme 3)
-        skyTop = uSkyTop;
-        skyBottom = uSkyBottom;
-        sunColor = vec3(1.0, 0.98, 0.9);       // Warm white-yellow
-        sunGlowColor = mix(skyBottom, vec3(1.0, 0.7, 0.3), 0.5); // Natural golden glow
+        dayTop = vec3(0.1, 0.05, 0.25);
+        dayBottom = vec3(0.95, 0.45, 0.1);
+        daySun = vec3(1.0, 0.95, 0.7);
+        dayGlow = vec3(0.9, 0.2, 0.05);
+
+        // Sunset/Dusk intermediate: Purple Dusk
+        sunsetTop = vec3(0.15, 0.1, 0.35);
+        sunsetBottom = vec3(0.9, 0.5, 0.55);
+        sunsetSun = vec3(1.0, 0.9, 0.95);
+        sunsetGlow = vec3(0.8, 0.3, 0.6);
+
+        // Sunrise/Dawn intermediate: Noon Blue / Gold
+        dawnTop = vec3(0.05, 0.4, 0.85);
+        dawnBottom = vec3(0.55, 0.8, 0.95);
+        dawnSun = vec3(1.0, 1.0, 0.9);
+        dawnGlow = vec3(1.0, 0.7, 0.2);
+    } else if (uTheme == 2) { // Purple Dusk
+        dayTop = vec3(0.15, 0.1, 0.35);
+        dayBottom = vec3(0.9, 0.5, 0.55);
+        daySun = vec3(1.0, 0.9, 0.95);
+        dayGlow = vec3(0.8, 0.3, 0.6);
+
+        // Sunset/Dusk intermediate: Dark blue-violet
+        sunsetTop = vec3(0.05, 0.05, 0.20);
+        sunsetBottom = vec3(0.40, 0.20, 0.50);
+        sunsetSun = vec3(0.9, 0.8, 0.95);
+        sunsetGlow = vec3(0.5, 0.1, 0.5);
+
+        // Sunrise/Dawn intermediate: Warm Orange / Gold
+        dawnTop = vec3(0.1, 0.2, 0.5);
+        dawnBottom = vec3(0.95, 0.6, 0.4);
+        dawnSun = vec3(1.0, 0.95, 0.7);
+        dawnGlow = vec3(0.9, 0.4, 0.2);
+    } else { // Custom
+        dayTop = uSkyTop;
+        dayBottom = uSkyBottom;
+        daySun = vec3(1.0, 0.98, 0.9);
+        dayGlow = mix(dayBottom, vec3(1.0, 0.7, 0.3), 0.5);
+
+        // Custom intermediates
+        sunsetTop = mix(dayTop, vec3(0.1, 0.05, 0.25), 0.5);
+        sunsetBottom = mix(dayBottom, vec3(0.95, 0.45, 0.1), 0.6);
+        sunsetSun = vec3(1.0, 0.95, 0.8);
+        sunsetGlow = vec3(0.9, 0.4, 0.2);
+
+        dawnTop = mix(dayTop, vec3(0.15, 0.1, 0.35), 0.5);
+        dawnBottom = mix(dayBottom, vec3(0.9, 0.5, 0.55), 0.6);
+        dawnSun = vec3(1.0, 0.9, 0.9);
+        dawnGlow = vec3(0.8, 0.4, 0.5);
+    }
+
+    // Calculate transition weights based on uNightIntensity and sun position
+    float wDay = clamp(1.0 - uNightIntensity * 2.0, 0.0, 1.0);
+    float wSunset = 0.0;
+    float wDawn = 0.0;
+    
+    if (uSunPos.x >= 0.0) {
+        wSunset = clamp(1.0 - abs(uNightIntensity - 0.5) * 2.0, 0.0, 1.0);
+    } else {
+        wDawn = clamp(1.0 - abs(uNightIntensity - 0.5) * 2.0, 0.0, 1.0);
+    }
+
+    float sumWeights = wDay + wSunset + wDawn;
+    if (sumWeights > 0.001) {
+        skyTop = (dayTop * wDay + sunsetTop * wSunset + dawnTop * wDawn) / sumWeights;
+        skyBottom = (dayBottom * wDay + sunsetBottom * wSunset + dawnBottom * wDawn) / sumWeights;
+        sunColor = (daySun * wDay + sunsetSun * wSunset + dawnSun * wDawn) / sumWeights;
+        sunGlowColor = (dayGlow * wDay + sunsetGlow * wSunset + dawnGlow * wDawn) / sumWeights;
+    } else {
+        skyTop = dayTop;
+        skyBottom = dayBottom;
+        sunColor = daySun;
+        sunGlowColor = dayGlow;
     }
 
     vec3 skyColor = mix(skyBottom, skyTop, tSky);

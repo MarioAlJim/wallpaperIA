@@ -155,6 +155,24 @@ class SunnyRenderer(
     private lateinit var starSizeBuffer: FloatBuffer
     private lateinit var starColorBuffer: FloatBuffer
 
+    // Constellation guide lines shader and buffers
+    private var constellationLinesProgram = 0
+    private var constLinesOffsetHandle = -1
+    private var constLinesColorHandle = -1
+    private var linePositionArray = FloatArray(30 * 4)
+    private lateinit var linePositionBuffer: FloatBuffer
+
+    private val constellationLines = listOf(
+        // Osa Mayor
+        Pair(0, 1), Pair(1, 2), Pair(2, 3), Pair(3, 6), Pair(6, 5), Pair(5, 4), Pair(4, 3),
+        // Casiopea
+        Pair(7, 8), Pair(8, 9), Pair(9, 10), Pair(10, 11),
+        // Orión
+        Pair(12, 13), Pair(12, 14), Pair(13, 16), Pair(14, 15), Pair(15, 16), Pair(14, 17), Pair(16, 18),
+        // Cruz del Sur
+        Pair(19, 20), Pair(21, 22)
+    )
+
     private var time = 0f
     private var aspectRatio = 1.0f
     private var swipeOffset = 0f
@@ -208,7 +226,9 @@ class SunnyRenderer(
         var vx: Float = 0f,
         var vy: Float = 0f,
         var life: Float = 0f,
-        var maxLife: Float = 0f
+        var maxLife: Float = 0f,
+        var isConstellation: Boolean = false,
+        var constIndex: Int = -1
     )
 
     private val stars = mutableListOf<Star>()
@@ -668,6 +688,35 @@ class SunnyRenderer(
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
 
+        // Compile and link constellation lines shader
+        try {
+            val constVert = """#version 300 es
+                layout(location = 0) in vec2 aPosition;
+                uniform vec2 uOffset;
+                void main() {
+                    gl_Position = vec4(aPosition + uOffset, 0.0, 1.0);
+                }
+            """.trimIndent()
+            val constFrag = """#version 300 es
+                precision mediump float;
+                uniform vec4 uColor;
+                out vec4 fragColor;
+                void main() {
+                    fragColor = uColor;
+                }
+            """.trimIndent()
+            constellationLinesProgram = createProgram(constVert, constFrag)
+            constLinesOffsetHandle = GLES30.glGetUniformLocation(constellationLinesProgram, "uOffset")
+            constLinesColorHandle = GLES30.glGetUniformLocation(constellationLinesProgram, "uColor")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // Initialize constellation line position FloatBuffer (max 30 lines, 60 vertices)
+        linePositionBuffer = ByteBuffer.allocateDirect(30 * 4 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
         // Compile and link shooting star shader
         try {
             val ssVert = readAssetFile(context, "shaders/shooting_star.vert")
@@ -1075,7 +1124,7 @@ class SunnyRenderer(
         for (star in stars) {
             star.life += deltaTime * star.twinkleSpeed
             if (star.life >= star.maxLife) {
-                resetStar(star, randomizePosition = isStarModeRandom)
+                resetStar(star, randomizePosition = if (star.isConstellation) false else isStarModeRandom)
             } else {
                 val progress = star.life / star.maxLife
                 val normalizedAlpha = when {
@@ -1085,7 +1134,7 @@ class SunnyRenderer(
                 }
                 star.alpha = normalizedAlpha * star.targetAlpha
 
-                if (isStarModeRandom) {
+                if (isStarModeRandom && !star.isConstellation) {
                     star.x += star.vx * deltaTime
                     star.y += star.vy * deltaTime
 
@@ -1621,6 +1670,8 @@ class SunnyRenderer(
         starColorBuffer.put(starColorArray, 0, index * 4)
         starColorBuffer.position(0)
 
+        drawConstellationLines(intensity)
+
         GLES30.glUseProgram(starPointsProgram)
 
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.015f else 0f
@@ -1677,6 +1728,50 @@ class SunnyRenderer(
 
             if (!blendEnabled) GLES30.glDisable(GLES30.GL_BLEND)
         }
+    }
+
+    private fun drawConstellationLines(intensity: Float) {
+        if (constellationLinesProgram == 0 || stars.size < 24) return
+
+        var index = 0
+        for (pair in constellationLines) {
+            val starA = stars.getOrNull(pair.first) ?: continue
+            val starB = stars.getOrNull(pair.second) ?: continue
+
+            if (starA.alpha > 0.01f && starB.alpha > 0.01f) {
+                linePositionArray[index * 4] = starA.x
+                linePositionArray[index * 4 + 1] = starA.y
+                linePositionArray[index * 4 + 2] = starB.x
+                linePositionArray[index * 4 + 3] = starB.y
+                index++
+            }
+        }
+
+        if (index == 0) return
+
+        linePositionBuffer.clear()
+        linePositionBuffer.put(linePositionArray, 0, index * 4)
+        linePositionBuffer.position(0)
+
+        GLES30.glUseProgram(constellationLinesProgram)
+
+        val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
+        if (!blendEnabled) GLES30.glEnable(GLES30.GL_BLEND)
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
+
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.015f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.015f else 0f
+        GLES30.glUniform2f(constLinesOffsetHandle, swipeOffset * 0.05f + gyroX, gyroY)
+        GLES30.glUniform4f(constLinesColorHandle, 0.6f, 0.8f, 1.0f, 0.07f * intensity)
+
+        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, linePositionBuffer)
+
+        GLES30.glDrawArrays(GLES30.GL_LINES, 0, index * 2)
+
+        GLES30.glDisableVertexAttribArray(0)
+        
+        if (!blendEnabled) GLES30.glDisable(GLES30.GL_BLEND)
     }
 
     private fun drawMoon(intensity: Float) {
@@ -2163,7 +2258,7 @@ class SunnyRenderer(
         GLES30.glUniform2f(bgSunPosHandle, lightX + bgGyroX, lightY + bgGyroY)
         GLES30.glUniform1f(bgAspectHandle, aspectRatio)
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
-        GLES30.glUniform1f(bgTimeHandle, time) // drives sunny_background.frag's Noon-only heat-haze wobble
+        GLES30.glUniform1f(bgTimeHandle, time)
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
 
         // Compute and pass top 4 cloud shadow parameters in screen NDC space
@@ -2319,14 +2414,23 @@ class SunnyRenderer(
 
     private fun adjustStars(density: Int) {
         val targetCount = (density * 2.5f).toInt().coerceIn(0, 300)
+        
+        if (targetCount > 0 && stars.isEmpty()) {
+            stars.addAll(initializeConstellationStars())
+        }
+
         if (stars.size < targetCount) {
             val needed = targetCount - stars.size
             for (i in 0 until needed) {
                 stars.add(createRandomStar())
             }
         } else if (stars.size > targetCount) {
-            while (stars.size > targetCount) {
+            val keepConstellations = if (targetCount < 24) 24 else targetCount
+            while (stars.size > keepConstellations) {
                 stars.removeAt(stars.size - 1)
+            }
+            if (targetCount == 0) {
+                stars.clear()
             }
         }
     }
@@ -2344,30 +2448,142 @@ class SunnyRenderer(
         if (randomizePosition) {
             star.x = random.nextFloat() * 2f - 1f // NDC bounds: -1.0 to 1.0
             star.y = random.nextFloat() * 1.4f - 0.4f // NDC bounds: -0.4 to 1.0 (sky region)
+        } else if (star.isConstellation) {
+            val coords = getConstellationStarCoords(star.constIndex)
+            if (coords != null) {
+                star.x = coords.first
+                star.y = coords.second
+            }
         }
         
-        star.size = 3.0f + random.nextFloat() * 12.0f // pixel size: 3 to 15
+        star.size = if (star.isConstellation) star.size else 3.0f + random.nextFloat() * 12.0f
         star.alpha = 0f
-        star.targetAlpha = 0.2f + random.nextFloat() * 0.8f // max opacity: 0.2 to 1.0
+        star.targetAlpha = if (star.isConstellation) star.targetAlpha else 0.2f + random.nextFloat() * 0.8f
         
-        // Random duration between 2 and 6 seconds
         val duration = 2.0f + random.nextFloat() * 4.0f
         star.maxLife = duration
-        star.twinkleSpeed = 1.0f
+        star.twinkleSpeed = if (star.isConstellation) star.twinkleSpeed else 1.0f
         star.life = 0f
 
-        // Slow drift velocity for Random/Dynamic mode (-0.015 to 0.015 units/sec)
-        star.vx = (random.nextFloat() * 2f - 1f) * 0.015f
-        star.vy = (random.nextFloat() * 2f - 1f) * 0.015f
+        if (!star.isConstellation) {
+            star.vx = (random.nextFloat() * 2f - 1f) * 0.015f
+            star.vy = (random.nextFloat() * 2f - 1f) * 0.015f
+        } else {
+            star.vx = 0f
+            star.vy = 0f
+        }
 
         // Star color configuration
         val isCombined = configProvider.getTimeMode() == 2 || configProvider.getTimeMode() == 3
         val colorIndex = if (isCombined) configProvider.getCombinedStarColorIndex() else configProvider.getStarColorIndex()
-        val finalIndex = if (colorIndex == 5) random.nextInt(5) else colorIndex
-        val (r, g, b) = getStarColorRGB(finalIndex)
-        star.r = r
-        star.g = g
-        star.b = b
+        
+        if (colorIndex != 5) {
+            val (r, g, b) = getStarColorRGB(colorIndex)
+            star.r = r
+            star.g = g
+            star.b = b
+        } else {
+            if (!star.isConstellation) {
+                val (r, g, b) = getStarColorRGB(random.nextInt(5))
+                star.r = r
+                star.g = g
+                star.b = b
+            } else {
+                if (star.constIndex == 12) { // Betelgeuse
+                    star.r = 1.0f
+                    star.g = 0.6f
+                    star.b = 0.4f
+                } else {
+                    star.r = 0.9f
+                    star.g = 0.95f
+                    star.b = 1.0f
+                }
+            }
+        }
+    }
+
+    private fun initializeConstellationStars(): List<Star> {
+        val list = mutableListOf<Star>()
+        
+        // 1. Osa Mayor
+        val umX = floatArrayOf(-0.7f, -0.6f, -0.5f, -0.45f, -0.55f, -0.7f, -0.75f)
+        val umY = floatArrayOf(0.7f, 0.72f, 0.75f, 0.65f, 0.53f, 0.5f, 0.62f)
+        val umSizes = floatArrayOf(12f, 10f, 11f, 13f, 10f, 11f, 9f)
+        for (i in 0 until 7) {
+            list.add(Star(
+                x = umX[i], y = umY[i], size = umSizes[i], alpha = 0f, targetAlpha = 0.8f,
+                twinkleSpeed = 0.8f + kotlin.random.Random.nextFloat() * 0.4f,
+                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = i
+            ))
+        }
+
+        // 2. Casiopea
+        val casX = floatArrayOf(0.4f, 0.48f, 0.55f, 0.63f, 0.7f)
+        val casY = floatArrayOf(0.7f, 0.6f, 0.68f, 0.58f, 0.72f)
+        val casSizes = floatArrayOf(12f, 11f, 13f, 11f, 12f)
+        for (i in 0 until 5) {
+            list.add(Star(
+                x = casX[i], y = casY[i], size = casSizes[i], alpha = 0f, targetAlpha = 0.85f,
+                twinkleSpeed = 0.7f + kotlin.random.Random.nextFloat() * 0.5f,
+                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = 7 + i
+            ))
+        }
+
+        // 3. Orión
+        val oriX = floatArrayOf(0.0f, 0.22f, 0.07f, 0.11f, 0.15f, 0.02f, 0.18f)
+        val oriY = floatArrayOf(0.6f, 0.57f, 0.44f, 0.43f, 0.42f, 0.28f, 0.26f)
+        val oriSizes = floatArrayOf(15f, 11f, 11f, 10f, 11f, 12f, 16f)
+        for (i in 0 until 7) {
+            val r = if (i == 0) 1.0f else 0.9f
+            val g = if (i == 0) 0.6f else 0.95f
+            val b = if (i == 0) 0.4f else 1.0f
+            list.add(Star(
+                x = oriX[i], y = oriY[i], size = oriSizes[i], alpha = 0f, targetAlpha = 0.9f,
+                twinkleSpeed = 0.6f + kotlin.random.Random.nextFloat() * 0.6f,
+                r = r, g = g, b = b, isConstellation = true, constIndex = 12 + i
+            ))
+        }
+
+        // 4. Cruz del Sur
+        val cruX = floatArrayOf(0.6f, 0.6f, 0.53f, 0.67f, 0.63f)
+        val cruY = floatArrayOf(0.35f, 0.15f, 0.26f, 0.24f, 0.20f)
+        val cruSizes = floatArrayOf(13f, 14f, 12f, 11f, 8f)
+        for (i in 0 until 5) {
+            list.add(Star(
+                x = cruX[i], y = cruY[i], size = cruSizes[i], alpha = 0f, targetAlpha = 0.85f,
+                twinkleSpeed = 0.8f + kotlin.random.Random.nextFloat() * 0.4f,
+                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = 19 + i
+            ))
+        }
+
+        return list
+    }
+
+    private fun getConstellationStarCoords(index: Int): Pair<Float, Float>? {
+        if (index in 0..6) {
+            val umX = floatArrayOf(-0.7f, -0.6f, -0.5f, -0.45f, -0.55f, -0.7f, -0.75f)
+            val umY = floatArrayOf(0.7f, 0.72f, 0.75f, 0.65f, 0.53f, 0.5f, 0.62f)
+            return Pair(umX[index], umY[index])
+        }
+        if (index in 7..11) {
+            val i = index - 7
+            val casX = floatArrayOf(0.4f, 0.48f, 0.55f, 0.63f, 0.7f)
+            val casY = floatArrayOf(0.7f, 0.6f, 0.68f, 0.58f, 0.72f)
+            return Pair(casX[i], casY[i])
+        }
+        if (index in 12..18) {
+            val i = index - 12
+            val oriX = floatArrayOf(0.0f, 0.22f, 0.07f, 0.11f, 0.15f, 0.02f, 0.18f)
+            val oriY = floatArrayOf(0.6f, 0.57f, 0.44f, 0.43f, 0.42f, 0.28f, 0.26f)
+            return Pair(oriX[i], oriY[i])
+        }
+        if (index in 19..23) {
+            val i = index - 19
+            val cruX = floatArrayOf(0.6f, 0.6f, 0.53f, 0.67f, 0.63f)
+            val cruY = floatArrayOf(0.35f, 0.15f, 0.26f, 0.24f, 0.20f)
+            return Pair(cruX[i], cruY[i])
+        }
+        return null
     }
 
     private fun getStarColorRGB(colorIndex: Int): Triple<Float, Float, Float> {
@@ -2391,7 +2607,7 @@ class SunnyRenderer(
     }
 
     override fun onTouchEvent(x: Float, y: Float) {
-        birdSpeedBoost = 2.5f
+        birdSpeedBoost = 1.25f
 
         if (!configProvider.isSunnyTouchBurstEnabled()) return
 

@@ -21,24 +21,7 @@ uniform vec4 uCloudShadowOpacity;
 out vec4 fragColor;
 
 void main() {
-    // --- Heat haze / calima (Noon theme only): a subtle horizontal UV wobble confined to a
-    // thin band near the bottom of the background image, simulating shimmering hot air near
-    // the horizon. Zero outside uTheme==0 and outside that band, and faded out at night, so
-    // it never touches the rest of the image or other themes. Computed unconditionally (no
-    // branch) since the per-pixel cost is a single sin() - cheaper and more predictable than
-    // a non-uniform branch.
-    const float kHazeBandStart = 0.80; // fraction of image height (vTexCoord.y) where the band begins
-    const float kHazeBandEnd = 1.0;    // bottom edge of the image
-    const float kHazeAmplitude = 0.006; // UV displacement amplitude - kept low/subtle
-    const float kHazeFrequency = 40.0;
-    const float kHazeSpeed = 1.6;
-    float hazeBandMask = smoothstep(kHazeBandStart, kHazeBandEnd, vTexCoord.y);
-    float hazeThemeMask = (uTheme == 0) ? 1.0 : 0.0;
-    float hazeStrength = hazeBandMask * hazeThemeMask * (1.0 - uNightIntensity);
-    float hazeWobble = sin(vTexCoord.x * kHazeFrequency + uTime * kHazeSpeed) * kHazeAmplitude;
     vec2 sampleUv = vTexCoord;
-    sampleUv.x += hazeWobble * hazeStrength;
-
     vec4 texColor = texture(uTexture, sampleUv);
 
     // Calculate luminance/luma to key out the white sky
@@ -78,28 +61,90 @@ void main() {
     vec3 fgColor;
     vec3 bgColor;
     vec3 highlightColor;
-    
+
+    vec3 fgDay, bgDay, hlDay;
+    vec3 fgSunset, bgSunset, hlSunset;
+    vec3 fgDawn, bgDawn, hlDawn;
+
     if (uTheme == 0) { // Noon Blue
-        fgColor = vec3(0.04, 0.15, 0.22);       // Deep slate-teal
-        bgColor = vec3(0.20, 0.38, 0.46);       // Soft misty teal-blue
-        highlightColor = vec3(0.98, 0.98, 0.82); // Warm white-yellow sun highlight
+        fgDay = vec3(0.04, 0.15, 0.22);
+        bgDay = vec3(0.20, 0.38, 0.46);
+        hlDay = vec3(0.98, 0.98, 0.82);
+
+        // Sunset/Dusk intermediate: Sunset Orange
+        fgSunset = vec3(0.18, 0.04, 0.10);
+        bgSunset = vec3(0.55, 0.20, 0.12);
+        hlSunset = vec3(1.0, 0.70, 0.25);
+
+        // Sunrise/Dawn intermediate: Purple Dusk
+        fgDawn = vec3(0.12, 0.06, 0.20);
+        bgDawn = vec3(0.50, 0.28, 0.44);
+        hlDawn = vec3(1.0, 0.75, 0.85);
     } else if (uTheme == 1) { // Sunset Orange
-        fgColor = vec3(0.18, 0.04, 0.10);       // Deep warm plum/burgundy
-        bgColor = vec3(0.55, 0.20, 0.12);       // Warm terracotta/orange
-        highlightColor = vec3(1.0, 0.70, 0.25);  // Golden orange sun highlight
-    } else if (uTheme == 2) { // Purple Dusk (Theme 2)
-        fgColor = vec3(0.12, 0.06, 0.20);       // Deep indigo/violet
-        bgColor = vec3(0.50, 0.28, 0.44);       // Soft misty mauve/pink
-        highlightColor = vec3(1.0, 0.75, 0.85);  // Pale lavender-pink sun highlight
-    } else { // Custom (Theme 3)
-        // Silhouette foreground: very dark, slightly tinted with sky bottom color
-        fgColor = mix(uSkyBottom * 0.12, vec3(0.04, 0.04, 0.06), 0.4);
-        // Silhouette background/haze: desaturated, darkened bottom sky color
-        bgColor = mix(uSkyBottom, vec3(0.25, 0.25, 0.3), 0.35) * 0.65;
-        // Glare highlight: blend warm white-yellow with sky bottom color
-        highlightColor = mix(vec3(1.0, 0.95, 0.82), uSkyBottom, 0.4);
+        fgDay = vec3(0.18, 0.04, 0.10);
+        bgDay = vec3(0.55, 0.20, 0.12);
+        hlDay = vec3(1.0, 0.70, 0.25);
+
+        // Sunset/Dusk intermediate: Purple Dusk
+        fgSunset = vec3(0.12, 0.06, 0.20);
+        bgSunset = vec3(0.50, 0.28, 0.44);
+        hlSunset = vec3(1.0, 0.75, 0.85);
+
+        // Sunrise/Dawn intermediate: Noon Blue / Gold
+        fgDawn = vec3(0.04, 0.15, 0.22);
+        bgDawn = vec3(0.20, 0.38, 0.46);
+        hlDawn = vec3(0.98, 0.98, 0.82);
+    } else if (uTheme == 2) { // Purple Dusk
+        fgDay = vec3(0.12, 0.06, 0.20);
+        bgDay = vec3(0.50, 0.28, 0.44);
+        hlDay = vec3(1.0, 0.75, 0.85);
+
+        // Sunset/Dusk intermediate: Deep dark blue-violet
+        fgSunset = vec3(0.08, 0.04, 0.15);
+        bgSunset = vec3(0.35, 0.18, 0.40);
+        hlSunset = vec3(0.9, 0.7, 0.85);
+
+        // Sunrise/Dawn intermediate: Warm Orange
+        fgDawn = vec3(0.18, 0.08, 0.08);
+        bgDawn = vec3(0.60, 0.30, 0.20);
+        hlDawn = vec3(1.0, 0.8, 0.5);
+    } else { // Custom
+        fgDay = mix(uSkyBottom * 0.12, vec3(0.04, 0.04, 0.06), 0.4);
+        bgDay = mix(uSkyBottom, vec3(0.25, 0.25, 0.3), 0.35) * 0.65;
+        hlDay = mix(vec3(1.0, 0.95, 0.82), uSkyBottom, 0.4);
+
+        // Intermediate blends
+        fgSunset = mix(fgDay, vec3(0.18, 0.04, 0.10), 0.5);
+        bgSunset = mix(bgDay, vec3(0.55, 0.20, 0.12), 0.5);
+        hlSunset = mix(hlDay, vec3(1.0, 0.70, 0.25), 0.5);
+
+        fgDawn = mix(fgDay, vec3(0.12, 0.06, 0.20), 0.5);
+        bgDawn = mix(bgDay, vec3(0.50, 0.28, 0.44), 0.5);
+        hlDawn = mix(hlDay, vec3(1.0, 0.75, 0.85), 0.5);
     }
+
+    // Calculate transition weights based on uNightIntensity and sun position
+    float wDay = clamp(1.0 - uNightIntensity * 2.0, 0.0, 1.0);
+    float wSunset = 0.0;
+    float wDawn = 0.0;
     
+    if (uSunPos.x >= 0.0) {
+        wSunset = clamp(1.0 - abs(uNightIntensity - 0.5) * 2.0, 0.0, 1.0);
+    } else {
+        wDawn = clamp(1.0 - abs(uNightIntensity - 0.5) * 2.0, 0.0, 1.0);
+    }
+
+    float sumWeights = wDay + wSunset + wDawn;
+    if (sumWeights > 0.001) {
+        fgColor = (fgDay * wDay + fgSunset * wSunset + fgDawn * wDawn) / sumWeights;
+        bgColor = (bgDay * wDay + bgSunset * wSunset + bgDawn * wDawn) / sumWeights;
+        highlightColor = (hlDay * wDay + hlSunset * wSunset + hlDawn * wDawn) / sumWeights;
+    } else {
+        fgColor = fgDay;
+        bgColor = bgDay;
+        highlightColor = hlDay;
+    }
+
     // Interpolate colors to night values
     fgColor = mix(fgColor, vec3(0.005, 0.01, 0.02), uNightIntensity * 0.9);
     bgColor = mix(bgColor, vec3(0.02, 0.03, 0.07), uNightIntensity * 0.85);
