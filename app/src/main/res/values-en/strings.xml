@@ -431,12 +431,12 @@
     <string-array name="sunny_backgrounds">
         <item>Gradient Only</item>
         <item>Mountains</item>
-        <item>Wheat Fields</item>
+        <item>Poppy Valley (Color)</item>
         <item>Lake and Forest</item>
-        <item>Forest and River (Color)</item>
-        <item>City Skyline</item>
+        <item>Valley with River &amp; Sunflowers (Color)</item>
+        <item>Rose Trail Valley (Color)</item>
         <item>Flower Valley (Color)</item>
-        <item>Waterfall and Cliff (Color)</item>
+        <item>Alpine Valley (Color)</item>
         <item>Gallery Image</item>
     </string-array>
     <string-array name="wind_directions">

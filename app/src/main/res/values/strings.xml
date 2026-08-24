@@ -431,12 +431,12 @@
     <string-array name="sunny_backgrounds">
         <item>Solo degradado</item>
         <item>Montañas</item>
-        <item>Campos de Trigo</item>
+        <item>Valle de Amapolas (Color)</item>
         <item>Lago y Bosque</item>
-        <item>Bosque y Río (Color)</item>
-        <item>Silueta de Ciudad</item>
+        <item>Valle con Río y Girasoles (Color)</item>
+        <item>Valle de Rosas y Senderos (Color)</item>
         <item>Valle de Flores (Color)</item>
-        <item>Cascada y Acantilado (Color)</item>
+        <item>Valle Alpino (Color)</item>
         <item>Imagen de la Galería</item>
     </string-array>
     <string-array name="wind_directions">
