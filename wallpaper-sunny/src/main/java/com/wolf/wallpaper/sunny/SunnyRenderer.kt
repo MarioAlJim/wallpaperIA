@@ -43,6 +43,10 @@ class SunnyRenderer(
     private var cloudOcclusionHandle = -1
     private var rainbowOpacityHandle = -1
     private var lensDirtOpacityHandle = -1
+    private var skyBgActiveHandle = -1
+    private var skyBgTranslationHandle = -1
+    private var skyBgScaleHandle = -1
+    private var skyBgTextureHandle = -1
 
     // Handles for particle.vert/particle.frag (instanced: per-instance position/scale/
     // color/opacity travel as vertex attributes, not per-draw uniforms; uProjectionMatrix
@@ -80,6 +84,10 @@ class SunnyRenderer(
     private var bgMoonPhaseMultiplierHandle = -1
     private var bgMvpMatrixHandle = -1
     private var bgTextureHandleCached = -1
+    private var bgWindSpeedHandle = -1
+    private var bgCloudShadowXHandle = -1
+    private var bgCloudShadowWidthHandle = -1
+    private var bgCloudShadowOpacityHandle = -1
     private var bgTimeHandle = -1 // uTime, used by sunny_background.frag's heat-haze effect (Noon theme only)
 
     // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
@@ -227,6 +235,70 @@ class SunnyRenderer(
     private var ssAspectHandle = -1
     private var ssColorHandle = -1
 
+    // Bird Shader Handles
+    private var birdProgram = 0
+    private var birdMvpMatrixHandle = -1
+    private var birdTimeHandle = -1
+    private var birdFlapSpeedHandle = -1
+    private var birdFlapOffsetHandle = -1
+    private var birdOpacityHandle = -1
+
+    // Bird state
+    private class Bird(
+        val isLeader: Boolean,
+        val offsetLeaderX: Float,
+        val offsetLeaderY: Float
+    ) {
+        var x = 0f
+        var y = 0f
+        var speed = 0f
+        var scale = 0f
+        var flapSpeed = 0f
+        var flapOffset = 0f
+        val isLone = (offsetLeaderX == 999f)
+
+        fun reset(aspect: Float) {
+            if (isLeader) {
+                x = -aspect - 0.4f - kotlin.random.Random.nextFloat() * 0.4f
+                y = kotlin.random.Random.nextFloat() * 0.4f + 0.3f
+                speed = kotlin.random.Random.nextFloat() * 0.05f + 0.12f
+                scale = (kotlin.random.Random.nextFloat() * 0.008f + 0.012f) * 2.0f
+                flapSpeed = speed * 45f
+                flapOffset = kotlin.random.Random.nextFloat() * 10f
+            } else if (isLone) {
+                x = -aspect - 0.4f - kotlin.random.Random.nextFloat() * 1.5f
+                y = kotlin.random.Random.nextFloat() * 0.5f + 0.2f
+                speed = kotlin.random.Random.nextFloat() * 0.06f + 0.10f
+                scale = (kotlin.random.Random.nextFloat() * 0.008f + 0.010f) * 2.0f
+                flapSpeed = speed * 45f
+                flapOffset = kotlin.random.Random.nextFloat() * 10f
+            }
+        }
+
+        fun update(deltaTime: Float, aspect: Float, touchSpeedBoost: Float, leader: Bird?) {
+            if (isLeader || isLone) {
+                val currentSpeed = speed * (1.0f + touchSpeedBoost)
+                x += currentSpeed * deltaTime
+                if (isLeader && x > aspect + 0.6f) {
+                    reset(aspect)
+                } else if (isLone && x > aspect + 0.3f) {
+                    reset(aspect)
+                }
+            } else {
+                // Follower
+                if (leader != null) {
+                    x = leader.x + offsetLeaderX
+                    y = leader.y + offsetLeaderY
+                    scale = leader.scale
+                    flapSpeed = leader.flapSpeed
+                    flapOffset = leader.flapOffset + offsetLeaderX * 2.0f
+                }
+            }
+        }
+    }
+    private val birds = mutableListOf<Bird>()
+    private var birdSpeedBoost = 0f
+
     // Firefly state
     private class Firefly(
         var x: Float,
@@ -359,6 +431,10 @@ class SunnyRenderer(
         cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
         rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
         lensDirtOpacityHandle = GLES30.glGetUniformLocation(program, "uLensDirtOpacity")
+        skyBgActiveHandle = GLES30.glGetUniformLocation(program, "uBgActive")
+        skyBgTranslationHandle = GLES30.glGetUniformLocation(program, "uBgTranslation")
+        skyBgScaleHandle = GLES30.glGetUniformLocation(program, "uBgScale")
+        skyBgTextureHandle = GLES30.glGetUniformLocation(program, "uBackgroundTex")
         noiseTexture = createNoiseTexture(128)
 
         // Compile and link lens flare shader
@@ -437,6 +513,21 @@ class SunnyRenderer(
         cloudMoonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
         cloudSilverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
 
+        // Compile and link bird shader
+        try {
+            val birdVert = readAssetFile(context, "shaders/bird.vert")
+            val birdFrag = readAssetFile(context, "shaders/bird.frag")
+            birdProgram = createProgram(birdVert, birdFrag)
+
+            birdMvpMatrixHandle = GLES30.glGetUniformLocation(birdProgram, "uMVPMatrix")
+            birdTimeHandle = GLES30.glGetUniformLocation(birdProgram, "uTime")
+            birdFlapSpeedHandle = GLES30.glGetUniformLocation(birdProgram, "uFlapSpeed")
+            birdFlapOffsetHandle = GLES30.glGetUniformLocation(birdProgram, "uFlapOffset")
+            birdOpacityHandle = GLES30.glGetUniformLocation(birdProgram, "uOpacity")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
         // Compile and link background shader
         val bgVert = readAssetFile(context, "shaders/sunny_background.vert")
         val bgFrag = readAssetFile(context, "shaders/sunny_background.frag")
@@ -453,6 +544,10 @@ class SunnyRenderer(
         bgMvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
         bgTextureHandleCached = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
         bgTimeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
+        bgWindSpeedHandle = GLES30.glGetUniformLocation(backgroundProgram, "uWindSpeed")
+        bgCloudShadowXHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowX")
+        bgCloudShadowWidthHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowWidth")
+        bgCloudShadowOpacityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowOpacity")
 
 
 
@@ -599,6 +694,7 @@ class SunnyRenderer(
             cloud.reset(kotlin.random.Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio)
         }
         cloudsDirty = true
+        initBirds()
     }
 
     override fun onUpdate(deltaTime: Float) {
@@ -1026,6 +1122,11 @@ class SunnyRenderer(
 
         // Rare subtle-rainbow simulation update (day skies only, see updateRainbow)
         updateRainbow(deltaTime)
+
+        // Birds simulation update
+        birdSpeedBoost = (birdSpeedBoost - deltaTime * 1.5f).coerceAtLeast(0f)
+        val leader = birds.firstOrNull { it.isLeader }
+        birds.forEach { it.update(deltaTime, aspectRatio, birdSpeedBoost, leader) }
     }
 
     /**
@@ -1239,6 +1340,20 @@ class SunnyRenderer(
         val centerProximity = (1f - smoothstep(0f, kLensDirtCenterFalloff, centerDist)).coerceIn(0f, 1f)
         GLES30.glUniform1f(lensDirtOpacityHandle, (lensDirtBase * centerProximity).coerceIn(0f, 1f))
 
+        // Pass background occlusion uniforms to sky shader for volumetric God Rays occlusion
+        val bgIndex = configProvider.getSunnyBackgroundIndex()
+        val transform = getBgTransform(bgIndex)
+        GLES30.glUniform1i(skyBgActiveHandle, if (bgIndex > 0 && bgIndex < 8) 1 else 0)
+        GLES30.glUniform2f(skyBgTranslationHandle, transform.translationX, transform.translationY)
+        GLES30.glUniform2f(skyBgScaleHandle, transform.scaleX, transform.scaleY)
+        
+        if (bgIndex > 0 && bgIndex < 8) {
+            val textureId = backgroundTextures[bgIndex - 1]
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE2)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, textureId)
+            GLES30.glUniform1i(skyBgTextureHandle, 2)
+        }
+
         if (theme == 3) {
             val topColor = configProvider.getSunnyCustomSkyTopColor()
             val bottomColor = configProvider.getSunnyCustomSkyBottomColor()
@@ -1259,8 +1374,95 @@ class SunnyRenderer(
         GLES30.glDisableVertexAttribArray(0)
     }
 
+    private fun initBirds() {
+        birds.clear()
+        
+        // 1. Formation V (5 birds)
+        // Leader
+        birds.add(Bird(isLeader = true, offsetLeaderX = 0f, offsetLeaderY = 0f))
+        // Left wing followers
+        birds.add(Bird(isLeader = false, offsetLeaderX = -0.12f, offsetLeaderY = 0.07f))
+        birds.add(Bird(isLeader = false, offsetLeaderX = -0.24f, offsetLeaderY = 0.14f))
+        // Right wing followers
+        birds.add(Bird(isLeader = false, offsetLeaderX = -0.12f, offsetLeaderY = -0.07f))
+        birds.add(Bird(isLeader = false, offsetLeaderX = -0.24f, offsetLeaderY = -0.14f))
+        
+        // 2. Lone random birds (3 birds)
+        birds.add(Bird(isLeader = false, offsetLeaderX = 999f, offsetLeaderY = 999f))
+        birds.add(Bird(isLeader = false, offsetLeaderX = 999f, offsetLeaderY = 999f))
+        birds.add(Bird(isLeader = false, offsetLeaderX = 999f, offsetLeaderY = 999f))
+        
+        // Reset all birds to their initial offscreen positions
+        birds.forEach { it.reset(aspectRatio) }
+    }
+
+    private fun drawBirds(dayIntensity: Float, nightIntensity: Float) {
+        if (birds.isEmpty() || birdProgram == 0 || dayIntensity <= 0.01f) return
+
+        GLES30.glUseProgram(birdProgram)
+
+        // Bind attributes
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        // Bind shared uniforms
+        GLES30.glUniform1f(birdTimeHandle, time)
+        GLES30.glUniform1f(birdOpacityHandle, dayIntensity)
+
+        // Gyro offsets (consistent with clouds)
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
+
+        for (bird in birds) {
+            // Determine active coordinates on screen
+            val activeX: Float
+            val activeY: Float
+            if (bird.isLeader || bird.isLone) {
+                activeX = bird.x
+                activeY = bird.y
+            } else {
+                val leader = birds.firstOrNull { it.isLeader }
+                if (leader != null) {
+                    activeX = leader.x + bird.offsetLeaderX
+                    activeY = leader.y + bird.offsetLeaderY
+                } else {
+                    continue
+                }
+            }
+
+            // Build model matrix
+            val modelMatrix = scratchModelMatrix
+            Matrix.setIdentityM(modelMatrix, 0)
+            // Apply translation with gyro offset
+            Matrix.translateM(modelMatrix, 0, activeX + gyroX, activeY + gyroY, 0f)
+            // Scale the quad (keep it 1:1 in aspect ratio)
+            Matrix.scaleM(modelMatrix, 0, bird.scale, bird.scale, 1.0f)
+
+            // Multiply with projection matrix
+            val modelViewProjection = scratchMVPMatrix
+            Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
+
+            GLES30.glUniformMatrix4fv(birdMvpMatrixHandle, 1, false, modelViewProjection, 0)
+            GLES30.glUniform1f(birdFlapSpeedHandle, bird.flapSpeed * (1.0f + birdSpeedBoost * 0.8f))
+            GLES30.glUniform1f(birdFlapOffsetHandle, bird.flapOffset)
+
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        }
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+    }
+
     private fun drawDayScene() {
         drawDaySky(1f, 0f)
+
+        // Draw birds (before background so they fly behind mountains/hills)
+        drawBirds(1f, 0f)
 
         // 2. Fondo seleccionado
         val bgIndex = configProvider.getSunnyBackgroundIndex()
@@ -1283,6 +1485,10 @@ class SunnyRenderer(
         drawStars(intensity)
         drawMoon(intensity)
         drawNightClouds(intensity)
+
+        // Draw birds (they will fade out to 0 opacity at night, but structure remains sound)
+        drawBirds(0f, intensity)
+
         val bgIndex = configProvider.getSunnyBackgroundIndex()
         drawBackground(bgIndex, intensity)
         drawFireflies(intensity) // Draw fireflies in front of background
@@ -1311,6 +1517,9 @@ class SunnyRenderer(
         if (nightIntensity > 0.01f) {
             drawNightClouds(nightIntensity)
         }
+
+        // Draw birds (visible during day, fade out at night)
+        drawBirds(dayIntensity, nightIntensity)
 
         // 4. Paisaje Silueta (Montañas/Fondo - Dibujado al frente)
         val bgIndex = configProvider.getSunnyBackgroundIndex()
@@ -1917,6 +2126,38 @@ class SunnyRenderer(
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
         GLES30.glUniform1f(bgTimeHandle, time) // drives sunny_background.frag's Noon-only heat-haze wobble
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
+
+        // Pass wind intensity to background shader for vegetation sway
+        val windIntensity = configProvider.getWindIntensity()
+        GLES30.glUniform1f(bgWindSpeedHandle, windIntensity / 100f)
+
+        // Compute and pass top 4 cloud shadow parameters in screen NDC space
+        val cloudGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
+        val activeShadowList = if (nightIntensity > 0.5f) sortedNightClouds else sortedClouds
+        val activeShadowClouds = activeShadowList.filter { it.opacity > 0.05f }
+            .sortedByDescending { it.scale }
+            .take(4)
+        
+        val shadowX = FloatArray(4)
+        val shadowWidth = FloatArray(4)
+        val shadowOpacity = FloatArray(4)
+        
+        for (i in 0 until 4) {
+            if (i < activeShadowClouds.size) {
+                val cloud = activeShadowClouds[i]
+                shadowX[i] = (cloud.positionX + cloudGyroX) / aspectRatio
+                shadowWidth[i] = (cloud.scale * 2.4f) / aspectRatio * 0.7f
+                shadowOpacity[i] = cloud.opacity
+            } else {
+                shadowX[i] = -99f
+                shadowWidth[i] = 0f
+                shadowOpacity[i] = 0f
+            }
+        }
+        
+        GLES30.glUniform4fv(bgCloudShadowXHandle, 1, shadowX, 0)
+        GLES30.glUniform4fv(bgCloudShadowWidthHandle, 1, shadowWidth, 0)
+        GLES30.glUniform4fv(bgCloudShadowOpacityHandle, 1, shadowOpacity, 0)
         
         val currentPhase = if (configProvider.getTimeMode() == 2) {
             effectiveCombinedMoonPhase()
@@ -1955,28 +2196,9 @@ class SunnyRenderer(
         val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
 
-        val screenAspect = aspectRatio
-        val bgAspect = backgroundAspectRatios[texIndex]
-        var scaleX = 1.0f
-        var scaleY = 1.0f
-
-        if (screenAspect > bgAspect) {
-            scaleX = screenAspect
-            scaleY = screenAspect / bgAspect
-        } else {
-            scaleX = bgAspect
-            scaleY = 1.0f
-        }
-
-        val bgShiftX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.05f else 0f
-        val bgShiftY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.05f else 0f
-
-        // Parallax background scrolling based on swipeOffset
-        val maxShiftX = (scaleX - screenAspect).coerceAtLeast(0f)
-        val shiftX = -swipeOffset * maxShiftX * 0.5f
-        Matrix.translateM(modelMatrix, 0, shiftX + bgShiftX, bgShiftY, 0f)
-
-        Matrix.scaleM(modelMatrix, 0, scaleX, scaleY, 1.0f)
+        val transform = getBgTransform(backgroundIndex)
+        Matrix.translateM(modelMatrix, 0, transform.translationX, transform.translationY, 0f)
+        Matrix.scaleM(modelMatrix, 0, transform.scaleX, transform.scaleY, 1.0f)
 
         val modelViewProjection = scratchMVPMatrix
         Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
@@ -1986,6 +2208,38 @@ class SunnyRenderer(
 
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
+    }
+
+    private class BgTransform(
+        val translationX: Float,
+        val translationY: Float,
+        val scaleX: Float,
+        val scaleY: Float
+    )
+
+    private fun getBgTransform(bgIndex: Int): BgTransform {
+        if (bgIndex <= 0 || bgIndex > 8) return BgTransform(0f, 0f, 1f, 1f)
+        val texIndex = bgIndex - 1
+        val screenAspect = aspectRatio
+        val bgAspect = backgroundAspectRatios[texIndex]
+        
+        val scaleX: Float
+        val scaleY: Float
+        if (screenAspect > bgAspect) {
+            scaleX = screenAspect
+            scaleY = screenAspect / bgAspect
+        } else {
+            scaleX = bgAspect
+            scaleY = 1.0f
+        }
+        
+        val bgShiftX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.05f else 0f
+        val bgShiftY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.05f else 0f
+        
+        val maxShiftX = (scaleX - screenAspect).coerceAtLeast(0f)
+        val shiftX = -swipeOffset * maxShiftX * 0.5f
+        
+        return BgTransform(shiftX + bgShiftX, bgShiftY, scaleX, scaleY)
     }
 
     private fun adjustClouds(density: Int) {
@@ -2102,6 +2356,8 @@ class SunnyRenderer(
     }
 
     override fun onTouchEvent(x: Float, y: Float) {
+        birdSpeedBoost = 2.5f
+
         if (!configProvider.isSunnyTouchBurstEnabled()) return
 
         // Proyectar coordenadas a espacio ortográfico del shader (uv space)

@@ -14,6 +14,10 @@ uniform vec3 uSkyBottom;
 uniform float uNightIntensity;
 uniform float uMoonPhaseMultiplier;
 uniform float uTime;
+uniform float uWindSpeed;
+uniform vec4 uCloudShadowX;
+uniform vec4 uCloudShadowWidth;
+uniform vec4 uCloudShadowOpacity;
 
 out vec4 fragColor;
 
@@ -34,6 +38,17 @@ void main() {
     float hazeStrength = hazeBandMask * hazeThemeMask * (1.0 - uNightIntensity);
     float hazeWobble = sin(vTexCoord.x * kHazeFrequency + uTime * kHazeSpeed) * kHazeAmplitude;
     vec2 sampleUv = vTexCoord;
+
+    // --- Wind-based Vegetation Sway (Sway only for asset backgrounds) ---
+    if (uIsCustom == 0) {
+        // Sway is zero at the bottom (y=1.0) and increases towards the top of the silhouette
+        float swayStrength = pow(1.0 - vTexCoord.y, 2.2) * 0.007 * (0.2 + uWindSpeed * 0.8);
+        // Sway frequency increases with wind speed
+        float swayFreq = 3.5 + uWindSpeed * 4.0;
+        float swayOffset = sin(uTime * swayFreq + vTexCoord.y * 6.0) * swayStrength;
+        sampleUv.x += swayOffset;
+    }
+
     sampleUv.x += hazeWobble * hazeStrength;
 
     vec4 texColor = texture(uTexture, sampleUv);
@@ -135,6 +150,24 @@ void main() {
             finalHillColor = mix(baseHillColor, highlightColor, glare * 0.50);
         }
     }
+
+    // --- Cloud shadows ---
+    float totalShadow = 0.0;
+    for (int i = 0; i < 4; i++) {
+        if (uCloudShadowOpacity[i] > 0.01) {
+            // Shift shadow horizontally based on sun position to simulate angle
+            float sunShift = (uSunPos.x - 0.5) * 0.05;
+            float targetX = uCloudShadowX[i] + sunShift;
+            float dist = abs(vTexCoord.x - targetX);
+            
+            float shadowFactor = smoothstep(uCloudShadowWidth[i], uCloudShadowWidth[i] * 0.4, dist);
+            float heightFactor = mix(0.5, 1.0, vTexCoord.y);
+            
+            totalShadow = max(totalShadow, shadowFactor * uCloudShadowOpacity[i] * 0.28 * heightFactor);
+        }
+    }
+    float shadowMult = 1.0 - (totalShadow * (1.0 - uNightIntensity));
+    finalHillColor *= shadowMult;
     
     // --- Rim lighting: a thin, sun-tinted glow along the silhouette's edge, strongest on the
     // side of the horizon facing the sun. Reuses `glare` (already computed above from the

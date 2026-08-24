@@ -21,6 +21,11 @@ uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" comp
 uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
 uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
 
+uniform int uBgActive;
+uniform vec2 uBgTranslation;
+uniform vec2 uBgScale;
+uniform sampler2D uBackgroundTex;
+
 // Approximates the old 4-octave hash/fract-based fbm() by summing a few samples of a
 // precomputed, bilinearly-filtered noise texture at different scales/weights instead of
 // computing the noise function in ALU per pixel. GL_LINEAR sampling already gives a
@@ -174,7 +179,30 @@ void main() {
 
         float rayAttenuation = exp(-dist * mix(0.8, kCloudShaftMinAttenuation, uCloudOcclusionNearSun));
         float occlusionBoost = 1.0 + uCloudOcclusionNearSun * kCloudShaftMaxBoost;
-        finalGlow += sunGlowColor * rays * rayAttenuation * uGodRaysIntensity * 1.5 * occlusionBoost;
+
+        // Raymarching crepuscular rays occlusion by background mountains
+        float bgOcclusion = 1.0;
+        if (uBgActive == 1) {
+            for (int i = 1; i <= 4; i++) {
+                float t = float(i) / 4.0;
+                vec2 Q = mix(uSunPos, vPosition, t);
+                
+                // Convert Q to background texture coordinates
+                vec2 worldPos = vec2(Q.x * uAspectRatio, Q.y);
+                vec2 localPos = (worldPos - uBgTranslation) / uBgScale;
+                vec2 uv = vec2(localPos.x * 0.5 + 0.5, 0.5 - localPos.y * 0.5);
+                
+                if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0) {
+                    vec4 tex = texture(uBackgroundTex, uv);
+                    float luma = (tex.r + tex.g + tex.b) / 3.0;
+                    if (luma < 0.90) {
+                        bgOcclusion *= 0.35;
+                    }
+                }
+            }
+        }
+
+        finalGlow += sunGlowColor * rays * rayAttenuation * uGodRaysIntensity * 1.5 * occlusionBoost * bgOcclusion;
     }
 
     // Combine
