@@ -190,6 +190,8 @@
     <string name="sunny_haces_de_luz_god_rays">Haces de Luz (God Rays)</string>
     <string name="sunny_inferior">Inferior</string>
     <string name="sunny_intensidad_de_destellos">Intensidad de Destellos</string>
+    <string name="sunny_aberracion_cromatica">Aberración Cromática</string>
+    <string name="sunny_aberracion_cromatica_desc">Añade franjas de arcoíris sutiles en los bordes de los destellos.</string>
     <string name="sunny_intensidad_de_rayos">Intensidad de Rayos</string>
     <string name="sunny_izq_a_der">Izq. a Der.</string>
     <string name="sunny_la_luna_pasa_a_la_siguiente_fase_ca">La luna pasa a la siguiente fase cada vez que se completa un ciclo de día y noche; la selección manual de abajo queda desactivada.</string>

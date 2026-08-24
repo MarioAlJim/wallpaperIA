@@ -55,6 +55,9 @@ internal class SunnyConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun isSunnyLensFlareEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SUNNY_LENS_FLARE_ENABLED, ConfigManager.DEFAULT_SUNNY_LENS_FLARE_ENABLED)
     fun setSunnyLensFlareEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SUNNY_LENS_FLARE_ENABLED, enabled) }
 
+    fun isSunnyLensFlareChromaticEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SUNNY_LENS_FLARE_CHROMATIC, ConfigManager.DEFAULT_SUNNY_LENS_FLARE_CHROMATIC)
+    fun setSunnyLensFlareChromaticEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SUNNY_LENS_FLARE_CHROMATIC, enabled) }
+
     fun getSunnyLensFlareIntensity(): Int = cachedInt(ConfigManager.KEY_SUNNY_LENS_FLARE_INTENSITY, ConfigManager.DEFAULT_SUNNY_LENS_FLARE_INTENSITY)
     fun setSunnyLensFlareIntensity(intensity: Int) { putInt(ConfigManager.KEY_SUNNY_LENS_FLARE_INTENSITY, intensity.coerceIn(0, 100)) }
 

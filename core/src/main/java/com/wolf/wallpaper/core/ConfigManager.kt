@@ -70,6 +70,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_SUNNY_GOD_RAYS_INTENSITY = "sunny_god_rays_intensity"
         const val KEY_SUNNY_LENS_FLARE_ENABLED = "sunny_lens_flare_enabled"
         const val KEY_SUNNY_LENS_FLARE_INTENSITY = "sunny_lens_flare_intensity"
+        const val KEY_SUNNY_LENS_FLARE_CHROMATIC = "sunny_lens_flare_chromatic"
         const val KEY_SUNNY_GYRO_ENABLED = "sunny_gyro_enabled"
         const val KEY_SUNNY_TOUCH_BURST_ENABLED = "sunny_touch_burst_enabled"
         const val KEY_SCREEN_DROPLETS_ENABLED = "screen_droplets_enabled"
@@ -153,6 +154,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_SUNNY_GOD_RAYS_INTENSITY = 50
         const val DEFAULT_SUNNY_LENS_FLARE_ENABLED = true
         const val DEFAULT_SUNNY_LENS_FLARE_INTENSITY = 50
+        const val DEFAULT_SUNNY_LENS_FLARE_CHROMATIC = true
         const val DEFAULT_SUNNY_GYRO_ENABLED = true
         const val DEFAULT_SUNNY_TOUCH_BURST_ENABLED = true
         const val DEFAULT_SCREEN_DROPLETS_ENABLED = true
@@ -304,6 +306,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun isSunnyLensFlareEnabled(): Boolean = sunny.isSunnyLensFlareEnabled()
     fun setSunnyLensFlareEnabled(enabled: Boolean) = sunny.setSunnyLensFlareEnabled(enabled)
+
+    override fun isSunnyLensFlareChromaticEnabled(): Boolean = sunny.isSunnyLensFlareChromaticEnabled()
+    fun setSunnyLensFlareChromaticEnabled(enabled: Boolean) = sunny.setSunnyLensFlareChromaticEnabled(enabled)
 
     override fun getSunnyLensFlareIntensity(): Int = sunny.getSunnyLensFlareIntensity()
     fun setSunnyLensFlareIntensity(intensity: Int) = sunny.setSunnyLensFlareIntensity(intensity)

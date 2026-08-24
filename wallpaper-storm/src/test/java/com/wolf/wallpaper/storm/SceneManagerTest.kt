@@ -75,6 +75,7 @@ class SceneManagerTest {
         override fun isSunnyGodRaysEnabled(): Boolean = false
         override fun getSunnyGodRaysIntensity(): Int = 0
         override fun isSunnyLensFlareEnabled(): Boolean = false
+        override fun isSunnyLensFlareChromaticEnabled(): Boolean = false
         override fun getSunnyLensFlareIntensity(): Int = 0
         override fun isSunnyGyroEnabled(): Boolean = false
         override fun isSunnyTouchBurstEnabled(): Boolean = false

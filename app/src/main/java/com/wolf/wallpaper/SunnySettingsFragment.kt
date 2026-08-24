@@ -135,6 +135,14 @@ class SunnySettingsFragment : Fragment() {
                 updateSummaries(view)
             }
         }
+        val switchSunnyLensFlareChromatic = view.findViewById<SwitchMaterial>(R.id.switchSunnyLensFlareChromatic)
+        if (switchSunnyLensFlareChromatic != null) {
+            switchSunnyLensFlareChromatic.isChecked = configManager.isSunnyLensFlareChromaticEnabled()
+            switchSunnyLensFlareChromatic.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setSunnyLensFlareChromaticEnabled(isChecked)
+                updateSummaries(view)
+            }
+        }
         setupValueCardSelector(
             view, R.id.spinnerSunnyLensFlareIntensity, R.id.textViewSunnyLensFlareIntensityValue,
             resources.getStringArray(R.array.lens_flare_intensity_options), intArrayOf(0, 25, 50, 75, 100),

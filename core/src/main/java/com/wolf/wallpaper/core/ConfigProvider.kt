@@ -37,6 +37,7 @@ interface ConfigProvider {
     fun isSunnyGodRaysEnabled(): Boolean
     fun getSunnyGodRaysIntensity(): Int // 0-100
     fun isSunnyLensFlareEnabled(): Boolean
+    fun isSunnyLensFlareChromaticEnabled(): Boolean
     fun getSunnyLensFlareIntensity(): Int // 0-100
     
     fun isSunnyGyroEnabled(): Boolean
