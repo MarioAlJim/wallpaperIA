@@ -343,7 +343,7 @@ class SunnyRenderer(
     // for shooting stars above.
     private var rainbowOpacity = 0f
     private var rainbowState = RAINBOW_STATE_IDLE
-    private var rainbowTimer = 0f
+    private var rainbowTimer = 60f
     private var rainbowHoldDuration = 0f
 
     // Touch-wind state (see onOffsetsChanged/applyTouchWindImpulse): tracks when the last
@@ -1308,14 +1308,7 @@ class SunnyRenderer(
      * pushed straight into its fade-out phase rather than popping off instantly.
      */
     private fun updateRainbow(deltaTime: Float) {
-        val timeMode = configProvider.getTimeMode()
-        val theme = configProvider.getSunnyTheme()
-        val dayIntensity = when (timeMode) {
-            0 -> 1f
-            2, 3 -> combinedDayIntensity
-            else -> 0f
-        }
-        val eligible = theme != 2 && dayIntensity > kRainbowMinDayIntensity
+        val eligible = true
 
         if (!eligible && rainbowState != RAINBOW_STATE_IDLE && rainbowState != RAINBOW_STATE_FADE_OUT) {
             rainbowState = RAINBOW_STATE_FADE_OUT
@@ -1324,10 +1317,13 @@ class SunnyRenderer(
 
         when (rainbowState) {
             RAINBOW_STATE_IDLE -> {
-                if (eligible && kotlin.random.Random.nextFloat() < kRainbowSpawnRatePerSecond * deltaTime) {
-                    rainbowState = RAINBOW_STATE_FADE_IN
+                rainbowTimer += deltaTime
+                if (rainbowTimer >= 60f) {
                     rainbowTimer = 0f
-                    rainbowHoldDuration = kRainbowHoldMin + kotlin.random.Random.nextFloat() * kRainbowHoldRange
+                    if (kotlin.random.Random.nextFloat() < 0.25f) {
+                        rainbowState = RAINBOW_STATE_FADE_IN
+                        rainbowHoldDuration = kRainbowHoldMin + kotlin.random.Random.nextFloat() * kRainbowHoldRange
+                    }
                 }
             }
             RAINBOW_STATE_FADE_IN -> {
