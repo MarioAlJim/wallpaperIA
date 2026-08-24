@@ -166,6 +166,7 @@
     <string name="sunny_color_de_estrellas">Color de Estrellas</string>
     <string name="sunny_colores_del_degradado">Colores del Degradado</string>
     <string name="sunny_combinado">Combinado</string>
+    <string name="sunny_reloj_tiempo_real">Reloj</string>
     <string name="sunny_configuracin_de_luna_y_estrellas">Configuración de Luna y Estrellas</string>
     <string name="sunny_configuracin_de_transicin">Configuración de Transición</string>
     <string name="sunny_configuracin_del_sol">Configuración del Sol</string>
@@ -231,7 +232,7 @@
     <string name="sunny_verde">Verde</string>
     <string name="sunny_x_y">X, Y</string>
     <string name="wallpaper_description">Simulador interactivo de tormenta con nubes animadas, lluvia y rayos procedimentales.</string>
-    <string name="wallpaper_label">Tormenta OpenGL</string>
+    <string name="wallpaper_label">Weather wallpaper</string>
     <string name="wind_direction_label">Dirección de la Lluvia</string>
     <string name="wind_intensity_label">Fuerza del Viento</string>
 

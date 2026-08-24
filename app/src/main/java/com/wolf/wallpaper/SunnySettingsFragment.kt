@@ -636,17 +636,20 @@ class SunnySettingsFragment : Fragment() {
         val cardDay = parent.findViewById<MaterialCardView>(R.id.cardTimeModeDay) ?: return
         val cardNight = parent.findViewById<MaterialCardView>(R.id.cardTimeModeNight) ?: return
         val cardCombined = parent.findViewById<MaterialCardView>(R.id.cardTimeModeCombined) ?: return
-        val cards = listOf(cardDay, cardNight, cardCombined)
+        val cardClock = parent.findViewById<MaterialCardView>(R.id.cardTimeModeClock) ?: return
+        val cards = listOf(cardDay, cardNight, cardCombined, cardClock)
 
         val imageDay = parent.findViewById<ImageView>(R.id.imageTimeModeDay)
         val imageNight = parent.findViewById<ImageView>(R.id.imageTimeModeNight)
         val imageCombined = parent.findViewById<ImageView>(R.id.imageTimeModeCombined)
-        val images = listOf(imageDay, imageNight, imageCombined)
+        val imageClock = parent.findViewById<ImageView>(R.id.imageTimeModeClock)
+        val images = listOf(imageDay, imageNight, imageCombined, imageClock)
 
         val textDay = parent.findViewById<TextView>(R.id.textTimeModeDay)
         val textNight = parent.findViewById<TextView>(R.id.textTimeModeNight)
         val textCombined = parent.findViewById<TextView>(R.id.textTimeModeCombined)
-        val texts = listOf(textDay, textNight, textCombined)
+        val textClock = parent.findViewById<TextView>(R.id.textTimeModeClock)
+        val texts = listOf(textDay, textNight, textCombined, textClock)
 
         val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
         val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_muted)
@@ -692,26 +695,35 @@ class SunnySettingsFragment : Fragment() {
         val cardSun = parent.findViewById<View>(R.id.cardSunnySun) ?: return
         val cardMoon = parent.findViewById<View>(R.id.cardSunnyMoon) ?: return
         val cardCombined = parent.findViewById<View>(R.id.cardSunnyCombined) ?: return
-        cardSun.visibility = if (mode == 0 || mode == 2) View.VISIBLE else View.GONE
-        cardMoon.visibility = if (mode == 1 || mode == 2) View.VISIBLE else View.GONE
+        cardSun.visibility = if (mode == 0 || mode == 2 || mode == 3) View.VISIBLE else View.GONE
+        cardMoon.visibility = if (mode == 1 || mode == 2 || mode == 3) View.VISIBLE else View.GONE
         cardCombined.visibility = if (mode == 2) View.VISIBLE else View.GONE
 
-        // Hide redundant individual day/night controls when Combined mode is active
+        // Hide redundant individual day/night controls when Combined/Clock mode is active
         val layoutSunSizeAndSpeed = parent.findViewById<View>(R.id.layoutSunSizeAndSpeed)
         val layoutSunTrajectoryGroup = parent.findViewById<View>(R.id.layoutSunTrajectoryGroup)
         val layoutMoonTrajectoryGroup = parent.findViewById<View>(R.id.layoutMoonTrajectoryGroup)
         val layoutStarColorAndDensityGroup = parent.findViewById<View>(R.id.layoutStarColorAndDensityGroup)
 
-        if (mode == 2) {
-            layoutSunSizeAndSpeed?.visibility = View.GONE
-            layoutSunTrajectoryGroup?.visibility = View.GONE
-            layoutMoonTrajectoryGroup?.visibility = View.GONE
-            layoutStarColorAndDensityGroup?.visibility = View.GONE
-        } else {
-            layoutSunSizeAndSpeed?.visibility = View.VISIBLE
-            layoutSunTrajectoryGroup?.visibility = View.VISIBLE
-            layoutMoonTrajectoryGroup?.visibility = View.VISIBLE
-            layoutStarColorAndDensityGroup?.visibility = View.VISIBLE
+        when (mode) {
+            2 -> { // Combined Cycle
+                layoutSunSizeAndSpeed?.visibility = View.GONE
+                layoutSunTrajectoryGroup?.visibility = View.GONE
+                layoutMoonTrajectoryGroup?.visibility = View.GONE
+                layoutStarColorAndDensityGroup?.visibility = View.GONE
+            }
+            3 -> { // Clock Real-time
+                layoutSunSizeAndSpeed?.visibility = View.VISIBLE
+                layoutSunTrajectoryGroup?.visibility = View.GONE
+                layoutMoonTrajectoryGroup?.visibility = View.GONE
+                layoutStarColorAndDensityGroup?.visibility = View.VISIBLE
+            }
+            else -> { // Day/Night Manual
+                layoutSunSizeAndSpeed?.visibility = View.VISIBLE
+                layoutSunTrajectoryGroup?.visibility = View.VISIBLE
+                layoutMoonTrajectoryGroup?.visibility = View.VISIBLE
+                layoutStarColorAndDensityGroup?.visibility = View.VISIBLE
+            }
         }
     }
 

@@ -14,7 +14,6 @@ uniform vec3 uSkyBottom;
 uniform float uNightIntensity;
 uniform float uMoonPhaseMultiplier;
 uniform float uTime;
-uniform float uWindSpeed;
 uniform vec4 uCloudShadowX;
 uniform vec4 uCloudShadowWidth;
 uniform vec4 uCloudShadowOpacity;
@@ -38,17 +37,6 @@ void main() {
     float hazeStrength = hazeBandMask * hazeThemeMask * (1.0 - uNightIntensity);
     float hazeWobble = sin(vTexCoord.x * kHazeFrequency + uTime * kHazeSpeed) * kHazeAmplitude;
     vec2 sampleUv = vTexCoord;
-
-    // --- Wind-based Vegetation Sway (Sway only for asset backgrounds) ---
-    if (uIsCustom == 0) {
-        // Sway is zero at the bottom (y=1.0) and increases towards the top of the silhouette
-        float swayStrength = pow(1.0 - vTexCoord.y, 2.2) * 0.007 * (0.2 + uWindSpeed * 0.8);
-        // Sway frequency increases with wind speed
-        float swayFreq = 3.5 + uWindSpeed * 4.0;
-        float swayOffset = sin(uTime * swayFreq + vTexCoord.y * 6.0) * swayStrength;
-        sampleUv.x += swayOffset;
-    }
-
     sampleUv.x += hazeWobble * hazeStrength;
 
     vec4 texColor = texture(uTexture, sampleUv);

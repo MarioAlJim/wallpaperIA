@@ -410,6 +410,7 @@
                             android:layout_height="96dp"
                             android:layout_weight="1"
                             android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
                             app:cardCornerRadius="12dp"
                             app:cardElevation="0dp"
                             app:strokeColor="@color/settings_chip_bg_inactive"
@@ -438,6 +439,47 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="@string/sunny_combinado"
+                                    android:textColor="@color/settings_text_muted"
+                                    android:textSize="11sp"
+                                    android:textStyle="bold"
+                                    android:gravity="center" />
+                            </LinearLayout>
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardTimeModeClock"
+                            android:layout_width="0dp"
+                            android:layout_height="96dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            app:cardCornerRadius="12dp"
+                            app:cardElevation="0dp"
+                            app:strokeColor="@color/settings_chip_bg_inactive"
+                            app:strokeWidth="1dp">
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="8dp">
+                                <FrameLayout
+                                    android:layout_width="40dp"
+                                    android:layout_height="48dp"
+                                    android:layout_marginBottom="6dp"
+                                    android:background="@drawable/mini_screen_bg">
+                                    <ImageView
+                                        android:id="@+id/imageTimeModeClock"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_gravity="center"
+                                        android:src="@drawable/ic_clock"
+                                        android:scaleType="fitCenter" />
+                                </FrameLayout>
+                                <TextView
+                                    android:id="@+id/textTimeModeClock"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/sunny_reloj_tiempo_real"
                                     android:textColor="@color/settings_text_muted"
                                     android:textSize="11sp"
                                     android:textStyle="bold"

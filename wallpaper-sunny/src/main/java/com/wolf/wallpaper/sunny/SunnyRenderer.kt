@@ -84,7 +84,6 @@ class SunnyRenderer(
     private var bgMoonPhaseMultiplierHandle = -1
     private var bgMvpMatrixHandle = -1
     private var bgTextureHandleCached = -1
-    private var bgWindSpeedHandle = -1
     private var bgCloudShadowXHandle = -1
     private var bgCloudShadowWidthHandle = -1
     private var bgCloudShadowOpacityHandle = -1
@@ -548,7 +547,6 @@ class SunnyRenderer(
         bgMvpMatrixHandle = GLES30.glGetUniformLocation(backgroundProgram, "uMVPMatrix")
         bgTextureHandleCached = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
         bgTimeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
-        bgWindSpeedHandle = GLES30.glGetUniformLocation(backgroundProgram, "uWindSpeed")
         bgCloudShadowXHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowX")
         bgCloudShadowWidthHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowWidth")
         bgCloudShadowOpacityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uCloudShadowOpacity")
@@ -2167,10 +2165,6 @@ class SunnyRenderer(
         GLES30.glUniform1i(bgIsCustomHandle, if (backgroundIndex == 8) 1 else 0)
         GLES30.glUniform1f(bgTimeHandle, time) // drives sunny_background.frag's Noon-only heat-haze wobble
         GLES30.glUniform1f(bgNightIntensityHandle, nightIntensity)
-
-        // Pass wind intensity to background shader for vegetation sway
-        val windIntensity = configProvider.getWindIntensity()
-        GLES30.glUniform1f(bgWindSpeedHandle, windIntensity / 100f)
 
         // Compute and pass top 4 cloud shadow parameters in screen NDC space
         val cloudGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f

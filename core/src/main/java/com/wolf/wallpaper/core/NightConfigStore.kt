@@ -5,7 +5,7 @@ import android.content.SharedPreferences
 /** Night-mode (moon, stars, time-of-day) preferences. */
 internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(prefs) {
     fun getTimeMode(): Int = cachedInt(ConfigManager.KEY_TIME_MODE, ConfigManager.DEFAULT_TIME_MODE)
-    fun setTimeMode(mode: Int) { putInt(ConfigManager.KEY_TIME_MODE, mode.coerceIn(0, 2)) }
+    fun setTimeMode(mode: Int) { putInt(ConfigManager.KEY_TIME_MODE, mode.coerceIn(0, 3)) }
 
     fun getMoonPhase(): Int = cachedInt(ConfigManager.KEY_MOON_PHASE, ConfigManager.DEFAULT_MOON_PHASE)
     fun setMoonPhase(phase: Int) { putInt(ConfigManager.KEY_MOON_PHASE, phase.coerceIn(0, 7)) }

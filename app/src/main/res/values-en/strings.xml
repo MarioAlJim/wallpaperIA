@@ -166,6 +166,7 @@
     <string name="sunny_color_de_estrellas">Star Color</string>
     <string name="sunny_colores_del_degradado">Gradient Colors</string>
     <string name="sunny_combinado">Combined</string>
+    <string name="sunny_reloj_tiempo_real">Clock</string>
     <string name="sunny_configuracin_de_luna_y_estrellas">Moon and Stars Configuration</string>
     <string name="sunny_configuracin_de_transicin">Transition Configuration</string>
     <string name="sunny_configuracin_del_sol">Sun Configuration</string>
@@ -231,7 +232,7 @@
     <string name="sunny_verde">Green</string>
     <string name="sunny_x_y">X, Y</string>
     <string name="wallpaper_description">Interactive storm simulator with animated clouds, rain, and procedural lightning.</string>
-    <string name="wallpaper_label">OpenGL Storm</string>
+    <string name="wallpaper_label">Weather wallpaper</string>
     <string name="wind_direction_label">Rain Direction</string>
     <string name="wind_intensity_label">Wind Strength</string>
 
