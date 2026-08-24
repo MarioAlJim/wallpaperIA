@@ -936,7 +936,7 @@ class SunnySettingsFragment : Fragment() {
 
         setupValueCardSelector(
             parent, R.id.spinnerGradientCycleSpeed, R.id.textViewGradientCycleSpeedValue,
-            resources.getStringArray(R.array.gradient_cycle_speed_options), intArrayOf(0, 25, 50, 75, 100),
+            resources.getStringArray(R.array.gradient_cycle_speed_options), intArrayOf(25, 50, 75, 100),
             configManager.getGradientCycleSpeed()
         ) { value -> configManager.setGradientCycleSpeed(value) }
         setupValueCardSelector(
@@ -1315,9 +1315,9 @@ class SunnySettingsFragment : Fragment() {
         if (summarySunnyCombined != null) {
             val speed = configManager.getGradientCycleSpeed()
             val speedText = when {
-                speed <= 20 -> getString(R.string.summary_speed_very_slow)
+                speed <= 25 -> getString(R.string.summary_speed_very_slow)
                 speed <= 50 -> getString(R.string.summary_speed_normal)
-                speed <= 85 -> getString(R.string.summary_speed_fast)
+                speed <= 75 -> getString(R.string.summary_speed_fast)
                 else -> getString(R.string.summary_speed_very_fast)
             }
             val sunSize = configManager.getCombinedSunSize()

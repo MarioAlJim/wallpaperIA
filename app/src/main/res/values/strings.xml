@@ -298,11 +298,10 @@
         <item>Resplandor total</item>
     </string-array>
     <string-array name="gradient_cycle_speed_options">
-        <item>Congelado</item>
-        <item>Muy lento</item>
-        <item>Normal</item>
-        <item>Rápido</item>
-        <item>Muy rápido</item>
+        <item>Muy lento (7 min)</item>
+        <item>Normal (5 min)</item>
+        <item>Rápido (3 min)</item>
+        <item>Muy rápido (1 min)</item>
     </string-array>
     <string-array name="lens_flare_intensity_options">
         <item>Sin destellos</item>

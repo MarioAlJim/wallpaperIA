@@ -298,11 +298,10 @@
         <item>Full glow</item>
     </string-array>
     <string-array name="gradient_cycle_speed_options">
-        <item>Frozen</item>
-        <item>Very slow</item>
-        <item>Normal</item>
-        <item>Fast</item>
-        <item>Very fast</item>
+        <item>Very slow (7 min)</item>
+        <item>Normal (5 min)</item>
+        <item>Fast (3 min)</item>
+        <item>Very fast (1 min)</item>
     </string-array>
     <string-array name="lens_flare_intensity_options">
         <item>No lens flares</item>

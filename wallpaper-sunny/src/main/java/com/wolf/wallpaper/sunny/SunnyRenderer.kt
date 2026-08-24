@@ -967,7 +967,15 @@ class SunnyRenderer(
             moon.positionY = 0.85f - 1.15f * (moon.positionX * moon.positionX)
         } else if (timeMode == 2) {
             // Speed is controlled by Combined cycle speed config
-            val moveSpeed = 0.01f + (configProvider.getGradientCycleSpeed() / 100f) * 0.49f
+            val cycleSpeed = configProvider.getGradientCycleSpeed()
+            val durationInSeconds = when (cycleSpeed) {
+                25 -> 7f * 60f
+                50 -> 5f * 60f
+                75 -> 3f * 60f
+                100 -> 1f * 60f
+                else -> 5f * 60f
+            }
+            val moveSpeed = 5.2f / durationInSeconds
             val sunL2R = (combinedDir == 0 || combinedDir == 2)
             val moonL2R = (combinedDir == 0 || combinedDir == 3)
 
