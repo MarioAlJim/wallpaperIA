@@ -173,6 +173,60 @@ class SunnyRenderer(
         Pair(19, 20), Pair(21, 22)
     )
 
+    // Dandelion seeds state and buffers
+    private class DandelionSeed(
+        var x: Float,
+        var y: Float,
+        var size: Float,
+        var vx: Float,
+        var vy: Float,
+        var rotation: Float,
+        var rotSpeed: Float,
+        var opacity: Float,
+        var life: Float,
+        var maxLife: Float
+    )
+    private val dandelionSeeds = mutableListOf<DandelionSeed>()
+    private var dandelionProgram = 0
+    private var dandelionProjMatrixHandle = -1
+    private var dandelionOffsetHandle = -1
+    private var dandelionInstanceArray = FloatArray(30 * 5)
+    private lateinit var dandelionInstanceBuffer: FloatBuffer
+
+    // Jet contrail state and buffers
+    private class JetContrailPoint(
+        val x: Float,
+        val y: Float,
+        var age: Float = 0f
+    )
+    private val contrailPoints = mutableListOf<JetContrailPoint>()
+    private var jetX = -2.0f
+    private var jetY = 0.5f
+    private var jetVx = 0f
+    private var jetVy = 0f
+    private var jetActive = false
+    private var jetSpawnTimer = 0f
+    private var lastContrailEmitTime = 0f
+
+    private var trailProgram = 0
+    private var trailProjMatrixHandle = -1
+    private var trailOffsetHandle = -1
+    private var trailVertexArray = FloatArray(100 * 2 * 2)
+    private var trailAgeArray = FloatArray(100 * 2)
+    private lateinit var trailVertexBuffer: FloatBuffer
+    private lateinit var trailAgeBuffer: FloatBuffer
+
+    // Constellation randomization state
+    private val constellationOffsetsX = FloatArray(4)
+    private val constellationOffsetsY = FloatArray(4)
+    private val constellationActive = BooleanArray(4) { true }
+    private var wasCombinedNight = false
+
+    // Airplane geometry buffers
+    private lateinit var planeVertexBuffer: FloatBuffer
+    private val planeVertexArray = FloatArray(3 * 2)
+    private var isFirstLaunch = true
+
     private var time = 0f
     private var aspectRatio = 1.0f
     private var swipeOffset = 0f
@@ -730,6 +784,108 @@ class SunnyRenderer(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+
+        // 1. Dandelion program compilation and buffer allocation
+        try {
+            val dandVert = """#version 300 es
+                layout(location = 0) in vec2 aPosition;
+                layout(location = 1) in vec2 aTexCoord;
+                layout(location = 2) in vec2 aInstancePos;
+                layout(location = 3) in float aInstanceScale;
+                layout(location = 4) in float aInstanceRotation;
+                layout(location = 5) in float aInstanceOpacity;
+
+                uniform mat4 uProjectionMatrix;
+                uniform vec2 uOffset;
+                out vec2 vTexCoord;
+                out float vOpacity;
+
+                void main() {
+                    vTexCoord = aTexCoord;
+                    vOpacity = aInstanceOpacity;
+                    float cosR = cos(aInstanceRotation);
+                    float sinR = sin(aInstanceRotation);
+                    vec2 rotatedPos = vec2(
+                        aPosition.x * cosR - aPosition.y * sinR,
+                        aPosition.x * sinR + aPosition.y * cosR
+                    );
+                    vec2 worldPos = aInstancePos + rotatedPos * aInstanceScale + uOffset;
+                    gl_Position = uProjectionMatrix * vec4(worldPos, 0.0, 1.0);
+                }
+            """.trimIndent()
+            val dandFrag = """#version 300 es
+                precision mediump float;
+                in vec2 vTexCoord;
+                in float vOpacity;
+                out vec4 fragColor;
+
+                void main() {
+                    vec2 uv = vTexCoord - vec2(0.5);
+                    float dist = length(uv);
+                    float seedCore = smoothstep(0.06, 0.02, dist);
+                    float angle = atan(uv.y, uv.x);
+                    float spokes = cos(6.0 * angle);
+                    float filament = smoothstep(0.7, 0.95, spokes) * smoothstep(0.45, 0.0, dist);
+                    float stem = smoothstep(0.015, 0.0, abs(uv.x)) * step(uv.y, 0.0) * smoothstep(-0.48, -0.05, uv.y);
+                    float mask = clamp(seedCore + filament * 0.7 + stem * 0.8, 0.0, 1.0);
+                    if (mask < 0.01) discard;
+                    fragColor = vec4(1.0, 1.0, 1.0, mask * vOpacity * 0.65);
+                }
+            """.trimIndent()
+            dandelionProgram = createProgram(dandVert, dandFrag)
+            dandelionProjMatrixHandle = GLES30.glGetUniformLocation(dandelionProgram, "uProjectionMatrix")
+            dandelionOffsetHandle = GLES30.glGetUniformLocation(dandelionProgram, "uOffset")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        dandelionInstanceBuffer = ByteBuffer.allocateDirect(30 * 5 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
+        // 2. Jet Contrail program compilation and buffer allocation
+        try {
+            val jetVert = """#version 300 es
+                layout(location = 0) in vec2 aPosition;
+                layout(location = 1) in float aAge;
+                uniform mat4 uProjectionMatrix;
+                uniform vec2 uOffset;
+                out float vAge;
+                void main() {
+                    vAge = aAge;
+                    vec2 worldPos = aPosition + uOffset;
+                    gl_Position = uProjectionMatrix * vec4(worldPos, 0.0, 1.0);
+                }
+            """.trimIndent()
+            val jetFrag = """#version 300 es
+                precision mediump float;
+                in float vAge;
+                out vec4 fragColor;
+                void main() {
+                    float opacity = clamp(1.0 - vAge / 40.0, 0.0, 1.0);
+                    fragColor = vec4(0.95, 0.95, 0.98, opacity * 0.25);
+                }
+            """.trimIndent()
+            trailProgram = createProgram(jetVert, jetFrag)
+            trailProjMatrixHandle = GLES30.glGetUniformLocation(trailProgram, "uProjectionMatrix")
+            trailOffsetHandle = GLES30.glGetUniformLocation(trailProgram, "uOffset")
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        trailVertexBuffer = ByteBuffer.allocateDirect(100 * 2 * 2 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
+        trailAgeBuffer = ByteBuffer.allocateDirect(100 * 2 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
+        planeVertexBuffer = ByteBuffer.allocateDirect(3 * 2 * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+
+        randomizeConstellations()
     }
 
     override fun onSurfaceChanged(width: Int, height: Int) {
@@ -746,6 +902,17 @@ class SunnyRenderer(
         }
         cloudsDirty = true
         initBirds()
+
+        if (isFirstLaunch) {
+            isFirstLaunch = false
+            jetActive = true
+            jetX = -aspectRatio - 0.2f
+            jetY = 0.5f
+            jetVx = 0.035f
+            jetVy = 0.002f
+            contrailPoints.clear()
+            lastContrailEmitTime = 0f
+        }
     }
 
     override fun onUpdate(deltaTime: Float) {
@@ -1215,6 +1382,178 @@ class SunnyRenderer(
         birdSpeedBoost = (birdSpeedBoost - deltaTime * 1.5f).coerceAtLeast(0f)
         val leader = birds.firstOrNull { it.isLeader }
         birds.forEach { it.update(deltaTime, aspectRatio, birdSpeedBoost, leader) }
+
+        // Dandelion seeds update
+        updateDandelionSeeds(deltaTime)
+
+        // Jet contrail update
+        updateJetContrail(deltaTime)
+
+        // Randomize constellations when transitioning from day to night
+        if (timeMode == 2 || timeMode == 3) {
+            if (isCombinedNight && !wasCombinedNight) {
+                randomizeConstellations()
+            }
+            wasCombinedNight = isCombinedNight
+        }
+    }
+
+    private fun updateDandelionSeeds(deltaTime: Float) {
+        val timeMode = configProvider.getTimeMode()
+        val isNight = timeMode == 1 || (timeMode in 2..3 && combinedNightIntensity > 0.85f)
+        
+        // Spawn seeds periodically if we have fewer than 15, only during the day/dusk/dawn
+        if (!isNight && dandelionSeeds.size < 15 && kotlin.random.Random.nextFloat() < 0.05f) {
+            val rand = kotlin.random.Random
+            val startOnLeft = rand.nextBoolean()
+            val sx = if (startOnLeft) -aspectRatio - 0.2f else rand.nextFloat() * aspectRatio * 2f - aspectRatio
+            val sy = if (startOnLeft) rand.nextFloat() * 1.2f - 0.2f else 1.2f
+            
+            val windFactor = configProvider.getWindIntensity() / 100f
+            val vx = 0.05f + windFactor * 0.15f + rand.nextFloat() * 0.05f
+            val vy = -0.04f - rand.nextFloat() * 0.04f
+            
+            dandelionSeeds.add(DandelionSeed(
+                x = sx,
+                y = sy,
+                size = 0.04f + rand.nextFloat() * 0.03f,
+                vx = vx,
+                vy = vy,
+                rotation = rand.nextFloat() * 2f * kotlin.math.PI.toFloat(),
+                rotSpeed = (rand.nextFloat() * 2f - 1f) * 0.5f,
+                opacity = 0f,
+                life = 0f,
+                maxLife = 10f + rand.nextFloat() * 10f
+            ))
+        }
+
+        val iterator = dandelionSeeds.iterator()
+        while (iterator.hasNext()) {
+            val seed = iterator.next()
+            seed.life += deltaTime
+            if (seed.life >= seed.maxLife || seed.x > aspectRatio + 0.3f || seed.y < -0.5f) {
+                iterator.remove()
+            } else {
+                val windFactor = configProvider.getWindIntensity() / 100f
+                val windVx = seed.vx + windFactor * 0.08f
+                
+                seed.x += windVx * deltaTime
+                seed.y += seed.vy * deltaTime
+                seed.rotation += seed.rotSpeed * deltaTime
+                
+                val progress = seed.life / seed.maxLife
+                seed.opacity = when {
+                    progress < 0.15f -> progress / 0.15f
+                    progress > 0.85f -> (1.0f - progress) / 0.15f
+                    else -> 1.0f
+                }
+            }
+        }
+    }
+
+    private fun updateJetContrail(deltaTime: Float) {
+        val timeMode = configProvider.getTimeMode()
+        val isNight = timeMode == 1 || (timeMode in 2..3 && combinedNightIntensity > 0.85f)
+
+        // 1. Spawning logic for jet
+        if (!jetActive) {
+            jetSpawnTimer += deltaTime
+            if (!isNight && jetSpawnTimer >= 30f) { // check every 30 seconds
+                jetSpawnTimer = 0f
+                if (kotlin.random.Random.nextFloat() < 0.60f) { // 60% spawn chance
+                    val rand = kotlin.random.Random
+                    jetActive = true
+                    jetX = -aspectRatio - 0.2f
+                    jetY = 0.4f + rand.nextFloat() * 0.3f
+                    jetVx = 0.03f + rand.nextFloat() * 0.02f
+                    jetVy = (rand.nextFloat() * 2f - 1f) * 0.005f
+                    contrailPoints.clear()
+                    lastContrailEmitTime = 0f
+                }
+            }
+        }
+
+        // 2. Jet flight simulation
+        if (jetActive) {
+            jetX += jetVx * deltaTime
+            jetY += jetVy * deltaTime
+            
+            // Emit trail point every 0.8 seconds
+            lastContrailEmitTime += deltaTime
+            if (lastContrailEmitTime >= 0.8f) {
+                lastContrailEmitTime = 0f
+                contrailPoints.add(JetContrailPoint(jetX, jetY))
+            }
+
+            if (jetX > aspectRatio + 0.3f) {
+                jetActive = false
+            }
+        }
+
+        // 3. Update contrail points
+        val iterator = contrailPoints.iterator()
+        while (iterator.hasNext()) {
+            val p = iterator.next()
+            p.age += deltaTime
+            if (p.age >= 40f) { // fade completely after 40 seconds
+                iterator.remove()
+            }
+        }
+    }
+
+    private fun randomizeConstellations() {
+        val rand = kotlin.random.Random
+        
+        var anyActive = false
+        for (i in 0..3) {
+            constellationActive[i] = rand.nextFloat() < 0.75f
+            if (constellationActive[i]) anyActive = true
+        }
+        if (!anyActive) {
+            constellationActive[rand.nextInt(4)] = true
+        }
+
+        // Ursa Major
+        constellationOffsetsX[0] = rand.nextFloat() * 0.3f - 0.15f
+        constellationOffsetsY[0] = rand.nextFloat() * 0.2f - 0.1f
+
+        // Cassiopeia
+        constellationOffsetsX[1] = rand.nextFloat() * 0.3f - 0.2f
+        constellationOffsetsY[1] = rand.nextFloat() * 0.2f - 0.1f
+
+        // Orion
+        constellationOffsetsX[2] = rand.nextFloat() * 0.3f - 0.15f
+        constellationOffsetsY[2] = rand.nextFloat() * 0.15f - 0.07f
+
+        // Southern Cross
+        constellationOffsetsX[3] = rand.nextFloat() * 0.2f - 0.1f
+        constellationOffsetsY[3] = rand.nextFloat() * 0.1f - 0.05f
+
+        if (stars.size >= 24) {
+            for (i in 0 until 24) {
+                val star = stars[i]
+                val cIdx = when (i) {
+                    in 0..6 -> 0
+                    in 7..11 -> 1
+                    in 12..18 -> 2
+                    else -> 3
+                }
+                
+                val baseTarget = when (cIdx) {
+                    0 -> 0.8f
+                    1 -> 0.85f
+                    2 -> 0.9f
+                    else -> 0.85f
+                }
+                star.targetAlpha = if (constellationActive[cIdx]) baseTarget else 0f
+                
+                val coords = getConstellationStarCoords(star.constIndex)
+                if (coords != null) {
+                    star.x = coords.first
+                    star.y = coords.second
+                }
+            }
+        }
     }
 
     /**
@@ -1545,6 +1884,9 @@ class SunnyRenderer(
     private fun drawDayScene() {
         drawDaySky(1f, 0f)
 
+        // Draw jet contrail in the sky (before birds/background/clouds)
+        drawJetContrail(1f)
+
         // Draw birds (before background so they fly behind mountains/hills)
         drawBirds(1f, 0f)
 
@@ -1557,6 +1899,9 @@ class SunnyRenderer(
 
         // 4. Partículas
         drawParticles(1f)
+
+        // Draw dandelion seeds in the foreground
+        drawDandelionSeeds(1f)
 
         // 5. Destellos de lente
         drawLensFlare(1f)
@@ -1585,6 +1930,11 @@ class SunnyRenderer(
 
         // 1. Cielo (Día y Noche combinados en un solo renderizado)
         drawDaySky(dayIntensity, nightIntensity)
+        
+        if (dayIntensity > 0.01f) {
+            drawJetContrail(dayIntensity)
+        }
+
         if (nightIntensity > 0.01f) {
             drawStars(nightIntensity)
         }
@@ -1619,6 +1969,7 @@ class SunnyRenderer(
         // 5. Efectos Especiales de Día
         if (dayIntensity > 0.01f) {
             drawParticles(dayIntensity)
+            drawDandelionSeeds(dayIntensity)
             drawLensFlare(dayIntensity)
         }
         if (nightIntensity > 0.01f) {
@@ -1731,6 +2082,14 @@ class SunnyRenderer(
 
         var index = 0
         for (pair in constellationLines) {
+            val cIdx = when (pair.first) {
+                in 0..6 -> 0
+                in 7..11 -> 1
+                in 12..18 -> 2
+                else -> 3
+            }
+            if (!constellationActive[cIdx]) continue
+
             val starA = stars.getOrNull(pair.first) ?: continue
             val starB = stars.getOrNull(pair.second) ?: continue
 
@@ -1984,15 +2343,9 @@ class SunnyRenderer(
 
         GLES30.glUseProgram(particleProgram)
 
-        // Save current blend configuration
+        // Save current blend state and enable additive blending
         val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
-        val prevSrcFunc = IntArray(1)
-        val prevDstFunc = IntArray(1)
-        GLES30.glGetIntegerv(GLES30.GL_BLEND_SRC_RGB, prevSrcFunc, 0)
-        GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
-
-        // Enable additive blending for glow effect
-        GLES30.glEnable(GLES30.GL_BLEND)
+        if (!blendEnabled) GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
 
         GLES30.glUniformMatrix4fv(pProjMatrixHandle, 1, false, projectionMatrix, 0)
@@ -2019,10 +2372,9 @@ class SunnyRenderer(
         drawInstancedQuads(particleInstanceBuffer, count)
 
         // Restore blend function to default to avoid breaking subsequent renders
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
         if (!blendEnabled) {
             GLES30.glDisable(GLES30.GL_BLEND)
-        } else {
-            GLES30.glBlendFunc(prevSrcFunc[0], prevDstFunc[0])
         }
     }
 
@@ -2198,11 +2550,7 @@ class SunnyRenderer(
     private fun drawFireflies(intensity: Float) {
         if (fireflies.isEmpty() || fireflyProgram == 0) return
         val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
-        val prevSrcFunc = IntArray(1)
-        val prevDstFunc = IntArray(1)
-        GLES30.glGetIntegerv(GLES30.GL_BLEND_SRC_RGB, prevSrcFunc, 0)
-        GLES30.glGetIntegerv(GLES30.GL_BLEND_DST_RGB, prevDstFunc, 0)
-        GLES30.glEnable(GLES30.GL_BLEND)
+        if (!blendEnabled) GLES30.glEnable(GLES30.GL_BLEND)
         GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE)
 
         GLES30.glUseProgram(fireflyProgram)
@@ -2227,10 +2575,9 @@ class SunnyRenderer(
 
         drawInstancedQuads(fireflyInstanceBuffer, count)
 
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
         if (!blendEnabled) {
             GLES30.glDisable(GLES30.GL_BLEND)
-        } else {
-            GLES30.glBlendFunc(prevSrcFunc[0], prevDstFunc[0])
         }
     }
 
@@ -2559,25 +2906,25 @@ class SunnyRenderer(
         if (index in 0..6) {
             val umX = floatArrayOf(-0.7f, -0.6f, -0.5f, -0.45f, -0.55f, -0.7f, -0.75f)
             val umY = floatArrayOf(0.7f, 0.72f, 0.75f, 0.65f, 0.53f, 0.5f, 0.62f)
-            return Pair(umX[index], umY[index])
+            return Pair(umX[index] + constellationOffsetsX[0], umY[index] + constellationOffsetsY[0])
         }
         if (index in 7..11) {
             val i = index - 7
             val casX = floatArrayOf(0.4f, 0.48f, 0.55f, 0.63f, 0.7f)
             val casY = floatArrayOf(0.7f, 0.6f, 0.68f, 0.58f, 0.72f)
-            return Pair(casX[i], casY[i])
+            return Pair(casX[i] + constellationOffsetsX[1], casY[i] + constellationOffsetsY[1])
         }
         if (index in 12..18) {
             val i = index - 12
             val oriX = floatArrayOf(0.0f, 0.22f, 0.07f, 0.11f, 0.15f, 0.02f, 0.18f)
             val oriY = floatArrayOf(0.6f, 0.57f, 0.44f, 0.43f, 0.42f, 0.28f, 0.26f)
-            return Pair(oriX[i], oriY[i])
+            return Pair(oriX[i] + constellationOffsetsX[2], oriY[i] + constellationOffsetsY[2])
         }
         if (index in 19..23) {
             val i = index - 19
             val cruX = floatArrayOf(0.6f, 0.6f, 0.53f, 0.67f, 0.63f)
             val cruY = floatArrayOf(0.35f, 0.15f, 0.26f, 0.24f, 0.20f)
-            return Pair(cruX[i], cruY[i])
+            return Pair(cruX[i] + constellationOffsetsX[3], cruY[i] + constellationOffsetsY[3])
         }
         return null
     }
@@ -2880,6 +3227,158 @@ class SunnyRenderer(
         while (v > 1.3f) v -= 2.6f
         while (v < -1.3f) v += 2.6f
         return v
+    }
+
+    private fun drawDandelionSeeds(intensity: Float) {
+        if (dandelionSeeds.isEmpty() || dandelionProgram == 0) return
+
+        GLES30.glUseProgram(dandelionProgram)
+        GLES30.glUniformMatrix4fv(dandelionProjMatrixHandle, 1, false, projectionMatrix, 0)
+
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.015f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.015f else 0f
+        GLES30.glUniform2f(dandelionOffsetHandle, swipeOffset * 0.05f + gyroX, gyroY)
+
+        val count = dandelionSeeds.size.coerceAtMost(30)
+        dandelionInstanceBuffer.clear()
+        for (i in 0 until count) {
+            val seed = dandelionSeeds[i]
+            dandelionInstanceBuffer.put(seed.x)
+            dandelionInstanceBuffer.put(seed.y)
+            dandelionInstanceBuffer.put(seed.size)
+            dandelionInstanceBuffer.put(seed.rotation)
+            dandelionInstanceBuffer.put(seed.opacity * intensity)
+        }
+        dandelionInstanceBuffer.position(0)
+
+        // Draw instanced quads using unit quad vertices
+        cloudQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        cloudQuadBuffer.position(2)
+        GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 16, cloudQuadBuffer)
+        GLES30.glEnableVertexAttribArray(1)
+
+        val stride = 5 * 4
+        
+        dandelionInstanceBuffer.position(0)
+        GLES30.glVertexAttribPointer(2, 2, GLES30.GL_FLOAT, false, stride, dandelionInstanceBuffer)
+        GLES30.glEnableVertexAttribArray(2)
+        GLES30.glVertexAttribDivisor(2, 1)
+
+        dandelionInstanceBuffer.position(2)
+        GLES30.glVertexAttribPointer(3, 1, GLES30.GL_FLOAT, false, stride, dandelionInstanceBuffer)
+        GLES30.glEnableVertexAttribArray(3)
+        GLES30.glVertexAttribDivisor(3, 1)
+
+        dandelionInstanceBuffer.position(3)
+        GLES30.glVertexAttribPointer(4, 1, GLES30.GL_FLOAT, false, stride, dandelionInstanceBuffer)
+        GLES30.glEnableVertexAttribArray(4)
+        GLES30.glVertexAttribDivisor(4, 1)
+
+        dandelionInstanceBuffer.position(4)
+        GLES30.glVertexAttribPointer(5, 1, GLES30.GL_FLOAT, false, stride, dandelionInstanceBuffer)
+        GLES30.glEnableVertexAttribArray(5)
+        GLES30.glVertexAttribDivisor(5, 1)
+
+        GLES30.glDrawArraysInstanced(GLES30.GL_TRIANGLE_STRIP, 0, 4, count)
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+        GLES30.glDisableVertexAttribArray(2)
+        GLES30.glDisableVertexAttribArray(3)
+        GLES30.glDisableVertexAttribArray(4)
+        GLES30.glDisableVertexAttribArray(5)
+        GLES30.glVertexAttribDivisor(2, 0)
+        GLES30.glVertexAttribDivisor(3, 0)
+        GLES30.glVertexAttribDivisor(4, 0)
+        GLES30.glVertexAttribDivisor(5, 0)
+    }
+
+    private fun drawJetContrail(intensity: Float) {
+        if (trailProgram == 0 || contrailPoints.size < 2) return
+
+        var index = 0
+        val maxPoints = (contrailPoints.size - 1).coerceAtMost(99)
+        for (i in 0 until maxPoints) {
+            val p0 = contrailPoints[i]
+            val p1 = contrailPoints[i + 1]
+
+            val dx = p1.x - p0.x
+            val dy = p1.y - p0.y
+            val len = kotlin.math.sqrt(dx * dx + dy * dy).coerceAtLeast(0.0001f)
+            val nx = -dy / len
+            val ny = dx / len
+
+            val width0 = 0.003f + (p0.age / 40f) * 0.018f
+            val width1 = 0.003f + (p1.age / 40f) * 0.018f
+
+            trailVertexArray[index * 4] = p0.x + nx * width0
+            trailVertexArray[index * 4 + 1] = p0.y + ny * width0
+            trailAgeArray[index * 2] = p0.age
+
+            trailVertexArray[index * 4 + 2] = p0.x - nx * width0
+            trailVertexArray[index * 4 + 3] = p0.y - ny * width0
+            trailAgeArray[index * 2 + 1] = p0.age
+            index++
+        }
+
+        trailVertexBuffer.clear()
+        trailVertexBuffer.put(trailVertexArray, 0, index * 4)
+        trailVertexBuffer.position(0)
+
+        trailAgeBuffer.clear()
+        trailAgeBuffer.put(trailAgeArray, 0, index * 2)
+        trailAgeBuffer.position(0)
+
+        GLES30.glUseProgram(trailProgram)
+        GLES30.glUniformMatrix4fv(trailProjMatrixHandle, 1, false, projectionMatrix, 0)
+
+        val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.015f else 0f
+        val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.015f else 0f
+        GLES30.glUniform2f(trailOffsetHandle, swipeOffset * 0.05f + gyroX, gyroY)
+
+        val blendEnabled = GLES30.glIsEnabled(GLES30.GL_BLEND)
+        if (!blendEnabled) GLES30.glEnable(GLES30.GL_BLEND)
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
+
+        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, trailVertexBuffer)
+
+        GLES30.glEnableVertexAttribArray(1)
+        GLES30.glVertexAttribPointer(1, 1, GLES30.GL_FLOAT, false, 0, trailAgeBuffer)
+
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, index * 2)
+
+        if (jetActive) {
+            val speed = kotlin.math.sqrt(jetVx * jetVx + jetVy * jetVy).coerceAtLeast(0.0001f)
+            val ux = jetVx / speed
+            val uy = jetVy / speed
+            val nx = -uy
+            val ny = ux
+
+            planeVertexArray[0] = jetX + ux * 0.02f
+            planeVertexArray[1] = jetY + uy * 0.02f
+            planeVertexArray[2] = jetX - ux * 0.012f + nx * 0.014f
+            planeVertexArray[3] = jetY - uy * 0.012f + ny * 0.014f
+            planeVertexArray[4] = jetX - ux * 0.012f - nx * 0.014f
+            planeVertexArray[5] = jetY - uy * 0.012f - ny * 0.014f
+
+            planeVertexBuffer.clear()
+            planeVertexBuffer.put(planeVertexArray)
+            planeVertexBuffer.position(0)
+
+            GLES30.glDisableVertexAttribArray(1)
+            GLES30.glVertexAttrib1f(1, 0f)
+
+            GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, planeVertexBuffer)
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3)
+        }
+
+        GLES30.glDisableVertexAttribArray(0)
+        GLES30.glDisableVertexAttribArray(1)
+
+        if (!blendEnabled) GLES30.glDisable(GLES30.GL_BLEND)
     }
 
     private fun createProgram(vertexCode: String, fragmentCode: String): Int =

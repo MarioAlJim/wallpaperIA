@@ -199,7 +199,7 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             // 3. Lens refraction distortion:
             // Displace texture coordinates towards the center to create a convex magnifying lens effect.
             // Distorts smoothly from 0 at the center (normDist=0) to 0 at the outer boundary (normDist=1).
-            float refractStrength = normDist * (1.0 - normDist) * 0.22 * fade;
+            float refractStrength = normDist * (1.0 - normDist) * 1.5 * fade;
             highp vec2 distortion = (shapePos / scale) * refractStrength;
             totalDistortion += distortion * weight;
 
