@@ -20,6 +20,10 @@ uniform sampler2D uNoiseTex; // Precomputed tileable value-noise texture (GL_REP
 uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" computed on the CPU (SunnyRenderer.computeCloudOcclusionNearSun)
 uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
 uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
+uniform float uNebulaIntensity; // 0..1, already 0 when the effect is disabled by the user
+uniform vec3 uNebulaColor;      // user-configurable tint
+uniform vec2 uNebulaCenter;     // fixed anchor point for the night, in the same aspect-scaled uv space as uvCoords below
+uniform float uNebulaRotation;  // per-night random phase offset so every night's swirl starts differently oriented
 
 uniform int uBgActive;
 uniform vec2 uBgTranslation;
@@ -150,8 +154,34 @@ void main() {
         float animatedHaze = smoothstep(-0.85 + hazeOffset, -0.42 + hazeOffset, vPosition.y) * (1.0 - smoothstep(-0.42 + hazeOffset, 0.08 + hazeOffset, vPosition.y));
         
         // Very subtle horizon glow at night (soft blue-gray mist)
-        vec3 hazeColor = vec3(0.08, 0.09, 0.16); 
+        vec3 hazeColor = vec3(0.08, 0.09, 0.16);
         nightSkyColor = mix(nightSkyColor, hazeColor, animatedHaze * 0.16);
+
+        // --- Nebula: a soft cosmic stain anchored to one fixed point in the sky for the whole
+        // night (uNebulaCenter, chosen once per calendar night on the CPU - SunnyRenderer.
+        // updateNebulaNightlyPlacement). The stain itself never drifts; only the wispy pattern
+        // inside it spins slowly around that fixed center, so it reads as a distant cloud of
+        // gas turning in place rather than something moving across the sky.
+        if (uNebulaIntensity > 0.001) {
+            vec2 toNebula = uvCoords - uNebulaCenter;
+            float nebulaDist = length(toNebula);
+            const float kNebulaRadius = 0.58;
+            float nebulaFalloff = smoothstep(kNebulaRadius, 0.0, nebulaDist);
+            if (nebulaFalloff > 0.001) {
+                float nebulaAngle = atan(toNebula.y, toNebula.x) + uNebulaRotation + uTime * 0.05;
+                // Two angular/radial sine bands at different frequencies, so the swirl reads as
+                // overlapping wisps rather than a single uniform ring, plus a sample of the
+                // shared noise texture (rotated with the swirl) for organic irregularity.
+                float bands = sin(nebulaAngle * 3.0 + nebulaDist * 8.0) * 0.5 + 0.5;
+                bands += sin(nebulaAngle * 5.0 - nebulaDist * 5.0 + uTime * 0.09) * 0.5 + 0.5;
+                vec2 swirlNoiseUv = vec2(cos(nebulaAngle), sin(nebulaAngle)) * nebulaDist * 1.4 + uNebulaCenter * 3.7;
+                bands += texture(uNoiseTex, swirlNoiseUv).r * 1.4;
+                bands /= 3.4;
+                float wisps = smoothstep(0.3, 0.8, bands);
+                float nebulaMask = wisps * nebulaFalloff * nebulaFalloff; // extra falloff^2: soft, glowing edge
+                nightSkyColor = mix(nightSkyColor, uNebulaColor, nebulaMask * uNebulaIntensity * 0.85);
+            }
+        }
 
         skyColor = mix(skyColor, nightSkyColor, uNightIntensity);
     }

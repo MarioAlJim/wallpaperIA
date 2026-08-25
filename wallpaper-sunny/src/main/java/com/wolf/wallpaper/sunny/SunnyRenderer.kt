@@ -92,6 +92,18 @@ class SunnyRenderer(
     // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
+    private var nebulaIntensityHandle = -1
+    private var nebulaColorHandle = -1
+    private var nebulaCenterHandle = -1
+    private var nebulaRotationHandle = -1
+
+    // Where the nebula sits for the current calendar night, and the swirl's starting phase -
+    // both re-rolled once per night in updateNebulaNightlyPlacement() so the nebula appears at
+    // a different spot each night without moving during that same night.
+    private var nebulaCenterX = 0f
+    private var nebulaCenterY = 0.25f
+    private var nebulaRotationPhase = 0f
+    private var nebulaPlacementEpochDay = Long.MIN_VALUE
 
     // Precomputed noise texture used by sunny.frag's lens dirt effect (dedicated texture unit:
     // GL_TEXTURE1, so it never clashes with the cloud/background/moon programs which all bind
@@ -510,6 +522,10 @@ class SunnyRenderer(
         godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
+        nebulaIntensityHandle = GLES30.glGetUniformLocation(program, "uNebulaIntensity")
+        nebulaColorHandle = GLES30.glGetUniformLocation(program, "uNebulaColor")
+        nebulaCenterHandle = GLES30.glGetUniformLocation(program, "uNebulaCenter")
+        nebulaRotationHandle = GLES30.glGetUniformLocation(program, "uNebulaRotation")
         noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
         cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
         rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
@@ -1752,6 +1768,27 @@ class SunnyRenderer(
         }
     }
 
+    /**
+     * Re-rolls where the nebula sits and how its swirl is oriented, once per calendar day (so
+     * once per night, since the nebula only ever renders while uNightIntensity > 0). Mixes the
+     * current epoch day into the user's stable per-install seed (ConfigProvider.getNebulaSeed)
+     * so the sequence of nightly positions differs between installs, while still being
+     * reproducible within the same night (e.g. across a service restart).
+     */
+    private fun updateNebulaNightlyPlacement() {
+        val epochDay = System.currentTimeMillis() / 86_400_000L
+        if (epochDay == nebulaPlacementEpochDay) return
+        nebulaPlacementEpochDay = epochDay
+
+        val rnd = kotlin.random.Random(epochDay * 1_000_003L + configProvider.getNebulaSeed())
+        // Keep the anchor within the upper part of the sky (above the haze/horizon band) and
+        // away from the very edges, so the stain always reads fully on-screen regardless of
+        // aspect ratio.
+        nebulaCenterX = rnd.nextFloat() * 1.4f - 0.7f
+        nebulaCenterY = 0.05f + rnd.nextFloat() * 0.55f
+        nebulaRotationPhase = rnd.nextFloat() * 6.2831855f
+    }
+
     private fun drawDaySky(intensity: Float, nightIntensity: Float = 0f) {
         // 1. Cielo procedural y sol
         GLES30.glUseProgram(program)
@@ -1785,6 +1822,23 @@ class SunnyRenderer(
 
         // Pass night intensity uniform to sky shader
         GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
+
+        // Nebula: re-rolls its placement once per calendar night (see the function), then
+        // simply forwards whatever it landed on plus the user's color/intensity/enabled prefs.
+        updateNebulaNightlyPlacement()
+        val nebulaIntensity = if (configProvider.isNebulaEnabled()) configProvider.getNebulaIntensity() / 100f else 0f
+        GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
+        if (nebulaIntensity > 0f) {
+            val nebulaColor = configProvider.getNebulaColor()
+            GLES30.glUniform3f(
+                nebulaColorHandle,
+                android.graphics.Color.red(nebulaColor) / 255f,
+                android.graphics.Color.green(nebulaColor) / 255f,
+                android.graphics.Color.blue(nebulaColor) / 255f
+            )
+            GLES30.glUniform2f(nebulaCenterHandle, nebulaCenterX, nebulaCenterY)
+            GLES30.glUniform1f(nebulaRotationHandle, nebulaRotationPhase)
+        }
 
         // Bind the precomputed noise texture used by the lens dirt effect further below (only
         // sampled by that branch, but binding is cheap either way)

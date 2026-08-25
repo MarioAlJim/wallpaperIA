@@ -1104,6 +1104,138 @@ class SunnySettingsFragment : Fragment() {
                 updateSummaries(parent)
             }
         }
+
+        setupNebulaSection(parent)
+    }
+
+    private fun setupNebulaSection(parent: View) {
+        val switchNebula = parent.findViewById<SwitchMaterial>(R.id.switchNebula)
+        val layoutOptionsGroup = parent.findViewById<View>(R.id.layoutNebulaOptionsGroup)
+        if (switchNebula != null) {
+            val enabled = configManager.isNebulaEnabled()
+            switchNebula.isChecked = enabled
+            layoutOptionsGroup?.visibility = if (enabled) View.VISIBLE else View.GONE
+            switchNebula.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setNebulaEnabled(isChecked)
+                layoutOptionsGroup?.visibility = if (isChecked) View.VISIBLE else View.GONE
+            }
+        }
+
+        setupValueCardSelector(
+            parent, R.id.spinnerNebulaIntensity, R.id.textViewNebulaIntensityValue,
+            resources.getStringArray(R.array.combined_star_density_options), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getNebulaIntensity()
+        ) { value -> configManager.setNebulaIntensity(value) }
+
+        updateNebulaColorPreview(parent)
+        parent.findViewById<View>(R.id.btnNebulaColor)?.setOnClickListener {
+            showNebulaColorPickerDialog(parent)
+        }
+    }
+
+    private fun updateNebulaColorPreview(parent: View) {
+        val color = configManager.getNebulaColor()
+        setCircleColorPreview(parent.findViewById(R.id.viewNebulaColorPreview), color)
+        parent.findViewById<TextView>(R.id.textViewNebulaColorCode)?.text = String.format("#%06X", 0xFFFFFF and color)
+    }
+
+    private fun showNebulaColorPickerDialog(parent: View) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
+        val previewView = dialogView.findViewById<View>(R.id.dialogColorPreview)
+        val hexInput = dialogView.findViewById<EditText>(R.id.dialogColorHexInput)
+
+        val sliderR = dialogView.findViewById<Slider>(R.id.sliderR)
+        val sliderG = dialogView.findViewById<Slider>(R.id.sliderG)
+        val sliderB = dialogView.findViewById<Slider>(R.id.sliderB)
+
+        val labelR = dialogView.findViewById<TextView>(R.id.labelR)
+        val labelG = dialogView.findViewById<TextView>(R.id.labelG)
+        val labelB = dialogView.findViewById<TextView>(R.id.labelB)
+
+        val initialColor = configManager.getNebulaColor()
+        var currentColor = initialColor
+
+        fun updateDialogColor(color: Int, updateHexText: Boolean = true, updateSliders: Boolean = true) {
+            currentColor = color
+            val previewDrawable = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(color)
+            }
+            previewView?.background = previewDrawable
+
+            val r = Color.red(color)
+            val g = Color.green(color)
+            val b = Color.blue(color)
+
+            if (updateHexText) {
+                hexInput?.setText(String.format("#%06X", 0xFFFFFF and color))
+            }
+            if (updateSliders) {
+                sliderR?.value = r.toFloat()
+                sliderG?.value = g.toFloat()
+                sliderB?.value = b.toFloat()
+            }
+
+            labelR?.text = "R: $r"
+            labelG?.text = "G: $g"
+            labelB?.text = "B: $b"
+        }
+
+        val sliderListener = {
+            val r = sliderR?.value?.toInt() ?: 0
+            val g = sliderG?.value?.toInt() ?: 0
+            val b = sliderB?.value?.toInt() ?: 0
+            updateDialogColor(Color.rgb(r, g, b), updateHexText = true, updateSliders = false)
+        }
+
+        sliderR?.addOnChangeListener { _, _, _ -> sliderListener() }
+        sliderG?.addOnChangeListener { _, _, _ -> sliderListener() }
+        sliderB?.addOnChangeListener { _, _, _ -> sliderListener() }
+
+        hexInput?.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val str = s?.toString() ?: ""
+                if (str.length == 7 && str.startsWith("#")) {
+                    try {
+                        updateDialogColor(Color.parseColor(str), updateHexText = false, updateSliders = true)
+                    } catch (e: Exception) {}
+                }
+            }
+        })
+
+        val presets = intArrayOf(
+            0xFF8E4FDB.toInt(), 0xFF4F7FDB.toInt(), 0xFFDB4FA9.toInt(), 0xFF4FDBC4.toInt(),
+            0xFFDB914F.toInt(), 0xFF6A3093.toInt(), 0xFFE53935.toInt(), 0xFF8E24AA.toInt(),
+            0xFF00ACC1.toInt(), 0xFF43A047.toInt(), 0xFFFFB300.toInt(), 0xFFFFFFFF.toInt()
+        )
+
+        for (i in 0..11) {
+            val presetId = resources.getIdentifier("presetColor$i", "id", requireContext().packageName)
+            val presetView = dialogView.findViewById<View>(presetId)
+            if (presetView != null) {
+                presetView.background = GradientDrawable().apply {
+                    shape = GradientDrawable.OVAL
+                    setColor(presets[i])
+                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
+                }
+                presetView.setOnClickListener {
+                    updateDialogColor(presets[i], updateHexText = true, updateSliders = true)
+                }
+            }
+        }
+
+        updateDialogColor(initialColor, updateHexText = true, updateSliders = true)
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setPositiveButton("Aceptar") { _, _ ->
+                configManager.setNebulaColor(currentColor)
+                updateNebulaColorPreview(parent)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 
     private fun setupCombinedMoonPhaseCards(parent: View) {

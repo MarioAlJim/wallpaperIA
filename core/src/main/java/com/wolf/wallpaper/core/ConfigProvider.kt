@@ -69,6 +69,11 @@ interface ConfigProvider {
     fun getGradientCycleSpeed(): Int    // 0–100
     fun getConstellationSeed(): Int     // stable per-install seed for constellation layout randomization, so each user sees a different sky
 
+    fun isNebulaEnabled(): Boolean
+    fun getNebulaIntensity(): Int       // 0–100
+    fun getNebulaColor(): Int           // ARGB color of the nebula stain
+    fun getNebulaSeed(): Int            // stable per-install seed, combined with the calendar day to place the nebula at a different spot each night
+
     fun isShootingStarsEnabled(): Boolean
     fun getShootingStarsDensity(): Int   // 0–100
     fun isFirefliesEnabled(): Boolean

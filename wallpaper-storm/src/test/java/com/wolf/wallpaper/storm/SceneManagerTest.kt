@@ -96,6 +96,10 @@ class SceneManagerTest {
         override fun getNightCloudDensity(): Int = 0
         override fun getGradientCycleSpeed(): Int = 0
         override fun getConstellationSeed(): Int = 2024
+        override fun isNebulaEnabled(): Boolean = true
+        override fun getNebulaIntensity(): Int = 55
+        override fun getNebulaColor(): Int = 0xFF8E4FDB.toInt()
+        override fun getNebulaSeed(): Int = 4242
         override fun getCombinedSunSize(): Int = 50
         override fun getCombinedMoonSize(): Int = 50
         override fun getCombinedMoonPhase(): Int = 4

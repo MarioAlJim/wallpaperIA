@@ -208,6 +208,10 @@
     <string name="sunny_modo_de_estrellas">Star Mode</string>
     <string name="sunny_modo_de_tiempo">Time Mode</string>
     <string name="sunny_muy_alto">Very High</string>
+    <string name="sunny_nebulosa">Nebula</string>
+    <string name="sunny_nebulosa_desc">A cosmic stain that slowly spins in place, at a different point in the sky every night.</string>
+    <string name="sunny_intensidad_de_la_nebulosa">Nebula Intensity</string>
+    <string name="sunny_color_de_la_nebulosa">Nebula Color</string>
     <string name="sunny_noche">Night</string>
     <string name="sunny_personalizado">Custom</string>
     <string name="sunny_poco">Low</string>

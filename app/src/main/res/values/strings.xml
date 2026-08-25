@@ -208,6 +208,10 @@
     <string name="sunny_modo_de_estrellas">Modo de Estrellas</string>
     <string name="sunny_modo_de_tiempo">Modo de Tiempo</string>
     <string name="sunny_muy_alto">Muy Alto</string>
+    <string name="sunny_nebulosa">Nebulosa</string>
+    <string name="sunny_nebulosa_desc">Una mancha cósmica que gira lentamente sobre sí misma, en un punto distinto del cielo cada noche.</string>
+    <string name="sunny_intensidad_de_la_nebulosa">Intensidad de la Nebulosa</string>
+    <string name="sunny_color_de_la_nebulosa">Color de la Nebulosa</string>
     <string name="sunny_noche">Noche</string>
     <string name="sunny_personalizado">Personalizado</string>
     <string name="sunny_poco">Poco</string>

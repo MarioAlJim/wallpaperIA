@@ -89,6 +89,10 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_NIGHT_CLOUD_DENSITY = "night_cloud_density"
         const val KEY_GRADIENT_CYCLE_SPEED = "gradient_cycle_speed"
         const val KEY_CONSTELLATION_SEED = "constellation_seed"
+        const val KEY_NEBULA_ENABLED = "nebula_enabled"
+        const val KEY_NEBULA_INTENSITY = "nebula_intensity"
+        const val KEY_NEBULA_COLOR = "nebula_color"
+        const val KEY_NEBULA_SEED = "nebula_seed"
 
         // New keys for Combined Mode
         const val KEY_COMBINED_SUN_SIZE = "combined_sun_size"
@@ -111,6 +115,11 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_GRADIENT_CYCLE_SPEED = 30
         // Fallback only; getConstellationSeed() generates and persists a real random seed on first read.
         const val DEFAULT_CONSTELLATION_SEED = 2024
+        const val DEFAULT_NEBULA_ENABLED = true
+        const val DEFAULT_NEBULA_INTENSITY = 55
+        const val DEFAULT_NEBULA_COLOR = 0xFF8E4FDB.toInt()
+        // Fallback only; getNebulaSeed() generates and persists a real random seed on first read.
+        const val DEFAULT_NEBULA_SEED = 4242
 
         const val DEFAULT_COMBINED_SUN_SIZE = 50
         const val DEFAULT_COMBINED_MOON_SIZE = 50
@@ -362,6 +371,17 @@ class ConfigManager(context: Context) : ConfigProvider {
     fun setGradientCycleSpeed(speed: Int) = night.setGradientCycleSpeed(speed)
 
     override fun getConstellationSeed(): Int = night.getConstellationSeed()
+
+    override fun isNebulaEnabled(): Boolean = night.isNebulaEnabled()
+    fun setNebulaEnabled(enabled: Boolean) = night.setNebulaEnabled(enabled)
+
+    override fun getNebulaIntensity(): Int = night.getNebulaIntensity()
+    fun setNebulaIntensity(intensity: Int) = night.setNebulaIntensity(intensity)
+
+    override fun getNebulaColor(): Int = night.getNebulaColor()
+    fun setNebulaColor(color: Int) = night.setNebulaColor(color)
+
+    override fun getNebulaSeed(): Int = night.getNebulaSeed()
 
     override fun isShootingStarsEnabled(): Boolean = night.isShootingStarsEnabled()
     fun setShootingStarsEnabled(enabled: Boolean) = night.setShootingStarsEnabled(enabled)

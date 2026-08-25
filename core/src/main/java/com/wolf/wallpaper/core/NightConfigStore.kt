@@ -49,6 +49,31 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
         return cachedInt(ConfigManager.KEY_CONSTELLATION_SEED, ConfigManager.DEFAULT_CONSTELLATION_SEED)
     }
 
+    fun isNebulaEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_NEBULA_ENABLED, ConfigManager.DEFAULT_NEBULA_ENABLED)
+    fun setNebulaEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_NEBULA_ENABLED, enabled) }
+
+    fun getNebulaIntensity(): Int = cachedInt(ConfigManager.KEY_NEBULA_INTENSITY, ConfigManager.DEFAULT_NEBULA_INTENSITY)
+    fun setNebulaIntensity(intensity: Int) { putInt(ConfigManager.KEY_NEBULA_INTENSITY, intensity.coerceIn(0, 100)) }
+
+    fun getNebulaColor(): Int = cachedInt(ConfigManager.KEY_NEBULA_COLOR, ConfigManager.DEFAULT_NEBULA_COLOR)
+    fun setNebulaColor(color: Int) { putInt(ConfigManager.KEY_NEBULA_COLOR, color) }
+
+    /**
+     * Stable per-install seed for the nebula. Combined on the render side with the current
+     * calendar day (not stored here) to pick a new position/orientation for the nebula each
+     * night while keeping it fixed for the whole night, and so different installs don't all
+     * land on the same spot on the same day. Generated once (lazily, on the first read) and
+     * persisted, same pattern as getConstellationSeed().
+     */
+    fun getNebulaSeed(): Int {
+        if (!prefs.contains(ConfigManager.KEY_NEBULA_SEED)) {
+            val generated = kotlin.random.Random.nextInt(1, Int.MAX_VALUE)
+            putInt(ConfigManager.KEY_NEBULA_SEED, generated)
+            return generated
+        }
+        return cachedInt(ConfigManager.KEY_NEBULA_SEED, ConfigManager.DEFAULT_NEBULA_SEED)
+    }
+
     fun isShootingStarsEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, ConfigManager.DEFAULT_SHOOTING_STARS_ENABLED)
     fun setShootingStarsEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, enabled) }
 

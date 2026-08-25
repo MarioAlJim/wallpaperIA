@@ -3265,6 +3265,109 @@
                                 android:checked="true" />
                         </RelativeLayout>
 
+                        <!-- Nebula Title/Toggle -->
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:layout_marginBottom="4dp">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@+id/switchNebula"
+                                android:text="@string/sunny_nebulosa"
+                                android:textColor="@color/settings_text_primary"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchNebula"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:checked="true" />
+                        </RelativeLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/sunny_nebulosa_desc"
+                            android:textColor="@color/settings_text_tertiary"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="8dp" />
+
+                        <LinearLayout
+                            android:id="@+id/layoutNebulaOptionsGroup"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_intensidad_de_la_nebulosa" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                                <TextView android:id="@+id/textViewNebulaIntensityValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="55%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                            </RelativeLayout>
+                            <HorizontalScrollView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:scrollbars="none"
+                                android:requiresFadingEdge="horizontal"
+                                android:fadingEdgeLength="24dp"
+                                android:layout_marginBottom="12dp">
+                                <LinearLayout
+                                    android:id="@+id/spinnerNebulaIntensity"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:paddingBottom="8dp"
+                                    android:paddingTop="4dp"
+                                    android:paddingStart="4dp"
+                                    android:paddingEnd="4dp" />
+                            </HorizontalScrollView>
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/btnNebulaColor"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="12dp"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                app:cardCornerRadius="12dp"
+                                app:strokeColor="@color/settings_chip_bg_inactive"
+                                app:strokeWidth="1dp"
+                                android:clickable="true"
+                                android:focusable="true">
+                                <LinearLayout
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:padding="10dp">
+                                    <View
+                                        android:id="@+id/viewNebulaColorPreview"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        android:layout_marginEnd="8dp" />
+                                    <LinearLayout
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical">
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/sunny_color_de_la_nebulosa"
+                                            android:textColor="@color/settings_text_primary"
+                                            android:textSize="11sp"
+                                            android:textStyle="bold" />
+                                        <TextView
+                                            android:id="@+id/textViewNebulaColorCode"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="#8E4FDB"
+                                            android:textColor="@color/settings_text_tertiary"
+                                            android:textSize="10sp" />
+                                    </LinearLayout>
+                                </LinearLayout>
+                            </com.google.android.material.card.MaterialCardView>
+                        </LinearLayout>
+
                         <!-- Combined Moon Settings Group -->
                         <LinearLayout
                             android:id="@+id/layoutCombinedMoonSettingsGroup"
