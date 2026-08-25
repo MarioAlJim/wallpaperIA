@@ -1791,6 +1791,38 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
 
+                    <!-- Rainbow Always Switch -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/sunny_rainbow_always"
+                            android:textColor="@color/settings_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyRainbowAlways"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:checked="false" />
+                    </RelativeLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/sunny_rainbow_always_desc"
+                        android:textColor="@color/settings_text_tertiary"
+                        android:textSize="12sp"
+                        android:layout_marginBottom="8dp" />
+
                     
                     <!-- Combined Sun Size Group -->
                     <LinearLayout

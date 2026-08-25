@@ -13,6 +13,8 @@ uniform vec3 uFlashColor;
 uniform vec3 uCloudColor;
 uniform vec2 uMoonPos;
 uniform float uSilverLiningIntensity; // 0.0 for day, > 0.0 for night
+uniform vec2 uSunPos;
+uniform float uSunBloomIntensity;
 
 out vec4 fragColor;
 
@@ -33,6 +35,13 @@ float ellipseAlpha(vec2 p, vec2 center, vec2 r) {
     return smoothstep(1.01, 0.99, dist);
 }
 
+float softEllipseAlpha(vec2 p, vec2 center, vec2 r, float grow) {
+    vec2 diff = p - center;
+    float dist = length(diff / (r + grow));
+    // Soft blend transition extending outward
+    return smoothstep(1.0, 0.0, dist);
+}
+
 void main() {
     // Normalise texture coordinates to a centered, aspect-ratio-corrected grid.
     // vTexCoord ranges from [0, 1] in both axes.
@@ -46,7 +55,7 @@ void main() {
     // can never contribute to the final color, so bail out before the ellipse/fbm math.
     // Widest ellipse pair on X is c2/c3 (extent ~0.855), updated to support c5/c6 (extent ~1.15).
     // Tallest on Y is c4 (extent ~0.52).
-    const vec2 kMaxCloudExtent = vec2(1.15, 0.52) * 1.15;
+    const vec2 kMaxCloudExtent = vec2(1.15, 0.52) * 1.30;
     vec2 pn = p / kMaxCloudExtent;
     if (dot(pn, pn) > 1.0) {
         discard;
@@ -110,6 +119,20 @@ void main() {
     bodyAlpha = max(bodyAlpha, w7 * ellipseAlpha(p, c7, r7));
     bodyAlpha = max(bodyAlpha, w8 * ellipseAlpha(p, c8, r8));
 
+    // --- Soft Body Ellipses for Sun Bloom (Light Bleeding) ---
+    float softBodyAlpha = 0.0;
+    if (uSunBloomIntensity > 0.001) {
+        float grow = 0.12;
+        softBodyAlpha = max(softBodyAlpha, w1 * softEllipseAlpha(p, c1, r1, grow));
+        softBodyAlpha = max(softBodyAlpha, w2 * softEllipseAlpha(p, c2, r2, grow));
+        softBodyAlpha = max(softBodyAlpha, w3 * softEllipseAlpha(p, c3, r3, grow));
+        softBodyAlpha = max(softBodyAlpha, w4 * softEllipseAlpha(p, c4, r4, grow));
+        softBodyAlpha = max(softBodyAlpha, w5 * softEllipseAlpha(p, c5, r5, grow));
+        softBodyAlpha = max(softBodyAlpha, w6 * softEllipseAlpha(p, c6, r6, grow));
+        softBodyAlpha = max(softBodyAlpha, w7 * softEllipseAlpha(p, c7, r7, grow));
+        softBodyAlpha = max(softBodyAlpha, w8 * softEllipseAlpha(p, c8, r8, grow));
+    }
+
     // --- Shadow Ellipses ---
     // The shadow is shifted by vec2(0.0, -0.0625) and is slightly larger by vec2(0.0125, 0.0125)
     vec2 sShift = vec2(0.0, -0.0625);
@@ -168,6 +191,39 @@ void main() {
             
             // Ensure the glowing edge is opaque enough to stand out
             combinedAlpha = max(combinedAlpha, liningStrength * vOpacity);
+        }
+    }
+
+    // --- Sun Bloom (Light Bleeding) ---
+    if (uSunBloomIntensity > 0.001) {
+        // Calculate the world position of the current pixel
+        vec2 pixelWorldPos = vCloudPos + p * vCloudScale;
+        
+        // Distance from this pixel to the sun
+        float distToSun = distance(pixelWorldPos, uSunPos);
+        
+        // Sun influence: peaks when close to the sun (starts at 0.65, peaks at 0.15)
+        float sunInfluence = smoothstep(0.65, 0.15, distToSun);
+        
+        if (sunInfluence > 0.001) {
+            // Bleed outside the cloud: soft body alpha where the cloud body is transparent/thin
+            float outsideBleed = softBodyAlpha * (1.0 - bodyAlpha);
+            
+            // Bleed inside the cloud: wash out the edges
+            float insideBleed = bodyAlpha * (1.0 - bodyAlpha * bodyAlpha);
+            
+            float bleedStrength = max(outsideBleed * 0.85, insideBleed) * sunInfluence * uSunBloomIntensity;
+            
+            if (bleedStrength > 0.0) {
+                // Bright warm gold/white light for sun bloom
+                vec3 sunBloomColor = vec3(1.0, 0.96, 0.85);
+                
+                // Mix the sun bloom color onto the cloud
+                mixedColor = mix(mixedColor, sunBloomColor, bleedStrength * 0.90);
+                
+                // Boost alpha of the bleed region so the glow is visible on the sky
+                combinedAlpha = max(combinedAlpha, bleedStrength * vOpacity);
+            }
         }
     }
 

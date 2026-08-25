@@ -163,6 +163,16 @@ class SunnySettingsFragment : Fragment() {
             }
         }
 
+        // Setup Sunny Rainbow Always
+        val switchSunnyRainbowAlways = view.findViewById<SwitchMaterial>(R.id.switchSunnyRainbowAlways)
+        if (switchSunnyRainbowAlways != null) {
+            switchSunnyRainbowAlways.isChecked = configManager.isRainbowAlwaysEnabled()
+            switchSunnyRainbowAlways.setOnCheckedChangeListener { _, isChecked ->
+                configManager.setRainbowAlwaysEnabled(isChecked)
+                updateSummaries(view)
+            }
+        }
+
         // Setup Night/Combined Mode Controls
         setupTimeModeCards(view)
         setupMoonPhaseCards(view)

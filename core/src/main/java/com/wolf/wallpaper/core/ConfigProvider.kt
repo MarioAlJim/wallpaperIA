@@ -75,5 +75,6 @@ interface ConfigProvider {
     fun isStormVariableEnabled(): Boolean
     fun getLightningSpawnMode(): Int
     fun getBgBrightness(): Int
+    fun isRainbowAlwaysEnabled(): Boolean
 }
 

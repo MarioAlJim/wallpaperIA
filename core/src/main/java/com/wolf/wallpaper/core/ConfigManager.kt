@@ -125,6 +125,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_WIND_DIRECTION = 0
         const val DEFAULT_RAIN_COLOR_INDEX = 0
         const val DEFAULT_WIND_INTENSITY = 50
+        const val KEY_RAINBOW_ALWAYS = "rainbow_always"
+        const val DEFAULT_RAINBOW_ALWAYS = false
         const val DEFAULT_RAIN_SPEED = 50
         const val DEFAULT_LIGHTNING_COLOR_INDEX = 0
         const val DEFAULT_LIGHTNING_DURATION = 30
@@ -323,6 +325,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun isFirefliesEnabled(): Boolean = sunny.isFirefliesEnabled()
     fun setFirefliesEnabled(enabled: Boolean) = sunny.setFirefliesEnabled(enabled)
+
+    override fun isRainbowAlwaysEnabled(): Boolean = sunny.isRainbowAlwaysEnabled()
+    fun setRainbowAlwaysEnabled(enabled: Boolean) = sunny.setRainbowAlwaysEnabled(enabled)
 
     // Night mode
     override fun getTimeMode(): Int = night.getTimeMode()

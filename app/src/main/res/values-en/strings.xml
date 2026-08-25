@@ -195,6 +195,8 @@
     <string name="sunny_intensidad_de_destellos">Flare Intensity</string>
     <string name="sunny_aberracion_cromatica">Chromatic Aberration</string>
     <string name="sunny_aberracion_cromatica_desc">Adds subtle rainbow fringing to the edges of the lens flares.</string>
+    <string name="sunny_rainbow_always">Always show rainbow</string>
+    <string name="sunny_rainbow_always_desc">Forces the rainbow to appear permanently in the day sky.</string>
     <string name="sunny_intensidad_de_rayos">Ray Intensity</string>
     <string name="sunny_izq_a_der">Left to Right</string>
     <string name="sunny_la_luna_pasa_a_la_siguiente_fase_ca">The moon advances to the next phase every time a day-night cycle completes; manual selection below is disabled.</string>

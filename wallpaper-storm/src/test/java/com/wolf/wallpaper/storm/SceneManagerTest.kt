@@ -106,6 +106,7 @@ class SceneManagerTest {
         override fun isShootingStarsEnabled(): Boolean = true
         override fun getShootingStarsDensity(): Int = 50
         override fun isFirefliesEnabled(): Boolean = true
+        override fun isRainbowAlwaysEnabled(): Boolean = false
         var mockStormVariableEnabled = false
         override fun isStormVariableEnabled(): Boolean = mockStormVariableEnabled
         override fun getBgBrightness(): Int = mockBgBrightness

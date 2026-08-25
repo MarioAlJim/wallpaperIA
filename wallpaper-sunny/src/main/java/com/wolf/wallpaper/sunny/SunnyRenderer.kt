@@ -112,6 +112,8 @@ class SunnyRenderer(
     private var cloudCloudPosHandle = -1
     private var cloudCloudScaleHandleCached = -1
     private var cloudSilverLiningIntensityHandle = -1
+    private var cloudSunPosHandle = -1
+    private var cloudSunBloomIntensityHandle = -1
 
     // Handles for lens_flare.frag
     private var lfSunPosHandle = -1
@@ -591,6 +593,8 @@ class SunnyRenderer(
         cloudCloudColorHandleCached = GLES30.glGetUniformLocation(cloudProgram, "uCloudColor")
         cloudMoonPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uMoonPos")
         cloudSilverLiningIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSilverLiningIntensity")
+        cloudSunPosHandle = GLES30.glGetUniformLocation(cloudProgram, "uSunPos")
+        cloudSunBloomIntensityHandle = GLES30.glGetUniformLocation(cloudProgram, "uSunBloomIntensity")
 
         // Compile and link bird shader
         try {
@@ -1657,6 +1661,29 @@ class SunnyRenderer(
      * pushed straight into its fade-out phase rather than popping off instantly.
      */
     private fun updateRainbow(deltaTime: Float) {
+        val alwaysEnabled = configProvider.isRainbowAlwaysEnabled()
+        
+        if (alwaysEnabled) {
+            if (rainbowState == RAINBOW_STATE_IDLE) {
+                rainbowState = RAINBOW_STATE_FADE_IN
+                rainbowTimer = 0f
+            }
+            if (rainbowState == RAINBOW_STATE_FADE_IN) {
+                rainbowTimer += deltaTime
+                rainbowOpacity = (rainbowTimer / kRainbowFadeInDuration).coerceIn(0f, 1f)
+                if (rainbowTimer >= kRainbowFadeInDuration) {
+                    rainbowState = RAINBOW_STATE_HOLD
+                    rainbowTimer = 0f
+                }
+            } else if (rainbowState == RAINBOW_STATE_HOLD) {
+                rainbowOpacity = 1f
+            } else if (rainbowState == RAINBOW_STATE_FADE_OUT) {
+                rainbowState = RAINBOW_STATE_FADE_IN
+                rainbowTimer = kRainbowFadeInDuration * rainbowOpacity
+            }
+            return
+        }
+
         val eligible = true
 
         if (!eligible && rainbowState != RAINBOW_STATE_IDLE && rainbowState != RAINBOW_STATE_FADE_OUT) {
@@ -2222,6 +2249,8 @@ class SunnyRenderer(
         val cloudColorHandle = cloudCloudColorHandleCached
         val moonPosHandle = cloudMoonPosHandle
         val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
+        val sunPosHandle = cloudSunPosHandle
+        val sunBloomIntensityHandle = cloudSunBloomIntensityHandle
 
         // Night clouds color: slightly darker/cooler/blue-ish gray tint
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
@@ -2230,6 +2259,8 @@ class SunnyRenderer(
         GLES30.glUniform3f(flashColorHandle, 1.0f, 1.0f, 1.0f)
         GLES30.glUniform2f(moonPosHandle, moon.positionX, moon.positionY)
         GLES30.glUniform1f(silverLiningIntensityHandle, intensity)
+        GLES30.glUniform2f(sunPosHandle, 0f, 0f)
+        GLES30.glUniform1f(sunBloomIntensityHandle, 0f)
 
         val gyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.10f else 0f
         val gyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.10f else 0f
@@ -2301,10 +2332,17 @@ class SunnyRenderer(
         val cloudColorHandle = cloudCloudColorHandleCached
         val moonPosHandle = cloudMoonPosHandle
         val silverLiningIntensityHandle = cloudSilverLiningIntensityHandle
+        val sunPosHandle = cloudSunPosHandle
+        val sunBloomIntensityHandle = cloudSunBloomIntensityHandle
 
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, projectionMatrix, 0)
         GLES30.glUniform2f(moonPosHandle, 0f, 0f)
         GLES30.glUniform1f(silverLiningIntensityHandle, 0f) // Disabled during day
+        
+        val sunGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.02f else 0f
+        val sunGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.02f else 0f
+        GLES30.glUniform2f(sunPosHandle, sunX + sunGyroX, sunY + sunGyroY)
+        GLES30.glUniform1f(sunBloomIntensityHandle, intensity)
 
         // In Sunny mode, warm color tinting matching the active sky theme
         val theme = configProvider.getSunnyTheme()

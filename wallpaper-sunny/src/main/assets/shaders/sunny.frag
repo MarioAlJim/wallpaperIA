@@ -300,7 +300,7 @@ void main() {
     if (uRainbowOpacity > 0.001) {
         const float kRainbowRadius = 1.55;    // ring radius (same uv units as the sun distance above)
         const float kRainbowBandWidth = 0.10; // total ring thickness across all color bands
-        const float kRainbowMaxIntensity = 0.14; // global cap - "casi lo ves o no"
+        const float kRainbowMaxIntensity = 0.45; // global cap - visible and beautiful
         vec2 antiSolarPos = -(uSunPos * uAspectRatio);
         float distToAntiSolar = distance(uv, antiSolarPos);
         float ringDist = abs(distToAntiSolar - kRainbowRadius);

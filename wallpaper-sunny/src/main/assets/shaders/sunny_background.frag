@@ -40,10 +40,6 @@ void main() {
     // Combine with the texture's original alpha channel
     float finalAlpha = min(texColor.a, alpha);
 
-    if (finalAlpha <= 0.0) {
-        discard;
-    }
-    
     // Calculate lighting from the sun
     vec2 uv = vec2(vScreenPos.x * uAspectRatio, vScreenPos.y);
     float distToSun = distance(uv, uSunPos * uAspectRatio);
@@ -57,6 +53,36 @@ void main() {
     
     // Fade out glare when the sun is below or near the horizon
     glare *= smoothstep(-0.4, -0.1, uSunPos.y);
+
+    // --- Solar/Lunar Bloom (Light Bleeding) over Silhouette Edges ---
+    float bloomAlpha = 0.0;
+    if (glare > 0.01) {
+        // Measure bleed outside the silhouette using a 4-tap texture search
+        vec2 texelSize = vec2(0.010 / uAspectRatio, 0.010);
+        float l1 = texture(uTexture, sampleUv + vec2(texelSize.x, 0.0)).r;
+        float l2 = texture(uTexture, sampleUv + vec2(-texelSize.x, 0.0)).r;
+        float l3 = texture(uTexture, sampleUv + vec2(0.0, texelSize.y)).r;
+        float l4 = texture(uTexture, sampleUv + vec2(0.0, -texelSize.y)).r;
+        float minL = min(min(l1, l2), min(l3, l4));
+        
+        float outsideBleed = smoothstep(0.96, 0.60, minL) * (1.0 - alpha);
+        
+        // Measure bleed inside the silhouette (soft edge glow inside)
+        float insideBleed = alpha * smoothstep(0.80, 0.96, luma);
+        
+        float totalBleed = max(outsideBleed, insideBleed);
+        
+        // Scale by glare and general light presence
+        bloomAlpha = totalBleed * glare * 0.70;
+        
+        // Fade out slightly at night (moon glow is softer than sun bloom)
+        bloomAlpha *= mix(1.0, 0.60, uNightIntensity);
+    }
+
+    float renderedAlpha = max(finalAlpha, bloomAlpha);
+    if (renderedAlpha <= 0.0) {
+        discard;
+    }
     
     vec3 fgColor;
     vec3 bgColor;
@@ -215,5 +241,19 @@ void main() {
     vec3 rimColor = mix(highlightColor, vec3(1.0, 0.95, 0.85), 0.3);
     finalHillColor += rimColor * rimEdge * glare * kRimIntensity;
 
-    fragColor = vec4(finalHillColor, finalAlpha);
+    // --- Solar/Lunar Bloom (Light Bleeding) blend ---
+    if (bloomAlpha > 0.0) {
+        // Bloom color matches the bright sun/moon glow, but is slightly boosted for vibrancy
+        vec3 bloomColor = mix(highlightColor * 1.3, vec3(1.0, 0.98, 0.92), 0.3);
+        
+        if (finalAlpha > 0.0) {
+            // Blend inside the silhouette: mix the shaded hill color with the hot bloom color
+            finalHillColor = mix(finalHillColor, bloomColor, bloomAlpha);
+        } else {
+            // Rendered outside the silhouette: purely bloom color
+            finalHillColor = bloomColor;
+        }
+    }
+
+    fragColor = vec4(finalHillColor, renderedAlpha);
 }

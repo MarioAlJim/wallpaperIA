@@ -69,4 +69,7 @@ internal class SunnyConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
 
     fun isFirefliesEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_FIREFLIES_ENABLED, ConfigManager.DEFAULT_FIREFLIES_ENABLED)
     fun setFirefliesEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_FIREFLIES_ENABLED, enabled) }
+
+    fun isRainbowAlwaysEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_RAINBOW_ALWAYS, ConfigManager.DEFAULT_RAINBOW_ALWAYS)
+    fun setRainbowAlwaysEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_RAINBOW_ALWAYS, enabled) }
 }
