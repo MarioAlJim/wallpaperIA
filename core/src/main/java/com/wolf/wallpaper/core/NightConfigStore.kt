@@ -54,6 +54,12 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun getNebulaTheme(): Int = cachedInt(ConfigManager.KEY_NEBULA_THEME, ConfigManager.DEFAULT_NEBULA_THEME)
     fun setNebulaTheme(theme: Int) { putInt(ConfigManager.KEY_NEBULA_THEME, theme.coerceIn(0, 3)) }
 
+    fun getNebulaSpeed(): Int = cachedInt(ConfigManager.KEY_NEBULA_SPEED, ConfigManager.DEFAULT_NEBULA_SPEED)
+    fun setNebulaSpeed(speed: Int) { putInt(ConfigManager.KEY_NEBULA_SPEED, speed.coerceIn(0, 100)) }
+
+    fun getNebulaScale(): Int = cachedInt(ConfigManager.KEY_NEBULA_SCALE, ConfigManager.DEFAULT_NEBULA_SCALE)
+    fun setNebulaScale(scale: Int) { putInt(ConfigManager.KEY_NEBULA_SCALE, scale.coerceIn(0, 100)) }
+
     fun isShootingStarsEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, ConfigManager.DEFAULT_SHOOTING_STARS_ENABLED)
     fun setShootingStarsEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, enabled) }
 

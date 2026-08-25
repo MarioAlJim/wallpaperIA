@@ -70,6 +70,8 @@ interface ConfigProvider {
     fun getNebulaIntensity(): Int       // 0–100
     fun getNebulaSeed(): Int            // stable per-install seed for the nebula's noise pattern, so each user sees a different-looking nebula
     fun getNebulaTheme(): Int           // 0: Púrpura Cósmico, 1: Esmeralda, 2: Fuego, 3: Azul Profundo
+    fun getNebulaSpeed(): Int           // 0–100, drift speed multiplier (50 = original speed)
+    fun getNebulaScale(): Int           // 0–100, pattern scale/size multiplier (50 = original scale)
 
     fun isShootingStarsEnabled(): Boolean
     fun getShootingStarsDensity(): Int   // 0–100

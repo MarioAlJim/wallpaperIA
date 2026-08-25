@@ -92,13 +92,24 @@ class SunnyRenderer(
     // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
+
+    // Dedicated program for the nebula/cosmic-dust layer (shaders/nebula.frag), drawn as its
+    // own additive pass on top of the sky quad instead of living inside sunny.frag - see
+    // SunnyRenderer.drawNebula().
+    private var nebulaProgram = 0
+    private var nebulaTimeHandle = -1
+    private var nebulaAspectHandle = -1
+    private var nebulaNightIntensityHandle = -1
+    private var nebulaNoiseTexHandle = -1
     private var nebulaIntensityHandle = -1
     private var nebulaOffsetHandle = -1
     private var nebulaColor1Handle = -1
     private var nebulaColor2Handle = -1
     private var nebulaColor3Handle = -1
+    private var nebulaSpeedHandle = -1
+    private var nebulaScaleHandle = -1
 
-    // Precomputed noise texture used by sunny.frag's nebula fbm approximation
+    // Precomputed noise texture, shared by sunny.frag's lens dirt effect and nebula.frag
     // (dedicated texture unit: GL_TEXTURE1, so it never clashes with the cloud/
     // background/moon programs which all bind their own texture at GL_TEXTURE0).
     private var noiseTexture = 0
@@ -509,11 +520,6 @@ class SunnyRenderer(
         godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
-        nebulaIntensityHandle = GLES30.glGetUniformLocation(program, "uNebulaIntensity")
-        nebulaOffsetHandle = GLES30.glGetUniformLocation(program, "uNebulaOffset")
-        nebulaColor1Handle = GLES30.glGetUniformLocation(program, "uNebulaColor1")
-        nebulaColor2Handle = GLES30.glGetUniformLocation(program, "uNebulaColor2")
-        nebulaColor3Handle = GLES30.glGetUniformLocation(program, "uNebulaColor3")
         noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
         cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
         rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
@@ -523,6 +529,28 @@ class SunnyRenderer(
         skyBgScaleHandle = GLES30.glGetUniformLocation(program, "uBgScale")
         skyBgTextureHandle = GLES30.glGetUniformLocation(program, "uBackgroundTex")
         noiseTexture = createNoiseTexture(128, configProvider.getNebulaSeed())
+
+        // Compile and link the nebula shader (its own program/pass, see drawNebula())
+        try {
+            val nebulaVert = readAssetFile(context, "shaders/sunny.vert")
+            val nebulaFrag = readAssetFile(context, "shaders/nebula.frag")
+            nebulaProgram = createProgram(nebulaVert, nebulaFrag)
+
+            nebulaTimeHandle = GLES30.glGetUniformLocation(nebulaProgram, "uTime")
+            nebulaAspectHandle = GLES30.glGetUniformLocation(nebulaProgram, "uAspectRatio")
+            nebulaNightIntensityHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNightIntensity")
+            nebulaNoiseTexHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNoiseTex")
+            nebulaIntensityHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaIntensity")
+            nebulaOffsetHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaOffset")
+            nebulaColor1Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor1")
+            nebulaColor2Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor2")
+            nebulaColor3Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor3")
+            nebulaSpeedHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaSpeed")
+            nebulaScaleHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaScale")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            nebulaProgram = 0
+        }
 
         // Compile and link lens flare shader
         try {
@@ -1782,25 +1810,9 @@ class SunnyRenderer(
 
         // Pass night intensity uniform to sky shader
         GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
-        
-        val nebulaIntensity = configProvider.getNebulaIntensity() / 100f
-        GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
 
-        // Subtle gyro parallax: the nebula sits farther back than everything else in the
-        // scene (stars, moon, mountains), so it should drift the least when tilting the
-        // device - a fraction of the factor used for the sun/stars gives it a sense of depth
-        // instead of feeling glued to the screen.
-        val nebulaGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.006f else 0f
-        val nebulaGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.006f else 0f
-        GLES30.glUniform2f(nebulaOffsetHandle, nebulaGyroX, nebulaGyroY)
-
-        val (nebulaC1, nebulaC2, nebulaC3) = getNebulaThemeColors(configProvider.getNebulaTheme())
-        GLES30.glUniform3f(nebulaColor1Handle, nebulaC1[0], nebulaC1[1], nebulaC1[2])
-        GLES30.glUniform3f(nebulaColor2Handle, nebulaC2[0], nebulaC2[1], nebulaC2[2])
-        GLES30.glUniform3f(nebulaColor3Handle, nebulaC3[0], nebulaC3[1], nebulaC3[2])
-
-        // Bind the precomputed noise texture used by the nebula fbm approximation
-        // (only sampled by the shader's night branch, but binding is cheap either way)
+        // Bind the precomputed noise texture, used here by the lens dirt effect further below
+        // (the nebula's own use of this texture now lives in its own pass, see drawNebula())
         if (noiseTexture != 0) {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
@@ -1856,6 +1868,70 @@ class SunnyRenderer(
         GLES30.glEnableVertexAttribArray(0)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         GLES30.glDisableVertexAttribArray(0)
+
+        // Nebula/cosmic dust: its own additive pass on top of the sky quad just drawn above,
+        // so it composites underneath the stars/moon draw calls that follow this function at
+        // every call site (drawDayScene/drawNightScene/drawCombinedScene).
+        drawNebula(nightIntensity)
+    }
+
+    /**
+     * Draws the procedural nebula (see shaders/nebula.frag) as its own fullscreen-quad pass,
+     * additively composited on top of the sky quad drawDaySky() just drew. Split out of the
+     * sky shader into its own program/draw call so it has an independent blend state
+     * (GL_ONE, GL_ONE_MINUS_SRC_COLOR - a GPU "screen" blend) instead of computing that blend
+     * by hand in-shader, and so its uniforms are entirely skipped on pure-day frames.
+     */
+    private fun drawNebula(nightIntensity: Float) {
+        if (nightIntensity <= 0.001f || nebulaProgram == 0) return
+
+        GLES30.glUseProgram(nebulaProgram)
+        GLES30.glUniform1f(nebulaTimeHandle, time)
+        GLES30.glUniform1f(nebulaAspectHandle, aspectRatio)
+        GLES30.glUniform1f(nebulaNightIntensityHandle, nightIntensity)
+
+        val nebulaIntensity = configProvider.getNebulaIntensity() / 100f
+        GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
+
+        // Subtle gyro parallax: the nebula sits farther back than everything else in the
+        // scene (stars, moon, mountains), so it should drift the least when tilting the
+        // device - a fraction of the factor used for the sun/stars gives it a sense of depth
+        // instead of feeling glued to the screen.
+        val nebulaGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.006f else 0f
+        val nebulaGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.006f else 0f
+        GLES30.glUniform2f(nebulaOffsetHandle, nebulaGyroX, nebulaGyroY)
+
+        val (nebulaC1, nebulaC2, nebulaC3) = getNebulaThemeColors(configProvider.getNebulaTheme())
+        GLES30.glUniform3f(nebulaColor1Handle, nebulaC1[0], nebulaC1[1], nebulaC1[2])
+        GLES30.glUniform3f(nebulaColor2Handle, nebulaC2[0], nebulaC2[1], nebulaC2[2])
+        GLES30.glUniform3f(nebulaColor3Handle, nebulaC3[0], nebulaC3[1], nebulaC3[2])
+
+        // 0-100 -> 0.2x-1.8x drift speed, 0-100 -> 0.6x-1.4x pattern scale; 50 (the default
+        // for both) maps to exactly 1.0x, preserving the original look out of the box.
+        val nebulaSpeed = 0.2f + (configProvider.getNebulaSpeed() / 100f) * 1.6f
+        val nebulaScale = 0.6f + (configProvider.getNebulaScale() / 100f) * 0.8f
+        GLES30.glUniform1f(nebulaSpeedHandle, nebulaSpeed)
+        GLES30.glUniform1f(nebulaScaleHandle, nebulaScale)
+
+        if (noiseTexture != 0) {
+            GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
+            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
+            GLES30.glUniform1i(nebulaNoiseTexHandle, 1)
+        }
+
+        // "Screen" blend (dst' = src + dst*(1-src) per channel): only ever brightens whatever
+        // is already in the framebuffer, so the nebula reads as glowing against the sky/stars
+        // instead of a flat patch painted over them. Restore the app's normal alpha blend
+        // afterward since every other draw call in this renderer assumes it.
+        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_COLOR)
+
+        fullscreenQuadBuffer.position(0)
+        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
+        GLES30.glEnableVertexAttribArray(0)
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
+        GLES30.glDisableVertexAttribArray(0)
+
+        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
     }
 
     private fun initBirds() {

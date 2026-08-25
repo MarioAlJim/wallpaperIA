@@ -91,6 +91,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_NEBULA_INTENSITY = "nebula_intensity"
         const val KEY_NEBULA_SEED = "nebula_seed"
         const val KEY_NEBULA_THEME = "nebula_theme"
+        const val KEY_NEBULA_SPEED = "nebula_speed"
+        const val KEY_NEBULA_SCALE = "nebula_scale"
 
         // New keys for Combined Mode
         const val KEY_COMBINED_SUN_SIZE = "combined_sun_size"
@@ -115,6 +117,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         // Fallback only; getNebulaSeed() generates and persists a real random seed on first read.
         const val DEFAULT_NEBULA_SEED = 1337
         const val DEFAULT_NEBULA_THEME = 0
+        const val DEFAULT_NEBULA_SPEED = 50
+        const val DEFAULT_NEBULA_SCALE = 50
 
         const val DEFAULT_COMBINED_SUN_SIZE = 50
         const val DEFAULT_COMBINED_MOON_SIZE = 50
@@ -372,6 +376,12 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getNebulaTheme(): Int = night.getNebulaTheme()
     fun setNebulaTheme(theme: Int) = night.setNebulaTheme(theme)
+
+    override fun getNebulaSpeed(): Int = night.getNebulaSpeed()
+    fun setNebulaSpeed(speed: Int) = night.setNebulaSpeed(speed)
+
+    override fun getNebulaScale(): Int = night.getNebulaScale()
+    fun setNebulaScale(scale: Int) = night.setNebulaScale(scale)
 
     override fun isShootingStarsEnabled(): Boolean = night.isShootingStarsEnabled()
     fun setShootingStarsEnabled(enabled: Boolean) = night.setShootingStarsEnabled(enabled)

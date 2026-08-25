@@ -1072,6 +1072,18 @@ class SunnySettingsFragment : Fragment() {
             resources.getStringArray(R.array.nebula_theme_options), intArrayOf(0, 1, 2, 3),
             configManager.getNebulaTheme()
         ) { value -> configManager.setNebulaTheme(value) }
+
+        setupValueCardSelector(
+            parent, R.id.spinnerNebulaSpeed, R.id.textViewNebulaSpeedValue,
+            resources.getStringArray(R.array.nebula_speed_options), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getNebulaSpeed()
+        ) { value -> configManager.setNebulaSpeed(value) }
+
+        setupValueCardSelector(
+            parent, R.id.spinnerNebulaScale, R.id.textViewNebulaScaleValue,
+            resources.getStringArray(R.array.nebula_scale_options), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getNebulaScale()
+        ) { value -> configManager.setNebulaScale(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedSunSize, R.id.textViewCombinedSunSizeValue,
             resources.getStringArray(R.array.sun_size_options), intArrayOf(0, 25, 50, 75, 100),
@@ -1533,6 +1545,8 @@ private class SunnyCardPreviewView(
             R.id.spinnerGradientCycleSpeed -> drawCyclePreview(canvas, w, h)
             R.id.spinnerNebulaIntensity -> drawNebulaPreview(canvas, w, h)
             R.id.spinnerNebulaTheme -> drawNebulaThemePreview(canvas, w, h)
+            R.id.spinnerNebulaSpeed -> drawNebulaSpeedPreview(canvas, w, h)
+            R.id.spinnerNebulaScale -> drawNebulaScalePreview(canvas, w, h)
         }
     }
 
@@ -1765,6 +1779,44 @@ private class SunnyCardPreviewView(
             Shader.TileMode.CLAMP
         )
         canvas.drawCircle(w * 0.5f, h * 0.5f, w * 0.45f, paint)
+        paint.shader = null
+    }
+
+    /** Streak count/spacing grows with the selected drift speed option. */
+    private fun drawNebulaSpeedPreview(canvas: Canvas, w: Float, h: Float) {
+        paint.style = Paint.Style.FILL
+        paint.color = Color.parseColor("#050514")
+        canvas.drawRect(0f, 0f, w, h, paint)
+
+        val (color1, _, color3) = NEBULA_THEME_COLORS[0]
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 2f.px()
+        paint.strokeCap = Paint.Cap.ROUND
+        val streakCount = 1 + optionIndex
+        val cy = h * 0.5f
+        for (i in 0 until streakCount) {
+            val cx = w * (0.2f + i * (0.6f / maxOf(streakCount - 1, 1)))
+            paint.color = adjustAlpha(if (i % 2 == 0) color1 else color3, 0.8f)
+            canvas.drawLine(cx - 6f.px(), cy, cx + 6f.px(), cy, paint)
+        }
+        paint.style = Paint.Style.FILL
+    }
+
+    /** Blob radius grows with the selected pattern-scale option. */
+    private fun drawNebulaScalePreview(canvas: Canvas, w: Float, h: Float) {
+        paint.style = Paint.Style.FILL
+        paint.color = Color.parseColor("#050514")
+        canvas.drawRect(0f, 0f, w, h, paint)
+
+        val (color1, color2, color3) = NEBULA_THEME_COLORS[0]
+        val radius = w * (0.18f + optionIndex * 0.06f)
+        paint.shader = RadialGradient(
+            w * 0.5f, h * 0.5f, radius,
+            intArrayOf(adjustAlpha(color3, 0.85f), adjustAlpha(color1, 0.6f), adjustAlpha(color2, 0.25f), 0),
+            floatArrayOf(0f, 0.4f, 0.75f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        canvas.drawCircle(w * 0.5f, h * 0.5f, radius, paint)
         paint.shader = null
     }
 

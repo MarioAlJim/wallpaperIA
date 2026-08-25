@@ -98,6 +98,8 @@ class SceneManagerTest {
         override fun getNebulaIntensity(): Int = 50
         override fun getNebulaSeed(): Int = 1337
         override fun getNebulaTheme(): Int = 0
+        override fun getNebulaSpeed(): Int = 50
+        override fun getNebulaScale(): Int = 50
         override fun getCombinedSunSize(): Int = 50
         override fun getCombinedMoonSize(): Int = 50
         override fun getCombinedMoonPhase(): Int = 4

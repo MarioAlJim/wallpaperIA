@@ -180,6 +180,8 @@
     <string name="sunny_nebulosas">Nebulosas</string>
     <string name="sunny_intensidad_de_nebulosa">Intensidad de Nebulosa</string>
     <string name="sunny_tema_de_nebulosa">Tema de Nebulosa</string>
+    <string name="sunny_velocidad_de_nebulosa">Velocidad de Nebulosa</string>
+    <string name="sunny_escala_de_nebulosa">Escala de Nebulosa</string>
     <string name="sunny_der_a_izq">Der. a Izq.</string>
     <string name="sunny_destellos_de_lente_lens_flare">Destellos de Lente (Lens Flare)</string>
     <string name="sunny_efecto_de_inclinacin_3d_giroscopio">Efecto de Inclinación 3D (Giroscopio)</string>
@@ -426,6 +428,20 @@
         <item>Esmeralda</item>
         <item>Fuego</item>
         <item>Azul Profundo</item>
+    </string-array>
+    <string-array name="nebula_speed_options">
+        <item>Muy Lenta</item>
+        <item>Lenta</item>
+        <item>Media</item>
+        <item>Rápida</item>
+        <item>Muy Rápida</item>
+    </string-array>
+    <string-array name="nebula_scale_options">
+        <item>Muy Pequeña</item>
+        <item>Pequeña</item>
+        <item>Media</item>
+        <item>Grande</item>
+        <item>Muy Grande</item>
     </string-array>
     <string-array name="sun_move_speed_options">
         <item>Detenido</item>
