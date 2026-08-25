@@ -21,6 +21,10 @@ uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" comp
 uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
 uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
 uniform float uNebulaIntensity;
+uniform vec2 uNebulaOffset; // subtle gyro-driven parallax shift (SunnyRenderer.drawDaySky), depth cue vs. stars/mountains
+uniform vec3 uNebulaColor1; // user-selectable color theme (SunnyConfigProvider.getNebulaTheme -> SunnyRenderer.getNebulaThemeColors)
+uniform vec3 uNebulaColor2;
+uniform vec3 uNebulaColor3;
 
 uniform int uBgActive;
 uniform vec2 uBgTranslation;
@@ -156,28 +160,45 @@ void main() {
         // --- Procedural Nebulae (Vía Láctea / Polvo Galáctico) ---
         vec2 uvCoords = vec2(vPosition.x * uAspectRatio, vPosition.y);
         vec2 nebulaUV = uvCoords * 1.6;
-        // Ultra-slow movement over time
+        // Ultra-slow movement over time, plus a subtle gyro parallax offset so the nebula
+        // reads as sitting farther back in depth than the stars/mountains in front of it.
+        nebulaUV -= uNebulaOffset;
         nebulaUV.x += uTime * 0.0012;
         nebulaUV.y += uTime * 0.0006;
         
         float nebulaNoiseVal = fbmTex(nebulaUV);
-        
+
         // Add a bit of fine detail to the nebula using another octave of noise for cosmic dust texture
         float fineNoise = texture(uNoiseTex, nebulaUV * 3.2 - vec2(uTime * 0.0018, uTime * 0.0009)).r;
         float combinedNoise = nebulaNoiseVal * 0.85 + fineNoise * 0.15;
         float nebulaMask = smoothstep(0.28, 0.72, combinedNoise);
-        
-        // Vibrant cosmic colors for nebulae (mixture of purple, indigo-blue, and magenta/pink)
-        vec3 nebulaColor1 = vec3(0.38, 0.08, 0.58); // Rich purple-magenta
-        vec3 nebulaColor2 = vec3(0.06, 0.14, 0.44); // Deep galactic blue-indigo
-        vec3 nebulaColor3 = vec3(0.62, 0.15, 0.42); // Vibrant magenta highlights
-        
-        vec3 mixedNebula = mix(nebulaColor2, nebulaColor1, smoothstep(0.35, 0.65, combinedNoise));
-        mixedNebula = mix(mixedNebula, nebulaColor3, smoothstep(0.55, 0.80, combinedNoise));
-        
-        // Blend nebulae into night sky color based on uNebulaIntensity
-        // Max opacity is 0.75 for a gorgeous visible galactic dust effect
-        nightSkyColor = mix(nightSkyColor, mixedNebula, nebulaMask * uNebulaIntensity * 0.75);
+
+        // Independent noise field driving color choice, sampled at a different scale/offset/
+        // drift speed than the density/mask field above. Previously color and mask were both
+        // derived from the same "combinedNoise" scalar, so every patch of a given density
+        // always resolved to the same color band, producing concentric color rings around
+        // dense spots. Decoupling them gives a more organic, painterly mixture of colors that
+        // doesn't line up with the density contours.
+        vec2 colorUV = nebulaUV * 0.55 + vec2(53.1, -19.4);
+        colorUV += vec2(uTime * 0.0004, -uTime * 0.0003);
+        float colorNoise = fbmTex(colorUV);
+
+        // Nebula colors come from the user-selected theme (uNebulaColor1/2/3), sent per-frame
+        // from SunnyRenderer.getNebulaThemeColors() based on ConfigProvider.getNebulaTheme().
+        vec3 mixedNebula = mix(uNebulaColor2, uNebulaColor1, smoothstep(0.30, 0.70, colorNoise));
+        // fineNoise (already sampled above, decorrelated from colorNoise) speckles in the
+        // highlight color independently of both the base hue and the density mask.
+        mixedNebula = mix(mixedNebula, uNebulaColor3, smoothstep(0.45, 0.85, fineNoise));
+
+        // Blend nebulae into night sky color based on uNebulaIntensity. Uses a "screen" blend
+        // (1 - (1-base)*(1-blend)) instead of a plain mix/lerp: a lerp replaces the dark sky
+        // color outright, which reads as flat/opaque patches; screen only ever brightens the
+        // sky, which looks like the nebula is glowing against it instead of painted over it.
+        // Naturally self-clamps to <= 1 per channel, so it can't blow out even at full
+        // intensity. Max amount is 0.75 for a gorgeous visible galactic dust effect.
+        float nebulaAmount = nebulaMask * uNebulaIntensity * 0.75;
+        vec3 nebulaGlow = mixedNebula * nebulaAmount;
+        nightSkyColor = 1.0 - (1.0 - nightSkyColor) * (1.0 - nebulaGlow);
 
         // --- Night Haze (Bruma Nocturna) ---
         // Soft fog band near the horizon (around y = -0.45)

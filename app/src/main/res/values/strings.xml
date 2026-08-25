@@ -179,6 +179,7 @@
     <string name="sunny_densidad_de_estrellas_fugaces">Densidad de Estrellas Fugaces</string>
     <string name="sunny_nebulosas">Nebulosas</string>
     <string name="sunny_intensidad_de_nebulosa">Intensidad de Nebulosa</string>
+    <string name="sunny_tema_de_nebulosa">Tema de Nebulosa</string>
     <string name="sunny_der_a_izq">Der. a Izq.</string>
     <string name="sunny_destellos_de_lente_lens_flare">Destellos de Lente (Lens Flare)</string>
     <string name="sunny_efecto_de_inclinacin_3d_giroscopio">Efecto de Inclinación 3D (Giroscopio)</string>
@@ -419,6 +420,12 @@
         <item>Media</item>
         <item>Alta</item>
         <item>Máxima</item>
+    </string-array>
+    <string-array name="nebula_theme_options">
+        <item>Púrpura Cósmico</item>
+        <item>Esmeralda</item>
+        <item>Fuego</item>
+        <item>Azul Profundo</item>
     </string-array>
     <string-array name="sun_move_speed_options">
         <item>Detenido</item>

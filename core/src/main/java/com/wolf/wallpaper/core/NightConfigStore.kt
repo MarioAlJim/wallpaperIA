@@ -37,6 +37,23 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun getNebulaIntensity(): Int = cachedInt(ConfigManager.KEY_NEBULA_INTENSITY, ConfigManager.DEFAULT_NEBULA_INTENSITY)
     fun setNebulaIntensity(intensity: Int) { putInt(ConfigManager.KEY_NEBULA_INTENSITY, intensity.coerceIn(0, 100)) }
 
+    /**
+     * Stable per-install seed for the nebula's noise texture. Generated once (lazily, on the
+     * first read) and persisted, instead of the old hardcoded seed, so every install/user ends
+     * up with a differently-shaped nebula instead of everyone seeing the exact same pattern.
+     */
+    fun getNebulaSeed(): Int {
+        if (!prefs.contains(ConfigManager.KEY_NEBULA_SEED)) {
+            val generated = kotlin.random.Random.nextInt(1, Int.MAX_VALUE)
+            putInt(ConfigManager.KEY_NEBULA_SEED, generated)
+            return generated
+        }
+        return cachedInt(ConfigManager.KEY_NEBULA_SEED, ConfigManager.DEFAULT_NEBULA_SEED)
+    }
+
+    fun getNebulaTheme(): Int = cachedInt(ConfigManager.KEY_NEBULA_THEME, ConfigManager.DEFAULT_NEBULA_THEME)
+    fun setNebulaTheme(theme: Int) { putInt(ConfigManager.KEY_NEBULA_THEME, theme.coerceIn(0, 3)) }
+
     fun isShootingStarsEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, ConfigManager.DEFAULT_SHOOTING_STARS_ENABLED)
     fun setShootingStarsEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, enabled) }
 

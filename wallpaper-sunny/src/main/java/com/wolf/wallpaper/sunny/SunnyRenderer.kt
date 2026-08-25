@@ -93,6 +93,10 @@ class SunnyRenderer(
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
     private var nebulaIntensityHandle = -1
+    private var nebulaOffsetHandle = -1
+    private var nebulaColor1Handle = -1
+    private var nebulaColor2Handle = -1
+    private var nebulaColor3Handle = -1
 
     // Precomputed noise texture used by sunny.frag's nebula fbm approximation
     // (dedicated texture unit: GL_TEXTURE1, so it never clashes with the cloud/
@@ -506,6 +510,10 @@ class SunnyRenderer(
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
         nebulaIntensityHandle = GLES30.glGetUniformLocation(program, "uNebulaIntensity")
+        nebulaOffsetHandle = GLES30.glGetUniformLocation(program, "uNebulaOffset")
+        nebulaColor1Handle = GLES30.glGetUniformLocation(program, "uNebulaColor1")
+        nebulaColor2Handle = GLES30.glGetUniformLocation(program, "uNebulaColor2")
+        nebulaColor3Handle = GLES30.glGetUniformLocation(program, "uNebulaColor3")
         noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
         cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
         rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
@@ -514,7 +522,7 @@ class SunnyRenderer(
         skyBgTranslationHandle = GLES30.glGetUniformLocation(program, "uBgTranslation")
         skyBgScaleHandle = GLES30.glGetUniformLocation(program, "uBgScale")
         skyBgTextureHandle = GLES30.glGetUniformLocation(program, "uBackgroundTex")
-        noiseTexture = createNoiseTexture(128)
+        noiseTexture = createNoiseTexture(128, configProvider.getNebulaSeed())
 
         // Compile and link lens flare shader
         try {
@@ -1778,6 +1786,19 @@ class SunnyRenderer(
         val nebulaIntensity = configProvider.getNebulaIntensity() / 100f
         GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
 
+        // Subtle gyro parallax: the nebula sits farther back than everything else in the
+        // scene (stars, moon, mountains), so it should drift the least when tilting the
+        // device - a fraction of the factor used for the sun/stars gives it a sense of depth
+        // instead of feeling glued to the screen.
+        val nebulaGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.006f else 0f
+        val nebulaGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.006f else 0f
+        GLES30.glUniform2f(nebulaOffsetHandle, nebulaGyroX, nebulaGyroY)
+
+        val (nebulaC1, nebulaC2, nebulaC3) = getNebulaThemeColors(configProvider.getNebulaTheme())
+        GLES30.glUniform3f(nebulaColor1Handle, nebulaC1[0], nebulaC1[1], nebulaC1[2])
+        GLES30.glUniform3f(nebulaColor2Handle, nebulaC2[0], nebulaC2[1], nebulaC2[2])
+        GLES30.glUniform3f(nebulaColor3Handle, nebulaC3[0], nebulaC3[1], nebulaC3[2])
+
         // Bind the precomputed noise texture used by the nebula fbm approximation
         // (only sampled by the shader's night branch, but binding is cheap either way)
         if (noiseTexture != 0) {
@@ -2980,6 +3001,36 @@ class SunnyRenderer(
         return null
     }
 
+    /**
+     * Color themes for the nebula, selected via ConfigProvider.getNebulaTheme(). Each theme is
+     * the same (color1, color2, color3) triple sunny.frag used to mix internally before they
+     * became uniforms, so index 0 preserves the original look exactly.
+     */
+    private fun getNebulaThemeColors(themeIndex: Int): Triple<FloatArray, FloatArray, FloatArray> {
+        return when (themeIndex) {
+            1 -> Triple( // Esmeralda
+                floatArrayOf(0.05f, 0.45f, 0.25f),
+                floatArrayOf(0.02f, 0.12f, 0.20f),
+                floatArrayOf(0.15f, 0.65f, 0.35f)
+            )
+            2 -> Triple( // Fuego
+                floatArrayOf(0.55f, 0.18f, 0.04f),
+                floatArrayOf(0.20f, 0.05f, 0.15f),
+                floatArrayOf(0.75f, 0.35f, 0.05f)
+            )
+            3 -> Triple( // Azul Profundo
+                floatArrayOf(0.08f, 0.20f, 0.55f),
+                floatArrayOf(0.02f, 0.06f, 0.22f),
+                floatArrayOf(0.15f, 0.45f, 0.70f)
+            )
+            else -> Triple( // Púrpura Cósmico (original)
+                floatArrayOf(0.38f, 0.08f, 0.58f),
+                floatArrayOf(0.06f, 0.14f, 0.44f),
+                floatArrayOf(0.62f, 0.15f, 0.42f)
+            )
+        }
+    }
+
     private fun getStarColorRGB(colorIndex: Int): Triple<Float, Float, Float> {
         return when (colorIndex) {
             1 -> Triple(0.6f, 0.8f, 1.0f)   // Azul frío
@@ -3228,13 +3279,17 @@ class SunnyRenderer(
      * texture samples instead of per-pixel hash/fract math. Each texel is an independent
      * random value; GL_LINEAR sampling + GL_REPEAT wrapping produces smooth, continuous
      * value-noise when sampled at frequencies below the texture's own resolution.
+     *
+     * [seed] comes from [ConfigProvider.getNebulaSeed], a value generated once per install
+     * and persisted, so each user's nebula/cosmic-dust pattern looks different instead of
+     * every device rendering the exact same shape.
      */
-    private fun createNoiseTexture(size: Int): Int {
+    private fun createNoiseTexture(size: Int, seed: Int): Int {
         val textureIds = IntArray(1)
         GLES30.glGenTextures(1, textureIds, 0)
         if (textureIds[0] == 0) return 0
 
-        val random = kotlin.random.Random(1337)
+        val random = kotlin.random.Random(seed)
         val data = ByteArray(size * size)
         for (i in data.indices) {
             data[i] = random.nextInt(0, 256).toByte()

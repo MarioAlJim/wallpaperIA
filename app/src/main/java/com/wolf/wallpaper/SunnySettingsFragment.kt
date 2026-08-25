@@ -252,6 +252,7 @@ class SunnySettingsFragment : Fragment() {
         options: Array<String>,
         values: IntArray,
         currentValue: Int,
+        extraIndexProvider: () -> Int = { 0 },
         onValueSelected: (Int) -> Unit
     ) {
         val container = parent.findViewById<LinearLayout>(containerId) ?: return
@@ -263,7 +264,7 @@ class SunnySettingsFragment : Fragment() {
             container = container,
             options = options,
             selectedIndex = initialIndex,
-            previewFactory = { index -> SunnyCardPreviewView(requireContext(), containerId, index) },
+            previewFactory = { index -> SunnyCardPreviewView(requireContext(), containerId, index, extraIndexProvider()) },
             previewFrameBackgroundRes = R.drawable.mini_screen_bg
         ) { position ->
             onValueSelected(values[position])
@@ -1062,8 +1063,15 @@ class SunnySettingsFragment : Fragment() {
         setupValueCardSelector(
             parent, R.id.spinnerNebulaIntensity, R.id.textViewNebulaIntensityValue,
             resources.getStringArray(R.array.nebula_intensity_options), intArrayOf(0, 25, 50, 75, 100),
-            configManager.getNebulaIntensity()
+            configManager.getNebulaIntensity(),
+            extraIndexProvider = { configManager.getNebulaTheme() }
         ) { value -> configManager.setNebulaIntensity(value) }
+
+        setupValueCardSelector(
+            parent, R.id.spinnerNebulaTheme, R.id.textViewNebulaThemeValue,
+            resources.getStringArray(R.array.nebula_theme_options), intArrayOf(0, 1, 2, 3),
+            configManager.getNebulaTheme()
+        ) { value -> configManager.setNebulaTheme(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedSunSize, R.id.textViewCombinedSunSizeValue,
             resources.getStringArray(R.array.sun_size_options), intArrayOf(0, 25, 50, 75, 100),
@@ -1486,7 +1494,10 @@ class SunnySettingsFragment : Fragment() {
 private class SunnyCardPreviewView(
     context: Context,
     private val containerId: Int,
-    private val optionIndex: Int
+    private val optionIndex: Int,
+    // Only consumed by drawNebulaPreview: which nebula color theme is currently selected, so
+    // the intensity preview swatch matches the actual shader colors instead of a fixed guess.
+    private val extraIndex: Int = 0
 ) : View(context) {
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -1521,6 +1532,7 @@ private class SunnyCardPreviewView(
             R.id.spinnerShootingStarsDensity -> drawShootingStarsPreview(canvas, w, h)
             R.id.spinnerGradientCycleSpeed -> drawCyclePreview(canvas, w, h)
             R.id.spinnerNebulaIntensity -> drawNebulaPreview(canvas, w, h)
+            R.id.spinnerNebulaTheme -> drawNebulaThemePreview(canvas, w, h)
         }
     }
 
@@ -1726,14 +1738,34 @@ private class SunnyCardPreviewView(
 
         val intensity = intArrayOf(0, 25, 50, 75, 100).getOrElse(optionIndex) { 50 } / 100f
         if (intensity > 0.05f) {
+            // Match sunny.frag's actual nebulaColor1/nebulaColor2 for the currently selected
+            // theme (extraIndex), instead of an unrelated fixed Material purple/indigo pair.
+            val (color1, color2, _) = NEBULA_THEME_COLORS.getOrElse(extraIndex) { NEBULA_THEME_COLORS[0] }
             paint.shader = RadialGradient(
                 w * 0.5f, h * 0.5f, w * 0.4f,
-                intArrayOf(adjustAlpha(Color.parseColor("#9C27B0"), intensity * 0.5f), adjustAlpha(Color.parseColor("#3F51B5"), intensity * 0.2f), 0),
+                intArrayOf(adjustAlpha(color1, intensity * 0.6f), adjustAlpha(color2, intensity * 0.3f), 0),
                 null, Shader.TileMode.CLAMP
             )
             canvas.drawCircle(w * 0.5f, h * 0.5f, w * 0.4f, paint)
             paint.shader = null
         }
+    }
+
+    /** One preview card per nebula color theme (see SunnyRenderer.getNebulaThemeColors). */
+    private fun drawNebulaThemePreview(canvas: Canvas, w: Float, h: Float) {
+        paint.style = Paint.Style.FILL
+        paint.color = Color.parseColor("#050514")
+        canvas.drawRect(0f, 0f, w, h, paint)
+
+        val (color1, color2, color3) = NEBULA_THEME_COLORS.getOrElse(optionIndex) { NEBULA_THEME_COLORS[0] }
+        paint.shader = RadialGradient(
+            w * 0.5f, h * 0.5f, w * 0.45f,
+            intArrayOf(adjustAlpha(color3, 0.9f), adjustAlpha(color1, 0.7f), adjustAlpha(color2, 0.35f), 0),
+            floatArrayOf(0f, 0.4f, 0.75f, 1f),
+            Shader.TileMode.CLAMP
+        )
+        canvas.drawCircle(w * 0.5f, h * 0.5f, w * 0.45f, paint)
+        paint.shader = null
     }
 
     private fun adjustAlpha(color: Int, factor: Float): Int {
@@ -1751,5 +1783,14 @@ private class SunnyCardPreviewView(
         private val FLARE_COLOR = Color.parseColor("#FFF3E0")
         private val CYCLE_NIGHT = Color.parseColor("#1A0D40")
         private val CYCLE_DAY = Color.parseColor("#F2731A")
+
+        // Mirrors SunnyRenderer.getNebulaThemeColors() exactly (same RGB triples, converted to
+        // ARGB hex) so these previews never drift from what the shader actually renders.
+        private val NEBULA_THEME_COLORS = arrayOf(
+            Triple(Color.parseColor("#611494"), Color.parseColor("#0F2470"), Color.parseColor("#9E266B")), // Púrpura Cósmico
+            Triple(Color.parseColor("#0D7340"), Color.parseColor("#051F33"), Color.parseColor("#26A659")), // Esmeralda
+            Triple(Color.parseColor("#8C2E0A"), Color.parseColor("#330D26"), Color.parseColor("#BF590D")), // Fuego
+            Triple(Color.parseColor("#14338C"), Color.parseColor("#050F38"), Color.parseColor("#2673B3"))  // Azul Profundo
+        )
     }
 }
