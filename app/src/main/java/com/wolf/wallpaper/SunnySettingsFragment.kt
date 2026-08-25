@@ -61,14 +61,7 @@ class SunnySettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
-        // 1. Setup Accordions
-        SettingsAccordionHelper.setupAccordionGroup(
-            view,
-            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyEnvironment, R.id.contentSunnyEnvironment, R.id.dividerSunnyEnvironment, R.id.arrowSunnyEnvironment),
-            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnySun, R.id.contentSunnySun, R.id.dividerSunnySun, R.id.arrowSunnySun),
-            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon),
-            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
-        )
+        // 1. Accordions removed (flat inline design)
 
         // 2. Setup Cloud Density Cards (Sunny clouds)
         setupCloudDensityCards(view)
@@ -812,6 +805,9 @@ class SunnySettingsFragment : Fragment() {
         cardMoon.visibility = if (mode == 1 || mode == 2 || mode == 3) View.VISIBLE else View.GONE
         cardCombined.visibility = if (mode == 2) View.VISIBLE else View.GONE
 
+        parent.findViewById<View>(R.id.layoutCombinedSunSizeGroup)?.visibility = if (mode == 2) View.VISIBLE else View.GONE
+        parent.findViewById<View>(R.id.layoutCombinedMoonSettingsGroup)?.visibility = if (mode == 2) View.VISIBLE else View.GONE
+
         // Hide redundant individual day/night controls when Combined/Clock mode is active
         val layoutSunSizeAndSpeed = parent.findViewById<View>(R.id.layoutSunSizeAndSpeed)
         val layoutSunTrajectoryGroup = parent.findViewById<View>(R.id.layoutSunTrajectoryGroup)
@@ -1052,6 +1048,12 @@ class SunnySettingsFragment : Fragment() {
             resources.getStringArray(R.array.gradient_cycle_speed_options), intArrayOf(25, 50, 75, 100),
             configManager.getGradientCycleSpeed()
         ) { value -> configManager.setGradientCycleSpeed(value) }
+
+        setupValueCardSelector(
+            parent, R.id.spinnerNebulaIntensity, R.id.textViewNebulaIntensityValue,
+            resources.getStringArray(R.array.nebula_intensity_options), intArrayOf(0, 25, 50, 75, 100),
+            configManager.getNebulaIntensity()
+        ) { value -> configManager.setNebulaIntensity(value) }
         setupValueCardSelector(
             parent, R.id.spinnerCombinedSunSize, R.id.textViewCombinedSunSizeValue,
             resources.getStringArray(R.array.sun_size_options), intArrayOf(0, 25, 50, 75, 100),
@@ -1508,6 +1510,7 @@ private class SunnyCardPreviewView(
             R.id.spinnerStarDensity, R.id.spinnerCombinedStarDensity -> drawStarField(canvas, w, h)
             R.id.spinnerShootingStarsDensity -> drawShootingStarsPreview(canvas, w, h)
             R.id.spinnerGradientCycleSpeed -> drawCyclePreview(canvas, w, h)
+            R.id.spinnerNebulaIntensity -> drawNebulaPreview(canvas, w, h)
         }
     }
 
@@ -1703,6 +1706,23 @@ private class SunnyCardPreviewView(
                 canvas.drawLine(cx - 3f.px(), cy - 4f.px(), cx + 3f.px(), cy, paint)
                 canvas.drawLine(cx + 3f.px(), cy, cx - 3f.px(), cy + 4f.px(), paint)
             }
+        }
+    }
+
+    private fun drawNebulaPreview(canvas: Canvas, w: Float, h: Float) {
+        paint.style = Paint.Style.FILL
+        paint.color = Color.parseColor("#050514")
+        canvas.drawRect(0f, 0f, w, h, paint)
+
+        val intensity = intArrayOf(0, 25, 50, 75, 100).getOrElse(optionIndex) { 50 } / 100f
+        if (intensity > 0.05f) {
+            paint.shader = RadialGradient(
+                w * 0.5f, h * 0.5f, w * 0.4f,
+                intArrayOf(adjustAlpha(Color.parseColor("#9C27B0"), intensity * 0.5f), adjustAlpha(Color.parseColor("#3F51B5"), intensity * 0.2f), 0),
+                null, Shader.TileMode.CLAMP
+            )
+            canvas.drawCircle(w * 0.5f, h * 0.5f, w * 0.4f, paint)
+            paint.shader = null
         }
     }
 

@@ -177,6 +177,8 @@
     <string name="sunny_da">Day</string>
     <string name="sunny_densidad_de_estrellas">Star Density</string>
     <string name="sunny_densidad_de_estrellas_fugaces">Shooting Stars Density</string>
+    <string name="sunny_nebulosas">Nebulae</string>
+    <string name="sunny_intensidad_de_nebulosa">Nebula Intensity</string>
     <string name="sunny_der_a_izq">Right to Left</string>
     <string name="sunny_destellos_de_lente_lens_flare">Lens Flare</string>
     <string name="sunny_efecto_de_inclinacin_3d_giroscopio">3D Tilt Effect (Gyroscope)</string>
@@ -408,6 +410,13 @@
         <item>Normal</item>
         <item>Many</item>
         <item>Full sky</item>
+    </string-array>
+    <string-array name="nebula_intensity_options">
+        <item>Disabled</item>
+        <item>Low</item>
+        <item>Medium</item>
+        <item>High</item>
+        <item>Maximum</item>
     </string-array>
     <string-array name="sun_move_speed_options">
         <item>Stopped</item>

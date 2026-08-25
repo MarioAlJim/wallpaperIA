@@ -20,6 +20,7 @@ uniform sampler2D uNoiseTex; // Precomputed tileable value-noise texture (GL_REP
 uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" computed on the CPU (SunnyRenderer.computeCloudOcclusionNearSun)
 uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
 uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
+uniform float uNebulaIntensity;
 
 uniform int uBgActive;
 uniform vec2 uBgTranslation;
@@ -160,15 +161,23 @@ void main() {
         nebulaUV.y += uTime * 0.0006;
         
         float nebulaNoiseVal = fbmTex(nebulaUV);
-        float nebulaMask = smoothstep(0.35, 0.75, nebulaNoiseVal);
         
-        // Deep purple-magenta colors for nebulae
-        vec3 nebulaColor1 = vec3(0.16, 0.03, 0.28); // Dark purple
-        vec3 nebulaColor2 = vec3(0.08, 0.02, 0.18); // Dark violet
-        vec3 mixedNebula = mix(nebulaColor2, nebulaColor1, smoothstep(0.45, 0.70, nebulaNoiseVal));
+        // Add a bit of fine detail to the nebula using another octave of noise for cosmic dust texture
+        float fineNoise = texture(uNoiseTex, nebulaUV * 3.2 - vec2(uTime * 0.0018, uTime * 0.0009)).r;
+        float combinedNoise = nebulaNoiseVal * 0.85 + fineNoise * 0.15;
+        float nebulaMask = smoothstep(0.28, 0.72, combinedNoise);
         
-        // Blend nebulae sutilmente (subtly, max 0.22 opacity) into night sky color
-        nightSkyColor = mix(nightSkyColor, mixedNebula, nebulaMask * 0.22);
+        // Vibrant cosmic colors for nebulae (mixture of purple, indigo-blue, and magenta/pink)
+        vec3 nebulaColor1 = vec3(0.38, 0.08, 0.58); // Rich purple-magenta
+        vec3 nebulaColor2 = vec3(0.06, 0.14, 0.44); // Deep galactic blue-indigo
+        vec3 nebulaColor3 = vec3(0.62, 0.15, 0.42); // Vibrant magenta highlights
+        
+        vec3 mixedNebula = mix(nebulaColor2, nebulaColor1, smoothstep(0.35, 0.65, combinedNoise));
+        mixedNebula = mix(mixedNebula, nebulaColor3, smoothstep(0.55, 0.80, combinedNoise));
+        
+        // Blend nebulae into night sky color based on uNebulaIntensity
+        // Max opacity is 0.75 for a gorgeous visible galactic dust effect
+        nightSkyColor = mix(nightSkyColor, mixedNebula, nebulaMask * uNebulaIntensity * 0.75);
 
         // --- Night Haze (Bruma Nocturna) ---
         // Soft fog band near the horizon (around y = -0.45)

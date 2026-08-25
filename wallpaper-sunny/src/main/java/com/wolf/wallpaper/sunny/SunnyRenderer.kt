@@ -92,6 +92,7 @@ class SunnyRenderer(
     // Handle for sunny.frag's uNightIntensity (day sky night-fade blend, distinct from
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
+    private var nebulaIntensityHandle = -1
 
     // Precomputed noise texture used by sunny.frag's nebula fbm approximation
     // (dedicated texture unit: GL_TEXTURE1, so it never clashes with the cloud/
@@ -502,6 +503,7 @@ class SunnyRenderer(
         godRaysIntensityHandle = GLES30.glGetUniformLocation(program, "uGodRaysIntensity")
         sunFadeFactorHandle = GLES30.glGetUniformLocation(program, "uSunFadeFactor")
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
+        nebulaIntensityHandle = GLES30.glGetUniformLocation(program, "uNebulaIntensity")
         noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
         cloudOcclusionHandle = GLES30.glGetUniformLocation(program, "uCloudOcclusionNearSun")
         rainbowOpacityHandle = GLES30.glGetUniformLocation(program, "uRainbowOpacity")
@@ -1745,6 +1747,9 @@ class SunnyRenderer(
 
         // Pass night intensity uniform to sky shader
         GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
+        
+        val nebulaIntensity = configProvider.getNebulaIntensity() / 100f
+        GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
 
         // Bind the precomputed noise texture used by the nebula fbm approximation
         // (only sampled by the shader's night branch, but binding is cheap either way)

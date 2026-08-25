@@ -34,6 +34,9 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun getGradientCycleSpeed(): Int = cachedInt(ConfigManager.KEY_GRADIENT_CYCLE_SPEED, ConfigManager.DEFAULT_GRADIENT_CYCLE_SPEED)
     fun setGradientCycleSpeed(speed: Int) { putInt(ConfigManager.KEY_GRADIENT_CYCLE_SPEED, speed.coerceIn(0, 100)) }
 
+    fun getNebulaIntensity(): Int = cachedInt(ConfigManager.KEY_NEBULA_INTENSITY, ConfigManager.DEFAULT_NEBULA_INTENSITY)
+    fun setNebulaIntensity(intensity: Int) { putInt(ConfigManager.KEY_NEBULA_INTENSITY, intensity.coerceIn(0, 100)) }
+
     fun isShootingStarsEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, ConfigManager.DEFAULT_SHOOTING_STARS_ENABLED)
     fun setShootingStarsEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, enabled) }
 
