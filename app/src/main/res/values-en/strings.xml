@@ -177,11 +177,6 @@
     <string name="sunny_da">Day</string>
     <string name="sunny_densidad_de_estrellas">Star Density</string>
     <string name="sunny_densidad_de_estrellas_fugaces">Shooting Stars Density</string>
-    <string name="sunny_nebulosas">Nebulae</string>
-    <string name="sunny_intensidad_de_nebulosa">Nebula Intensity</string>
-    <string name="sunny_tema_de_nebulosa">Nebula Theme</string>
-    <string name="sunny_velocidad_de_nebulosa">Nebula Speed</string>
-    <string name="sunny_escala_de_nebulosa">Nebula Scale</string>
     <string name="sunny_der_a_izq">Right to Left</string>
     <string name="sunny_destellos_de_lente_lens_flare">Lens Flare</string>
     <string name="sunny_efecto_de_inclinacin_3d_giroscopio">3D Tilt Effect (Gyroscope)</string>
@@ -415,33 +410,6 @@
         <item>Normal</item>
         <item>Many</item>
         <item>Full sky</item>
-    </string-array>
-    <string-array name="nebula_intensity_options">
-        <item>Disabled</item>
-        <item>Low</item>
-        <item>Medium</item>
-        <item>High</item>
-        <item>Maximum</item>
-    </string-array>
-    <string-array name="nebula_theme_options">
-        <item>Cosmic Purple</item>
-        <item>Emerald</item>
-        <item>Fire</item>
-        <item>Deep Blue</item>
-    </string-array>
-    <string-array name="nebula_speed_options">
-        <item>Very Slow</item>
-        <item>Slow</item>
-        <item>Medium</item>
-        <item>Fast</item>
-        <item>Very Fast</item>
-    </string-array>
-    <string-array name="nebula_scale_options">
-        <item>Very Small</item>
-        <item>Small</item>
-        <item>Medium</item>
-        <item>Large</item>
-        <item>Very Large</item>
     </string-array>
     <string-array name="sun_move_speed_options">
         <item>Stopped</item>

@@ -93,25 +93,9 @@ class SunnyRenderer(
     // the background program's own bgNightIntensityHandle above)
     private var dayNightIntensityHandle = -1
 
-    // Dedicated program for the nebula/cosmic-dust layer (shaders/nebula.frag), drawn as its
-    // own additive pass on top of the sky quad instead of living inside sunny.frag - see
-    // SunnyRenderer.drawNebula().
-    private var nebulaProgram = 0
-    private var nebulaTimeHandle = -1
-    private var nebulaAspectHandle = -1
-    private var nebulaNightIntensityHandle = -1
-    private var nebulaNoiseTexHandle = -1
-    private var nebulaIntensityHandle = -1
-    private var nebulaOffsetHandle = -1
-    private var nebulaColor1Handle = -1
-    private var nebulaColor2Handle = -1
-    private var nebulaColor3Handle = -1
-    private var nebulaSpeedHandle = -1
-    private var nebulaScaleHandle = -1
-
-    // Precomputed noise texture, shared by sunny.frag's lens dirt effect and nebula.frag
-    // (dedicated texture unit: GL_TEXTURE1, so it never clashes with the cloud/
-    // background/moon programs which all bind their own texture at GL_TEXTURE0).
+    // Precomputed noise texture used by sunny.frag's lens dirt effect (dedicated texture unit:
+    // GL_TEXTURE1, so it never clashes with the cloud/background/moon programs which all bind
+    // their own texture at GL_TEXTURE0).
     private var noiseTexture = 0
     private var noiseTexHandle = -1
 
@@ -234,15 +218,21 @@ class SunnyRenderer(
     private lateinit var trailVertexBuffer: FloatBuffer
     private lateinit var trailAgeBuffer: FloatBuffer
 
-    // Constellation randomization state
+    // Constellation randomization state. Seeded from ConfigProvider.getConstellationSeed()
+    // (a value generated once per install and persisted) instead of the unseeded global
+    // Random, so each user's sky layout is stable and different from everyone else's rather
+    // than everyone seeing the same arrangement.
     private val constellationOffsetsX = FloatArray(4)
     private val constellationOffsetsY = FloatArray(4)
     private val constellationActive = BooleanArray(4) { true }
+    private val constellationRandom: kotlin.random.Random by lazy { kotlin.random.Random(configProvider.getConstellationSeed()) }
     private var wasCombinedNight = false
 
-    // Airplane geometry buffers
+    // Airplane geometry buffers: a small triangle-fan silhouette (hub + nose + wingtips +
+    // tail stabilizers, see drawJetContrail) rather than a single flat triangle, so the
+    // jet reads as a recognizable plane shape instead of an arrowhead.
     private lateinit var planeVertexBuffer: FloatBuffer
-    private val planeVertexArray = FloatArray(3 * 2)
+    private val planeVertexArray = FloatArray(7 * 2)
     private var isFirstLaunch = true
 
     private var time = 0f
@@ -528,29 +518,7 @@ class SunnyRenderer(
         skyBgTranslationHandle = GLES30.glGetUniformLocation(program, "uBgTranslation")
         skyBgScaleHandle = GLES30.glGetUniformLocation(program, "uBgScale")
         skyBgTextureHandle = GLES30.glGetUniformLocation(program, "uBackgroundTex")
-        noiseTexture = createNoiseTexture(128, configProvider.getNebulaSeed())
-
-        // Compile and link the nebula shader (its own program/pass, see drawNebula())
-        try {
-            val nebulaVert = readAssetFile(context, "shaders/sunny.vert")
-            val nebulaFrag = readAssetFile(context, "shaders/nebula.frag")
-            nebulaProgram = createProgram(nebulaVert, nebulaFrag)
-
-            nebulaTimeHandle = GLES30.glGetUniformLocation(nebulaProgram, "uTime")
-            nebulaAspectHandle = GLES30.glGetUniformLocation(nebulaProgram, "uAspectRatio")
-            nebulaNightIntensityHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNightIntensity")
-            nebulaNoiseTexHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNoiseTex")
-            nebulaIntensityHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaIntensity")
-            nebulaOffsetHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaOffset")
-            nebulaColor1Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor1")
-            nebulaColor2Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor2")
-            nebulaColor3Handle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaColor3")
-            nebulaSpeedHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaSpeed")
-            nebulaScaleHandle = GLES30.glGetUniformLocation(nebulaProgram, "uNebulaScale")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            nebulaProgram = 0
-        }
+        noiseTexture = createNoiseTexture(128)
 
         // Compile and link lens flare shader
         try {
@@ -904,8 +872,15 @@ class SunnyRenderer(
                 in float vAge;
                 out vec4 fragColor;
                 void main() {
-                    float opacity = clamp(1.0 - vAge / 40.0, 0.0, 1.0);
-                    fragColor = vec4(0.95, 0.95, 0.98, opacity * 0.25);
+                    if (vAge < 0.0) {
+                        // Plane body sentinel (see drawJetContrail): opaque-ish silvery
+                        // color so the airplane silhouette itself reads as a solid,
+                        // well-defined shape instead of fading like the contrail.
+                        fragColor = vec4(0.80, 0.83, 0.88, 0.85);
+                    } else {
+                        float opacity = clamp(1.0 - vAge / 40.0, 0.0, 1.0);
+                        fragColor = vec4(0.95, 0.95, 0.98, opacity * 0.25);
+                    }
                 }
             """.trimIndent()
             trailProgram = createProgram(jetVert, jetFrag)
@@ -923,7 +898,7 @@ class SunnyRenderer(
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
 
-        planeVertexBuffer = ByteBuffer.allocateDirect(3 * 2 * 4)
+        planeVertexBuffer = ByteBuffer.allocateDirect(7 * 2 * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
 
@@ -1552,7 +1527,7 @@ class SunnyRenderer(
     }
 
     private fun randomizeConstellations() {
-        val rand = kotlin.random.Random
+        val rand = constellationRandom
         
         var anyActive = false
         for (i in 0..3) {
@@ -1811,8 +1786,8 @@ class SunnyRenderer(
         // Pass night intensity uniform to sky shader
         GLES30.glUniform1f(dayNightIntensityHandle, nightIntensity)
 
-        // Bind the precomputed noise texture, used here by the lens dirt effect further below
-        // (the nebula's own use of this texture now lives in its own pass, see drawNebula())
+        // Bind the precomputed noise texture used by the lens dirt effect further below (only
+        // sampled by that branch, but binding is cheap either way)
         if (noiseTexture != 0) {
             GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
             GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
@@ -1868,70 +1843,6 @@ class SunnyRenderer(
         GLES30.glEnableVertexAttribArray(0)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         GLES30.glDisableVertexAttribArray(0)
-
-        // Nebula/cosmic dust: its own additive pass on top of the sky quad just drawn above,
-        // so it composites underneath the stars/moon draw calls that follow this function at
-        // every call site (drawDayScene/drawNightScene/drawCombinedScene).
-        drawNebula(nightIntensity)
-    }
-
-    /**
-     * Draws the procedural nebula (see shaders/nebula.frag) as its own fullscreen-quad pass,
-     * additively composited on top of the sky quad drawDaySky() just drew. Split out of the
-     * sky shader into its own program/draw call so it has an independent blend state
-     * (GL_ONE, GL_ONE_MINUS_SRC_COLOR - a GPU "screen" blend) instead of computing that blend
-     * by hand in-shader, and so its uniforms are entirely skipped on pure-day frames.
-     */
-    private fun drawNebula(nightIntensity: Float) {
-        if (nightIntensity <= 0.001f || nebulaProgram == 0) return
-
-        GLES30.glUseProgram(nebulaProgram)
-        GLES30.glUniform1f(nebulaTimeHandle, time)
-        GLES30.glUniform1f(nebulaAspectHandle, aspectRatio)
-        GLES30.glUniform1f(nebulaNightIntensityHandle, nightIntensity)
-
-        val nebulaIntensity = configProvider.getNebulaIntensity() / 100f
-        GLES30.glUniform1f(nebulaIntensityHandle, nebulaIntensity)
-
-        // Subtle gyro parallax: the nebula sits farther back than everything else in the
-        // scene (stars, moon, mountains), so it should drift the least when tilting the
-        // device - a fraction of the factor used for the sun/stars gives it a sense of depth
-        // instead of feeling glued to the screen.
-        val nebulaGyroX = if (configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.006f else 0f
-        val nebulaGyroY = if (configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.006f else 0f
-        GLES30.glUniform2f(nebulaOffsetHandle, nebulaGyroX, nebulaGyroY)
-
-        val (nebulaC1, nebulaC2, nebulaC3) = getNebulaThemeColors(configProvider.getNebulaTheme())
-        GLES30.glUniform3f(nebulaColor1Handle, nebulaC1[0], nebulaC1[1], nebulaC1[2])
-        GLES30.glUniform3f(nebulaColor2Handle, nebulaC2[0], nebulaC2[1], nebulaC2[2])
-        GLES30.glUniform3f(nebulaColor3Handle, nebulaC3[0], nebulaC3[1], nebulaC3[2])
-
-        // 0-100 -> 0.2x-1.8x drift speed, 0-100 -> 0.6x-1.4x pattern scale; 50 (the default
-        // for both) maps to exactly 1.0x, preserving the original look out of the box.
-        val nebulaSpeed = 0.2f + (configProvider.getNebulaSpeed() / 100f) * 1.6f
-        val nebulaScale = 0.6f + (configProvider.getNebulaScale() / 100f) * 0.8f
-        GLES30.glUniform1f(nebulaSpeedHandle, nebulaSpeed)
-        GLES30.glUniform1f(nebulaScaleHandle, nebulaScale)
-
-        if (noiseTexture != 0) {
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE1)
-            GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
-            GLES30.glUniform1i(nebulaNoiseTexHandle, 1)
-        }
-
-        // "Screen" blend (dst' = src + dst*(1-src) per channel): only ever brightens whatever
-        // is already in the framebuffer, so the nebula reads as glowing against the sky/stars
-        // instead of a flat patch painted over them. Restore the app's normal alpha blend
-        // afterward since every other draw call in this renderer assumes it.
-        GLES30.glBlendFunc(GLES30.GL_ONE, GLES30.GL_ONE_MINUS_SRC_COLOR)
-
-        fullscreenQuadBuffer.position(0)
-        GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, fullscreenQuadBuffer)
-        GLES30.glEnableVertexAttribArray(0)
-        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
-        GLES30.glDisableVertexAttribArray(0)
-
-        GLES30.glBlendFunc(GLES30.GL_SRC_ALPHA, GLES30.GL_ONE_MINUS_SRC_ALPHA)
     }
 
     private fun initBirds() {
@@ -2045,7 +1956,7 @@ class SunnyRenderer(
     }
 
     private fun drawNightScene(intensity: Float) {
-        // Draw the night sky background with nebulae and horizon haze
+        // Draw the night sky background with horizon haze
         drawDaySky(0f, intensity)
         
         drawStars(intensity)
@@ -3077,36 +2988,6 @@ class SunnyRenderer(
         return null
     }
 
-    /**
-     * Color themes for the nebula, selected via ConfigProvider.getNebulaTheme(). Each theme is
-     * the same (color1, color2, color3) triple sunny.frag used to mix internally before they
-     * became uniforms, so index 0 preserves the original look exactly.
-     */
-    private fun getNebulaThemeColors(themeIndex: Int): Triple<FloatArray, FloatArray, FloatArray> {
-        return when (themeIndex) {
-            1 -> Triple( // Esmeralda
-                floatArrayOf(0.05f, 0.45f, 0.25f),
-                floatArrayOf(0.02f, 0.12f, 0.20f),
-                floatArrayOf(0.15f, 0.65f, 0.35f)
-            )
-            2 -> Triple( // Fuego
-                floatArrayOf(0.55f, 0.18f, 0.04f),
-                floatArrayOf(0.20f, 0.05f, 0.15f),
-                floatArrayOf(0.75f, 0.35f, 0.05f)
-            )
-            3 -> Triple( // Azul Profundo
-                floatArrayOf(0.08f, 0.20f, 0.55f),
-                floatArrayOf(0.02f, 0.06f, 0.22f),
-                floatArrayOf(0.15f, 0.45f, 0.70f)
-            )
-            else -> Triple( // Púrpura Cósmico (original)
-                floatArrayOf(0.38f, 0.08f, 0.58f),
-                floatArrayOf(0.06f, 0.14f, 0.44f),
-                floatArrayOf(0.62f, 0.15f, 0.42f)
-            )
-        }
-    }
-
     private fun getStarColorRGB(colorIndex: Int): Triple<Float, Float, Float> {
         return when (colorIndex) {
             1 -> Triple(0.6f, 0.8f, 1.0f)   // Azul frío
@@ -3351,21 +3232,17 @@ class SunnyRenderer(
 
     /**
      * Generates a small single-channel, tileable noise texture once at startup, used by
-     * sunny.frag to approximate multi-octave fbm noise via a few bilinearly-filtered
-     * texture samples instead of per-pixel hash/fract math. Each texel is an independent
-     * random value; GL_LINEAR sampling + GL_REPEAT wrapping produces smooth, continuous
-     * value-noise when sampled at frequencies below the texture's own resolution.
-     *
-     * [seed] comes from [ConfigProvider.getNebulaSeed], a value generated once per install
-     * and persisted, so each user's nebula/cosmic-dust pattern looks different instead of
-     * every device rendering the exact same shape.
+     * sunny.frag's lens dirt effect to get fine grain without per-pixel hash/fract math.
+     * Each texel is an independent random value; GL_LINEAR sampling + GL_REPEAT wrapping
+     * produces smooth, continuous value-noise when sampled at frequencies below the
+     * texture's own resolution.
      */
-    private fun createNoiseTexture(size: Int, seed: Int): Int {
+    private fun createNoiseTexture(size: Int): Int {
         val textureIds = IntArray(1)
         GLES30.glGenTextures(1, textureIds, 0)
         if (textureIds[0] == 0) return 0
 
-        val random = kotlin.random.Random(seed)
+        val random = kotlin.random.Random(1337)
         val data = ByteArray(size * size)
         for (i in data.indices) {
             data[i] = random.nextInt(0, 256).toByte()
@@ -3539,22 +3416,30 @@ class SunnyRenderer(
             val nx = -uy
             val ny = ux
 
-            planeVertexArray[0] = jetX + ux * 0.02f
-            planeVertexArray[1] = jetY + uy * 0.02f
-            planeVertexArray[2] = jetX - ux * 0.012f + nx * 0.014f
-            planeVertexArray[3] = jetY - uy * 0.012f + ny * 0.014f
-            planeVertexArray[4] = jetX - ux * 0.012f - nx * 0.014f
-            planeVertexArray[5] = jetY - uy * 0.012f - ny * 0.014f
+            // Plane silhouette as a triangle fan: hub, nose, right wingtip, right tail
+            // stabilizer, left tail stabilizer, left wingtip, back to nose. Reads as a
+            // small recognizable jet outline instead of a single flat triangle.
+            fun setPoint(vertexIndex: Int, forward: Float, side: Float) {
+                planeVertexArray[vertexIndex * 2] = jetX + ux * forward + nx * side
+                planeVertexArray[vertexIndex * 2 + 1] = jetY + uy * forward + ny * side
+            }
+            setPoint(0, 0f, 0f)          // hub (fan center)
+            setPoint(1, 0.020f, 0f)      // nose
+            setPoint(2, -0.006f, 0.017f) // right wingtip (swept back)
+            setPoint(3, -0.020f, 0.005f) // right tail stabilizer
+            setPoint(4, -0.020f, -0.005f) // left tail stabilizer
+            setPoint(5, -0.006f, -0.017f) // left wingtip (swept back)
+            setPoint(6, 0.020f, 0f)      // back to nose, closing the fan
 
             planeVertexBuffer.clear()
             planeVertexBuffer.put(planeVertexArray)
             planeVertexBuffer.position(0)
 
             GLES30.glDisableVertexAttribArray(1)
-            GLES30.glVertexAttrib1f(1, 0f)
+            GLES30.glVertexAttrib1f(1, -1f) // sentinel: opaque plane color, see jetFrag
 
             GLES30.glVertexAttribPointer(0, 2, GLES30.GL_FLOAT, false, 0, planeVertexBuffer)
-            GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, 3)
+            GLES30.glDrawArrays(GLES30.GL_TRIANGLE_FAN, 0, 7)
         }
 
         GLES30.glDisableVertexAttribArray(0)

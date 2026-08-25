@@ -34,31 +34,20 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun getGradientCycleSpeed(): Int = cachedInt(ConfigManager.KEY_GRADIENT_CYCLE_SPEED, ConfigManager.DEFAULT_GRADIENT_CYCLE_SPEED)
     fun setGradientCycleSpeed(speed: Int) { putInt(ConfigManager.KEY_GRADIENT_CYCLE_SPEED, speed.coerceIn(0, 100)) }
 
-    fun getNebulaIntensity(): Int = cachedInt(ConfigManager.KEY_NEBULA_INTENSITY, ConfigManager.DEFAULT_NEBULA_INTENSITY)
-    fun setNebulaIntensity(intensity: Int) { putInt(ConfigManager.KEY_NEBULA_INTENSITY, intensity.coerceIn(0, 100)) }
-
     /**
-     * Stable per-install seed for the nebula's noise texture. Generated once (lazily, on the
-     * first read) and persisted, instead of the old hardcoded seed, so every install/user ends
-     * up with a differently-shaped nebula instead of everyone seeing the exact same pattern.
+     * Stable per-install seed for constellation layout randomization (which constellations
+     * are active and their position offsets, see SunnyRenderer.randomizeConstellations).
+     * Generated once (lazily, on the first read) and persisted, so every install/user ends
+     * up with a differently-arranged sky instead of everyone seeing the same pattern.
      */
-    fun getNebulaSeed(): Int {
-        if (!prefs.contains(ConfigManager.KEY_NEBULA_SEED)) {
+    fun getConstellationSeed(): Int {
+        if (!prefs.contains(ConfigManager.KEY_CONSTELLATION_SEED)) {
             val generated = kotlin.random.Random.nextInt(1, Int.MAX_VALUE)
-            putInt(ConfigManager.KEY_NEBULA_SEED, generated)
+            putInt(ConfigManager.KEY_CONSTELLATION_SEED, generated)
             return generated
         }
-        return cachedInt(ConfigManager.KEY_NEBULA_SEED, ConfigManager.DEFAULT_NEBULA_SEED)
+        return cachedInt(ConfigManager.KEY_CONSTELLATION_SEED, ConfigManager.DEFAULT_CONSTELLATION_SEED)
     }
-
-    fun getNebulaTheme(): Int = cachedInt(ConfigManager.KEY_NEBULA_THEME, ConfigManager.DEFAULT_NEBULA_THEME)
-    fun setNebulaTheme(theme: Int) { putInt(ConfigManager.KEY_NEBULA_THEME, theme.coerceIn(0, 3)) }
-
-    fun getNebulaSpeed(): Int = cachedInt(ConfigManager.KEY_NEBULA_SPEED, ConfigManager.DEFAULT_NEBULA_SPEED)
-    fun setNebulaSpeed(speed: Int) { putInt(ConfigManager.KEY_NEBULA_SPEED, speed.coerceIn(0, 100)) }
-
-    fun getNebulaScale(): Int = cachedInt(ConfigManager.KEY_NEBULA_SCALE, ConfigManager.DEFAULT_NEBULA_SCALE)
-    fun setNebulaScale(scale: Int) { putInt(ConfigManager.KEY_NEBULA_SCALE, scale.coerceIn(0, 100)) }
 
     fun isShootingStarsEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, ConfigManager.DEFAULT_SHOOTING_STARS_ENABLED)
     fun setShootingStarsEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_SHOOTING_STARS_ENABLED, enabled) }

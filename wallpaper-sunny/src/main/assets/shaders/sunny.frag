@@ -26,11 +26,6 @@ uniform vec2 uBgTranslation;
 uniform vec2 uBgScale;
 uniform sampler2D uBackgroundTex;
 
-// Note: the nebula, which used to be computed right here inside the night branch below
-// (including its own fbm-over-noise-texture helper), is now its own dedicated shader program
-// drawn as a separate additive pass on top of this sky quad - see shaders/nebula.frag and
-// SunnyRenderer.drawNebula(). uNoiseTex here is only used by the lens dirt effect further down.
-
 void main() {
     // 1. Sky Gradient based on Theme
     float tSky = (vPosition.y + 1.0) * 0.5; // ranges 0.0 to 1.0
@@ -146,11 +141,6 @@ void main() {
         vec3 nightSkyColor = mix(nightSkyBottom, nightSkyTop, tSky);
 
         vec2 uvCoords = vec2(vPosition.x * uAspectRatio, vPosition.y);
-
-        // Note: the nebula/cosmic-dust layer used to be blended into nightSkyColor right here.
-        // It's now drawn as its own additive pass after this shader (shaders/nebula.frag,
-        // SunnyRenderer.drawNebula()), using a GL_ONE/GL_ONE_MINUS_SRC_COLOR blend against
-        // whatever this shader outputs - equivalent to the "screen" blend used previously.
 
         // --- Night Haze (Bruma Nocturna) ---
         // Soft fog band near the horizon (around y = -0.45)
@@ -271,8 +261,8 @@ void main() {
     // and this branch is a uniform (not per-fragment) condition, so it costs nothing on the
     // overwhelming majority of frames where no rainbow is active.
     if (uRainbowOpacity > 0.001) {
-        const float kRainbowRadius = 1.55;    // ring radius (same uv units as the sun distance above)
-        const float kRainbowBandWidth = 0.10; // total ring thickness across all color bands
+        const float kRainbowRadius = 0.85;    // ring radius (same uv units as the sun distance above)
+        const float kRainbowBandWidth = 0.14; // total ring thickness across all color bands
         const float kRainbowMaxIntensity = 0.45; // global cap - visible and beautiful
         vec2 antiSolarPos = -(uSunPos * uAspectRatio);
         float distToAntiSolar = distance(uv, antiSolarPos);
@@ -300,11 +290,10 @@ void main() {
     }
 
     // --- Lens dirt: a very subtle, screen-space-fixed smudge/dust pattern that darkens the
-    // final image slightly, reusing the precomputed noise texture (uNoiseTex) at a much
-    // finer tiling than the nebula use above so it reads as fine grain rather than soft
-    // blobs. Opacity (uLensDirtOpacity) is computed on the CPU from the same "is the sun
-    // visible near screen center" logic that gates the lens flare, so it is 0 whenever the
-    // sun itself is not visible.
+    // final image slightly, reusing the precomputed noise texture (uNoiseTex) at a fine
+    // tiling so it reads as fine grain rather than soft blobs. Opacity (uLensDirtOpacity) is
+    // computed on the CPU from the same "is the sun visible near screen center" logic that
+    // gates the lens flare, so it is 0 whenever the sun itself is not visible.
     if (uLensDirtOpacity > 0.001) {
         const float kLensDirtMaxDarken = 0.10; // max fractional darkening at full opacity+mask
         vec2 dirtUv = vPosition * 0.5 + 0.5; // fixed to screen space, not world space, so it reads as "on the lens" rather than moving with the scene
