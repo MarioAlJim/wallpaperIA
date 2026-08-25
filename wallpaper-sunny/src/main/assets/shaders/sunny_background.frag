@@ -47,10 +47,14 @@ void main() {
     // Smooth glare/illumination based on distance to the sun
     float glare = smoothstep(0.75, 0.05, distToSun);
     
-    // Day-only effect: the hill/silhouette "lit from above" glare (and everything it
-    // feeds below - rim lighting, solar bloom) must never show at night, so it is killed
-    // off completely as uNightIntensity rises instead of being re-scaled by moon phase.
-    glare *= (1.0 - uNightIntensity);
+    // At night, the sun's full "lit from above" glare is replaced by a much fainter moonlight
+    // glow on the silhouette (and everything glare feeds below it - rim lighting, bloom),
+    // scaled further down by the moon's current phase via uMoonPhaseMultiplier (near-zero at
+    // new moon, still just a soft glow at full moon) so it never approaches daytime strength.
+    const float kMoonGlareStrength = 0.5; // extra dampening on top of the phase multiplier itself
+    float dayGlare = glare * (1.0 - uNightIntensity);
+    float moonGlare = glare * uNightIntensity * uMoonPhaseMultiplier * kMoonGlareStrength;
+    glare = dayGlare + moonGlare;
 
     // Fade out glare when the sun is below or near the horizon
     glare *= smoothstep(-0.4, -0.1, uSunPos.y);
