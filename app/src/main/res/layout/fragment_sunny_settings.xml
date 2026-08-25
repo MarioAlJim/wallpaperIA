@@ -10,9 +10,195 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp">
-        <!-- Accordion 0: Ajuste de Entorno -->
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false">
+
+        <!-- 1. Modo de Tiempo Card (At the top!) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardTimeMode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/settings_stroke"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/settings_card_bg">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/sunny_modo_de_tiempo"
+                    android:textColor="@color/settings_text_primary"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+                
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Selecciona cómo se comporta el ciclo temporal en tu pantalla"
+                    android:textColor="@color/settings_text_tertiary"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="12dp" />
+
+                <LinearLayout
+                    android:id="@+id/layoutTimeModeCards"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    
+                    <!-- Día Button -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardTimeModeDay"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/settings_chip_bg_inactive"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+                            <ImageView
+                                android:id="@+id/imageTimeModeDay"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_sun" />
+                            <TextView
+                                android:id="@+id/textTimeModeDay"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sunny_da"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Noche Button -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardTimeModeNight"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/settings_chip_bg_inactive"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+                            <ImageView
+                                android:id="@+id/imageTimeModeNight"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_moon" />
+                            <TextView
+                                android:id="@+id/textTimeModeNight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sunny_noche"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Combinado Button -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardTimeModeCombined"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/settings_chip_bg_inactive"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+                            <ImageView
+                                android:id="@+id/imageTimeModeCombined"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_combined" />
+                            <TextView
+                                android:id="@+id/textTimeModeCombined"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sunny_combinado"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Reloj Button -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardTimeModeClock"
+                        android:layout_width="0dp"
+                        android:layout_height="80dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        app:cardCornerRadius="12dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="@color/settings_chip_bg_inactive"
+                        app:strokeWidth="1dp">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center"
+                            android:padding="8dp">
+                            <ImageView
+                                android:id="@+id/imageTimeModeClock"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_clock" />
+                            <TextView
+                                android:id="@+id/textTimeModeClock"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/sunny_reloj_tiempo_real"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="11sp"
+                                android:textStyle="bold"
+                                android:layout_marginTop="6dp" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 2. Ajuste de Entorno Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyEnvironment"
             android:layout_width="match_parent"
@@ -29,32 +215,38 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Header (Always Visible) -->
+                <!-- Header (Non-collapsible title group) -->
                 <RelativeLayout
                     android:id="@+id/headerSunnyEnvironment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/iconSunnyEnvironment"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_background"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeSunnyEnvironment"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#E0F2F1"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#8A2BE2" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconSunnyEnvironment"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_background"
+                            app:tint="#009688" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconSunnyEnvironment"
-                        android:layout_toStartOf="@id/arrowSunnyEnvironment"
-                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/badgeSunnyEnvironment"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -62,7 +254,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/sunny_ajuste_de_entorno"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -71,35 +263,36 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
+                    <!-- Dummy/compatibility views to satisfy findViewById/binding -->
                     <ImageView
                         android:id="@+id/arrowSunnyEnvironment"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_down"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@color/settings_text_secondary" />
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
+                    <View
+                        android:id="@+id/dividerSunnyEnvironment"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
                 </RelativeLayout>
 
                 <View
-                    android:id="@+id/dividerSunnyEnvironment"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke"
-                    android:visibility="gone" />
+                    android:background="@color/settings_stroke" />
 
-                <!-- Content Area (Expandable) -->
+                <!-- Content Area -->
                 <LinearLayout
                     android:id="@+id/contentSunnyEnvironment"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <!-- Cloud Density -->
                     <RelativeLayout
@@ -229,7 +422,7 @@
                         app:icon="@drawable/ic_background"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        android:visibility="gone" />
+                        android:visibility="visible" />
 
                     <TextView
                         android:id="@+id/tvCustomSunnyBgStatus"
@@ -241,7 +434,7 @@
                         android:textColor="@color/settings_text_secondary"
                         android:textSize="12sp"
                         android:gravity="center"
-                        android:visibility="gone" />
+                        android:visibility="visible" />
 
                     <!-- Divider -->
                     <View
@@ -285,210 +478,8 @@
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
-        <!-- Card: Modo de Tiempo (Always Visible) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardTimeMode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/settings_stroke"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <!-- Time Mode Selector -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sunny_modo_de_tiempo"
-                    android:textColor="@color/settings_text_primary"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp" />
-
-                    <LinearLayout
-                        android:id="@+id/layoutTimeModeCards"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:layout_marginBottom="16dp">
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardTimeModeDay"
-                            android:layout_width="0dp"
-                            android:layout_height="96dp"
-                            android:layout_weight="1"
-                            android:layout_marginEnd="4dp"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="@color/settings_chip_bg_inactive"
-                            app:strokeWidth="1dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="vertical"
-                                android:gravity="center"
-                                android:padding="8dp">
-                                <FrameLayout
-                                    android:layout_width="40dp"
-                                    android:layout_height="48dp"
-                                    android:layout_marginBottom="6dp"
-                                    android:background="@drawable/mini_screen_bg">
-                                    <ImageView
-                                        android:id="@+id/imageTimeModeDay"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:layout_gravity="center"
-                                        android:src="@drawable/ic_sun"
-                                        android:scaleType="fitCenter" />
-                                </FrameLayout>
-                                <TextView
-                                    android:id="@+id/textTimeModeDay"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sunny_da"
-                                    android:textColor="@color/settings_text_muted"
-                                    android:textSize="11sp"
-                                    android:textStyle="bold"
-                                    android:gravity="center" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardTimeModeNight"
-                            android:layout_width="0dp"
-                            android:layout_height="96dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="@color/settings_chip_bg_inactive"
-                            app:strokeWidth="1dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="vertical"
-                                android:gravity="center"
-                                android:padding="8dp">
-                                <FrameLayout
-                                    android:layout_width="40dp"
-                                    android:layout_height="48dp"
-                                    android:layout_marginBottom="6dp"
-                                    android:background="@drawable/mini_screen_bg">
-                                    <ImageView
-                                        android:id="@+id/imageTimeModeNight"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:layout_gravity="center"
-                                        android:src="@drawable/ic_moon"
-                                        android:scaleType="fitCenter" />
-                                </FrameLayout>
-                                <TextView
-                                    android:id="@+id/textTimeModeNight"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sunny_noche"
-                                    android:textColor="@color/settings_text_muted"
-                                    android:textSize="11sp"
-                                    android:textStyle="bold"
-                                    android:gravity="center" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardTimeModeCombined"
-                            android:layout_width="0dp"
-                            android:layout_height="96dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="@color/settings_chip_bg_inactive"
-                            app:strokeWidth="1dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="vertical"
-                                android:gravity="center"
-                                android:padding="8dp">
-                                <FrameLayout
-                                    android:layout_width="40dp"
-                                    android:layout_height="48dp"
-                                    android:layout_marginBottom="6dp"
-                                    android:background="@drawable/mini_screen_bg">
-                                    <ImageView
-                                        android:id="@+id/imageTimeModeCombined"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:layout_gravity="center"
-                                        android:src="@drawable/ic_combined"
-                                        android:scaleType="fitCenter" />
-                                </FrameLayout>
-                                <TextView
-                                    android:id="@+id/textTimeModeCombined"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sunny_combinado"
-                                    android:textColor="@color/settings_text_muted"
-                                    android:textSize="11sp"
-                                    android:textStyle="bold"
-                                    android:gravity="center" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-
-                        <com.google.android.material.card.MaterialCardView
-                            android:id="@+id/cardTimeModeClock"
-                            android:layout_width="0dp"
-                            android:layout_height="96dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="4dp"
-                            app:cardCornerRadius="12dp"
-                            app:cardElevation="0dp"
-                            app:strokeColor="@color/settings_chip_bg_inactive"
-                            app:strokeWidth="1dp">
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:orientation="vertical"
-                                android:gravity="center"
-                                android:padding="8dp">
-                                <FrameLayout
-                                    android:layout_width="40dp"
-                                    android:layout_height="48dp"
-                                    android:layout_marginBottom="6dp"
-                                    android:background="@drawable/mini_screen_bg">
-                                    <ImageView
-                                        android:id="@+id/imageTimeModeClock"
-                                        android:layout_width="24dp"
-                                        android:layout_height="24dp"
-                                        android:layout_gravity="center"
-                                        android:src="@drawable/ic_clock"
-                                        android:scaleType="fitCenter" />
-                                </FrameLayout>
-                                <TextView
-                                    android:id="@+id/textTimeModeClock"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="@string/sunny_reloj_tiempo_real"
-                                    android:textColor="@color/settings_text_muted"
-                                    android:textSize="11sp"
-                                    android:textStyle="bold"
-                                    android:gravity="center" />
-                            </LinearLayout>
-                        </com.google.android.material.card.MaterialCardView>
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Card: Configuración del Sol (Accordion) -->
+        <!-- 3. Configuración del Sol Card (Always visible inline when Day/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnySun"
             android:layout_width="match_parent"
@@ -498,39 +489,45 @@
             app:strokeWidth="1dp"
             app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg">
+            app:cardBackgroundColor="@color/settings_card_bg"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Header (Always Visible) -->
                 <RelativeLayout
                     android:id="@+id/headerSunnySun"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/iconSunnySun"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_sun"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeSunnySun"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#FFF3E0"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#FFB300" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconSunnySun"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_sun"
+                            app:tint="#FFB300" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconSunnySun"
-                        android:layout_toStartOf="@id/arrowSunnySun"
-                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/badgeSunnySun"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -538,7 +535,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/sunny_configuracin_del_sol"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -547,37 +544,30 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
                     <ImageView
                         android:id="@+id/arrowSunnySun"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_down"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@color/settings_text_primary" />
-
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
                 </RelativeLayout>
 
-                <!-- Divider -->
                 <View
                     android:id="@+id/dividerSunnySun"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke"
-                    android:visibility="gone" />
+                    android:background="@color/settings_stroke" />
 
-                <!-- Content Area (Expandable) -->
                 <LinearLayout
                     android:id="@+id/contentSunnySun"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <LinearLayout
                         android:id="@+id/layoutDayControls"
@@ -832,7 +822,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_marginBottom="12dp"
-                        android:visibility="gone">
+                        android:visibility="visible">
 
                         <TextView
                             android:layout_width="match_parent"
@@ -1237,7 +1227,7 @@
                             android:orientation="vertical"
                             android:layout_marginTop="8dp"
                             android:layout_marginBottom="12dp"
-                            android:visibility="gone">
+                            android:visibility="visible">
 
                             <TextView
                                 android:layout_width="wrap_content"
@@ -1502,7 +1492,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="vertical"
                                 android:layout_marginTop="12dp"
-                                android:visibility="gone">
+                                android:visibility="visible">
 
                                 <!-- Custom Sun X Slider -->
                                 <RelativeLayout
@@ -1801,12 +1791,43 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="8dp" />
 
+                    
+                    <!-- Combined Sun Size Group -->
+                    <LinearLayout
+                        android:id="@+id/layoutCombinedSunSizeGroup"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                                                <!-- Combined Sun Size -->
+                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_tamao_del_sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerCombinedSunSize"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
+
                     </LinearLayout>
+</LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Card: Configuración de Luna y Estrellas (Accordion) -->
+        <!-- 4. Configuración de Luna y Estrellas Card (Always visible inline when Night/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyMoon"
             android:layout_width="match_parent"
@@ -1816,39 +1837,45 @@
             app:strokeWidth="1dp"
             app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg">
+            app:cardBackgroundColor="@color/settings_card_bg"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Header (Always Visible) -->
                 <RelativeLayout
                     android:id="@+id/headerSunnyMoon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
+                    android:padding="16dp">
 
-                    <ImageView
-                        android:id="@+id/iconSunnyMoon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_moon"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeSunnyMoon"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#E8EAF6"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#6C82B4" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconSunnyMoon"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_moon"
+                            app:tint="#3F51B5" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconSunnyMoon"
-                        android:layout_toStartOf="@id/arrowSunnyMoon"
-                        android:layout_marginStart="16dp"
+                        android:layout_toEndOf="@id/badgeSunnyMoon"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -1856,7 +1883,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/sunny_configuracin_de_luna_y_estrellas"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -1865,37 +1892,30 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
                     <ImageView
                         android:id="@+id/arrowSunnyMoon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_down"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@color/settings_text_primary" />
-
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
                 </RelativeLayout>
 
-                <!-- Divider -->
                 <View
                     android:id="@+id/dividerSunnyMoon"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke"
-                    android:visibility="gone" />
+                    android:background="@color/settings_stroke" />
 
-                <!-- Content Area (Expandable) -->
                 <LinearLayout
                     android:id="@+id/contentSunnyMoon"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <LinearLayout
                         android:id="@+id/layoutNightControls"
@@ -2499,7 +2519,7 @@
                                 android:orientation="vertical"
                                 android:layout_marginTop="8dp"
                                 android:layout_marginBottom="8dp"
-                                android:visibility="gone">
+                                android:visibility="visible">
                                 <TextView
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
@@ -2755,7 +2775,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="vertical"
                                     android:layout_marginTop="12dp"
-                                    android:visibility="gone">
+                                    android:visibility="visible">
 
                                     <!-- Custom Moon X Slider -->
                                     <RelativeLayout
@@ -3215,164 +3235,14 @@
 
 
 
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Card: Configuración de Transición (Accordion) -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSunnyCombined"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:strokeWidth="1dp"
-            app:strokeColor="@color/settings_stroke"
-            app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- Header (Always Visible) -->
-                <RelativeLayout
-                    android:id="@+id/headerSunnyCombined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:id="@+id/iconSunnyCombined"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_combined"
-                        android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@color/settings_accent" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconSunnyCombined"
-                        android:layout_toStartOf="@id/arrowSunnyCombined"
-                        android:layout_marginStart="16dp"
-                        android:layout_centerVertical="true">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/sunny_configuracin_de_transicin"
-                            android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/summarySunnyCombined"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/storm_cargando"
-                            android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
-                            android:layout_marginTop="2dp" />
-                    </LinearLayout>
-
-                    <ImageView
-                        android:id="@+id/arrowSunnyCombined"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_arrow_down"
-                        android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
-                        app:tint="@color/settings_text_primary" />
-
-                </RelativeLayout>
-
-                <!-- Divider -->
-                <View
-                    android:id="@+id/dividerSunnyCombined"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/settings_stroke"
-                    android:visibility="gone" />
-
-                <!-- Content Area (Expandable) -->
-                <LinearLayout
-                    android:id="@+id/contentSunnyCombined"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:visibility="gone">
-
-                    <LinearLayout
-                        android:id="@+id/layoutCombinedControls"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <!-- Gradient Cycle Speed -->
-                        <TextView
+                    
+                        <!-- Combined Moon Settings Group -->
+                        <LinearLayout
+                            android:id="@+id/layoutCombinedMoonSettingsGroup"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/sunny_velocidad_del_ciclo_danoche"
-                            android:textColor="@color/settings_text_primary"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="8dp"
-                            android:layout_marginBottom="8dp" />
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_ciclo_danoche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
-                        </RelativeLayout>
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:scrollbars="none"
-                            android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
-                            android:layout_marginBottom="8dp">
-                            <LinearLayout
-                                android:id="@+id/spinnerGradientCycleSpeed"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
-                        </HorizontalScrollView>
-
-                        <!-- Combined Sun Size -->
-                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
-                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_tamao_del_sol" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
-                            <TextView android:id="@+id/textViewCombinedSunSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
-                        </RelativeLayout>
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:scrollbars="none"
-                            android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
-                            android:layout_marginBottom="8dp">
-                            <LinearLayout
-                                android:id="@+id/spinnerCombinedSunSize"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
-                        </HorizontalScrollView>
-
-                        <!-- Combined Moon Size -->
+                            android:orientation="vertical">
+                                                    <!-- Combined Moon Size -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_tamao_de_la_luna" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
                             <TextView android:id="@+id/textViewCombinedMoonSizeValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="50%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
@@ -4007,6 +3877,149 @@
                                 android:paddingEnd="4dp" />
                         </HorizontalScrollView>
 
+                        </LinearLayout>
+</LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 5. Configuración de Transición Card (Always visible inline when Combined) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSunnyCombined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:strokeWidth="1dp"
+            app:strokeColor="@color/settings_stroke"
+            app:cardElevation="0dp"
+            app:cardBackgroundColor="@color/settings_card_bg"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/headerSunnyCombined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeSunnyCombined"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#EDE7F6"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_combined"
+                            app:tint="#673AB7" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/badgeSunnyCombined"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Configuración de Transición"
+                            android:textColor="@color/settings_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/summarySunnyCombined"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/storm_cargando"
+                            android:textColor="@color/settings_text_secondary"
+                            android:textSize="11sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/arrowSunnyCombined"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
+                    <View
+                        android:id="@+id/dividerSunnyCombined"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/settings_stroke" />
+
+                <!-- Content Area -->
+                <LinearLayout
+                    android:id="@+id/contentSunnyCombined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    
+                    <LinearLayout
+                        android:id="@+id/layoutCombinedControls"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                        
+                        <LinearLayout
+                        android:id="@+id/layoutCombinedControls"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <!-- Gradient Cycle Speed -->
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/sunny_velocidad_del_ciclo_danoche"
+                            android:textColor="@color/settings_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp" />
+                        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/sunny_ciclo_danoche" android:textColor="@color/settings_text_primary" android:textSize="14sp" android:textStyle="bold" />
+                            <TextView android:id="@+id/textViewGradientCycleSpeedValue" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="30%" android:textColor="@color/settings_text_secondary" android:textSize="13sp" android:layout_alignParentEnd="true" />
+                        </RelativeLayout>
+                        <HorizontalScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="none"
+                            android:requiresFadingEdge="horizontal"
+                            android:fadingEdgeLength="24dp"
+                            android:layout_marginBottom="8dp">
+                            <LinearLayout
+                                android:id="@+id/spinnerGradientCycleSpeed"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:paddingBottom="8dp"
+                                android:paddingTop="4dp"
+                                android:paddingStart="4dp"
+                                android:paddingEnd="4dp" />
+                        </HorizontalScrollView>
+
                         <!-- Trajectory Direction -->
                         <TextView
                             android:layout_width="match_parent"
@@ -4038,7 +4051,7 @@
                         </com.google.android.material.textfield.TextInputLayout>
 
                     </LinearLayout>
-                    <!-- END layoutCombinedControls -->
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>

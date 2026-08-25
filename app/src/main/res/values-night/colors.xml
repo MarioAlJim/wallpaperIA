@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Settings screen color tokens (dark palette = original hardcoded values) -->
-    <color name="settings_bg">#121214</color>
-    <color name="settings_card_bg">#17171A</color>
-    <color name="settings_card_bg_alt">#21212A</color>
-    <color name="settings_card_bg_alt2">#15151A</color>
-    <color name="settings_card_bg_alt3">#08080C</color>
-    <color name="settings_chip_bg_inactive">#3A3A4A</color>
-    <color name="settings_chip_bg_active">#2D2D3D</color>
-    <color name="settings_stroke">#2E2E33</color>
-    <color name="settings_text_primary">#E0E0E6</color>
-    <color name="settings_text_secondary">#9D9DA6</color>
-    <color name="settings_text_tertiary">#6C6C75</color>
-    <color name="settings_text_muted">#B0B0BA</color>
-    <color name="settings_accent">#00E5FF</color>
-    <color name="settings_accent_text">#00E5FF</color>
-    <color name="settings_accent_ripple">#2200E5FF</color>
+    <!-- Settings screen color tokens (dark palette) -->
+    <color name="settings_bg">#111216</color>
+    <color name="settings_card_bg">#1C1D24</color>
+    <color name="settings_card_bg_alt">#262732</color>
+    <color name="settings_card_bg_alt2">#22232C</color>
+    <color name="settings_card_bg_alt3">#343542</color>
+    <color name="settings_card_pressed">#2D2E39</color>
+    <color name="settings_card_selected">#26383D</color>
+    <color name="settings_chip_bg_inactive">#262732</color>
+    <color name="settings_chip_bg_active">#26383D</color>
+    <color name="settings_stroke">#343542</color>
+    <color name="settings_stroke_secondary">#40414D</color>
+    <color name="settings_text_primary">#F2F2F7</color>
+    <color name="settings_text_secondary">#999BA8</color>
+    <color name="settings_text_tertiary">#666875</color>
+    <color name="settings_text_muted">#999BA8</color>
+    <color name="settings_text_disabled">#666875</color>
+    <color name="settings_accent">#24C6D9</color>
+    <color name="settings_accent_text">#24C6D9</color>
+    <color name="settings_accent_ripple">#2224C6D9</color>
     <color name="settings_section_warning">#F2731A</color>
 </resources>
