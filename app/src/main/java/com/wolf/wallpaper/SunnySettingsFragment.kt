@@ -774,11 +774,19 @@ class SunnySettingsFragment : Fragment() {
         val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
         val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
 
+        val switchClockMode = parent.findViewById<SwitchMaterial>(R.id.switchCombinedClockMode)
+
         fun selectMode(mode: Int) {
+            val highlightIndex = when (mode) {
+                0 -> 0
+                1 -> 1
+                2, 3 -> 2
+                else -> 0
+            }
             cards.forEachIndexed { i, card ->
                 val image = images[i]
                 val text = texts[i]
-                if (i == mode) {
+                if (i == highlightIndex) {
                     card.strokeColor = strokeActiveColor
                     card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
                     card.setCardBackgroundColor(activeBgColor)
@@ -792,6 +800,17 @@ class SunnySettingsFragment : Fragment() {
                     image?.setColorFilter(inactiveColor)
                 }
             }
+            // Update switch state
+            if (switchClockMode != null) {
+                switchClockMode.setOnCheckedChangeListener(null)
+                switchClockMode.isChecked = mode == 3
+                switchClockMode.setOnCheckedChangeListener { _, isChecked ->
+                    val newMode = if (isChecked) 3 else 2
+                    configManager.setTimeMode(newMode)
+                    selectMode(newMode)
+                    updateSummaries(parent)
+                }
+            }
             updateTimeModeVisibility(parent, mode)
         }
 
@@ -800,8 +819,15 @@ class SunnySettingsFragment : Fragment() {
 
         cards.forEachIndexed { i, card ->
             card.setOnClickListener {
-                configManager.setTimeMode(i)
-                selectMode(i)
+                if (i == 2) {
+                    val isClockChecked = switchClockMode?.isChecked == true
+                    val selectedMode = if (isClockChecked) 3 else 2
+                    configManager.setTimeMode(selectedMode)
+                    selectMode(selectedMode)
+                } else {
+                    configManager.setTimeMode(i)
+                    selectMode(i)
+                }
                 updateSummaries(parent)
             }
         }
@@ -813,10 +839,11 @@ class SunnySettingsFragment : Fragment() {
         val cardCombined = parent.findViewById<View>(R.id.cardSunnyCombined) ?: return
         cardSun.visibility = if (mode == 0 || mode == 2 || mode == 3) View.VISIBLE else View.GONE
         cardMoon.visibility = if (mode == 1 || mode == 2 || mode == 3) View.VISIBLE else View.GONE
-        cardCombined.visibility = if (mode == 2) View.VISIBLE else View.GONE
+        cardCombined.visibility = if (mode == 2 || mode == 3) View.VISIBLE else View.GONE
 
-        parent.findViewById<View>(R.id.layoutCombinedSunSizeGroup)?.visibility = if (mode == 2) View.VISIBLE else View.GONE
-        parent.findViewById<View>(R.id.layoutCombinedMoonSettingsGroup)?.visibility = if (mode == 2) View.VISIBLE else View.GONE
+        parent.findViewById<View>(R.id.layoutCombinedSunSizeGroup)?.visibility = if (mode == 2 || mode == 3) View.VISIBLE else View.GONE
+        parent.findViewById<View>(R.id.layoutCombinedMoonSettingsGroup)?.visibility = if (mode == 2 || mode == 3) View.VISIBLE else View.GONE
+        parent.findViewById<View>(R.id.layoutGradientCycleSpeedContainer)?.visibility = if (mode == 2) View.VISIBLE else View.GONE
 
         // Hide redundant individual day/night controls when Combined/Clock mode is active
         val layoutSunSizeAndSpeed = parent.findViewById<View>(R.id.layoutSunSizeAndSpeed)
@@ -1566,11 +1593,15 @@ class SunnySettingsFragment : Fragment() {
 
         if (summarySunnyCombined != null) {
             val speed = configManager.getGradientCycleSpeed()
-            val speedText = when {
-                speed <= 25 -> getString(R.string.summary_speed_very_slow)
-                speed <= 50 -> getString(R.string.summary_speed_normal)
-                speed <= 75 -> getString(R.string.summary_speed_fast)
-                else -> getString(R.string.summary_speed_very_fast)
+            val speedText = if (configManager.getTimeMode() == 3) {
+                getString(R.string.sunny_modo_reloj_summary_text)
+            } else {
+                when {
+                    speed <= 25 -> getString(R.string.summary_speed_very_slow)
+                    speed <= 50 -> getString(R.string.summary_speed_normal)
+                    speed <= 75 -> getString(R.string.summary_speed_fast)
+                    else -> getString(R.string.summary_speed_very_fast)
+                }
             }
             val sunSize = configManager.getCombinedSunSize()
             val moonSize = configManager.getCombinedMoonSize()

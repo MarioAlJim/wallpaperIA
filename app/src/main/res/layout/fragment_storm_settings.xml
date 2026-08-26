@@ -10,8 +10,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp">
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:clipToPadding="false">
 
         <!-- Card: Tormenta Variable -->
         <com.google.android.material.card.MaterialCardView
@@ -30,22 +33,32 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
-                <ImageView
-                    android:id="@+id/iconStormVariable"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:src="@drawable/ic_lightning"
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/badgeStormVariable"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp"
+                    app:cardBackgroundColor="#E8F5E9"
                     android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    app:tint="#4CAF50" />
+                    android:layout_centerVertical="true">
+                    <ImageView
+                        android:id="@+id/iconStormVariable"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_lightning"
+                        app:tint="#4CAF50" />
+                </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:layout_toEndOf="@id/iconStormVariable"
+                    android:layout_toEndOf="@id/badgeStormVariable"
                     android:layout_toStartOf="@+id/switchStormVariable"
-                    android:layout_marginStart="16dp"
+                    android:layout_marginStart="12dp"
                     android:layout_centerVertical="true">
 
                     <TextView
@@ -53,7 +66,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/storm_tormenta_variable_ciclos"
                         android:textColor="@color/settings_text_primary"
-                        android:textSize="16sp"
+                        android:textSize="15sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -61,7 +74,7 @@
                         android:layout_height="wrap_content"
                         android:text="@string/storm_alterna_ciclos_de_calma_y_rfagas_de"
                         android:textColor="@color/settings_text_secondary"
-                        android:textSize="12sp"
+                        android:textSize="11sp"
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
@@ -101,22 +114,32 @@
                     android:clickable="true"
                     android:focusable="true">
 
-                    <ImageView
-                        android:id="@+id/iconCloudsWind"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_cloud"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeCloudsWind"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#F3E5F5"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#8A2BE2" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconCloudsWind"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_cloud"
+                            app:tint="#8A2BE2" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconCloudsWind"
+                        android:layout_toEndOf="@id/badgeCloudsWind"
                         android:layout_toStartOf="@id/arrowCloudsWind"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -124,7 +147,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_nubes_y_viento"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -133,7 +156,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
@@ -453,22 +476,32 @@
                     android:clickable="true"
                     android:focusable="true">
 
-                    <ImageView
-                        android:id="@+id/iconRain"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_rain"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeRain"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#E0F7FA"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#1E90FF" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconRain"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_rain"
+                            app:tint="#1E90FF" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconRain"
+                        android:layout_toEndOf="@id/badgeRain"
                         android:layout_toStartOf="@id/arrowRain"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -476,7 +509,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_lluvia"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -485,7 +518,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
@@ -786,22 +819,32 @@
                     android:clickable="true"
                     android:focusable="true">
 
-                    <ImageView
-                        android:id="@+id/iconLightning"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_lightning"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeLightning"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#FFFDE7"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#FFD700" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconLightning"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_lightning"
+                            app:tint="#FFD700" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconLightning"
+                        android:layout_toEndOf="@id/badgeLightning"
                         android:layout_toStartOf="@id/arrowLightning"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -809,7 +852,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_rayos_y_tormenta"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -818,7 +861,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
@@ -1233,22 +1276,32 @@
                     android:clickable="true"
                     android:focusable="true">
 
-                    <ImageView
-                        android:id="@+id/iconBackground"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_background"
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeBackground"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#FBE9E7"
                         android:layout_alignParentStart="true"
-                        android:layout_centerVertical="true"
-                        app:tint="#00FF7F" />
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconBackground"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_background"
+                            app:tint="#FF4500" />
+                    </com.google.android.material.card.MaterialCardView>
 
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:layout_toEndOf="@id/iconBackground"
+                        android:layout_toEndOf="@id/badgeBackground"
                         android:layout_toStartOf="@id/arrowBackground"
-                        android:layout_marginStart="16dp"
+                        android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
                         <TextView
@@ -1256,7 +1309,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_fondo"
                             android:textColor="@color/settings_text_primary"
-                            android:textSize="18sp"
+                            android:textSize="15sp"
                             android:textStyle="bold" />
 
                         <TextView
@@ -1265,7 +1318,7 @@
                             android:layout_height="wrap_content"
                             android:text="@string/storm_cargando"
                             android:textColor="@color/settings_text_secondary"
-                            android:textSize="12sp"
+                            android:textSize="11sp"
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 

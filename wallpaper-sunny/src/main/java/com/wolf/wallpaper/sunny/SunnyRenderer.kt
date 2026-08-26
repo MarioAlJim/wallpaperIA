@@ -173,19 +173,19 @@ class SunnyRenderer(
     private var constellationLinesProgram = 0
     private var constLinesOffsetHandle = -1
     private var constLinesColorHandle = -1
-    private var linePositionArray = FloatArray(30 * 4)
+    private var linePositionArray = FloatArray(MAX_CONSTELLATION_LINES * 4)
     private lateinit var linePositionBuffer: FloatBuffer
 
-    private val constellationLines = listOf(
-        // Osa Mayor
-        Pair(0, 1), Pair(1, 2), Pair(2, 3), Pair(3, 6), Pair(6, 5), Pair(5, 4), Pair(4, 3),
-        // Casiopea
-        Pair(7, 8), Pair(8, 9), Pair(9, 10), Pair(10, 11),
-        // Orión
-        Pair(12, 13), Pair(12, 14), Pair(13, 16), Pair(14, 15), Pair(15, 16), Pair(14, 17), Pair(16, 18),
-        // Cruz del Sur
-        Pair(19, 20), Pair(21, 22)
-    )
+    /**
+     * One procedurally-generated "connect-the-dots" constellation: [starStartIndex] is where
+     * its reserved block of stars begins in the shared `stars` list (see CONSTELLATION_COUNT /
+     * CONSTELLATION_MAX_STARS below), [starCount] is how many of that block's slots hold a real
+     * star tonight, and [connections] are LOCAL index pairs (0 until starCount) describing which
+     * of those stars are joined by a guide line.
+     */
+    private class ProceduralConstellation(val starStartIndex: Int, var starCount: Int = 0) {
+        val connections = mutableListOf<Pair<Int, Int>>()
+    }
 
     // Dandelion seeds state and buffers
     private class DandelionSeed(
@@ -234,9 +234,16 @@ class SunnyRenderer(
     // (a value generated once per install and persisted) instead of the unseeded global
     // Random, so each user's sky layout is stable and different from everyone else's rather
     // than everyone seeing the same arrangement.
-    private val constellationOffsetsX = FloatArray(4)
-    private val constellationOffsetsY = FloatArray(4)
-    private val constellationActive = BooleanArray(4) { true }
+    //
+    // Shapes themselves are generated procedurally (see generateConstellationShape) instead of
+    // coming from a fixed catalog of real constellations, so no two nights ever show the exact
+    // same silhouette. CONSTELLATION_MAX_STARS reserves the worst-case block size per
+    // constellation in the shared `stars` list; a given night may only fill part of that block
+    // (see ProceduralConstellation.starCount), with the rest left fully invisible.
+    private val constellationActive = BooleanArray(CONSTELLATION_COUNT) { true }
+    private val constellationStarX = FloatArray(CONSTELLATION_STAR_SLOTS)
+    private val constellationStarY = FloatArray(CONSTELLATION_STAR_SLOTS)
+    private val proceduralConstellations = MutableList(CONSTELLATION_COUNT) { ProceduralConstellation(it * CONSTELLATION_MAX_STARS) }
     private val constellationRandom: kotlin.random.Random by lazy { kotlin.random.Random(configProvider.getConstellationSeed()) }
     private var wasCombinedNight = false
 
@@ -302,7 +309,11 @@ class SunnyRenderer(
         var life: Float = 0f,
         var maxLife: Float = 0f,
         var isConstellation: Boolean = false,
-        var constIndex: Int = -1
+        var constIndex: Int = -1,
+        // True for the rare "giant star" a procedurally-generated constellation may roll (see
+        // randomizeConstellations) - gets a warm orange tint instead of the usual blue-white,
+        // similar to how a real sky has the occasional red giant like Betelgeuse.
+        var isGiant: Boolean = false
     )
 
     private val stars = mutableListOf<Star>()
@@ -792,8 +803,8 @@ class SunnyRenderer(
             e.printStackTrace()
         }
 
-        // Initialize constellation line position FloatBuffer (max 30 lines, 60 vertices)
-        linePositionBuffer = ByteBuffer.allocateDirect(30 * 4 * 4)
+        // Initialize constellation line position FloatBuffer (max MAX_CONSTELLATION_LINES lines)
+        linePositionBuffer = ByteBuffer.allocateDirect(MAX_CONSTELLATION_LINES * 4 * 4)
             .order(ByteOrder.nativeOrder())
             .asFloatBuffer()
 
@@ -1542,59 +1553,115 @@ class SunnyRenderer(
         }
     }
 
+    /**
+     * Re-rolls every constellation from scratch: which ones are visible tonight, and - via
+     * generateConstellationShape() - an entirely new procedural silhouette and star count for
+     * each, so the sky never repeats the same recognizable shape from one night to the next.
+     */
     private fun randomizeConstellations() {
         val rand = constellationRandom
-        
+
         var anyActive = false
-        for (i in 0..3) {
+        for (i in 0 until CONSTELLATION_COUNT) {
             constellationActive[i] = rand.nextFloat() < 0.75f
             if (constellationActive[i]) anyActive = true
         }
         if (!anyActive) {
-            constellationActive[rand.nextInt(4)] = true
+            constellationActive[rand.nextInt(CONSTELLATION_COUNT)] = true
         }
 
-        // Ursa Major
-        constellationOffsetsX[0] = rand.nextFloat() * 0.3f - 0.15f
-        constellationOffsetsY[0] = rand.nextFloat() * 0.2f - 0.1f
+        if (stars.size < CONSTELLATION_STAR_SLOTS) return
 
-        // Cassiopeia
-        constellationOffsetsX[1] = rand.nextFloat() * 0.3f - 0.2f
-        constellationOffsetsY[1] = rand.nextFloat() * 0.2f - 0.1f
+        // One roughly-separate horizontal sector per constellation (plus jitter for its exact
+        // center within that sector) so they don't constantly pile on top of each other, while
+        // the shape itself is generated fresh every time regardless of where it lands.
+        val sectorWidth = 2f / CONSTELLATION_COUNT
+        for (i in 0 until CONSTELLATION_COUNT) {
+            val sectorCenterX = -1f + sectorWidth * (i + 0.5f)
+            val centerX = sectorCenterX + (rand.nextFloat() * 2f - 1f) * sectorWidth * 0.3f
+            val centerY = 0.2f + rand.nextFloat() * 0.55f
 
-        // Orion
-        constellationOffsetsX[2] = rand.nextFloat() * 0.3f - 0.15f
-        constellationOffsetsY[2] = rand.nextFloat() * 0.15f - 0.07f
+            val (worldPoints, connections) = generateConstellationShape(rand, centerX, centerY)
+            val starCount = worldPoints.size
+            // ~40% chance one star in the shape is a warm "giant" - never guaranteed, so not
+            // every constellation looks the same in that respect either.
+            val giantLocalIndex = if (rand.nextFloat() < 0.4f) rand.nextInt(starCount) else -1
 
-        // Southern Cross
-        constellationOffsetsX[3] = rand.nextFloat() * 0.2f - 0.1f
-        constellationOffsetsY[3] = rand.nextFloat() * 0.1f - 0.05f
+            val constellation = proceduralConstellations[i]
+            constellation.starCount = starCount
+            constellation.connections.clear()
+            constellation.connections.addAll(connections)
 
-        if (stars.size >= 24) {
-            for (i in 0 until 24) {
-                val star = stars[i]
-                val cIdx = when (i) {
-                    in 0..6 -> 0
-                    in 7..11 -> 1
-                    in 12..18 -> 2
-                    else -> 3
-                }
-                
-                val baseTarget = when (cIdx) {
-                    0 -> 0.8f
-                    1 -> 0.85f
-                    2 -> 0.9f
-                    else -> 0.85f
-                }
-                star.targetAlpha = if (constellationActive[cIdx]) baseTarget else 0f
-                
-                val coords = getConstellationStarCoords(star.constIndex)
-                if (coords != null) {
-                    star.x = coords.first
-                    star.y = coords.second
+            for (localIdx in 0 until CONSTELLATION_MAX_STARS) {
+                val globalIdx = i * CONSTELLATION_MAX_STARS + localIdx
+                val star = stars.getOrNull(globalIdx) ?: continue
+
+                if (localIdx < starCount) {
+                    val (px, py) = worldPoints[localIdx]
+                    star.x = px
+                    star.y = py
+                    constellationStarX[globalIdx] = px
+                    constellationStarY[globalIdx] = py
+                    star.size = 9f + rand.nextFloat() * 7f
+                    star.twinkleSpeed = 0.6f + rand.nextFloat() * 0.6f
+                    star.isGiant = localIdx == giantLocalIndex
+                    star.targetAlpha = if (constellationActive[i]) 0.75f + rand.nextFloat() * 0.2f else 0f
+                    if (star.isGiant) {
+                        star.r = 1.0f; star.g = 0.62f; star.b = 0.42f
+                    } else {
+                        star.r = 0.9f; star.g = 0.95f; star.b = 1.0f
+                    }
+                } else {
+                    // This constellation rolled fewer stars than the reserved block size
+                    // tonight - the leftover slots stay fully invisible and unconnected.
+                    star.targetAlpha = 0f
+                    star.isGiant = false
+                    val (lastX, lastY) = worldPoints.last()
+                    constellationStarX[globalIdx] = lastX
+                    constellationStarY[globalIdx] = lastY
                 }
             }
         }
+    }
+
+    /**
+     * Procedurally builds one organic "connect-the-dots" constellation: a random walk of star
+     * positions (each a plausible short distance from the last, in a random direction) so it's
+     * never a copy of a real constellation, plus an occasional extra branch back to an earlier
+     * star so the silhouette forks - like Orion's shoulders/belt/legs - instead of reading as a
+     * single zigzag line. Returns star positions in world (NDC) space, already centered on
+     * (centerX, centerY), and connections as pairs of LOCAL indices into that position list.
+     */
+    private fun generateConstellationShape(
+        rand: kotlin.random.Random,
+        centerX: Float,
+        centerY: Float
+    ): Pair<List<Pair<Float, Float>>, List<Pair<Int, Int>>> {
+        val starCount = CONSTELLATION_MIN_STARS + rand.nextInt(CONSTELLATION_MAX_STARS - CONSTELLATION_MIN_STARS + 1)
+        val localPoints = mutableListOf(0f to 0f)
+        val connections = mutableListOf<Pair<Int, Int>>()
+
+        for (i in 1 until starCount) {
+            val (prevX, prevY) = localPoints[i - 1]
+            val angle = rand.nextFloat() * (2f * Math.PI.toFloat())
+            val dist = 0.07f + rand.nextFloat() * 0.09f
+            val nx = (prevX + kotlin.math.cos(angle) * dist).coerceIn(-0.30f, 0.30f)
+            val ny = (prevY + kotlin.math.sin(angle) * dist).coerceIn(-0.20f, 0.20f)
+            localPoints.add(nx to ny)
+            connections.add((i - 1) to i)
+
+            // From the 3rd star onward, ~30% chance of an extra branch to an earlier star
+            // instead of only ever chaining forward.
+            if (i >= 3 && rand.nextFloat() < 0.3f) {
+                val branchTarget = rand.nextInt(i - 1)
+                connections.add(branchTarget to i)
+            }
+        }
+
+        val centroidX = localPoints.sumOf { it.first.toDouble() }.toFloat() / localPoints.size
+        val centroidY = localPoints.sumOf { it.second.toDouble() }.toFloat() / localPoints.size
+        val worldPoints = localPoints.map { (x, y) -> (x - centroidX + centerX) to (y - centroidY + centerY) }
+        return worldPoints to connections
     }
 
     /**
@@ -2022,6 +2089,7 @@ class SunnyRenderer(
 
         val bgIndex = configProvider.getSunnyBackgroundIndex()
         drawBackground(bgIndex, intensity)
+        drawParticles(0f, intensity)
         drawFireflies(intensity) // Draw fireflies in front of background
         drawMoonLensFlare(intensity)
     }
@@ -2068,9 +2136,11 @@ class SunnyRenderer(
             drawFireflies(nightIntensity)
         }
 
-        // 5. Efectos Especiales de Día
+        // 5. Efectos Especiales
+        if (dayIntensity > 0.01f || nightIntensity > 0.01f) {
+            drawParticles(dayIntensity, nightIntensity)
+        }
         if (dayIntensity > 0.01f) {
-            drawParticles(dayIntensity)
             drawDandelionSeeds(dayIntensity)
             drawLensFlare(dayIntensity)
         }
@@ -2081,6 +2151,12 @@ class SunnyRenderer(
 
     private fun drawStars(intensity: Float) {
         if (starsProgram == 0) return
+        // NOTE: We do NOT draw the fullscreen background quad here anymore because it draws
+        // a solid night sky color that completely overwrites the sky rendered by drawDaySky (sunny.frag).
+        // The day/night sky transition and the nebula are already rendered in sunny.frag.
+        // Drawing it here was hiding the nebula mode during the night except for a brief moment
+        // during transitions when the quad was semi-transparent.
+        /*
         GLES30.glUseProgram(starsProgram)
         GLES30.glUniform1f(starsIntensityHandle, intensity)
 
@@ -2089,6 +2165,7 @@ class SunnyRenderer(
         GLES30.glEnableVertexAttribArray(0)
         GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
         GLES30.glDisableVertexAttribArray(0)
+        */
 
         // Draw star points
         if (starPointsProgram == 0 || stars.isEmpty()) return
@@ -2180,27 +2257,26 @@ class SunnyRenderer(
     }
 
     private fun drawConstellationLines(intensity: Float) {
-        if (constellationLinesProgram == 0 || stars.size < 24) return
+        if (constellationLinesProgram == 0 || stars.size < CONSTELLATION_STAR_SLOTS) return
 
         var index = 0
-        for (pair in constellationLines) {
-            val cIdx = when (pair.first) {
-                in 0..6 -> 0
-                in 7..11 -> 1
-                in 12..18 -> 2
-                else -> 3
-            }
+        for (cIdx in 0 until CONSTELLATION_COUNT) {
             if (!constellationActive[cIdx]) continue
+            val constellation = proceduralConstellations[cIdx]
+            val base = constellation.starStartIndex
 
-            val starA = stars.getOrNull(pair.first) ?: continue
-            val starB = stars.getOrNull(pair.second) ?: continue
+            for (pair in constellation.connections) {
+                if (index >= MAX_CONSTELLATION_LINES) break
+                val starA = stars.getOrNull(base + pair.first) ?: continue
+                val starB = stars.getOrNull(base + pair.second) ?: continue
 
-            if (starA.alpha > 0.01f && starB.alpha > 0.01f) {
-                linePositionArray[index * 4] = starA.x
-                linePositionArray[index * 4 + 1] = starA.y
-                linePositionArray[index * 4 + 2] = starB.x
-                linePositionArray[index * 4 + 3] = starB.y
-                index++
+                if (starA.alpha > 0.01f && starB.alpha > 0.01f) {
+                    linePositionArray[index * 4] = starA.x
+                    linePositionArray[index * 4 + 1] = starA.y
+                    linePositionArray[index * 4 + 2] = starB.x
+                    linePositionArray[index * 4 + 3] = starB.y
+                    index++
+                }
             }
         }
 
@@ -2451,7 +2527,7 @@ class SunnyRenderer(
         drawInstancedClouds(cloudInstanceBuffer, count)
     }
 
-    private fun drawParticles(intensity: Float = 1f) {
+    private fun drawParticles(dayIntensity: Float, nightIntensity: Float = 0f) {
         if (particles.isEmpty() || particleProgram == 0) return
 
         GLES30.glUseProgram(particleProgram)
@@ -2478,7 +2554,9 @@ class SunnyRenderer(
             particleInstanceBuffer.put(p.r)
             particleInstanceBuffer.put(p.g)
             particleInstanceBuffer.put(p.b)
-            particleInstanceBuffer.put(p.alpha * intensity)
+            // Modulate alpha based on whether it is a day particle (gravity == 0) or night particle (gravity > 0)
+            val pIntensity = if (p.gravity > 0f) nightIntensity else dayIntensity
+            particleInstanceBuffer.put(p.alpha * pIntensity)
         }
         particleInstanceBuffer.position(0)
 
@@ -2870,9 +2948,13 @@ class SunnyRenderer(
 
     private fun adjustStars(density: Int) {
         val targetCount = (density * 2.5f).toInt().coerceIn(0, 300)
-        
+
         if (targetCount > 0 && stars.isEmpty()) {
             stars.addAll(initializeConstellationStars())
+            // The reserved constellation block now has real Star objects to write into, so
+            // generate tonight's shapes immediately instead of waiting for the next day->night
+            // transition (which may be a while away, or - in pure Night mode - never happen).
+            randomizeConstellations()
         }
 
         if (stars.size < targetCount) {
@@ -2881,7 +2963,7 @@ class SunnyRenderer(
                 stars.add(createRandomStar())
             }
         } else if (stars.size > targetCount) {
-            val keepConstellations = if (targetCount < 24) 24 else targetCount
+            val keepConstellations = if (targetCount < CONSTELLATION_STAR_SLOTS) CONSTELLATION_STAR_SLOTS else targetCount
             while (stars.size > keepConstellations) {
                 stars.removeAt(stars.size - 1)
             }
@@ -2945,10 +3027,10 @@ class SunnyRenderer(
                 star.g = g
                 star.b = b
             } else {
-                if (star.constIndex == 12) { // Betelgeuse
+                if (star.isGiant) {
                     star.r = 1.0f
-                    star.g = 0.6f
-                    star.b = 0.4f
+                    star.g = 0.62f
+                    star.b = 0.42f
                 } else {
                     star.r = 0.9f
                     star.g = 0.95f
@@ -2958,88 +3040,25 @@ class SunnyRenderer(
         }
     }
 
+    /**
+     * Reserves CONSTELLATION_STAR_SLOTS blank star slots for the procedural constellations
+     * (see randomizeConstellations/generateConstellationShape), which fill in real positions,
+     * sizes and colors right after this is called. Placeholder values here just need to be
+     * invisible (targetAlpha = 0) until that happens.
+     */
     private fun initializeConstellationStars(): List<Star> {
-        val list = mutableListOf<Star>()
-        
-        // 1. Osa Mayor
-        val umX = floatArrayOf(-0.7f, -0.6f, -0.5f, -0.45f, -0.55f, -0.7f, -0.75f)
-        val umY = floatArrayOf(0.7f, 0.72f, 0.75f, 0.65f, 0.53f, 0.5f, 0.62f)
-        val umSizes = floatArrayOf(12f, 10f, 11f, 13f, 10f, 11f, 9f)
-        for (i in 0 until 7) {
-            list.add(Star(
-                x = umX[i], y = umY[i], size = umSizes[i], alpha = 0f, targetAlpha = 0.8f,
-                twinkleSpeed = 0.8f + kotlin.random.Random.nextFloat() * 0.4f,
-                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = i
-            ))
+        return (0 until CONSTELLATION_STAR_SLOTS).map { i ->
+            Star(
+                x = 0f, y = 0f, size = 10f, alpha = 0f, targetAlpha = 0f,
+                twinkleSpeed = 1f, r = 0.9f, g = 0.95f, b = 1.0f,
+                isConstellation = true, constIndex = i
+            )
         }
-
-        // 2. Casiopea
-        val casX = floatArrayOf(0.4f, 0.48f, 0.55f, 0.63f, 0.7f)
-        val casY = floatArrayOf(0.7f, 0.6f, 0.68f, 0.58f, 0.72f)
-        val casSizes = floatArrayOf(12f, 11f, 13f, 11f, 12f)
-        for (i in 0 until 5) {
-            list.add(Star(
-                x = casX[i], y = casY[i], size = casSizes[i], alpha = 0f, targetAlpha = 0.85f,
-                twinkleSpeed = 0.7f + kotlin.random.Random.nextFloat() * 0.5f,
-                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = 7 + i
-            ))
-        }
-
-        // 3. Orión
-        val oriX = floatArrayOf(0.0f, 0.22f, 0.07f, 0.11f, 0.15f, 0.02f, 0.18f)
-        val oriY = floatArrayOf(0.6f, 0.57f, 0.44f, 0.43f, 0.42f, 0.28f, 0.26f)
-        val oriSizes = floatArrayOf(15f, 11f, 11f, 10f, 11f, 12f, 16f)
-        for (i in 0 until 7) {
-            val r = if (i == 0) 1.0f else 0.9f
-            val g = if (i == 0) 0.6f else 0.95f
-            val b = if (i == 0) 0.4f else 1.0f
-            list.add(Star(
-                x = oriX[i], y = oriY[i], size = oriSizes[i], alpha = 0f, targetAlpha = 0.9f,
-                twinkleSpeed = 0.6f + kotlin.random.Random.nextFloat() * 0.6f,
-                r = r, g = g, b = b, isConstellation = true, constIndex = 12 + i
-            ))
-        }
-
-        // 4. Cruz del Sur
-        val cruX = floatArrayOf(0.6f, 0.6f, 0.53f, 0.67f, 0.63f)
-        val cruY = floatArrayOf(0.35f, 0.15f, 0.26f, 0.24f, 0.20f)
-        val cruSizes = floatArrayOf(13f, 14f, 12f, 11f, 8f)
-        for (i in 0 until 5) {
-            list.add(Star(
-                x = cruX[i], y = cruY[i], size = cruSizes[i], alpha = 0f, targetAlpha = 0.85f,
-                twinkleSpeed = 0.8f + kotlin.random.Random.nextFloat() * 0.4f,
-                r = 0.9f, g = 0.95f, b = 1.0f, isConstellation = true, constIndex = 19 + i
-            ))
-        }
-
-        return list
     }
 
     private fun getConstellationStarCoords(index: Int): Pair<Float, Float>? {
-        if (index in 0..6) {
-            val umX = floatArrayOf(-0.7f, -0.6f, -0.5f, -0.45f, -0.55f, -0.7f, -0.75f)
-            val umY = floatArrayOf(0.7f, 0.72f, 0.75f, 0.65f, 0.53f, 0.5f, 0.62f)
-            return Pair(umX[index] + constellationOffsetsX[0], umY[index] + constellationOffsetsY[0])
-        }
-        if (index in 7..11) {
-            val i = index - 7
-            val casX = floatArrayOf(0.4f, 0.48f, 0.55f, 0.63f, 0.7f)
-            val casY = floatArrayOf(0.7f, 0.6f, 0.68f, 0.58f, 0.72f)
-            return Pair(casX[i] + constellationOffsetsX[1], casY[i] + constellationOffsetsY[1])
-        }
-        if (index in 12..18) {
-            val i = index - 12
-            val oriX = floatArrayOf(0.0f, 0.22f, 0.07f, 0.11f, 0.15f, 0.02f, 0.18f)
-            val oriY = floatArrayOf(0.6f, 0.57f, 0.44f, 0.43f, 0.42f, 0.28f, 0.26f)
-            return Pair(oriX[i] + constellationOffsetsX[2], oriY[i] + constellationOffsetsY[2])
-        }
-        if (index in 19..23) {
-            val i = index - 19
-            val cruX = floatArrayOf(0.6f, 0.6f, 0.53f, 0.67f, 0.63f)
-            val cruY = floatArrayOf(0.35f, 0.15f, 0.26f, 0.24f, 0.20f)
-            return Pair(cruX[i] + constellationOffsetsX[3], cruY[i] + constellationOffsetsY[3])
-        }
-        return null
+        if (index !in 0 until CONSTELLATION_STAR_SLOTS) return null
+        return Pair(constellationStarX[index], constellationStarY[index])
     }
 
     private fun getStarColorRGB(colorIndex: Int): Triple<Float, Float, Float> {
@@ -3548,5 +3567,17 @@ class SunnyRenderer(
         private const val kShootingStarTrailMinLife = 0.35f
         private const val kShootingStarTrailLifeRange = 0.45f
         private const val kShootingStarTrailGravity = 0.55f // simulated gravity (units/sec^2), trail particles only
+
+        // --- Procedural constellations (effect: connect-the-dots shapes generated fresh each
+        // night instead of coming from a fixed catalog) ---
+        // How many can share the sky at once, and how large a star reserve each one gets (see
+        // ProceduralConstellation / generateConstellationShape).
+        const val CONSTELLATION_COUNT = 4
+        const val CONSTELLATION_MIN_STARS = 5
+        const val CONSTELLATION_MAX_STARS = 9
+        const val CONSTELLATION_STAR_SLOTS = CONSTELLATION_COUNT * CONSTELLATION_MAX_STARS
+        // Worst case per constellation: (MAX_STARS - 1) chain links plus one branch for every
+        // star from the 3rd onward, times CONSTELLATION_COUNT - rounded up with headroom.
+        const val MAX_CONSTELLATION_LINES = CONSTELLATION_COUNT * (CONSTELLATION_MAX_STARS - 1 + CONSTELLATION_MAX_STARS - 2)
     }
 }

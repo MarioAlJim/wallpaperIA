@@ -165,8 +165,11 @@
     <string name="sunny_clido">Warm</string>
     <string name="sunny_color_de_estrellas">Star Color</string>
     <string name="sunny_colores_del_degradado">Gradient Colors</string>
-    <string name="sunny_combinado">Combined</string>
+    <string name="sunny_combinado">Automatic</string>
     <string name="sunny_reloj_tiempo_real">Clock</string>
+    <string name="sunny_modo_reloj_switch">Clock Mode</string>
+    <string name="sunny_modo_reloj_switch_desc">Synchronize the sky and lighting with the real time of your device.</string>
+    <string name="sunny_modo_reloj_summary_text">Real-time</string>
     <string name="sunny_configuracin_de_luna_y_estrellas">Moon and Stars Configuration</string>
     <string name="sunny_configuracin_de_transicin">Transition Configuration</string>
     <string name="sunny_configuracin_del_sol">Sun Configuration</string>
