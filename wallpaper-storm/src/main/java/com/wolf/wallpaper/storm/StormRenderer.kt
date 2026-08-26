@@ -490,11 +490,11 @@ class StormRenderer(
             drawWindLines(sceneManager.getWindLines())
         }
         sceneManager.sortCloudsByDepth()
-        drawClouds(sceneManager.getClouds(), sceneManager.lightnings, lightningFlashEnabled, cloudFlashEnabled)
+        drawClouds(sceneManager.getClouds(), stormFlash)
         drawRain(edgeRainBuffer, sceneManager.getRainColorIndex())
     }
 
-    private fun drawClouds(clouds: List<StormCloud>, lightnings: List<Lightning>, lightningFlashEnabled: Boolean, cloudFlashEnabled: Boolean) {
+    private fun drawClouds(clouds: List<StormCloud>, globalLightningFlash: LightningFlashAggregate) {
         if (clouds.isEmpty()) return
 
         GLES30.glUseProgram(cloudProgram)
@@ -506,11 +506,6 @@ class StormRenderer(
         val cloudColorHandle = cloudCloudColorHandle
         val heightFactorHandle = cloudHeightFactorHandle
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
-
-        // Clouds react to global real lightnings (not internalOnly)
-        val globalLightningFlash = aggregateLightningFlash(lightnings) { lightning ->
-            lightning.isActive && !lightning.isInternalOnly && lightningFlashEnabled
-        }
 
         // Bind additional uniforms for refraction and dark god rays
         val timeHandle = cloudTimeHandle
@@ -566,6 +561,8 @@ class StormRenderer(
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
 
         // Already sorted by depth in place by SceneManager.sortCloudsByDepth()
+        var lastBoundTexture = -1
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
         for (cloud in clouds) {
             val finalIntensity = (globalLightningFlash.maxIntensity + cloud.flashIntensity).coerceIn(0f, 1.5f)
             val finalR: Float
@@ -583,9 +580,12 @@ class StormRenderer(
             GLES30.glUniform1f(flashIntensityHandle, finalIntensity)
             GLES30.glUniform3f(flashColorHandle, finalR, finalG, finalB)
 
-            GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
             if (cloudTextures.isNotEmpty()) {
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, cloudTextures[cloud.textureIndex % cloudTextures.size])
+                val tex = cloudTextures[cloud.textureIndex % cloudTextures.size]
+                if (tex != lastBoundTexture) {
+                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tex)
+                    lastBoundTexture = tex
+                }
             }
             GLES30.glUniform2f(cloudScaleHandle, cloud.scale * 2.4f, cloud.scale)
 
@@ -612,8 +612,7 @@ class StormRenderer(
 
             GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
             
-            // Restore original cloud color shading, height factor, and opacity
-            GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
+            // Restore height factor and opacity (uCloudColor is always 0.7,0.7,0.7 set once outside the loop)
             val heightFactor = ((cloud.z - 0.3f) / 0.7f).coerceIn(0f, 1f)
             GLES30.glUniform1f(heightFactorHandle, heightFactor)
             GLES30.glUniform1f(opacityHandle, cloud.opacity)
@@ -903,6 +902,8 @@ class StormRenderer(
 
         // 2. Draw textured lightning bolt for each active lightning
         GLES30.glUniform1i(isTexturedHandle, 1)
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
+        GLES30.glUniform1i(textureHandle, 0)
 
         // Bind position coordinates (location 0)
         lightningQuadBuffer.position(0)
@@ -918,6 +919,7 @@ class StormRenderer(
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
         val maxSwipeShift = aspectRatio * 0.3f
 
+        var lastBoundTexture = -1
         for (lightning in activeLightnings) {
             if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
                 GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
@@ -954,9 +956,11 @@ class StormRenderer(
                 Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
                 GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
-                GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
-                GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, lightningTextures[lightning.selectedTextureIndex])
-                GLES30.glUniform1i(textureHandle, 0)
+                val tex = lightningTextures[lightning.selectedTextureIndex]
+                if (tex != lastBoundTexture) {
+                    GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tex)
+                    lastBoundTexture = tex
+                }
 
                 GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4)
             }

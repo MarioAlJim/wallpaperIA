@@ -866,7 +866,7 @@ class StormSettingsFragment : Fragment() {
                     if (count > 0) {
                         drawStylizedClouds(canvas, w, h, count)
                     } else {
-                        paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+                        paint.color = ContextCompat.getColor(context, R.color.settings_text_secondary)
                         paint.style = Paint.Style.STROKE
                         paint.strokeWidth = 1.dpToPx().toFloat()
                         canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
@@ -1142,7 +1142,7 @@ class StormSettingsFragment : Fragment() {
                     paint.style = Paint.Style.STROKE
                     paint.strokeCap = Paint.Cap.ROUND
                     if (optionIndex == 0) {
-                        paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+                        paint.color = ContextCompat.getColor(context, R.color.settings_text_secondary)
                         paint.strokeWidth = 1.dpToPx().toFloat()
                         canvas.drawCircle(w * 0.5f, h * 0.5f, 10.dpToPx().toFloat(), paint)
                     } else {
@@ -1328,7 +1328,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         private fun drawCloudShape(canvas: Canvas, w: Float, h: Float) {
-            paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+            paint.color = ContextCompat.getColor(context, R.color.settings_text_secondary)
             paint.style = Paint.Style.FILL
             
             canvas.drawCircle(w * 0.35f, 10.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
@@ -1349,7 +1349,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         private fun drawStylizedClouds(canvas: Canvas, w: Float, h: Float, count: Int) {
-            paint.color = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+            paint.color = ContextCompat.getColor(context, R.color.settings_text_secondary)
             paint.style = Paint.Style.FILL
             
             val random = java.util.Random(count * 100L)

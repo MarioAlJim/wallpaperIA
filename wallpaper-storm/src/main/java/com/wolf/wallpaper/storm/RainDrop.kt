@@ -35,6 +35,7 @@ class RainDrop(
     var spawnY: Float = 1.05f
     var spawnFromCloud: Boolean = false
     var parentCloud: StormCloud? = null
+    var dirRatio: Float = 0f
     private var baseSpeed: Float = 0f
     private var angleOffset: Float = 0f
 
@@ -77,18 +78,16 @@ class RainDrop(
         velocityY = -speed * cosA
         velocityX = speed * sinA
         
-        // dirLength mathematically equals speed. Since speed is positive (baseSpeed > 0),
-        // we can cancel out speed in velocityX/dirLength and velocityY/dirLength,
-        // avoiding a sqrt() and division calculations on every raindrop.
         dirX = sinA
         dirY = -cosA
+        dirRatio = if (dirY != 0f) dirX / dirY else 0f
     }
 
     fun getProjectedX(): Float {
         if (dirY == 0f) return spawnX
         val refX = if (positionY > 100f) spawnX else positionX
         val refY = if (positionY > 100f) spawnY else positionY
-        return refX + (1.05f - refY) * (dirX / dirY)
+        return refX + (1.05f - refY) * dirRatio
     }
 
     fun reset(aspectRatio: Float, windAngle: Float, rainSpeed: Float, startOnScreen: Boolean = false, spawnCloud: StormCloud? = null, allowFallbackToEdge: Boolean = true, existingProjectedX: FloatArray = FloatArray(0), activeCount: Int = 0) {
@@ -124,7 +123,7 @@ class RainDrop(
             
             // Project candidate X to reference Y = 1.05f
             val candidateProjectedX = if (dirY != 0f) {
-                candidateX + (1.05f - candidateSpawnY) * (dirX / dirY)
+                candidateX + (1.05f - candidateSpawnY) * dirRatio
             } else {
                 candidateX
             }
@@ -164,7 +163,7 @@ class RainDrop(
             positionX = spawnX
             if (dirY != 0f) {
                 val distanceFallen = spawnY - positionY
-                positionX -= distanceFallen * (dirX / dirY)
+                positionX -= distanceFallen * dirRatio
             }
         } else {
             spawnDelay = Random.nextFloat() * 3.0f // up to 3 seconds delay for better distribution
@@ -197,7 +196,7 @@ class RainDrop(
         }
         
         // Calculate horizontal travel based on the ratio dirX / dirY (dirY is negative)
-        val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirX / dirY) else 0f
+        val absHorizontalTravel = if (dirY != 0f) 2.1f * kotlin.math.abs(dirRatio) else 0f
         
         // Mitchell's Best-Candidate algorithm to find best spawnX to avoid overlapping paths
         var bestSpawnX = 0f
@@ -246,7 +245,7 @@ class RainDrop(
             // Adjust positionX based on current positionY to keep it in the diagonal flow
             if (dirY != 0f) {
                 val distanceFallen = 1.05f - positionY
-                positionX -= distanceFallen * (dirX / dirY)
+                positionX -= distanceFallen * dirRatio
             }
         } else {
             spawnDelay = Random.nextFloat() * 3.0f // up to 3 seconds delay for better distribution

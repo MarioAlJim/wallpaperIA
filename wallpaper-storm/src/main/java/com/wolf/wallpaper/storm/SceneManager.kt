@@ -264,9 +264,28 @@ class SceneManager(
                         else -> false
                     }
                     
-                    val activeClouds = clouds.filter { !it.isFadingOut }
-                    if (useCloud && activeClouds.isNotEmpty()) {
-                        val selectedCloud = activeClouds.random()
+                    var selectedCloud: StormCloud? = null
+                    if (useCloud) {
+                        var activeCount = 0
+                        for (c in clouds) {
+                            if (!c.isFadingOut) activeCount++
+                        }
+                        if (activeCount > 0) {
+                            val targetIndex = Random.nextInt(activeCount)
+                            var currentIndex = 0
+                            for (c in clouds) {
+                                if (!c.isFadingOut) {
+                                    if (currentIndex == targetIndex) {
+                                        selectedCloud = c
+                                        break
+                                    }
+                                    currentIndex++
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (selectedCloud != null) {
                         inactiveLightning.triggerFromCloud(
                             selectedCloud,
                             aspectRatio,
@@ -591,16 +610,26 @@ class SceneManager(
     }
 
     private fun getSpawnCloudForDrop(): StormCloud? {
-        val activeClouds = clouds.filter { !it.isFadingOut }
-        if (activeClouds.isEmpty()) return null
-        
         val mode = configProvider.getRainSpawnMode() // 0: Top Edge, 1: Clouds, 2: Everywhere
-        return when (mode) {
-            1 -> activeClouds.random()
-            2 -> {
-                if (Random.nextBoolean()) activeClouds.random() else null
-            }
-            else -> null
+        if (mode == 0) return null
+        if (mode == 2 && Random.nextBoolean()) return null
+        
+        var activeCount = 0
+        for (c in clouds) {
+            if (!c.isFadingOut) activeCount++
         }
+        if (activeCount == 0) return null
+        
+        val targetIndex = Random.nextInt(activeCount)
+        var currentIndex = 0
+        for (c in clouds) {
+            if (!c.isFadingOut) {
+                if (currentIndex == targetIndex) {
+                    return c
+                }
+                currentIndex++
+            }
+        }
+        return null
     }
 }
