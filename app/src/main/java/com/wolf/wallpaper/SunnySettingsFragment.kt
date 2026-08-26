@@ -61,7 +61,14 @@ class SunnySettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
-        // 1. Accordions removed (flat inline design)
+        // 1. Setup Accordions
+        SettingsAccordionHelper.setupAccordionGroup(
+            view,
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyEnvironment, R.id.contentSunnyEnvironment, R.id.dividerSunnyEnvironment, R.id.arrowSunnyEnvironment),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnySun, R.id.contentSunnySun, R.id.dividerSunnySun, R.id.arrowSunnySun),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyMoon, R.id.contentSunnyMoon, R.id.dividerSunnyMoon, R.id.arrowSunnyMoon),
+            SettingsAccordionHelper.AccordionSpec(R.id.headerSunnyCombined, R.id.contentSunnyCombined, R.id.dividerSunnyCombined, R.id.arrowSunnyCombined)
+        )
 
         // 2. Setup Cloud Density Cards (Sunny clouds)
         setupCloudDensityCards(view)

@@ -76,12 +76,16 @@ object SettingsCardSelectorHelper {
             }
         }
 
+        val hasPreview = previewFactory != null
+        val cardHeight = if (hasPreview) 92.px() else 40.px()
+        val cardWidth = if (hasPreview) 92.px() else LinearLayout.LayoutParams.WRAP_CONTENT
+
         for (i in options.indices) {
             val card = MaterialCardView(context).apply {
-                layoutParams = LinearLayout.LayoutParams(92.px(), 92.px()).apply {
+                layoutParams = LinearLayout.LayoutParams(cardWidth, cardHeight).apply {
                     setMargins(0, 0, 10.px(), 0)
                 }
-                radius = 12.px().toFloat()
+                radius = if (hasPreview) 12.px().toFloat() else 8.px().toFloat()
                 strokeWidth = 1.px()
                 strokeColor = strokeInactiveColor
                 cardElevation = 0f
@@ -94,42 +98,48 @@ object SettingsCardSelectorHelper {
                 layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER
-                setPadding(6.px(), 6.px(), 6.px(), 6.px())
+                if (hasPreview) {
+                    setPadding(6.px(), 6.px(), 6.px(), 6.px())
+                } else {
+                    setPadding(16.px(), 0, 16.px(), 0)
+                }
             }
 
-            val previewFrame = FrameLayout(context).apply {
-                layoutParams = LinearLayout.LayoutParams(38.px(), 50.px()).apply {
-                    setMargins(0, 0, 0, 4.px())
-                }
-                background = if (previewFrameBackgroundRes != 0) {
-                    ContextCompat.getDrawable(context, previewFrameBackgroundRes)
-                } else {
-                    GradientDrawable().apply {
-                        shape = GradientDrawable.RECTANGLE
-                        cornerRadius = 6 * density
-                        setColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt2))
-                        setStroke(1.px(), strokeInactiveColor)
+            if (hasPreview) {
+                val previewFrame = FrameLayout(context).apply {
+                    layoutParams = LinearLayout.LayoutParams(38.px(), 50.px()).apply {
+                        setMargins(0, 0, 0, 4.px())
+                    }
+                    background = if (previewFrameBackgroundRes != 0) {
+                        ContextCompat.getDrawable(context, previewFrameBackgroundRes)
+                    } else {
+                        GradientDrawable().apply {
+                            shape = GradientDrawable.RECTANGLE
+                            cornerRadius = 6 * density
+                            setColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt2))
+                            setStroke(1.px(), strokeInactiveColor)
+                        }
                     }
                 }
-            }
 
-            previewFactory?.invoke(i)?.let { preview ->
-                if (preview.layoutParams == null) {
-                    preview.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+                previewFactory?.invoke(i)?.let { preview ->
+                    if (preview.layoutParams == null) {
+                        preview.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
+                    }
+                    previewFrame.addView(preview)
                 }
-                previewFrame.addView(preview)
+                innerLayout.addView(previewFrame)
             }
 
             val titleView = TextView(context).apply {
                 layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
                 text = options[i]
                 setTextColor(if (i == selectedIndex) activeColor else inactiveColor)
-                textSize = 10f
+                textSize = if (hasPreview) 10f else 12f
                 gravity = Gravity.CENTER
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
 
-            innerLayout.addView(previewFrame)
             innerLayout.addView(titleView)
             card.addView(innerLayout)
 

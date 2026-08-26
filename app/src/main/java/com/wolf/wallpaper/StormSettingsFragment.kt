@@ -384,12 +384,14 @@ class StormSettingsFragment : Fragment() {
         val activeLightningColor = Color.parseColor(lightningColorHex(configManager.getLightningColorIndex()))
         val activeWindDir = configManager.getWindDirection()
 
+        val isTextOnly = containerId == R.id.spinnerLightningFrequency || containerId == R.id.spinnerCloudFlashFrequency
+
         SettingsCardSelectorHelper.populate(
             context = requireContext(),
             container = container,
             options = options,
             selectedIndex = initialIndex,
-            previewFactory = { index ->
+            previewFactory = if (isTextOnly) null else { index ->
                 if (containerId != R.id.spinnerBackgroundMode) {
                     StormCardPreviewView(requireContext(), containerId, index, activeRainColor, activeWindDir, activeLightningColor)
                 } else {

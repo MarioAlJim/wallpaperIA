@@ -215,7 +215,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Header (Non-collapsible title group) -->
+                <!-- Header -->
                 <RelativeLayout
                     android:id="@+id/headerSunnyEnvironment"
                     android:layout_width="match_parent"
@@ -246,6 +246,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_toEndOf="@id/badgeSunnyEnvironment"
+                        android:layout_toStartOf="@id/arrowSunnyEnvironment"
                         android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
@@ -267,23 +268,23 @@
                             android:layout_marginTop="2dp" />
                     </LinearLayout>
 
-                    <!-- Dummy/compatibility views to satisfy findViewById/binding -->
                     <ImageView
                         android:id="@+id/arrowSunnyEnvironment"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
-                    <View
-                        android:id="@+id/dividerSunnyEnvironment"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="@color/settings_text_primary" />
                 </RelativeLayout>
 
+                <!-- Divider -->
                 <View
+                    android:id="@+id/dividerSunnyEnvironment"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke" />
+                    android:background="@color/settings_stroke"
+                    android:visibility="gone" />
 
                 <!-- Content Area -->
                 <LinearLayout
@@ -292,7 +293,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <!-- Cloud Density -->
                     <RelativeLayout
@@ -527,6 +528,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_toEndOf="@id/badgeSunnySun"
+                        android:layout_toStartOf="@id/arrowSunnySun"
                         android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
@@ -550,16 +552,20 @@
 
                     <ImageView
                         android:id="@+id/arrowSunnySun"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="@color/settings_text_primary" />
                 </RelativeLayout>
 
                 <View
                     android:id="@+id/dividerSunnySun"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke" />
+                    android:background="@color/settings_stroke"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/contentSunnySun"
@@ -567,7 +573,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:id="@+id/layoutDayControls"
@@ -1907,6 +1913,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_toEndOf="@id/badgeSunnyMoon"
+                        android:layout_toStartOf="@id/arrowSunnyMoon"
                         android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
@@ -1930,16 +1937,20 @@
 
                     <ImageView
                         android:id="@+id/arrowSunnyMoon"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="@color/settings_text_primary" />
                 </RelativeLayout>
 
                 <View
                     android:id="@+id/dividerSunnyMoon"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke" />
+                    android:background="@color/settings_stroke"
+                    android:visibility="gone" />
 
                 <LinearLayout
                     android:id="@+id/contentSunnyMoon"
@@ -4062,6 +4073,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
                         android:layout_toEndOf="@id/badgeSunnyCombined"
+                        android:layout_toStartOf="@id/arrowSunnyCombined"
                         android:layout_marginStart="12dp"
                         android:layout_centerVertical="true">
 
@@ -4085,20 +4097,21 @@
 
                     <ImageView
                         android:id="@+id/arrowSunnyCombined"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
-                    <View
-                        android:id="@+id/dividerSunnyCombined"
-                        android:layout_width="0dp"
-                        android:layout_height="0dp"
-                        android:visibility="gone" />
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_arrow_down"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        app:tint="@color/settings_text_primary" />
                 </RelativeLayout>
 
+                <!-- Divider -->
                 <View
+                    android:id="@+id/dividerSunnyCombined"
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/settings_stroke" />
+                    android:background="@color/settings_stroke"
+                    android:visibility="gone" />
 
                 <!-- Content Area -->
                 <LinearLayout
@@ -4106,7 +4119,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="16dp"
+                    android:visibility="gone">
 
                     <!-- Real-time Clock Toggle -->
                     <RelativeLayout
