@@ -72,6 +72,7 @@ interface ConfigProvider {
     fun isNebulaEnabled(): Boolean
     fun getNebulaIntensity(): Int       // 0–100
     fun getNebulaColor(): Int           // ARGB color of the nebula stain
+    fun getNebulaColor2(): Int          // Second ARGB color of the nebula stain
     fun getNebulaSeed(): Int            // stable per-install seed, combined with the calendar day to place the nebula at a different spot each night
 
     fun isShootingStarsEnabled(): Boolean

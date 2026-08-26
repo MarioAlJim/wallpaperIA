@@ -94,6 +94,7 @@ class SunnyRenderer(
     private var dayNightIntensityHandle = -1
     private var nebulaIntensityHandle = -1
     private var nebulaColorHandle = -1
+    private var nebulaColor2Handle = -1
     private var nebulaCenterHandle = -1
     private var nebulaRotationHandle = -1
 
@@ -535,6 +536,7 @@ class SunnyRenderer(
         dayNightIntensityHandle = GLES30.glGetUniformLocation(program, "uNightIntensity")
         nebulaIntensityHandle = GLES30.glGetUniformLocation(program, "uNebulaIntensity")
         nebulaColorHandle = GLES30.glGetUniformLocation(program, "uNebulaColor")
+        nebulaColor2Handle = GLES30.glGetUniformLocation(program, "uNebulaColor2")
         nebulaCenterHandle = GLES30.glGetUniformLocation(program, "uNebulaCenter")
         nebulaRotationHandle = GLES30.glGetUniformLocation(program, "uNebulaRotation")
         noiseTexHandle = GLES30.glGetUniformLocation(program, "uNoiseTex")
@@ -1757,11 +1759,30 @@ class SunnyRenderer(
     private fun updateRainbow(deltaTime: Float) {
         val alwaysEnabled = configProvider.isRainbowAlwaysEnabled()
         
+        val timeMode = configProvider.getTimeMode()
+        val nightIntensity = when (timeMode) {
+            1 -> 1f
+            2, 3 -> combinedNightIntensity
+            else -> 0f
+        }
+        val theme = configProvider.getSunnyTheme()
+        val eligible = nightIntensity < 0.15f && theme != 2
+
         if (alwaysEnabled) {
-            if (rainbowState == RAINBOW_STATE_IDLE) {
-                rainbowState = RAINBOW_STATE_FADE_IN
-                rainbowTimer = 0f
+            // Under alwaysEnabled, we simply fade in/out based on eligibility
+            if (eligible) {
+                if (rainbowState != RAINBOW_STATE_FADE_IN && rainbowState != RAINBOW_STATE_HOLD) {
+                    rainbowState = RAINBOW_STATE_FADE_IN
+                    rainbowTimer = rainbowOpacity * kRainbowFadeInDuration
+                }
+            } else {
+                if (rainbowState != RAINBOW_STATE_FADE_OUT && rainbowState != RAINBOW_STATE_IDLE) {
+                    rainbowState = RAINBOW_STATE_FADE_OUT
+                    rainbowTimer = (1f - rainbowOpacity) * kRainbowFadeOutDuration
+                }
             }
+
+            // Animate opacity
             if (rainbowState == RAINBOW_STATE_FADE_IN) {
                 rainbowTimer += deltaTime
                 rainbowOpacity = (rainbowTimer / kRainbowFadeInDuration).coerceIn(0f, 1f)
@@ -1772,13 +1793,18 @@ class SunnyRenderer(
             } else if (rainbowState == RAINBOW_STATE_HOLD) {
                 rainbowOpacity = 1f
             } else if (rainbowState == RAINBOW_STATE_FADE_OUT) {
-                rainbowState = RAINBOW_STATE_FADE_IN
-                rainbowTimer = kRainbowFadeInDuration * rainbowOpacity
+                rainbowTimer += deltaTime
+                rainbowOpacity = (1f - rainbowTimer / kRainbowFadeOutDuration).coerceIn(0f, 1f)
+                if (rainbowTimer >= kRainbowFadeOutDuration || rainbowOpacity <= 0f) {
+                    rainbowState = RAINBOW_STATE_IDLE
+                    rainbowTimer = 0f
+                    rainbowOpacity = 0f
+                }
+            } else {
+                rainbowOpacity = 0f
             }
             return
         }
-
-        val eligible = true
 
         if (!eligible && rainbowState != RAINBOW_STATE_IDLE && rainbowState != RAINBOW_STATE_FADE_OUT) {
             rainbowState = RAINBOW_STATE_FADE_OUT
@@ -1790,7 +1816,7 @@ class SunnyRenderer(
                 rainbowTimer += deltaTime
                 if (rainbowTimer >= 60f) {
                     rainbowTimer = 0f
-                    if (kotlin.random.Random.nextFloat() < 0.25f) {
+                    if (kotlin.random.Random.nextFloat() < 0.30f && eligible) {
                         rainbowState = RAINBOW_STATE_FADE_IN
                         rainbowHoldDuration = kRainbowHoldMin + kotlin.random.Random.nextFloat() * kRainbowHoldRange
                     }
@@ -1902,6 +1928,13 @@ class SunnyRenderer(
                 android.graphics.Color.red(nebulaColor) / 255f,
                 android.graphics.Color.green(nebulaColor) / 255f,
                 android.graphics.Color.blue(nebulaColor) / 255f
+            )
+            val nebulaColor2 = configProvider.getNebulaColor2()
+            GLES30.glUniform3f(
+                nebulaColor2Handle,
+                android.graphics.Color.red(nebulaColor2) / 255f,
+                android.graphics.Color.green(nebulaColor2) / 255f,
+                android.graphics.Color.blue(nebulaColor2) / 255f
             )
             GLES30.glUniform2f(nebulaCenterHandle, nebulaCenterX, nebulaCenterY)
             GLES30.glUniform1f(nebulaRotationHandle, nebulaRotationPhase)

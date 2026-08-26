@@ -1163,7 +1163,10 @@ class SunnySettingsFragment : Fragment() {
 
         updateNebulaColorPreview(parent)
         parent.findViewById<View>(R.id.btnNebulaColor)?.setOnClickListener {
-            showNebulaColorPickerDialog(parent)
+            showNebulaColorPickerDialog(parent, isColor2 = false)
+        }
+        parent.findViewById<View>(R.id.btnNebulaColor2)?.setOnClickListener {
+            showNebulaColorPickerDialog(parent, isColor2 = true)
         }
     }
 
@@ -1171,9 +1174,13 @@ class SunnySettingsFragment : Fragment() {
         val color = configManager.getNebulaColor()
         setCircleColorPreview(parent.findViewById(R.id.viewNebulaColorPreview), color)
         parent.findViewById<TextView>(R.id.textViewNebulaColorCode)?.text = String.format("#%06X", 0xFFFFFF and color)
+
+        val color2 = configManager.getNebulaColor2()
+        setCircleColorPreview(parent.findViewById(R.id.viewNebulaColorPreview2), color2)
+        parent.findViewById<TextView>(R.id.textViewNebulaColorCode2)?.text = String.format("#%06X", 0xFFFFFF and color2)
     }
 
-    private fun showNebulaColorPickerDialog(parent: View) {
+    private fun showNebulaColorPickerDialog(parent: View, isColor2: Boolean) {
         val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
         val previewView = dialogView.findViewById<View>(R.id.dialogColorPreview)
         val hexInput = dialogView.findViewById<EditText>(R.id.dialogColorHexInput)
@@ -1186,7 +1193,7 @@ class SunnySettingsFragment : Fragment() {
         val labelG = dialogView.findViewById<TextView>(R.id.labelG)
         val labelB = dialogView.findViewById<TextView>(R.id.labelB)
 
-        val initialColor = configManager.getNebulaColor()
+        val initialColor = if (isColor2) configManager.getNebulaColor2() else configManager.getNebulaColor()
         var currentColor = initialColor
 
         fun updateDialogColor(color: Int, updateHexText: Boolean = true, updateSliders: Boolean = true) {
@@ -1265,7 +1272,11 @@ class SunnySettingsFragment : Fragment() {
         com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
             .setPositiveButton("Aceptar") { _, _ ->
-                configManager.setNebulaColor(currentColor)
+                if (isColor2) {
+                    configManager.setNebulaColor2(currentColor)
+                } else {
+                    configManager.setNebulaColor(currentColor)
+                }
                 updateNebulaColorPreview(parent)
             }
             .setNegativeButton("Cancelar", null)

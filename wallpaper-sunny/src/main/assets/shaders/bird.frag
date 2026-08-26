@@ -3,7 +3,7 @@ precision mediump float;
 
 in vec2 vTexCoord;
 
-uniform float uTime;
+uniform highp float uTime;
 uniform float uFlapSpeed;
 uniform float uFlapOffset;
 uniform float uOpacity;

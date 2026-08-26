@@ -58,6 +58,9 @@ internal class NightConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun getNebulaColor(): Int = cachedInt(ConfigManager.KEY_NEBULA_COLOR, ConfigManager.DEFAULT_NEBULA_COLOR)
     fun setNebulaColor(color: Int) { putInt(ConfigManager.KEY_NEBULA_COLOR, color) }
 
+    fun getNebulaColor2(): Int = cachedInt(ConfigManager.KEY_NEBULA_COLOR_2, ConfigManager.DEFAULT_NEBULA_COLOR_2)
+    fun setNebulaColor2(color: Int) { putInt(ConfigManager.KEY_NEBULA_COLOR_2, color) }
+
     /**
      * Stable per-install seed for the nebula. Combined on the render side with the current
      * calendar day (not stored here) to pick a new position/orientation for the nebula each

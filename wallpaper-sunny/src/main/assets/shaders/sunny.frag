@@ -4,7 +4,7 @@ precision mediump float;
 in vec2 vPosition;
 out vec4 fragColor;
 
-uniform float uTime;
+uniform highp float uTime;
 uniform float uAspectRatio;
 uniform float uSunSize; // 0.1 to 0.35
 uniform float uSunSpeed; // speed coefficient
@@ -21,7 +21,8 @@ uniform float uCloudOcclusionNearSun; // 0..1, "cloud density near the sun" comp
 uniform float uRainbowOpacity; // 0..1, CPU-driven rare-event fade in/hold/fade out (SunnyRenderer.updateRainbow)
 uniform float uLensDirtOpacity; // 0..1, up when the sun is visible near screen center, 0 otherwise (mirrors the lens flare visibility gating)
 uniform float uNebulaIntensity; // 0..1, already 0 when the effect is disabled by the user
-uniform vec3 uNebulaColor;      // user-configurable tint
+uniform vec3 uNebulaColor;      // user-configurable tint 1
+uniform vec3 uNebulaColor2;     // user-configurable tint 2
 uniform vec2 uNebulaCenter;     // fixed anchor point for the night, in the same aspect-scaled uv space as uvCoords below
 uniform float uNebulaRotation;  // per-night random phase offset so every night's swirl starts differently oriented
 
@@ -163,23 +164,46 @@ void main() {
         // inside it spins slowly around that fixed center, so it reads as a distant cloud of
         // gas turning in place rather than something moving across the sky.
         if (uNebulaIntensity > 0.001) {
-            vec2 toNebula = uvCoords - uNebulaCenter;
-            float nebulaDist = length(toNebula);
-            const float kNebulaRadius = 0.58;
-            float nebulaFalloff = smoothstep(kNebulaRadius, 0.0, nebulaDist);
+            highp vec2 toNebula = uvCoords - uNebulaCenter;
+            highp float nebulaDist = length(toNebula);
+            const highp float kNebulaRadius = 0.58;
+            highp float nebulaFalloff = smoothstep(kNebulaRadius, 0.0, nebulaDist);
             if (nebulaFalloff > 0.001) {
-                float nebulaAngle = atan(toNebula.y, toNebula.x) + uNebulaRotation + uTime * 0.05;
-                // Two angular/radial sine bands at different frequencies, so the swirl reads as
-                // overlapping wisps rather than a single uniform ring, plus a sample of the
-                // shared noise texture (rotated with the swirl) for organic irregularity.
-                float bands = sin(nebulaAngle * 3.0 + nebulaDist * 8.0) * 0.5 + 0.5;
-                bands += sin(nebulaAngle * 5.0 - nebulaDist * 5.0 + uTime * 0.09) * 0.5 + 0.5;
-                vec2 swirlNoiseUv = vec2(cos(nebulaAngle), sin(nebulaAngle)) * nebulaDist * 1.4 + uNebulaCenter * 3.7;
-                bands += texture(uNoiseTex, swirlNoiseUv).r * 1.4;
-                bands /= 3.4;
-                float wisps = smoothstep(0.3, 0.8, bands);
-                float nebulaMask = wisps * nebulaFalloff * nebulaFalloff; // extra falloff^2: soft, glowing edge
-                nightSkyColor = mix(nightSkyColor, uNebulaColor, nebulaMask * uNebulaIntensity * 0.85);
+                highp float nebulaAngle = atan(toNebula.y, toNebula.x) + uNebulaRotation + uTime * 0.03;
+                
+                // 1. Spiral twist/distortion based on distance
+                highp float twistedAngle = nebulaAngle - nebulaDist * 2.2;
+                
+                // 2. Swirling noise coordinates
+                highp vec2 swirlNoiseUv = vec2(cos(twistedAngle), sin(twistedAngle)) * nebulaDist * 1.2 + uNebulaCenter * 2.1;
+                
+                // 3. Multi-octave noise for rich gas volumes and fine cosmic dust
+                highp float noiseDetail = texture(uNoiseTex, swirlNoiseUv).r * 0.7;
+                noiseDetail += texture(uNoiseTex, swirlNoiseUv * 2.8 + vec2(uTime * 0.012)).r * 0.3;
+                
+                // 4. Overlapping bands with a slowly morphing flow
+                highp float bands = sin(twistedAngle * 3.0 + nebulaDist * 6.0) * 0.5 + 0.5;
+                bands += sin(twistedAngle * 5.0 - nebulaDist * 4.0 + uTime * 0.06) * 0.3 + 0.3;
+                bands += noiseDetail * 1.2;
+                bands /= 2.8;
+                
+                // 5. Soft wisps masking
+                highp float wisps = smoothstep(0.28, 0.75, bands);
+                
+                // 6. Stellar Core Glow in the center (stellar nursery effect)
+                highp float coreGlow = exp(-nebulaDist * 8.0) * 0.55;
+                
+                // 7. Dynamic two-color blending (blends over space, bands pattern, and slow time oscillation)
+                highp float colorFactor = clamp((bands - 0.2) * 1.3, 0.0, 1.0);
+                colorFactor = mix(colorFactor, sin(uTime * 0.02 + nebulaDist * 3.0) * 0.5 + 0.5, 0.35);
+                vec3 blendedNebulaColor = mix(uNebulaColor, uNebulaColor2, colorFactor);
+                
+                // 8. Combine wisps and core glow, then blend into sky
+                highp float nebulaMask = (wisps * 0.85 + coreGlow * 0.15) * nebulaFalloff * nebulaFalloff;
+                nightSkyColor = mix(nightSkyColor, blendedNebulaColor, nebulaMask * uNebulaIntensity * 0.95);
+                
+                // Additive hot core glow boost
+                nightSkyColor += mix(uNebulaColor, uNebulaColor2, 0.3) * coreGlow * uNebulaIntensity * nebulaFalloff * 0.45;
             }
         }
 
@@ -187,13 +211,13 @@ void main() {
     }
 
     // 2. Sun setup
-    vec2 uv = vec2(vPosition.x * uAspectRatio, vPosition.y);
+    highp vec2 uv = vec2(vPosition.x * uAspectRatio, vPosition.y);
     
-    float dist = distance(uv, uSunPos * uAspectRatio);
+    highp float dist = distance(uv, uSunPos * uAspectRatio);
     
     // Pulsating radius based on uSunSize and uSunSpeed
-    float pulse = sin(uTime * uSunSpeed) * 0.02 * (uSunSize / 0.20);
-    float radius = uSunSize + pulse + uSunPulse * 0.08;
+    highp float pulse = sin(uTime * uSunSpeed) * 0.02 * (uSunSize / 0.20);
+    highp float radius = uSunSize + pulse + uSunPulse * 0.08;
     
     // Smooth sun edge
     float sunMask = smoothstep(radius, radius - 0.008, dist);
@@ -237,25 +261,25 @@ void main() {
     // rays blend toward a lower-frequency pattern and spread further/softer, as if emanating
     // from behind the clouds, while staying identical to the original look when it's 0.
     if (uGodRaysIntensity > 0.0) {
-        float angle = atan(uv.y - uSunPos.y * uAspectRatio, uv.x - uSunPos.x * uAspectRatio);
-        float rays = sin(angle * 12.0 + uTime * 0.15) * 0.5 + 0.5;
+        highp float angle = atan(uv.y - uSunPos.y * uAspectRatio, uv.x - uSunPos.x * uAspectRatio);
+        highp float rays = sin(angle * 12.0 + uTime * 0.15) * 0.5 + 0.5;
         rays += sin(angle * 27.0 - uTime * 0.25) * 0.3 + 0.3;
         rays += sin(angle * 53.0 + uTime * 0.4) * 0.15 + 0.15;
         rays += sin(angle * 89.0 - uTime * 0.6) * 0.05 + 0.05;
         rays = rays / 2.0; // Normalize [0, 1]
 
-        const float kCloudShaftLowFreqA = 4.0;
-        const float kCloudShaftLowFreqB = 7.0;
-        const float kCloudShaftRayBlend = 0.6;   // how much of the shaft pattern replaces the base rays at full occlusion
-        const float kCloudShaftMaxBoost = 0.9;   // extra ray strength contributed at full occlusion
-        const float kCloudShaftMinAttenuation = 0.55; // wider spread (slower falloff) near clouds vs the base 0.8
-        float shaftRays = sin(angle * kCloudShaftLowFreqA + uTime * 0.08) * 0.5 + 0.5;
+        const highp float kCloudShaftLowFreqA = 4.0;
+        const highp float kCloudShaftLowFreqB = 7.0;
+        const highp float kCloudShaftRayBlend = 0.6;   // how much of the shaft pattern replaces the base rays at full occlusion
+        const highp float kCloudShaftMaxBoost = 0.9;   // extra ray strength contributed at full occlusion
+        const highp float kCloudShaftMinAttenuation = 0.55; // wider spread (slower falloff) near clouds vs the base 0.8
+        highp float shaftRays = sin(angle * kCloudShaftLowFreqA + uTime * 0.08) * 0.5 + 0.5;
         shaftRays += sin(angle * kCloudShaftLowFreqB - uTime * 0.12) * 0.5 + 0.5;
         shaftRays *= 0.5;
         rays = mix(rays, mix(rays, shaftRays, kCloudShaftRayBlend), uCloudOcclusionNearSun);
 
-        float rayAttenuation = exp(-dist * mix(0.8, kCloudShaftMinAttenuation, uCloudOcclusionNearSun));
-        float occlusionBoost = 1.0 + uCloudOcclusionNearSun * kCloudShaftMaxBoost;
+        highp float rayAttenuation = exp(-dist * mix(0.8, kCloudShaftMinAttenuation, uCloudOcclusionNearSun));
+        highp float occlusionBoost = 1.0 + uCloudOcclusionNearSun * kCloudShaftMaxBoost;
 
         // Raymarching crepuscular rays occlusion by background mountains
         float bgOcclusion = 1.0;

@@ -92,6 +92,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_NEBULA_ENABLED = "nebula_enabled"
         const val KEY_NEBULA_INTENSITY = "nebula_intensity"
         const val KEY_NEBULA_COLOR = "nebula_color"
+        const val KEY_NEBULA_COLOR_2 = "nebula_color_2"
         const val KEY_NEBULA_SEED = "nebula_seed"
 
         // New keys for Combined Mode
@@ -118,6 +119,7 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val DEFAULT_NEBULA_ENABLED = true
         const val DEFAULT_NEBULA_INTENSITY = 55
         const val DEFAULT_NEBULA_COLOR = 0xFF8E4FDB.toInt()
+        const val DEFAULT_NEBULA_COLOR_2 = 0xFF00B0FF.toInt()
         // Fallback only; getNebulaSeed() generates and persists a real random seed on first read.
         const val DEFAULT_NEBULA_SEED = 4242
 
@@ -380,6 +382,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun getNebulaColor(): Int = night.getNebulaColor()
     fun setNebulaColor(color: Int) = night.setNebulaColor(color)
+
+    override fun getNebulaColor2(): Int = night.getNebulaColor2()
+    fun setNebulaColor2(color: Int) = night.setNebulaColor2(color)
 
     override fun getNebulaSeed(): Int = night.getNebulaSeed()
 
