@@ -16,6 +16,25 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false">
 
+        <!-- Botón de Ayuda: resumen de las secciones y cómo afectan al fondo -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end"
+            android:layout_marginBottom="4dp">
+
+            <ImageButton
+                android:id="@+id/btnSunnyHelp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:padding="8dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_help"
+                android:tint="@color/settings_accent"
+                android:contentDescription="@string/help_button_description" />
+        </LinearLayout>
+
         <!-- 1. Modo de Tiempo Card (At the top!) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardTimeMode"

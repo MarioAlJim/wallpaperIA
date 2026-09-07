@@ -252,9 +252,21 @@ class StormSettingsFragment : Fragment() {
             }
         }
 
+        view.findViewById<ImageView>(R.id.btnStormHelp)?.setOnClickListener {
+            showHelpDialog()
+        }
+
         updateCustomBackgroundViewsVisibility(view, configManager.getBackgroundIndex())
         refreshStormCardPreviews(view)
         updateSummaries(view)
+    }
+
+    private fun showHelpDialog() {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.storm_help_dialog_title)
+            .setMessage(Html.fromHtml(getString(R.string.storm_help_dialog_message), Html.FROM_HTML_MODE_LEGACY))
+            .setPositiveButton("Entendido", null)
+            .show()
     }
 
     private fun getClosestCloudOptionIndex(density: Int): Int {

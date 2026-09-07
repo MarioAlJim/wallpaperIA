@@ -61,6 +61,10 @@ class SunnySettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
+        view.findViewById<ImageView>(R.id.btnSunnyHelp)?.setOnClickListener {
+            showHelpDialog()
+        }
+
         // 1. Setup Accordions
         SettingsAccordionHelper.setupAccordionGroup(
             view,
@@ -577,6 +581,14 @@ class SunnySettingsFragment : Fragment() {
             layoutSpeed?.visibility = View.VISIBLE
             layoutStationary?.visibility = View.GONE
         }
+    }
+
+    private fun showHelpDialog() {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.sunny_help_dialog_title)
+            .setMessage(Html.fromHtml(getString(R.string.sunny_help_dialog_message), Html.FROM_HTML_MODE_LEGACY))
+            .setPositiveButton("Entendido", null)
+            .show()
     }
 
     private fun saveCustomSunnyBackground(uri: android.net.Uri) {
