@@ -1,0 +1,284 @@
+<title>Weather Live Wallpaper Privacy Policy</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+  :root {
+    --bg: #eef1f6;
+    --surface: #ffffff;
+    --ink: #1b2430;
+    --ink-soft: #55606f;
+    --ink-faint: #8a94a3;
+    --accent: #1c86a6;
+    --accent-soft: #e2eef2;
+    --hairline: #d7dee6;
+    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    --sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10141a;
+      --surface: #171d25;
+      --ink: #edf0f4;
+      --ink-soft: #a3aebb;
+      --ink-faint: #6c7684;
+      --accent: #5cd0e8;
+      --accent-soft: #1c2c31;
+      --hairline: #2a323c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10141a;
+    --surface: #171d25;
+    --ink: #edf0f4;
+    --ink-soft: #a3aebb;
+    --ink-faint: #6c7684;
+    --accent: #5cd0e8;
+    --accent-soft: #1c2c31;
+    --hairline: #2a323c;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    display: flex;
+    justify-content: center;
+    padding: 56px 20px 96px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .masthead {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--hairline);
+    margin-bottom: 36px;
+  }
+
+  .mark {
+    flex: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, var(--accent) 0%, #123f4d 78%);
+    position: relative;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+  }
+  .mark::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 85%, rgba(255,255,255,0.35) 0%, transparent 35%);
+  }
+
+  .masthead-text h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 6px;
+  }
+  .masthead-meta {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .tldr {
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-bottom: 40px;
+  }
+  .tldr .label {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .tldr p {
+    margin: 0;
+    font-size: 0.98rem;
+    color: var(--ink);
+  }
+
+  section {
+    margin-bottom: 32px;
+  }
+
+  h2 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  h2 .n {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--accent);
+  }
+
+  p, li {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 0.97rem;
+  }
+  p { margin: 0 0 12px; }
+  ul { margin: 0 0 12px; padding-left: 1.2em; }
+  li { margin-bottom: 6px; }
+  strong { color: var(--ink); font-weight: 600; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 12px 0 16px;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--hairline);
+  }
+  th {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+  td { color: var(--ink-soft); }
+  td:first-child { color: var(--ink); white-space: nowrap; }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--hairline);
+    font-size: 0.85rem;
+    color: var(--ink-faint);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (max-width: 480px) {
+    body { padding: 40px 16px 72px; }
+    .masthead { gap: 14px; }
+    .mark { width: 38px; height: 38px; }
+    h1 { font-size: 1.3rem; }
+  }
+</style>
+
+<main>
+  <div class="masthead">
+    <div class="mark" aria-hidden="true"></div>
+    <div class="masthead-text">
+      <h1>Weather Live Wallpaper — Privacy Policy</h1>
+      <span class="masthead-meta">Effective September 6, 2026 · v1.0</span>
+    </div>
+  </div>
+
+  <div class="tldr">
+    <span class="label">In short</span>
+    <p>Weather Live Wallpaper collects <strong>nothing</strong>. It has no internet access, no accounts, no ads, and no analytics. Every setting and image you choose stays on your device.</p>
+  </div>
+
+  <section>
+    <h2><span class="n">01</span> What this app is</h2>
+    <p>Weather Live Wallpaper is an Android live wallpaper that renders an animated storm scene (clouds, rain, lightning) or a day/night sun-and-moon scene directly on your device's home and lock screen, using your device's own graphics hardware.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span> Information we collect</h2>
+    <p>None. The app does not request an account, does not connect to the internet, and does not include any advertising, analytics, or crash-reporting software development kit. There are no servers involved — nothing you do inside the app ever leaves your device.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span> Data stored on your device</h2>
+    <p>The app saves the following, only in its own private app storage, so that your preferences persist between sessions:</p>
+    <table>
+      <tr><th>Data</th><th>Purpose</th><th>Leaves the device?</th></tr>
+      <tr><td>Effect settings</td><td>Remembers your chosen cloud density, rain, wind, sun/moon, colors, etc.</td><td>No</td></tr>
+      <tr><td>Custom background image</td><td>Only if you pick one from your gallery as a scene background</td><td>No</td></tr>
+      <tr><td>App theme &amp; onboarding flags</td><td>Remembers Light/Dark preference and whether you've seen the tutorial</td><td>No</td></tr>
+    </table>
+    <p>Uninstalling the app permanently deletes all of the above; there is no separate copy anywhere else, because none was ever made.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">04</span> Photo access</h2>
+    <p>If you choose to use your own photo as a background, the app opens Android's built-in system photo picker. You pick a single image yourself; the app never gets broad access to your gallery, and no photo is transmitted anywhere — it is simply copied into the app's own private storage on your device to be drawn as a wallpaper layer.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">05</span> Sensors</h2>
+    <p>With the optional gyroscope/tilt effect turned on, the app reads your device's motion sensors to shift the parallax of clouds and stars as you tilt the phone. These readings are used only in memory, frame by frame, to compute the animation — they are never stored or sent anywhere.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">06</span> Permissions</h2>
+    <p>The app requests no dangerous or sensitive Android permissions — no camera, microphone, contacts, location, or storage access. It declares only the standard system permission required to register as a live wallpaper, and the photo picker in section 4 works without any gallery permission at all.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">07</span> Third parties</h2>
+    <p>There are none. No advertising network, no analytics provider, no cloud backend, and no data broker of any kind receives information from this app, because the app never sends information anywhere in the first place.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">08</span> Children's privacy</h2>
+    <p>The app is not directed at children specifically, but since it collects no data from anyone, of any age, there is nothing to safeguard beyond what this policy already describes.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">09</span> Changes to this policy</h2>
+    <p>If this app ever changes in a way that affects your privacy — for example, by adding a feature that uses the network — this page will be updated first, and the version stamp in the masthead above will change accordingly.</p>
+  </section>
+
+  <section>
+    <h2><span class="n">10</span> Contact</h2>
+    <p>Questions about this policy or the app can be sent to <a href="mailto:mario.aljim14@gmail.com">mario.aljim14@gmail.com</a>.</p>
+  </section>
+
+  <footer>
+    <span>Weather Live Wallpaper</span>
+    <a href="mailto:mario.aljim14@gmail.com">mario.aljim14@gmail.com</a>
+  </footer>
+</main>

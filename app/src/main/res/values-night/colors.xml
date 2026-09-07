@@ -11,7 +11,6 @@
     <color name="settings_chip_bg_inactive">#262732</color>
     <color name="settings_chip_bg_active">#26383D</color>
     <color name="settings_stroke">#343542</color>
-    <color name="settings_stroke_secondary">#40414D</color>
     <color name="settings_text_primary">#F2F2F7</color>
     <color name="settings_text_secondary">#999BA8</color>
     <color name="settings_text_tertiary">#666875</color>

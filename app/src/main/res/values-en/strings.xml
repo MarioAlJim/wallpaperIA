@@ -15,7 +15,7 @@
     <string name="act_establecer_fondo_de_pantalla">Set Wallpaper</string>
     <string name="act_oscuro">Dark</string>
     <string name="act_tormenta">Storm</string>
-    <string name="app_name">wallpaper</string>
+    <string name="app_name">Weather Live Wallpaper</string>
     <string name="cloud_density_label">Cloud Density</string>
     <string name="color_ajuste_manual_rgb">Manual Adjustment (RGB)</string>
     <string name="color_b_255">B: 255</string>
@@ -246,7 +246,7 @@
     <string name="sunny_verde">Green</string>
     <string name="sunny_x_y">X, Y</string>
     <string name="wallpaper_description">Interactive storm simulator with animated clouds, rain, and procedural lightning.</string>
-    <string name="wallpaper_label">Weather wallpaper</string>
+    <string name="wallpaper_label">Weather Live Wallpaper</string>
     <string name="wind_direction_label">Rain Direction</string>
     <string name="wind_intensity_label">Wind Strength</string>
 

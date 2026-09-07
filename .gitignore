@@ -14,3 +14,12 @@ build/
 .cxx
 local.properties
 .kotlin/
+
+# Release signing - never commit the keystore or its passwords.
+/keystore.properties
+/keystore/
+*.jks
+*.keystore
+
+# Stray local build output that isn't under build/
+/app/debug/

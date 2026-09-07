@@ -15,7 +15,7 @@
     <string name="act_establecer_fondo_de_pantalla">Establecer Fondo de Pantalla</string>
     <string name="act_oscuro">Oscuro</string>
     <string name="act_tormenta">Tormenta</string>
-    <string name="app_name">wallpaper</string>
+    <string name="app_name">Weather Live Wallpaper</string>
     <string name="cloud_density_label">Densidad de Nubes</string>
     <string name="color_ajuste_manual_rgb">Ajuste Manual (RGB)</string>
     <string name="color_b_255">B: 255</string>
@@ -246,7 +246,7 @@
     <string name="sunny_verde">Verde</string>
     <string name="sunny_x_y">X, Y</string>
     <string name="wallpaper_description">Simulador interactivo de tormenta con nubes animadas, lluvia y rayos procedimentales.</string>
-    <string name="wallpaper_label">Weather wallpaper</string>
+    <string name="wallpaper_label">Weather Live Wallpaper</string>
     <string name="wind_direction_label">Dirección de la Lluvia</string>
     <string name="wind_intensity_label">Fuerza del Viento</string>
 
