@@ -331,7 +331,11 @@ class SceneManager(
     fun applySwipeWindImpulse(velocity: Float) {
         // A swipe to the right (positive velocity) generates wind to the left (negative angle impulse).
         // Scale velocity to degrees: e.g., velocity of 5.0 -> impulse of -45.0 degrees.
-        val impulse = -velocity * 9f
+        // This angle impulse is what drives the swipe-following drift on rain drops (via
+        // updateVelocity's windAngle param), so it's scaled down to 25% (75% reduction) to make
+        // that particular slide effect subtler on the rain without touching the clouds' own
+        // swipe offset, which is computed separately in StormRenderer via swipeOffset.
+        val impulse = -velocity * 9f * 0.25f
         val cappedImpulse = impulse.coerceIn(-45f, 45f)
         currentWindAngle = (currentWindAngle + cappedImpulse).coerceIn(-90f, 90f)
     }
