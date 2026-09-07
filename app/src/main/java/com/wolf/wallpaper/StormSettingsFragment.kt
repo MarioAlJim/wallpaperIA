@@ -265,6 +265,9 @@ class StormSettingsFragment : Fragment() {
         com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.storm_help_dialog_title)
             .setMessage(Html.fromHtml(getString(R.string.storm_help_dialog_message), Html.FROM_HTML_MODE_LEGACY))
+            .setNeutralButton("Ver tutorial") { _, _ ->
+                (requireActivity() as WallpaperSettingsActivity).startTutorial(0)
+            }
             .setPositiveButton("Entendido", null)
             .show()
     }
