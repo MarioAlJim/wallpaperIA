@@ -743,16 +743,15 @@ class StormSettingsFragment : Fragment() {
 
         val bgIndex = configManager.getBackgroundIndex()
         val bgText = backgroundModes.getOrNull(bgIndex) ?: ""
-        val bgBrightnessOptions = resources.getStringArray(R.array.bg_brightness_options)
-        val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
-        val initialBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
-        val bgBrightnessText = bgBrightnessOptions.getOrNull(initialBgBrightnessIndex) ?: ""
-        val combinedBgText = if (bgBrightnessText.isNotEmpty()) "$bgText ($bgBrightnessText)" else bgText
-
         summaryBackground.text = Html.fromHtml(
-            getString(R.string.summary_background_format, accentColor, combinedBgText),
+            getString(R.string.summary_background_format, accentColor, bgText),
             Html.FROM_HTML_MODE_LEGACY
         )
+
+        val bgBrightnessOptions = resources.getStringArray(R.array.bg_brightness_options)
+        val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
+        val currentBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
+        parent?.findViewById<TextView>(R.id.textViewBgBrightnessValue)?.text = bgBrightnessOptions.getOrNull(currentBgBrightnessIndex) ?: "Normal"
     }
 
     private fun Int.dpToPx(): Int {

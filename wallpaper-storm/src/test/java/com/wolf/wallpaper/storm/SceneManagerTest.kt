@@ -912,14 +912,17 @@ class SceneManagerTest {
 
         // 2. Spawning Mode = 1 (Clouds only), but NO clouds present (Density = 0)
         mockConfig.mockCloudDensity = 0
-        sceneManager.update(10.0f) // let all clouds fade out and get removed
+        repeat(40) { sceneManager.update(0.1f) } // let all clouds fade out and get removed
         
-        // Deactivate the lightning
-        val activeField = l.javaClass.getDeclaredField("isActive").apply { isAccessible = true }
-        activeField.set(l, false)
-        l.parentCloud = null
+        // Deactivate all lightnings so we start clean
+        for (lightning in sceneManager.lightnings) {
+            val field = lightning.javaClass.getDeclaredField("isActive").apply { isAccessible = true }
+            field.set(lightning, false)
+            lightning.parentCloud = null
+        }
 
         // Trigger another lightning
+        delayField.set(sceneManager, 0.0f)
         timeField.set(sceneManager, 10.0f)
         sceneManager.update(0.1f)
 
@@ -943,5 +946,22 @@ class SceneManagerTest {
         sceneManager.applySwipeWindImpulse(-4.0f)
         val afterNegativeAngle = sceneManager.getCurrentWindAngle()
         assertTrue("Wind angle should increase after negative swipe", afterNegativeAngle > afterPositiveAngle)
+    }
+
+    @Test
+    fun testBgBrightness_normalizedFloat() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+
+        mockConfig.mockBgBrightness = 100
+        assertEquals(1.0f, sceneManager.getBgBrightness(), 0.001f)
+
+        mockConfig.mockBgBrightness = 30
+        assertEquals(0.3f, sceneManager.getBgBrightness(), 0.001f)
+
+        mockConfig.mockBgBrightness = 60
+        assertEquals(0.6f, sceneManager.getBgBrightness(), 0.001f)
+
+        mockConfig.mockBgBrightness = 150
+        assertEquals(1.5f, sceneManager.getBgBrightness(), 0.001f)
     }
 }

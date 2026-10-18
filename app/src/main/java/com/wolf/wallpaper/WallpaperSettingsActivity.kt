@@ -169,6 +169,11 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             "Actívala para que la tormenta cambie sola, alternando ciclos de calma y ráfagas, sin que tengas que ajustar nada manualmente."
         ),
         TutorialStep(
+            R.id.cardGlobalBrightness,
+            "Brillo Global",
+            "Ajusta el nivel de brillo base del fondo y las nubes: en niveles bajos la escena se oscurece y se ilumina con los relámpagos."
+        ),
+        TutorialStep(
             R.id.headerCloudsWind,
             "Nubes y Viento",
             "Toca aquí para desplegar la densidad y velocidad de las nubes, y la dirección/intensidad del viento."
@@ -186,7 +191,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         TutorialStep(
             R.id.headerBackground,
             "Fondo",
-            "Elige la imagen o color que se ve detrás de la tormenta, y su brillo."
+            "Elige la imagen o color que se ve detrás de la tormenta (paisaje, negro o foto personalizada)."
         ),
         TutorialStep(
             R.id.btnStormHelp,

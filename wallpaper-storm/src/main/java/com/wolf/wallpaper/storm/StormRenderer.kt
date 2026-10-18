@@ -100,6 +100,7 @@ class StormRenderer(
     private var cloudBgScaleHandle = -1
     private var cloudCloudScaleHandle = -1
     private var cloudNoiseTextureHandle = -1
+    private var cloudBgBrightnessHandle = -1
 
     private var rainMvpHandle = -1
     private var rainColorHandleCached = -1
@@ -286,6 +287,7 @@ class StormRenderer(
         cloudBgScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgScale")
         cloudCloudScaleHandle = GLES30.glGetUniformLocation(cloudProgram, "uCloudScale")
         cloudNoiseTextureHandle = GLES30.glGetUniformLocation(cloudProgram, "uNoiseTexture")
+        cloudBgBrightnessHandle = GLES30.glGetUniformLocation(cloudProgram, "uBgBrightness")
 
         rainMvpHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
         rainColorHandleCached = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
@@ -506,6 +508,7 @@ class StormRenderer(
         val cloudColorHandle = cloudCloudColorHandle
         val heightFactorHandle = cloudHeightFactorHandle
         GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
+        GLES30.glUniform1f(cloudBgBrightnessHandle, sceneManager.getBgBrightness())
 
         // Bind additional uniforms for refraction and dark god rays
         val timeHandle = cloudTimeHandle

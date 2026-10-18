@@ -26,6 +26,7 @@ uniform highp vec2 uCloudScale;
 
 // Volumetric shadow rays uniform (feeds the noise-texture lookup in GetDarkGodRays)
 uniform highp vec2 uLightningPos;
+uniform float uBgBrightness;
 
 // Small tileable grid of prebaked random values used by noise()/fbm() for the
 // Dark God Rays shadowing. Sampling a texture (hardware-filtered) replaces the
@@ -123,6 +124,9 @@ void main() {
     float screenGrad = mix(1.15, 0.75, normY);
     baseColor *= screenGrad;
 
+    // Background brightness scaling: at low brightness, clouds are dimmed to match the dark night/storm sky
+    baseColor *= uBgBrightness;
+
     // Add internal lightning illumination
     vec3 flashLight = texColor.rgb * uFlashColor * uFlashIntensity * 1.5;
 
@@ -132,5 +136,9 @@ void main() {
     float darkRay = GetDarkGodRays(ndc, uLightningPos, uFlashIntensity, uTime, uAspectRatio);
     finalColor *= darkRay;
 
-    fragColor = vec4(finalColor, texColor.a * uOpacity);
+    // Cloud visibility factor: at low brightness, clouds are subtle/faint and surge to full opacity during a lightning flash
+    float flashAlphaBoost = clamp(uFlashIntensity * 2.0, 0.0, 1.0);
+    float cloudAlphaFactor = clamp(mix(0.35, 1.0, clamp(uBgBrightness, 0.0, 1.0)) + flashAlphaBoost, 0.0, 1.0);
+
+    fragColor = vec4(finalColor, texColor.a * uOpacity * cloudAlphaFactor);
 }
