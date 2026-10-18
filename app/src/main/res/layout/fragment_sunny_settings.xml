@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -16,7 +16,7 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false">
 
-        <!-- Botón de Ayuda: resumen de las secciones y cómo afectan al fondo -->
+        <!-- BotÃ³n de Ayuda: resumen de las secciones y cÃ³mo afectan al fondo -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Selecciona cómo se comporta el ciclo temporal en tu pantalla"
+                    android:text="Selecciona cÃ³mo se comporta el ciclo temporal en tu pantalla"
                     android:textColor="@color/settings_text_tertiary"
                     android:textSize="12sp"
                     android:layout_marginBottom="12dp" />
@@ -75,7 +75,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     
-                    <!-- Día Button -->
+                    <!-- DÃ­a Button -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardTimeModeDay"
                         android:layout_width="0dp"
@@ -416,16 +416,19 @@
                         android:layout_marginBottom="12dp"
                         android:scrollbars="none"
                         android:requiresFadingEdge="horizontal"
-                        android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                         <LinearLayout
                             android:id="@+id/spinnerSunnyBackground"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:paddingBottom="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp" />
+                            android:paddingTop="4dp" />
                     </HorizontalScrollView>
 
                     <!-- Gallery Background Selector for Sunny -->
@@ -499,7 +502,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 3. Configuración del Sol Card (Always visible inline when Day/Combined/Clock) -->
+        <!-- 3. ConfiguraciÃ³n del Sol Card (Always visible inline when Day/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnySun"
             android:layout_width="match_parent"
@@ -632,16 +635,19 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                             <LinearLayout
                                 android:id="@+id/spinnerSunSize"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
 
                         <!-- Sun Pulsation Speed -->
@@ -672,16 +678,19 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                             <LinearLayout
                                 android:id="@+id/spinnerSunSpeed"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
                     </LinearLayout>
 
@@ -701,7 +710,12 @@
                         android:layout_height="wrap_content"
                         android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                         android:layout_marginBottom="12dp">
 
                         <LinearLayout
@@ -709,14 +723,12 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
                             android:paddingBottom="8dp"
-                            android:paddingTop="4dp"
-                            android:paddingStart="4dp"
-                            android:paddingEnd="4dp">
+                            android:paddingTop="4dp">
 
                             <!-- Card 0: Noon Blue -->
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeNoon"
-                                android:layout_width="92dp"
+                                android:layout_width="86dp"
                                 android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -747,7 +759,7 @@
                             <!-- Card 1: Sunset Orange -->
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeSunset"
-                                android:layout_width="92dp"
+                                android:layout_width="86dp"
                                 android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -778,7 +790,7 @@
                             <!-- Card 2: Purple Dusk -->
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeDusk"
-                                android:layout_width="92dp"
+                                android:layout_width="86dp"
                                 android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -809,7 +821,7 @@
                             <!-- Card 3: Custom Gradient -->
                             <com.google.android.material.card.MaterialCardView
                                 android:id="@+id/cardSunnyThemeCustom"
-                                android:layout_width="92dp"
+                                android:layout_width="86dp"
                                 android:layout_height="92dp"
                                 android:layout_marginEnd="10dp"
                                 app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -987,7 +999,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="12dp">
 
                             <LinearLayout
@@ -995,14 +1012,12 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp">
+                                android:paddingTop="4dp">
 
                                 <!-- Card 0: Left to Right -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirL2R"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1023,7 +1038,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="→"
+                                                android:text="â†’"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1041,7 +1056,7 @@
                                 <!-- Card 1: Right to Left -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirR2L"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1062,7 +1077,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="←"
+                                                android:text="â†"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1080,7 +1095,7 @@
                                 <!-- Card 2: Stationary -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirStationary"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1101,7 +1116,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="⚫"
+                                                android:text="âš«"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="16sp"
                                                 android:layout_gravity="center" />
@@ -1119,7 +1134,7 @@
                                  <!-- Card 3: Random -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirRandom"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1159,7 +1174,7 @@
                                 <!-- Card 4: Chaotic -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardSunDirChaotic"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -1179,7 +1194,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="🌀"
+                                                android:text="ðŸŒ€"
                                                 android:textColor="#FF5722"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1231,16 +1246,19 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                                 android:requiresFadingEdge="horizontal"
-                                android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                                 <LinearLayout
                                     android:id="@+id/spinnerSunMoveSpeed"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp" />
+                                    android:paddingTop="4dp" />
                             </HorizontalScrollView>
                         </LinearLayout>
 
@@ -1268,21 +1286,24 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
 
                                 <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp">
+                                    android:paddingTop="4dp">
 
                                     <!-- Card 0: Top Left -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosTopLeft"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1320,7 +1341,7 @@
                                     <!-- Card 1: Top Right -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosTopRight"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1358,7 +1379,7 @@
                                     <!-- Card 2: Center -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosCenter"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1395,7 +1416,7 @@
                                     <!-- Card 3: Left Edge -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosLeft"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1433,7 +1454,7 @@
                                     <!-- Card 4: Right Edge -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosRight"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -1471,7 +1492,7 @@
                                     <!-- Card 5: Custom (Personalizado) -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardSunPosCustom"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -1662,16 +1683,19 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                             <LinearLayout
                                 android:id="@+id/spinnerSunnyGodRaysIntensity"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
                     </LinearLayout>
 
@@ -1739,16 +1763,19 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp">
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp">
                             <LinearLayout
                                 android:id="@+id/spinnerSunnyLensFlareIntensity"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
 
                         <!-- Chromatic Aberration Toggle -->
@@ -1865,7 +1892,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="8dp">
                             <LinearLayout
                                 android:id="@+id/spinnerCombinedSunSize"
@@ -1873,9 +1905,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
 
                     </LinearLayout>
@@ -1884,7 +1914,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 4. Configuración de Luna y Estrellas Card (Always visible inline when Night/Combined/Clock) -->
+        <!-- 4. ConfiguraciÃ³n de Luna y Estrellas Card (Always visible inline when Night/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyMoon"
             android:layout_width="match_parent"
@@ -2005,7 +2035,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutMoonPhaseCards"
@@ -2013,13 +2048,11 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp">
+                                    android:paddingTop="4dp">
                                     <!-- Card 0: Nueva -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase0"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2052,10 +2085,10 @@
                                                 android:gravity="center" />
                                         </LinearLayout>
                                     </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 1: Creciente Cóncava -->
+                                    <!-- Card 1: Creciente CÃ³ncava -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase1"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2091,7 +2124,7 @@
                                     <!-- Card 2: Cuarto Creciente -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase2"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2127,7 +2160,7 @@
                                     <!-- Card 3: Creciente Convexa -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase3"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2163,7 +2196,7 @@
                                     <!-- Card 4: Luna Llena -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase4"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2199,7 +2232,7 @@
                                     <!-- Card 5: Menguante Convexa -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase5"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2235,7 +2268,7 @@
                                     <!-- Card 6: Cuarto Menguante -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase6"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2268,10 +2301,10 @@
                                                 android:gravity="center" />
                                         </LinearLayout>
                                     </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 7: Menguante Cóncava -->
+                                    <!-- Card 7: Menguante CÃ³ncava -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase7"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2321,7 +2354,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutMoonDirectionCards"
@@ -2329,13 +2367,11 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp">
+                                    android:paddingTop="4dp">
                                     <!-- Card 0: Left to Right -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirL2R"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2356,7 +2392,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="→"
+                                                    android:text="â†’"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2373,7 +2409,7 @@
                                     <!-- Card 1: Right to Left -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirR2L"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2394,7 +2430,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="←"
+                                                    android:text="â†"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2411,7 +2447,7 @@
                                     <!-- Card 2: Static -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirStatic"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2432,7 +2468,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="⚫"
+                                                    android:text="âš«"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="16sp"
                                                     android:layout_gravity="center" />
@@ -2449,7 +2485,7 @@
                                     <!-- Card 3: Random -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirRandom"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2489,7 +2525,7 @@
                                     <!-- Card 4: Chaotic -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonDirChaotic"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -2509,7 +2545,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="🌀"
+                                                    android:text="ðŸŒ€"
                                                     android:textColor="#FF5722"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2559,7 +2595,12 @@
                                     android:layout_height="wrap_content"
                                     android:scrollbars="none"
                                     android:requiresFadingEdge="horizontal"
-                                    android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                     android:layout_marginBottom="8dp">
                                     <LinearLayout
                                         android:id="@+id/spinnerMoonMoveSpeed"
@@ -2567,9 +2608,7 @@
                                         android:layout_height="wrap_content"
                                         android:orientation="horizontal"
                                         android:paddingBottom="8dp"
-                                        android:paddingTop="4dp"
-                                        android:paddingStart="4dp"
-                                        android:paddingEnd="4dp" />
+                                        android:paddingTop="4dp" />
                                 </HorizontalScrollView>
                             </LinearLayout>
 
@@ -2595,20 +2634,23 @@
                                     android:layout_height="wrap_content"
                                     android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                     android:layout_marginBottom="12dp">
                                     <LinearLayout
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:orientation="horizontal"
                                         android:paddingBottom="8dp"
-                                        android:paddingTop="4dp"
-                                        android:paddingStart="4dp"
-                                        android:paddingEnd="4dp">
+                                        android:paddingTop="4dp">
                                         <!-- Card 0: Top Left -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosTopLeft"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2645,7 +2687,7 @@
                                         <!-- Card 1: Top Right -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosTopRight"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2682,7 +2724,7 @@
                                         <!-- Card 2: Center -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosCenter"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2718,7 +2760,7 @@
                                         <!-- Card 3: Mid Left -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosMidLeft"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2755,7 +2797,7 @@
                                         <!-- Card 4: Mid Right -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosMidRight"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             android:layout_marginEnd="10dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2792,7 +2834,7 @@
                                         <!-- Card 5: Custom -->
                                         <com.google.android.material.card.MaterialCardView
                                             android:id="@+id/cardMoonPosCustom"
-                                            android:layout_width="92dp"
+                                            android:layout_width="86dp"
                                             android:layout_height="92dp"
                                             app:cardBackgroundColor="@color/settings_card_bg_alt"
                                             app:cardCornerRadius="12dp"
@@ -2928,7 +2970,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/layoutStarColorCards"
@@ -2936,13 +2983,11 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp">
+                                    android:paddingTop="4dp">
                                     <!-- Card 0: White -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorWhite"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -2978,7 +3023,7 @@
                                     <!-- Card 1: Blue -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorBlue"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3014,7 +3059,7 @@
                                     <!-- Card 2: Warm -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorWarm"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3050,7 +3095,7 @@
                                     <!-- Card 3: Pink -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorPink"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3086,7 +3131,7 @@
                                     <!-- Card 4: Green -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorGreen"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         android:layout_marginEnd="10dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3122,7 +3167,7 @@
                                     <!-- Card 5: Mixed -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardStarColorMixed"
-                                        android:layout_width="92dp"
+                                        android:layout_width="86dp"
                                         android:layout_height="92dp"
                                         app:cardBackgroundColor="@color/settings_card_bg_alt"
                                         app:cardCornerRadius="12dp"
@@ -3167,7 +3212,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                                 android:requiresFadingEdge="horizontal"
-                                android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="8dp">
                                 <LinearLayout
                                     android:id="@+id/spinnerStarDensity"
@@ -3175,9 +3225,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp" />
+                                    android:paddingTop="4dp" />
                             </HorizontalScrollView>
                         </LinearLayout>
 
@@ -3257,7 +3305,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                                 android:requiresFadingEdge="horizontal"
-                                android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="8dp">
                                 <LinearLayout
                                     android:id="@+id/spinnerShootingStarsDensity"
@@ -3265,9 +3318,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp" />
+                                    android:paddingTop="4dp" />
                             </HorizontalScrollView>
                         </LinearLayout>
 
@@ -3340,7 +3391,12 @@
                                 android:layout_height="wrap_content"
                                 android:scrollbars="none"
                                 android:requiresFadingEdge="horizontal"
-                                android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                                 android:layout_marginBottom="12dp">
                                 <LinearLayout
                                     android:id="@+id/spinnerNebulaIntensity"
@@ -3348,9 +3404,7 @@
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
                                     android:paddingBottom="8dp"
-                                    android:paddingTop="4dp"
-                                    android:paddingStart="4dp"
-                                    android:paddingEnd="4dp" />
+                                    android:paddingTop="4dp" />
                             </HorizontalScrollView>
 
                             <LinearLayout
@@ -3389,7 +3443,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Color Núcleo"
+                                                android:text="Color NÃºcleo"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:textStyle="bold" />
@@ -3467,7 +3521,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="8dp">
                             <LinearLayout
                                 android:id="@+id/spinnerCombinedMoonSize"
@@ -3475,9 +3534,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
 
                         <!-- Combined Moon Phase -->
@@ -3524,7 +3581,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="12dp">
                             <LinearLayout
                                 android:id="@+id/layoutCombinedMoonPhaseCards"
@@ -3532,13 +3594,11 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp">
+                                android:paddingTop="4dp">
                                 <!-- Card 0: Nueva -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase0"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3571,10 +3631,10 @@
                                             android:gravity="center" />
                                     </LinearLayout>
                                 </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 1: Creciente Cóncava -->
+                                <!-- Card 1: Creciente CÃ³ncava -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase1"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3610,7 +3670,7 @@
                                 <!-- Card 2: Cuarto Creciente -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase2"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3646,7 +3706,7 @@
                                 <!-- Card 3: Creciente Convexa -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase3"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3682,7 +3742,7 @@
                                 <!-- Card 4: Luna Llena -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase4"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3718,7 +3778,7 @@
                                 <!-- Card 5: Menguante Convexa -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase5"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3754,7 +3814,7 @@
                                 <!-- Card 6: Cuarto Menguante -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase6"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3787,10 +3847,10 @@
                                             android:gravity="center" />
                                     </LinearLayout>
                                 </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 7: Menguante Cóncava -->
+                                <!-- Card 7: Menguante CÃ³ncava -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase7"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -3840,7 +3900,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="12dp">
                             <LinearLayout
                                 android:id="@+id/layoutCombinedStarColorCards"
@@ -3848,13 +3913,11 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp">
+                                android:paddingTop="4dp">
                                 <!-- Card 0: White -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorWhite"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3890,7 +3953,7 @@
                                 <!-- Card 1: Blue -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorBlue"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3926,7 +3989,7 @@
                                 <!-- Card 2: Warm -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorWarm"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3962,7 +4025,7 @@
                                 <!-- Card 3: Pink -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorPink"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -3998,7 +4061,7 @@
                                 <!-- Card 4: Green -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorGreen"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     android:layout_marginEnd="10dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
@@ -4034,7 +4097,7 @@
                                 <!-- Card 5: Mixed -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedStarColorMixed"
-                                    android:layout_width="92dp"
+                                    android:layout_width="86dp"
                                     android:layout_height="92dp"
                                     app:cardBackgroundColor="@color/settings_card_bg_alt"
                                     app:cardCornerRadius="12dp"
@@ -4079,7 +4142,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="8dp">
                             <LinearLayout
                                 android:id="@+id/spinnerCombinedStarDensity"
@@ -4087,9 +4155,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
 
                         </LinearLayout>
@@ -4098,7 +4164,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 5. Configuración de Transición Card (Always visible inline when Combined) -->
+        <!-- 5. ConfiguraciÃ³n de TransiciÃ³n Card (Always visible inline when Combined) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyCombined"
             android:layout_width="match_parent"
@@ -4152,7 +4218,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Configuración de Transición"
+                            android:text="ConfiguraciÃ³n de TransiciÃ³n"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -4247,7 +4313,12 @@
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
                             android:requiresFadingEdge="horizontal"
-                            android:fadingEdgeLength="24dp"
+                        android:layout_marginStart="-8dp"
+                        android:layout_marginEnd="-8dp"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clipToPadding="false"
+                        android:fadingEdgeLength="32dp"
                             android:layout_marginBottom="8dp">
                             <LinearLayout
                                 android:id="@+id/spinnerGradientCycleSpeed"
@@ -4255,9 +4326,7 @@
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
                                 android:paddingBottom="8dp"
-                                android:paddingTop="4dp"
-                                android:paddingStart="4dp"
-                                android:paddingEnd="4dp" />
+                                android:paddingTop="4dp" />
                         </HorizontalScrollView>
                     </LinearLayout>
 

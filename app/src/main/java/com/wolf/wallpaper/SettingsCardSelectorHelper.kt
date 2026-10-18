@@ -78,12 +78,13 @@ object SettingsCardSelectorHelper {
 
         val hasPreview = previewFactory != null
         val cardHeight = if (hasPreview) 92.px() else 40.px()
-        val cardWidth = if (hasPreview) 92.px() else LinearLayout.LayoutParams.WRAP_CONTENT
+        val cardWidth = if (hasPreview) 86.px() else LinearLayout.LayoutParams.WRAP_CONTENT
 
         for (i in options.indices) {
+            val isLast = i == options.indices.last
             val card = MaterialCardView(context).apply {
                 layoutParams = LinearLayout.LayoutParams(cardWidth, cardHeight).apply {
-                    setMargins(0, 0, 10.px(), 0)
+                    setMargins(0, 0, if (isLast) 0 else 10.px(), 0)
                 }
                 radius = if (hasPreview) 12.px().toFloat() else 8.px().toFloat()
                 strokeWidth = 1.px()
