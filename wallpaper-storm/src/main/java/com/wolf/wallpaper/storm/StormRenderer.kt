@@ -104,6 +104,9 @@ class StormRenderer(
 
     private var rainMvpHandle = -1
     private var rainColorHandleCached = -1
+    private var rainBgBrightnessHandle = -1
+    private var rainFlashIntensityHandle = -1
+    private var rainFlashColorHandle = -1
 
     private var windMvpHandle = -1
     private var windColorHandleCached = -1
@@ -291,6 +294,9 @@ class StormRenderer(
 
         rainMvpHandle = GLES30.glGetUniformLocation(rainProgram, "uMVPMatrix")
         rainColorHandleCached = GLES30.glGetUniformLocation(rainProgram, "uRainColor")
+        rainBgBrightnessHandle = GLES30.glGetUniformLocation(rainProgram, "uBgBrightness")
+        rainFlashIntensityHandle = GLES30.glGetUniformLocation(rainProgram, "uFlashIntensity")
+        rainFlashColorHandle = GLES30.glGetUniformLocation(rainProgram, "uFlashColor")
 
         windMvpHandle = GLES30.glGetUniformLocation(windProgram, "uMVPMatrix")
         windColorHandleCached = GLES30.glGetUniformLocation(windProgram, "uWindColor")
@@ -485,7 +491,7 @@ class StormRenderer(
         }
 
         drawBackground(sceneManager.getBackgroundIndex(), stormFlash)
-        drawRain(cloudRainBuffer, sceneManager.getRainColorIndex())
+        drawRain(cloudRainBuffer, sceneManager.getRainColorIndex(), stormFlash)
         drawLightning(sceneManager.lightnings, stormFlash)
         if (sceneManager.isWindLinesEnabled() && sceneManager.getWindIntensity() >= 50) {
             sceneManager.sortWindLinesByDepth()
@@ -493,7 +499,7 @@ class StormRenderer(
         }
         sceneManager.sortCloudsByDepth()
         drawClouds(sceneManager.getClouds(), stormFlash)
-        drawRain(edgeRainBuffer, sceneManager.getRainColorIndex())
+        drawRain(edgeRainBuffer, sceneManager.getRainColorIndex(), stormFlash)
     }
 
     private fun drawClouds(clouds: List<StormCloud>, globalLightningFlash: LightningFlashAggregate) {
@@ -629,18 +635,61 @@ class StormRenderer(
         GLES30.glDisableVertexAttribArray(1)
     }
 
-    private fun drawRain(rainDrops: List<RainDrop>, colorIndex: Int) {
+    private fun drawRain(
+        rainDrops: List<RainDrop>,
+        colorIndex: Int,
+        globalLightningFlash: LightningFlashAggregate
+    ) {
         if (rainDrops.isEmpty()) return
 
         GLES30.glUseProgram(rainProgram)
         val mvpMatrixHandle = rainMvpHandle
         val colorHandle = rainColorHandleCached
+        val bgBrightnessHandle = rainBgBrightnessHandle
+        val flashIntensityHandle = rainFlashIntensityHandle
+        val flashColorHandle = rainFlashColorHandle
         
         Matrix.multiplyMM(mvpMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
         GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
 
         val color = getRainColor(colorIndex)
         GLES30.glUniform4fv(colorHandle, 1, color, 0)
+        GLES30.glUniform1f(bgBrightnessHandle, sceneManager.getBgBrightness())
+
+        val flashIntensity: Float
+        val flashR: Float
+        val flashG: Float
+        val flashB: Float
+        if (globalLightningFlash.maxIntensity > 0f) {
+            flashIntensity = globalLightningFlash.maxIntensity.coerceIn(0f, 1.5f)
+            flashR = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedR / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+            flashG = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedG / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+            flashB = if (globalLightningFlash.activeCount > 0) (globalLightningFlash.resolvedB / globalLightningFlash.activeCount).coerceIn(0f, 1f) else 1f
+        } else {
+            var maxCloudIntensity = 0f
+            var cloudFlashColor: FloatArray? = null
+            if (sceneManager.isCloudFlashEnabled()) {
+                for (cloud in sceneManager.getClouds()) {
+                    if (cloud.flashIntensity > maxCloudIntensity) {
+                        maxCloudIntensity = cloud.flashIntensity
+                        cloudFlashColor = cloud.flashColor
+                    }
+                }
+            }
+            if (maxCloudIntensity > 0f) {
+                flashIntensity = maxCloudIntensity.coerceIn(0f, 1.5f)
+                flashR = cloudFlashColor?.get(0) ?: 1f
+                flashG = cloudFlashColor?.get(1) ?: 1f
+                flashB = cloudFlashColor?.get(2) ?: 1f
+            } else {
+                flashIntensity = 0f
+                flashR = 1f
+                flashG = 1f
+                flashB = 1f
+            }
+        }
+        GLES30.glUniform1f(flashIntensityHandle, flashIntensity)
+        GLES30.glUniform3f(flashColorHandle, flashR, flashG, flashB)
 
         // Rain drops are already sorted by depth (z) in place by SceneManager.sortRainDropsByDepth()
         val sortedDrops = rainDrops

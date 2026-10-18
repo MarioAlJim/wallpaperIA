@@ -321,7 +321,7 @@ void main() {
     // UV sample, applied after the storm dimming so it still reads as glass catching light
     // even in the darkest parts of the scene.
     if (uScreenDropletsEnabled > 0.5 && droplet.w > 0.5) {
-        finalColor += baseTexColor * droplet.z * 0.9;
+        finalColor += baseTexColor * droplet.z * 0.9 * clamp(uBgBrightness, 0.35, 1.5);
     }
 
     fragColor = vec4(finalColor, 1.0);

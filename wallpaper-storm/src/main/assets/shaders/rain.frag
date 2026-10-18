@@ -3,6 +3,9 @@
 precision mediump float;
 
 uniform vec4 uRainColor;
+uniform float uBgBrightness;
+uniform float uFlashIntensity;
+uniform vec3 uFlashColor;
 
 in float vDepth;
 in vec2 vTexCoord;
@@ -76,12 +79,20 @@ void main() {
     // Lens glow: brightest at the centre of the head
     float lensGlow = 0.4 + 0.6 * normal.z;
 
-    vec3 baseColor      = uRainColor.rgb;
+    vec3 baseColor      = uRainColor.rgb * uBgBrightness;
     vec3 highlightColor = vec3(1.0);
-    vec3 finalColor     = mix(baseColor, highlightColor, spec * 0.8)
+    vec3 finalColor     = mix(baseColor, highlightColor, spec * 0.8 * uBgBrightness)
                         + vec3(0.25) * fresnel * baseColor;
 
-    float alpha = uRainColor.a * vDepth * vCloudOpacity * edgeAlpha * verticalGradient * lensGlow;
+    // Lightning flash illuminates the rain drops with the flash's intensity and color
+    vec3 flashLight = uFlashColor * uFlashIntensity * 1.5;
+    finalColor += flashLight * (spec * 0.9 + 0.35 * fresnel + 0.25);
+
+    // Rain visibility factor: at low brightness, rain is subtle and dims, surging with lightning flash
+    float flashAlphaBoost = clamp(uFlashIntensity * 2.0, 0.0, 1.0);
+    float rainAlphaFactor = clamp(mix(0.30, 1.0, clamp(uBgBrightness, 0.0, 1.0)) + flashAlphaBoost, 0.0, 1.0);
+
+    float alpha = uRainColor.a * vDepth * vCloudOpacity * edgeAlpha * verticalGradient * lensGlow * rainAlphaFactor;
 
     fragColor = vec4(finalColor, alpha);
 }
