@@ -46,6 +46,9 @@ class SceneManager(
         // Cloud count mapping (density 0-100 -> cloud count, max 10)
         private const val MAX_CLOUD_COUNT = 10
 
+        // Maximum cloud textures loaded in pool to optimize startup time and VRAM usage
+        const val MAX_CLOUD_TEXTURES = 12
+
         // Rain drop count mapping (intensity 0-100 -> drop count, max 1000)
         private const val MAX_RAIN_DROP_COUNT = 1000
 
@@ -451,7 +454,7 @@ class SceneManager(
         val count = if (context == null) 1 else try {
             val files = context.assets.list("clouds") ?: emptyArray()
             val pngCount = files.count { it.endsWith(".png") }
-            if (pngCount > 0) pngCount else 1
+            if (pngCount > 0) minOf(pngCount, MAX_CLOUD_TEXTURES) else 1
         } catch (e: Exception) {
             1
         }

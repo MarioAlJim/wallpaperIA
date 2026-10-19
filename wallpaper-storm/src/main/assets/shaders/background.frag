@@ -73,6 +73,12 @@ float fbm(highp vec2 p) {
 // both ease down together (see `shrink` below) so a droplet visibly shrinks and fades out at
 // the same time instead of vanishing at a hard cutoff.
 vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, float sizeFactor, vec3 rainColor, out float borderVal, out float fadeVal) {
+    if (sizeFactor <= 0.001 || uRainIntensity <= 0.001) {
+        borderVal = 1.0;
+        fadeVal = 0.0;
+        return vec4(0.0);
+    }
+
     // 12 lanes tall on screen regardless of aspect ratio. Grid-cell math (st/ip/fp/localPos)
     // stays highp: at mediump, this jitters visibly as the droplet grid "swims".
     highp vec2 scale = vec2(12.0 * aspect, 12.0);
@@ -96,16 +102,9 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
         }
     }
 
-    // Droplets only ever move straight down (never sideways), but a lane's horizontal jitter
-    // (laneOffsetX below) plus a large enough radius can still push a droplet's footprint past
-    // its own column's half-width — and each column hashes to a fully independent lane, so a
-    // fragment in the next column over won't render any part of a neighbor's droplet unless we
-    // explicitly check that neighboring column too. Skipping that (checking x=0 only) is what
-    // was clipping wide/offset droplets to a hard vertical cut at the column boundary, so the
-    // 3 nearest columns are checked for every row instead.
-    // We also check one row below (y = 1) to prevent the top half of spawning droplets from
-    // being clipped by the cell boundary at t=0, making them appear instantaneously.
-    for (int y = -1; y <= 9; y++) {
+    // Optimized 3x3 neighborhood: checks adjacent columns (-1..1) and immediate vertical span (-1..1),
+    // reducing loop iterations from 33 (11x3) down to 9 (3x3) - a 73% reduction in fragment load.
+    for (int y = -1; y <= 1; y++) {
         for (int x = -1; x <= 1; x++) {
             highp vec2 neighbor = vec2(float(x), float(y));
             highp vec2 cell = ip + neighbor;
@@ -118,11 +117,9 @@ vec4 GetDropletEffects(highp vec2 uv, highp float time, highp float aspect, floa
             // This lane's fall distance and speed are fixed for its whole lifetime; only its
             // vertical position (via t below) changes from one frame to the next. Kept highp:
             // fallTime accumulates uTime (unbounded over hours of wallpaper uptime), so mediump
-            // would eventually make the fall animation glitch. The extra / 2.0 doubles each
-            // droplet's on-screen lifetime (half the per-second progression rate = twice as long
-            // to fall the same fallDist) without changing anything else about its motion.
-            float fallDist = mix(3.0, 8.0, Hash(cell + vec2(12.3, 45.6)));
-            float speed = mix(0.12, 0.4, Hash(cell + vec2(4.4, 4.4))) / fallDist / 2.0;
+            // would eventually make the fall animation glitch.
+            float fallDist = mix(1.2, 2.0, Hash(cell + vec2(12.3, 45.6)));
+            float speed = mix(0.15, 0.45, Hash(cell + vec2(4.4, 4.4))) / fallDist / 2.0;
 
             highp float fallTime = time * speed + h_cell * 20.0;
             highp float loopId = floor(fallTime);
@@ -262,7 +259,7 @@ void main() {
 
     vec4 droplet = vec4(0.0);
     highp vec2 distortedUV = vTexCoord;
-    if (uScreenDropletsEnabled > 0.5) {
+    if (uScreenDropletsEnabled > 0.5 && uScreenDropletsSize > 0.001 && uRainIntensity > 0.001) {
         // Convert screen coordinates to screen-space UV (0 to 1) for isotropic droplet calculations
         highp vec2 screenUV = vec2((vScreenPos.x + 1.0) * 0.5, (vScreenPos.y + 1.0) * 0.5);
         // Get the droplet mask/fade (droplet.xy contains the lens refraction distortion offset in screen-space UV).

@@ -171,7 +171,7 @@ class StormRenderer(
         try {
             val assetManager = context.assets
             val files = assetManager.list("clouds") ?: emptyArray()
-            val sortedFiles = files.filter { it.endsWith(".png") }.sorted()
+            val sortedFiles = files.filter { it.endsWith(".png") }.sorted().take(SceneManager.MAX_CLOUD_TEXTURES)
             for (file in sortedFiles) {
                 val tex = loadTexture(context, "clouds/$file", maxSize = 512)
                 if (tex != 0) {
