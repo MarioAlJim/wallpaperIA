@@ -59,61 +59,17 @@ class SceneManagerTest {
         override fun isCloudFlashEnabled(): Boolean = mockCloudFlashEnabled
         override fun isInteractiveLightningEnabled(): Boolean = mockInteractiveLightningEnabled
         override fun getActiveEffect(): Int = mockActiveEffect
-        override fun getSunSize(): Int = mockSunSize
-        override fun getSunSpeed(): Int = mockSunSpeed
-        override fun getSunnyTheme(): Int = mockSunnyTheme
-        override fun getSunPathDirection(): Int = mockSunPathDirection
-        override fun getSunMoveSpeed(): Int = mockSunMoveSpeed
-        override fun getSunnyBackgroundIndex(): Int = mockSunnyBackgroundIndex
-        override fun getSunStationaryPosition(): Int = 0
-        override fun getSunCustomX(): Int = 0
-        override fun getSunCustomY(): Int = 0
-        override fun getMoonCustomX(): Int = 0
-        override fun getMoonCustomY(): Int = 0
-        override fun getSunnyCustomSkyTopColor(): Int = 0
-        override fun getSunnyCustomSkyBottomColor(): Int = 0
-        override fun isSunnyGodRaysEnabled(): Boolean = false
-        override fun getSunnyGodRaysIntensity(): Int = 0
-        override fun isSunnyLensFlareEnabled(): Boolean = false
-        override fun isSunnyLensFlareChromaticEnabled(): Boolean = false
-        override fun getSunnyLensFlareIntensity(): Int = 0
-        override fun isSunnyGyroEnabled(): Boolean = false
-        override fun isSunnyTouchBurstEnabled(): Boolean = false
         override fun isScreenDropletsEnabled(): Boolean = false
         override fun getScreenDropletsSize(): Int = 100
         override fun getRainSpawnMode(): Int = 0
         override fun getLightningSpawnMode(): Int = mockLightningSpawnMode
         override fun isWindLinesEnabled(): Boolean = mockWindLinesEnabled
         override fun getWindLinesIntensity(): Int = mockWindLinesIntensity
-        override fun getTimeMode(): Int = 0
-        override fun getMoonPhase(): Int = 0
-        override fun getMoonPathDirection(): Int = 0
-        override fun getMoonMoveSpeed(): Int = 0
-        override fun getMoonStationaryPosition(): Int = 0
-        override fun getStarColorIndex(): Int = 0
-        override fun getStarDensity(): Int = 0
-        override fun getStarMode(): Int = 0
-        override fun getNightCloudDensity(): Int = 0
-        override fun getGradientCycleSpeed(): Int = 0
-        override fun getConstellationSeed(): Int = 2024
-        override fun isNebulaEnabled(): Boolean = true
-        override fun getNebulaIntensity(): Int = 55
-        override fun getNebulaColor(): Int = 0xFF8E4FDB.toInt()
-        override fun getNebulaColor2(): Int = 0xFF00B0FF.toInt()
-        override fun getNebulaSeed(): Int = 4242
-        override fun getCombinedSunSize(): Int = 50
-        override fun getCombinedMoonSize(): Int = 50
-        override fun getCombinedMoonPhase(): Int = 4
-        override fun getCombinedStarDensity(): Int = 60
-        override fun getCombinedStarColorIndex(): Int = 0
-        override fun getCombinedPathDirection(): Int = 0
-        override fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean = false
-        override fun isShootingStarsEnabled(): Boolean = true
-        override fun getShootingStarsDensity(): Int = 50
-        override fun isFirefliesEnabled(): Boolean = true
-        override fun isRainbowAlwaysEnabled(): Boolean = false
+        override fun isSunnyGyroEnabled(): Boolean = false
         var mockStormVariableEnabled = false
         override fun isStormVariableEnabled(): Boolean = mockStormVariableEnabled
+        var mockStormVariableDuration = 1
+        override fun getStormVariableDuration(): Int = mockStormVariableDuration
         override fun getBgBrightness(): Int = mockBgBrightness
     }
 
@@ -836,9 +792,9 @@ class SceneManagerTest {
         val sceneManager = SceneManager(mockContext, mockConfig)
         sceneManager.onSurfaceChanged(1080, 1920)
 
-        // 1. Enable variable storm mode
+        // 1. Enable variable storm mode with default duration (Media: Calm 50s, Trans 10s, Med 30s, Chao 25s)
         mockConfig.mockStormVariableEnabled = true
-        // Tick to trigger state evaluation
+        mockConfig.mockStormVariableDuration = 1
         sceneManager.update(0.0f)
 
         val densityField = SceneManager::class.java.getDeclaredField("cloudDensity").apply { isAccessible = true }
@@ -846,37 +802,90 @@ class SceneManagerTest {
         val lightningField = SceneManager::class.java.getDeclaredField("lightningFrequency").apply { isAccessible = true }
         val windField = SceneManager::class.java.getDeclaredField("windIntensity").apply { isAccessible = true }
 
-        // It should start in calm state (overrides density=40, rain=15, wind=15, lightning=10)
+        // Start in Calm state (density=40, rain=15, wind=15, lightning=10)
+        assertEquals(SceneManager.VariableStormPhase.CALM, sceneManager.getStormPhase())
         assertEquals(40, densityField.get(sceneManager) as Int)
         assertEquals(15, rainField.get(sceneManager) as Int)
         assertEquals(10, lightningField.get(sceneManager) as Int)
         assertEquals(15, windField.get(sceneManager) as Int)
 
-        // 2. Advance time past the 60-second calm period (e.g. 61 seconds)
-        // At 60s, isBurstActive becomes true, and transition starts increasing
-        sceneManager.update(61.0f)
-        
-        // After another 15 seconds of transition update, transition factor should be 1.0f (fully burst)
-        sceneManager.update(15.0f)
+        // 2. Advance past Calm (50s) + Transition (10s) -> Enters Medium Phase
+        sceneManager.update(60.0f)
+        assertEquals(SceneManager.VariableStormPhase.MEDIUM_UP, sceneManager.getStormPhase())
+        assertEquals(65, densityField.get(sceneManager) as Int)
+        assertEquals(55, rainField.get(sceneManager) as Int)
+        assertEquals(47, lightningField.get(sceneManager) as Int)
+        assertEquals(55, windField.get(sceneManager) as Int)
 
-        // It should enter full burst state (overrides density=90, rain=95, wind=95, lightning=85)
+        // 3. Advance past Medium (30s) + Transition (10s) -> Enters Chaotic Phase
+        sceneManager.update(40.0f)
+        assertEquals(SceneManager.VariableStormPhase.CHAOTIC, sceneManager.getStormPhase())
         assertEquals(90, densityField.get(sceneManager) as Int)
         assertEquals(95, rainField.get(sceneManager) as Int)
         assertEquals(85, lightningField.get(sceneManager) as Int)
         assertEquals(95, windField.get(sceneManager) as Int)
 
-        // 3. Advance time past the 30-second burst period (e.g. 31 seconds)
-        // isBurstActive becomes false, and transition starts decreasing
-        sceneManager.update(31.0f)
-        
-        // After another 15 seconds of transition update, transition factor should be 0.0f (fully calm)
-        sceneManager.update(15.0f)
+        // 4. Advance past Chaotic (25s) + Transition (10s) -> Enters Medium Down Phase
+        sceneManager.update(35.0f)
+        assertEquals(SceneManager.VariableStormPhase.MEDIUM_DOWN, sceneManager.getStormPhase())
+        assertEquals(65, densityField.get(sceneManager) as Int)
+        assertEquals(55, rainField.get(sceneManager) as Int)
 
-        // It should return to calm state
+        // 5. Advance past Medium Down (30s) + Transition (10s) -> Returns to Calm
+        sceneManager.update(40.0f)
+        assertEquals(SceneManager.VariableStormPhase.CALM, sceneManager.getStormPhase())
         assertEquals(40, densityField.get(sceneManager) as Int)
         assertEquals(15, rainField.get(sceneManager) as Int)
         assertEquals(10, lightningField.get(sceneManager) as Int)
         assertEquals(15, windField.get(sceneManager) as Int)
+    }
+
+    @Test
+    fun testVariableStormPhaseDurationCorta() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        mockConfig.mockStormVariableEnabled = true
+        mockConfig.mockStormVariableDuration = SceneManager.DURATION_CORTA // Corta: Calm 20s, Trans 5s, Med 15s, Chao 15s
+        sceneManager.update(0.0f)
+
+        assertEquals(20.0f, sceneManager.getCalmDuration(), 0.01f)
+        assertEquals(15.0f, sceneManager.getMediumDuration(), 0.01f)
+        assertEquals(15.0f, sceneManager.getChaoticDuration(), 0.01f)
+        assertEquals(5.0f, sceneManager.getTransitionDuration(), 0.01f)
+        assertEquals(SceneManager.VariableStormPhase.CALM, sceneManager.getStormPhase())
+
+        // Past Calm (20s) + Trans (5s) -> Medium
+        sceneManager.update(25.0f)
+        assertEquals(SceneManager.VariableStormPhase.MEDIUM_UP, sceneManager.getStormPhase())
+
+        // Past Medium (15s) + Trans (5s) -> Chaotic
+        sceneManager.update(20.0f)
+        assertEquals(SceneManager.VariableStormPhase.CHAOTIC, sceneManager.getStormPhase())
+    }
+
+    @Test
+    fun testVariableStormPhaseDurationLarga() {
+        val sceneManager = SceneManager(mockContext, mockConfig)
+        sceneManager.onSurfaceChanged(1080, 1920)
+
+        mockConfig.mockStormVariableEnabled = true
+        mockConfig.mockStormVariableDuration = SceneManager.DURATION_LARGA // Larga: Calm 100s, Trans 15s, Med 60s, Chao 45s
+        sceneManager.update(0.0f)
+
+        assertEquals(100.0f, sceneManager.getCalmDuration(), 0.01f)
+        assertEquals(60.0f, sceneManager.getMediumDuration(), 0.01f)
+        assertEquals(45.0f, sceneManager.getChaoticDuration(), 0.01f)
+        assertEquals(15.0f, sceneManager.getTransitionDuration(), 0.01f)
+        assertEquals(SceneManager.VariableStormPhase.CALM, sceneManager.getStormPhase())
+
+        // Past Calm (100s) + Trans (15s) -> Medium
+        sceneManager.update(115.0f)
+        assertEquals(SceneManager.VariableStormPhase.MEDIUM_UP, sceneManager.getStormPhase())
+
+        // Past Medium (60s) + Trans (15s) -> Chaotic
+        sceneManager.update(75.0f)
+        assertEquals(SceneManager.VariableStormPhase.CHAOTIC, sceneManager.getStormPhase())
     }
 
     @Test

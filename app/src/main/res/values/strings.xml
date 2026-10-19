@@ -8,6 +8,13 @@
         <item>Normal</item>
         <item>Claro</item>
     </string-array>
+    <string name="storm_phase_duration_title">Duración de fases</string>
+    <string name="storm_phase_duration_desc">Altera qué tanto dura una configuración tranquila, media y caótica.</string>
+    <string-array name="storm_phase_duration_options">
+        <item>Corta</item>
+        <item>Media</item>
+        <item>Larga</item>
+    </string-array>
     <string name="act_auto">Auto</string>
     <string name="act_claro">Claro</string>
     <string name="act_da_y_noche">Día y Noche</string>

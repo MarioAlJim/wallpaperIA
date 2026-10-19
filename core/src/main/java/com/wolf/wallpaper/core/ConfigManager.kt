@@ -74,6 +74,8 @@ class ConfigManager(context: Context) : ConfigProvider {
         // Storm Variable
         const val KEY_STORM_VARIABLE_ENABLED = "storm_variable_enabled"
         const val DEFAULT_STORM_VARIABLE_ENABLED = false
+        const val KEY_STORM_VARIABLE_DURATION = "storm_variable_duration"
+        const val DEFAULT_STORM_VARIABLE_DURATION = 1 // 0: Corta, 1: Media, 2: Larga
 
         // Lightning Spawn Mode
         const val KEY_LIGHTNING_SPAWN_MODE = "lightning_spawn_mode"
@@ -146,6 +148,9 @@ class ConfigManager(context: Context) : ConfigProvider {
 
     override fun isStormVariableEnabled(): Boolean = storm.isStormVariableEnabled()
     fun setStormVariableEnabled(enabled: Boolean) = storm.setStormVariableEnabled(enabled)
+
+    override fun getStormVariableDuration(): Int = storm.getStormVariableDuration()
+    fun setStormVariableDuration(duration: Int) = storm.setStormVariableDuration(duration)
 
     override fun getLightningSpawnMode(): Int = storm.getLightningSpawnMode()
     fun setLightningSpawnMode(mode: Int) = storm.setLightningSpawnMode(mode)

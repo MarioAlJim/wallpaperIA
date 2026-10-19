@@ -23,6 +23,7 @@ interface ConfigProvider {
     fun isWindLinesEnabled(): Boolean
     fun getWindLinesIntensity(): Int // 0-100
     fun isStormVariableEnabled(): Boolean
+    fun getStormVariableDuration(): Int = 1 // 0: Corta, 1: Media, 2: Larga
     fun getLightningSpawnMode(): Int
     fun getBgBrightness(): Int
     fun isSunnyGyroEnabled(): Boolean = true

@@ -10,10 +10,10 @@ class SceneManager(
     val configProvider: ConfigProvider
 ) {
     companion object {
-        // Variable Storm Mode cycle timings (seconds)
-        private const val STORM_BURST_DURATION = 30.0f
-        private const val STORM_CALM_DURATION = 60.0f
-        private const val STORM_TRANSITION_DURATION = 15.0f
+        // Variable Storm Mode phase timings (seconds) based on duration mode (0: Corta, 1: Media, 2: Larga)
+        const val DURATION_CORTA = 0
+        const val DURATION_MEDIA = 1
+        const val DURATION_LARGA = 2
 
         // Current-value smoothing rate (lerp fraction per second)
         private const val VALUE_LERP_RATE = 5f
@@ -78,11 +78,50 @@ class SceneManager(
     @Volatile
     private var pendingTouch: Pair<Float, Float>? = null
 
+    enum class VariableStormPhase {
+        CALM,
+        TRANSITION_TO_MEDIUM_UP,
+        MEDIUM_UP,
+        TRANSITION_TO_CHAOTIC,
+        CHAOTIC,
+        TRANSITION_TO_MEDIUM_DOWN,
+        MEDIUM_DOWN,
+        TRANSITION_TO_CALM
+    }
+
     // Variable Storm Mode cycle state variables
     private var stormCycleTime = 0f
+    private var stormPhase = VariableStormPhase.CALM
     private var isBurstActive = false
     private var currentBurstWindDirection = 2
     private var stormTransitionFactor = 0f
+
+    fun getCalmDuration(): Float = when (configProvider.getStormVariableDuration()) {
+        DURATION_CORTA -> 20.0f
+        DURATION_LARGA -> 100.0f
+        else -> 50.0f
+    }
+
+    fun getMediumDuration(): Float = when (configProvider.getStormVariableDuration()) {
+        DURATION_CORTA -> 15.0f
+        DURATION_LARGA -> 60.0f
+        else -> 30.0f
+    }
+
+    fun getChaoticDuration(): Float = when (configProvider.getStormVariableDuration()) {
+        DURATION_CORTA -> 15.0f
+        DURATION_LARGA -> 45.0f
+        else -> 25.0f
+    }
+
+    fun getTransitionDuration(): Float = when (configProvider.getStormVariableDuration()) {
+        DURATION_CORTA -> 5.0f
+        DURATION_LARGA -> 15.0f
+        else -> 10.0f
+    }
+
+    fun getStormPhase(): VariableStormPhase = stormPhase
+    fun getStormTransitionFactor(): Float = stormTransitionFactor
 
     init {
         updateFromConfig()
@@ -122,31 +161,61 @@ class SceneManager(
         }
 
         if (configProvider.isStormVariableEnabled()) {
+            val calmDur = getCalmDuration()
+            val medDur = getMediumDuration()
+            val chaoDur = getChaoticDuration()
+            val transDur = getTransitionDuration()
+
             stormCycleTime += deltaTime
-            if (isBurstActive) {
-                if (stormCycleTime >= STORM_BURST_DURATION) {
-                    isBurstActive = false
-                    stormCycleTime = 0f
+
+            var advancing = true
+            while (advancing) {
+                val currentPhaseDuration = when (stormPhase) {
+                    VariableStormPhase.CALM -> calmDur
+                    VariableStormPhase.TRANSITION_TO_MEDIUM_UP -> transDur
+                    VariableStormPhase.MEDIUM_UP -> medDur
+                    VariableStormPhase.TRANSITION_TO_CHAOTIC -> transDur
+                    VariableStormPhase.CHAOTIC -> chaoDur
+                    VariableStormPhase.TRANSITION_TO_MEDIUM_DOWN -> transDur
+                    VariableStormPhase.MEDIUM_DOWN -> medDur
+                    VariableStormPhase.TRANSITION_TO_CALM -> transDur
                 }
-            } else {
-                if (stormCycleTime >= STORM_CALM_DURATION) {
-                    isBurstActive = true
-                    stormCycleTime = 0f
-                    // Choose random wind direction for the burst (0: left, 2: right)
-                    currentBurstWindDirection = if (Random.nextBoolean()) 2 else 0
+
+                if (stormCycleTime >= currentPhaseDuration) {
+                    stormCycleTime -= currentPhaseDuration
+                    stormPhase = when (stormPhase) {
+                        VariableStormPhase.CALM -> {
+                            currentBurstWindDirection = if (Random.nextBoolean()) 2 else 0
+                            VariableStormPhase.TRANSITION_TO_MEDIUM_UP
+                        }
+                        VariableStormPhase.TRANSITION_TO_MEDIUM_UP -> VariableStormPhase.MEDIUM_UP
+                        VariableStormPhase.MEDIUM_UP -> VariableStormPhase.TRANSITION_TO_CHAOTIC
+                        VariableStormPhase.TRANSITION_TO_CHAOTIC -> VariableStormPhase.CHAOTIC
+                        VariableStormPhase.CHAOTIC -> VariableStormPhase.TRANSITION_TO_MEDIUM_DOWN
+                        VariableStormPhase.TRANSITION_TO_MEDIUM_DOWN -> VariableStormPhase.MEDIUM_DOWN
+                        VariableStormPhase.MEDIUM_DOWN -> VariableStormPhase.TRANSITION_TO_CALM
+                        VariableStormPhase.TRANSITION_TO_CALM -> VariableStormPhase.CALM
+                    }
+                } else {
+                    advancing = false
                 }
             }
 
-            // Smoothly interpolate transition factor
-            val targetTransition = if (isBurstActive) 1.0f else 0.0f
-            val transitionRate = 1.0f / STORM_TRANSITION_DURATION
-            if (stormTransitionFactor < targetTransition) {
-                stormTransitionFactor = (stormTransitionFactor + transitionRate * deltaTime).coerceAtMost(targetTransition)
-            } else if (stormTransitionFactor > targetTransition) {
-                stormTransitionFactor = (stormTransitionFactor - transitionRate * deltaTime).coerceAtLeast(targetTransition)
+            val transProgress = if (transDur > 0f) (stormCycleTime / transDur).coerceIn(0f, 1f) else 1f
+            stormTransitionFactor = when (stormPhase) {
+                VariableStormPhase.CALM -> 0.0f
+                VariableStormPhase.TRANSITION_TO_MEDIUM_UP -> 0.0f + 0.5f * transProgress
+                VariableStormPhase.MEDIUM_UP -> 0.5f
+                VariableStormPhase.TRANSITION_TO_CHAOTIC -> 0.5f + 0.5f * transProgress
+                VariableStormPhase.CHAOTIC -> 1.0f
+                VariableStormPhase.TRANSITION_TO_MEDIUM_DOWN -> 1.0f - 0.5f * transProgress
+                VariableStormPhase.MEDIUM_DOWN -> 0.5f
+                VariableStormPhase.TRANSITION_TO_CALM -> 0.5f - 0.5f * transProgress
             }
+            isBurstActive = (stormPhase == VariableStormPhase.CHAOTIC || stormPhase == VariableStormPhase.TRANSITION_TO_CHAOTIC)
         } else {
             stormCycleTime = 0f
+            stormPhase = VariableStormPhase.CALM
             isBurstActive = false
             stormTransitionFactor = 0f
         }

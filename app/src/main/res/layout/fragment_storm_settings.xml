@@ -26,79 +26,162 @@
             app:strokeWidth="1dp"
             app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?android:attr/selectableItemBackground">
+            app:cardBackgroundColor="@color/settings_card_bg">
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:orientation="vertical">
 
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/badgeStormVariable"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    app:cardCornerRadius="18dp"
-                    app:cardElevation="0dp"
-                    app:strokeWidth="0dp"
-                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true">
-                    <ImageView
-                        android:id="@+id/iconStormVariable"
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_lightning"
-                        app:tint="@color/settings_accent" />
-                </com.google.android.material.card.MaterialCardView>
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:id="@+id/rowStormVariableToggle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_toEndOf="@id/badgeStormVariable"
-                    android:layout_toStartOf="@+id/statusStormVariable"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_centerVertical="true">
+                    android:padding="16dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
-                    <TextView
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/badgeStormVariable"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        app:cardCornerRadius="18dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="@color/settings_card_bg_alt"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true">
+                        <ImageView
+                            android:id="@+id/iconStormVariable"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_lightning"
+                            app:tint="@color/settings_accent" />
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/storm_tormenta_variable_ciclos"
-                        android:textColor="@color/settings_text_primary"
-                        android:textSize="15sp"
+                        android:orientation="vertical"
+                        android:layout_toEndOf="@id/badgeStormVariable"
+                        android:layout_toStartOf="@+id/statusStormVariable"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:layout_centerVertical="true">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/storm_tormenta_variable_ciclos"
+                            android:textColor="@color/settings_text_primary"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/storm_alterna_ciclos_de_calma_y_rfagas_de"
+                            android:textColor="@color/settings_text_secondary"
+                            android:textSize="11sp"
+                            android:layout_marginTop="2dp" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/statusStormVariable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="@string/touch_interaction_disabled"
+                        android:textColor="@color/settings_text_muted"
+                        android:textSize="12sp"
                         android:textStyle="bold" />
 
-                    <TextView
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchStormVariable"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/storm_alterna_ciclos_de_calma_y_rfagas_de"
-                        android:textColor="@color/settings_text_secondary"
-                        android:textSize="11sp"
-                        android:layout_marginTop="2dp" />
+                        android:visibility="gone" />
+                </RelativeLayout>
+
+                <!-- Duration settings container (expanded when variable storm is active) -->
+                <LinearLayout
+                    android:id="@+id/layoutStormVariableDuration"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingBottom="16dp"
+                    android:visibility="gone">
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/settings_stroke"
+                        android:layout_marginBottom="12dp" />
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_alignParentStart="true"
+                            android:layout_toStartOf="@+id/textViewStormVariableDurationValue"
+                            android:layout_marginEnd="8dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/storm_phase_duration_title"
+                                android:textColor="@color/settings_text_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/storm_phase_duration_desc"
+                                android:textColor="@color/settings_text_secondary"
+                                android:textSize="11sp"
+                                android:layout_marginTop="2dp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textViewStormVariableDurationValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Media"
+                            android:textColor="@color/settings_text_secondary"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true" />
+                    </RelativeLayout>
+
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:scrollbars="none"
+                        android:requiresFadingEdge="horizontal"
+                        android:clipToPadding="false">
+
+                        <LinearLayout
+                            android:id="@+id/spinnerStormVariableDuration"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp" />
+                    </HorizontalScrollView>
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/statusStormVariable"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/touch_interaction_disabled"
-                    android:textColor="@color/settings_text_muted"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchStormVariable"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone" />
-            </RelativeLayout>
+            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Card: Brillo Global -->

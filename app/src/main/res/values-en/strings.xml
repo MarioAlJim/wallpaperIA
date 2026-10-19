@@ -8,6 +8,13 @@
         <item>Normal</item>
         <item>Bright</item>
     </string-array>
+    <string name="storm_phase_duration_title">Phase Duration</string>
+    <string name="storm_phase_duration_desc">Adjusts how long calm, moderate, and chaotic configurations last.</string>
+    <string-array name="storm_phase_duration_options">
+        <item>Short</item>
+        <item>Medium</item>
+        <item>Long</item>
+    </string-array>
     <string name="act_auto">Auto</string>
     <string name="act_claro">Light</string>
     <string name="act_da_y_noche">Day &amp; Night</string>

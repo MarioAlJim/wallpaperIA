@@ -70,6 +70,9 @@ internal class StormConfigStore(prefs: SharedPreferences) : CachedPrefStore(pref
     fun isStormVariableEnabled(): Boolean = cachedBoolean(ConfigManager.KEY_STORM_VARIABLE_ENABLED, ConfigManager.DEFAULT_STORM_VARIABLE_ENABLED)
     fun setStormVariableEnabled(enabled: Boolean) { putBoolean(ConfigManager.KEY_STORM_VARIABLE_ENABLED, enabled) }
 
+    fun getStormVariableDuration(): Int = cachedInt(ConfigManager.KEY_STORM_VARIABLE_DURATION, ConfigManager.DEFAULT_STORM_VARIABLE_DURATION)
+    fun setStormVariableDuration(duration: Int) { putInt(ConfigManager.KEY_STORM_VARIABLE_DURATION, duration.coerceIn(0, 2)) }
+
     fun getLightningSpawnMode(): Int = cachedInt(ConfigManager.KEY_LIGHTNING_SPAWN_MODE, ConfigManager.DEFAULT_LIGHTNING_SPAWN_MODE)
     fun setLightningSpawnMode(mode: Int) { putInt(ConfigManager.KEY_LIGHTNING_SPAWN_MODE, mode.coerceIn(0, 2)) }
 

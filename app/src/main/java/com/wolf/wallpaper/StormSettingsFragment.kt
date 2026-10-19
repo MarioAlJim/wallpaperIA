@@ -294,15 +294,24 @@ class StormSettingsFragment : Fragment() {
         }
 
         val cardStormVariable = view.findViewById<View>(R.id.cardStormVariable)
+        val rowStormVariableToggle = view.findViewById<View>(R.id.rowStormVariableToggle) ?: cardStormVariable
         val switchStormVariable = view.findViewById<SwitchMaterial>(R.id.switchStormVariable)
         val statusStormVariable = view.findViewById<TextView>(R.id.statusStormVariable)
         val iconStormVariable = view.findViewById<ImageView>(R.id.iconStormVariable)
         val badgeStormVariable = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.badgeStormVariable)
+        val layoutStormVariableDuration = view.findViewById<View>(R.id.layoutStormVariableDuration)
+        val textViewStormVariableDurationValue = view.findViewById<TextView>(R.id.textViewStormVariableDurationValue)
+        val phaseDurations = resources.getStringArray(R.array.storm_phase_duration_options)
+
         if (cardStormVariable != null) {
             val isEnabled = configManager.isStormVariableEnabled()
             updateControlsLockState(view, isEnabled)
+            layoutStormVariableDuration?.visibility = if (isEnabled) View.VISIBLE else View.GONE
+            val currentDurationIndex = configManager.getStormVariableDuration().coerceIn(0, 2)
+            textViewStormVariableDurationValue?.text = phaseDurations.getOrNull(currentDurationIndex) ?: ""
+
             SettingsSwitchHelper.bind(
-                row = cardStormVariable,
+                row = rowStormVariableToggle,
                 switch = switchStormVariable,
                 isChecked = isEnabled,
                 statusView = statusStormVariable,
@@ -310,7 +319,14 @@ class StormSettingsFragment : Fragment() {
                 iconCard = badgeStormVariable
             ) { isChecked ->
                 configManager.setStormVariableEnabled(isChecked)
+                layoutStormVariableDuration?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateControlsLockState(view, isChecked)
+                updateSummaries(view)
+            }
+
+            setupDropdown(view, R.id.spinnerStormVariableDuration, phaseDurations, currentDurationIndex) { position ->
+                configManager.setStormVariableDuration(position)
+                textViewStormVariableDurationValue?.text = phaseDurations.getOrNull(position) ?: ""
                 updateSummaries(view)
             }
         }
@@ -453,13 +469,18 @@ class StormSettingsFragment : Fragment() {
         val activeLightningColor = Color.parseColor(lightningColorHex(configManager.getLightningColorIndex()))
         val activeWindDir = configManager.getWindDirection()
 
-        val isTextOnly = containerId == R.id.spinnerLightningFrequency || containerId == R.id.spinnerCloudFlashFrequency
+        val isTextOnly = containerId == R.id.spinnerLightningFrequency || containerId == R.id.spinnerCloudFlashFrequency || containerId == R.id.spinnerStormVariableDuration
+
+        val title = if (containerId == R.id.spinnerStormVariableDuration) getString(R.string.storm_phase_duration_title) else null
+        val subtitle = if (containerId == R.id.spinnerStormVariableDuration) getString(R.string.storm_phase_duration_desc) else null
 
         SettingsCardSelectorHelper.populate(
             context = requireContext(),
             container = container,
             options = options,
             selectedIndex = initialIndex,
+            title = title,
+            subtitle = subtitle,
             previewFactory = if (isTextOnly) null else { index ->
                 if (containerId != R.id.spinnerBackgroundMode) {
                     StormCardPreviewView(requireContext(), containerId, index, activeRainColor, activeWindDir, activeLightningColor)
@@ -792,6 +813,10 @@ class StormSettingsFragment : Fragment() {
         val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
         val currentBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
         parent?.findViewById<TextView>(R.id.textViewBgBrightnessValue)?.text = bgBrightnessOptions.getOrNull(currentBgBrightnessIndex) ?: "Normal"
+
+        val phaseDurations = resources.getStringArray(R.array.storm_phase_duration_options)
+        val currentDurationIndex = configManager.getStormVariableDuration().coerceIn(0, 2)
+        parent?.findViewById<TextView>(R.id.textViewStormVariableDurationValue)?.text = phaseDurations.getOrNull(currentDurationIndex) ?: "Media"
     }
 
     private fun setupColorPickerRows(view: View) {
