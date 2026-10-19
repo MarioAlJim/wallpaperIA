@@ -5,10 +5,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RadialGradient
 import android.graphics.LinearGradient
+import android.graphics.RectF
 import android.graphics.Shader
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -104,13 +107,23 @@ class StormSettingsFragment : Fragment() {
             updateSummaries(view)
         }
 
+        val rowWindLines = view.findViewById<View>(R.id.rowWindLines)
         val switchWindLines = view.findViewById<SwitchMaterial>(R.id.switchWindLines)
+        val statusWindLines = view.findViewById<TextView>(R.id.statusWindLines)
+        val iconWindLines = view.findViewById<ImageView>(R.id.iconWindLines)
+        val cardIconWindLines = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconWindLines)
         val layoutWindLinesIntensity = view.findViewById<View>(R.id.layoutWindLinesIntensity)
-        if (switchWindLines != null) {
+        if (rowWindLines != null || switchWindLines != null) {
             val isEnabled = configManager.isWindLinesEnabled()
-            switchWindLines.isChecked = isEnabled
             layoutWindLinesIntensity?.visibility = if (isEnabled) View.VISIBLE else View.GONE
-            switchWindLines.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowWindLines ?: switchWindLines!!,
+                switch = switchWindLines,
+                isChecked = isEnabled,
+                statusView = statusWindLines,
+                iconView = iconWindLines,
+                iconCard = cardIconWindLines
+            ) { isChecked ->
                 configManager.setWindLinesEnabled(isChecked)
                 layoutWindLinesIntensity?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateSummaries(view)
@@ -130,13 +143,23 @@ class StormSettingsFragment : Fragment() {
 
         // 3. Setup Lluvia Controls
 
+        val rowScreenDroplets = view.findViewById<View>(R.id.rowScreenDroplets)
         val switchScreenDroplets = view.findViewById<SwitchMaterial>(R.id.switchScreenDroplets)
+        val statusScreenDroplets = view.findViewById<TextView>(R.id.statusScreenDroplets)
+        val iconScreenDroplets = view.findViewById<ImageView>(R.id.iconScreenDroplets)
+        val cardIconScreenDroplets = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconScreenDroplets)
         val layoutScreenDropletsSize = view.findViewById<View>(R.id.layoutScreenDropletsSize)
-        if (switchScreenDroplets != null) {
+        if (rowScreenDroplets != null || switchScreenDroplets != null) {
             val isEnabled = configManager.isScreenDropletsEnabled()
-            switchScreenDroplets.isChecked = isEnabled
             layoutScreenDropletsSize?.visibility = if (isEnabled) View.VISIBLE else View.GONE
-            switchScreenDroplets.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowScreenDroplets ?: switchScreenDroplets!!,
+                switch = switchScreenDroplets,
+                isChecked = isEnabled,
+                statusView = statusScreenDroplets,
+                iconView = iconScreenDroplets,
+                iconCard = cardIconScreenDroplets
+            ) { isChecked ->
                 configManager.setScreenDropletsEnabled(isChecked)
                 layoutScreenDropletsSize?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateSummaries(view)
@@ -192,28 +215,58 @@ class StormSettingsFragment : Fragment() {
             updateSummaries(view)
         }
 
+        val rowCloudFlash = view.findViewById<View>(R.id.rowCloudFlash)
         val switchCloudFlash = view.findViewById<SwitchMaterial>(R.id.switchCloudFlash)
-        if (switchCloudFlash != null) {
-            switchCloudFlash.isChecked = configManager.isCloudFlashEnabled()
-            switchCloudFlash.setOnCheckedChangeListener { _, isChecked ->
+        val statusCloudFlash = view.findViewById<TextView>(R.id.statusCloudFlash)
+        val iconCloudFlash = view.findViewById<ImageView>(R.id.iconCloudFlash)
+        val cardIconCloudFlash = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconCloudFlash)
+        if (rowCloudFlash != null || switchCloudFlash != null) {
+            SettingsSwitchHelper.bind(
+                row = rowCloudFlash ?: switchCloudFlash!!,
+                switch = switchCloudFlash,
+                isChecked = configManager.isCloudFlashEnabled(),
+                statusView = statusCloudFlash,
+                iconView = iconCloudFlash,
+                iconCard = cardIconCloudFlash
+            ) { isChecked ->
                 configManager.setCloudFlashEnabled(isChecked)
                 updateSummaries(view)
             }
         }
 
+        val rowLightningFlash = view.findViewById<View>(R.id.rowLightningFlash)
         val switchLightningFlash = view.findViewById<SwitchMaterial>(R.id.switchLightningFlash)
-        if (switchLightningFlash != null) {
-            switchLightningFlash.isChecked = configManager.isLightningFlashEnabled()
-            switchLightningFlash.setOnCheckedChangeListener { _, isChecked ->
+        val statusLightningFlash = view.findViewById<TextView>(R.id.statusLightningFlash)
+        val iconLightningFlash = view.findViewById<ImageView>(R.id.iconLightningFlash)
+        val cardIconLightningFlash = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconLightningFlash)
+        if (rowLightningFlash != null || switchLightningFlash != null) {
+            SettingsSwitchHelper.bind(
+                row = rowLightningFlash ?: switchLightningFlash!!,
+                switch = switchLightningFlash,
+                isChecked = configManager.isLightningFlashEnabled(),
+                statusView = statusLightningFlash,
+                iconView = iconLightningFlash,
+                iconCard = cardIconLightningFlash
+            ) { isChecked ->
                 configManager.setLightningFlashEnabled(isChecked)
                 updateSummaries(view)
             }
         }
 
+        val rowInteractiveLightning = view.findViewById<View>(R.id.rowInteractiveLightning)
         val switchInteractiveLightning = view.findViewById<SwitchMaterial>(R.id.switchInteractiveLightning)
-        if (switchInteractiveLightning != null) {
-            switchInteractiveLightning.isChecked = configManager.isInteractiveLightningEnabled()
-            switchInteractiveLightning.setOnCheckedChangeListener { _, isChecked ->
+        val statusInteractiveLightning = view.findViewById<TextView>(R.id.statusInteractiveLightning)
+        val iconInteractiveLightning = view.findViewById<ImageView>(R.id.iconInteractiveLightning)
+        val cardIconInteractiveLightning = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconInteractiveLightning)
+        if (rowInteractiveLightning != null || switchInteractiveLightning != null) {
+            SettingsSwitchHelper.bind(
+                row = rowInteractiveLightning ?: switchInteractiveLightning!!,
+                switch = switchInteractiveLightning,
+                isChecked = configManager.isInteractiveLightningEnabled(),
+                statusView = statusInteractiveLightning,
+                iconView = iconInteractiveLightning,
+                iconCard = cardIconInteractiveLightning
+            ) { isChecked ->
                 configManager.setInteractiveLightningEnabled(isChecked)
                 updateSummaries(view)
             }
@@ -240,20 +293,26 @@ class StormSettingsFragment : Fragment() {
             pickImageLauncher.launch("image/*")
         }
 
+        val cardStormVariable = view.findViewById<View>(R.id.cardStormVariable)
         val switchStormVariable = view.findViewById<SwitchMaterial>(R.id.switchStormVariable)
-        if (switchStormVariable != null) {
+        val statusStormVariable = view.findViewById<TextView>(R.id.statusStormVariable)
+        val iconStormVariable = view.findViewById<ImageView>(R.id.iconStormVariable)
+        val badgeStormVariable = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.badgeStormVariable)
+        if (cardStormVariable != null) {
             val isEnabled = configManager.isStormVariableEnabled()
-            switchStormVariable.isChecked = isEnabled
             updateControlsLockState(view, isEnabled)
-            switchStormVariable.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = cardStormVariable,
+                switch = switchStormVariable,
+                isChecked = isEnabled,
+                statusView = statusStormVariable,
+                iconView = iconStormVariable,
+                iconCard = badgeStormVariable
+            ) { isChecked ->
                 configManager.setStormVariableEnabled(isChecked)
                 updateControlsLockState(view, isChecked)
                 updateSummaries(view)
             }
-        }
-
-        view.findViewById<ImageView>(R.id.btnStormHelp)?.setOnClickListener {
-            showHelpDialog()
         }
 
         updateCustomBackgroundViewsVisibility(view, configManager.getBackgroundIndex())
@@ -262,14 +321,9 @@ class StormSettingsFragment : Fragment() {
     }
 
     private fun showHelpDialog() {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.storm_help_dialog_title)
-            .setMessage(Html.fromHtml(getString(R.string.storm_help_dialog_message), Html.FROM_HTML_MODE_LEGACY))
-            .setNeutralButton("Ver tutorial") { _, _ ->
-                (requireActivity() as WallpaperSettingsActivity).startTutorial(0)
-            }
-            .setPositiveButton("Entendido", null)
-            .show()
+        SettingsBottomSheetHelper.showHelpSheet(requireContext(), isStorm = true) {
+            (requireActivity() as? WallpaperSettingsActivity)?.startTutorial(0)
+        }
     }
 
     private fun getClosestCloudOptionIndex(density: Int): Int {
@@ -491,21 +545,9 @@ class StormSettingsFragment : Fragment() {
             refreshStormCardPreviews(view)
         }
 
-        val rainColors = resources.getStringArray(R.array.rain_colors)
-        setupDropdown(view, R.id.spinnerRainColor, rainColors, configManager.getRainColorIndex()) { position ->
-            configManager.setRainColorIndex(position)
-            refreshStormCardPreviews(view)
-        }
-
         val rainSpawnModes = resources.getStringArray(R.array.rain_spawn_modes)
         setupDropdown(view, R.id.spinnerRainSpawnMode, rainSpawnModes, configManager.getRainSpawnMode()) { position ->
             configManager.setRainSpawnMode(position)
-        }
-
-        val lightningColors = resources.getStringArray(R.array.lightning_colors)
-        setupDropdown(view, R.id.spinnerLightningColor, lightningColors, configManager.getLightningColorIndex()) { position ->
-            configManager.setLightningColorIndex(position)
-            refreshStormCardPreviews(view)
         }
 
         val lightningSpawnModes = resources.getStringArray(R.array.lightning_spawn_modes)
@@ -513,9 +555,7 @@ class StormSettingsFragment : Fragment() {
             configManager.setLightningSpawnMode(position)
         }
 
-        setupDropdown(view, R.id.spinnerCloudFlashColor, lightningColors, configManager.getCloudFlashColorIndex()) { position ->
-            configManager.setCloudFlashColorIndex(position)
-        }
+        setupColorPickerRows(view)
 
         updateControlsLockState(view, configManager.isStormVariableEnabled())
     }
@@ -752,6 +792,119 @@ class StormSettingsFragment : Fragment() {
         val bgBrightnessValues = intArrayOf(30, 60, 100, 150)
         val currentBgBrightnessIndex = SettingsCardSelectorHelper.closestValueIndex(bgBrightnessValues, configManager.getBgBrightness())
         parent?.findViewById<TextView>(R.id.textViewBgBrightnessValue)?.text = bgBrightnessOptions.getOrNull(currentBgBrightnessIndex) ?: "Normal"
+    }
+
+    private fun setupColorPickerRows(view: View) {
+        val rainColors = resources.getStringArray(R.array.rain_colors)
+        val rainOptions = rainColors.mapIndexed { i, name ->
+            val hex = rainColorHex(i)
+            SettingsBottomSheetHelper.DynamicColorOption(
+                name = name,
+                colorInt = Color.parseColor(hex),
+                isRainbow = false
+            )
+        }
+
+        val lightningColors = resources.getStringArray(R.array.lightning_colors)
+        val lightningOptions = lightningColors.mapIndexed { i, name ->
+            val hex = lightningColorHex(i)
+            SettingsBottomSheetHelper.DynamicColorOption(
+                name = name,
+                colorInt = Color.parseColor(hex),
+                isRainbow = (i == 6)
+            )
+        }
+
+        fun updateRainRow() {
+            val idx = configManager.getRainColorIndex().coerceIn(0, rainOptions.size - 1)
+            val opt = rainOptions[idx]
+            view.findViewById<TextView>(R.id.textViewRainColorValue)?.text = opt.name
+            view.findViewById<View>(R.id.viewRainColorSwatch)?.setBackgroundColor(opt.colorInt)
+        }
+
+        fun updateLightningRow() {
+            val idx = configManager.getLightningColorIndex().coerceIn(0, lightningOptions.size - 1)
+            val opt = lightningOptions[idx]
+            view.findViewById<TextView>(R.id.textViewLightningColorValue)?.text = opt.name
+            val swatch = view.findViewById<View>(R.id.viewLightningColorSwatch)
+            if (opt.isRainbow) {
+                swatch?.background = GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    intArrayOf(Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA)
+                )
+            } else {
+                swatch?.background = null
+                swatch?.setBackgroundColor(opt.colorInt)
+            }
+        }
+
+        fun updateCloudFlashRow() {
+            val idx = configManager.getCloudFlashColorIndex().coerceIn(0, lightningOptions.size - 1)
+            val opt = lightningOptions[idx]
+            view.findViewById<TextView>(R.id.textViewCloudFlashColorValue)?.text = opt.name
+            val swatch = view.findViewById<View>(R.id.viewCloudFlashColorSwatch)
+            if (opt.isRainbow) {
+                swatch?.background = GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    intArrayOf(Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA)
+                )
+            } else {
+                swatch?.background = null
+                swatch?.setBackgroundColor(opt.colorInt)
+            }
+        }
+
+        updateRainRow()
+        updateLightningRow()
+        updateCloudFlashRow()
+
+        view.findViewById<View>(R.id.cardRainColorSelector)?.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicColorPickerSheet(
+                context = requireContext(),
+                title = getString(R.string.rain_color_label),
+                subtitle = getString(R.string.storm_elige_la_tonalidad_cromtica_de_las),
+                elementType = SettingsBottomSheetHelper.ElementType.RAIN,
+                options = rainOptions,
+                selectedIndex = configManager.getRainColorIndex()
+            ) { selectedPosition ->
+                configManager.setRainColorIndex(selectedPosition)
+                updateRainRow()
+                refreshStormCardPreviews(view)
+                updateSummaries(view)
+            }
+        }
+
+        view.findViewById<View>(R.id.cardLightningColorSelector)?.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicColorPickerSheet(
+                context = requireContext(),
+                title = getString(R.string.lightning_color_label),
+                subtitle = getString(R.string.storm_configura_el_tono_cromtico_de_los_d),
+                elementType = SettingsBottomSheetHelper.ElementType.LIGHTNING,
+                options = lightningOptions,
+                selectedIndex = configManager.getLightningColorIndex()
+            ) { selectedPosition ->
+                configManager.setLightningColorIndex(selectedPosition)
+                updateLightningRow()
+                refreshStormCardPreviews(view)
+                updateSummaries(view)
+            }
+        }
+
+        view.findViewById<View>(R.id.cardCloudFlashColorSelector)?.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicColorPickerSheet(
+                context = requireContext(),
+                title = getString(R.string.storm_color_de_destellos_en_nubes),
+                subtitle = getString(R.string.storm_configura_el_tono_cromtico_de_los_d_1),
+                elementType = SettingsBottomSheetHelper.ElementType.CLOUD_FLASH,
+                options = lightningOptions,
+                selectedIndex = configManager.getCloudFlashColorIndex()
+            ) { selectedPosition ->
+                configManager.setCloudFlashColorIndex(selectedPosition)
+                updateCloudFlashRow()
+                refreshStormCardPreviews(view)
+                updateSummaries(view)
+            }
+        }
     }
 
     private fun Int.dpToPx(): Int {
@@ -996,27 +1149,9 @@ class StormSettingsFragment : Fragment() {
                     }
                 }
 
-                R.id.spinnerRainColor -> {
-                    val colorHex = when (optionIndex) {
-                        0 -> "#1E90FF"
-                        1 -> "#FFFFFF"
-                        2 -> "#FF3030"
-                        3 -> "#00FF7F"
-                        4 -> "#FFD700"
-                        5 -> "#8A2BE2"
-                        else -> "#1E90FF"
-                    }
-                    val optionColor = Color.parseColor(colorHex)
-                    drawRaindrops(canvas, w, h, 12, optionColor, activeWindDir)
-                }
 
                 R.id.spinnerBgBrightness -> {
-                    val bgColors = arrayOf("#0A0A0E", "#15151F", "#2A2A38", "#4A4A5F")
-                    val colorHex = bgColors.getOrElse(optionIndex) { bgColors[2] }
-                    paint.color = Color.parseColor(colorHex)
-                    paint.style = Paint.Style.FILL
-                    canvas.drawRoundRect(0f, 0f, w, h, 8.dpToPx().toFloat(), 8.dpToPx().toFloat(), paint)
-                    drawLightningBolt(canvas, w, h, Color.parseColor("#FFE533"))
+                    drawRealStaticStormScene(canvas, w, h, optionIndex)
                 }
 
                 R.id.spinnerRainSpawnMode -> {
@@ -1058,44 +1193,6 @@ class StormSettingsFragment : Fragment() {
                     }
                 }
 
-                R.id.spinnerLightningColor -> {
-                    val colorHex = when (optionIndex) {
-                        0 -> "#FFFFFF"
-                        1 -> "#6699FF"
-                        2 -> "#FFE533"
-                        3 -> "#FF3333"
-                        4 -> "#33FF33"
-                        5 -> "#CC4DFF"
-                        6 -> "#FFE533"
-                        else -> "#FFFFFF"
-                    }
-                    val lColor = Color.parseColor(colorHex)
-                    drawStylizedLightning(canvas, w, h, lColor, isRainbow = (optionIndex == 6))
-                }
-
-                R.id.spinnerCloudFlashColor -> {
-                    val colorHex = when (optionIndex) {
-                        0 -> "#FFFFFF"
-                        1 -> "#6699FF"
-                        2 -> "#FFE533"
-                        3 -> "#FF3333"
-                        4 -> "#33FF33"
-                        5 -> "#CC4DFF"
-                        6 -> "#FFE533"
-                        else -> "#FFFFFF"
-                    }
-                    val glowColor = Color.parseColor(colorHex)
-                    val colors = intArrayOf(
-                        adjustAlpha(glowColor, 0.7f),
-                        adjustAlpha(glowColor, 0.0f)
-                    )
-                    val glowRadius = w * 0.35f
-                    paint.shader = RadialGradient(w/2f, h/2f, glowRadius, colors, null, Shader.TileMode.CLAMP)
-                    paint.style = Paint.Style.FILL
-                    canvas.drawCircle(w/2f, h/2f, glowRadius, paint)
-                    paint.shader = null
-                    drawCloudShapeCentered(canvas, w, h)
-                }
 
                 R.id.spinnerLightningSpawnMode -> {
                     when (optionIndex) {
@@ -1386,6 +1483,182 @@ class StormSettingsFragment : Fragment() {
             val green = Color.green(color)
             val blue = Color.blue(color)
             return Color.argb(alpha, red, green, blue)
+        }
+
+        private fun getRealStormBackgroundBitmap(reqWidth: Int, reqHeight: Int): Bitmap? {
+            val bgIndex = configManager.getBackgroundIndex()
+            val bgPath = when (bgIndex) {
+                0 -> "background/background.jpg" // Fallback to classic landscape to clearly showcase brightness levels
+                1 -> "background/background.jpg"
+                2 -> "background/background_02.png"
+                3 -> "background/background_03.png"
+                4 -> "background/background_04.png"
+                5 -> "background/background_05.png"
+                6 -> "background/background_06.png"
+                7 -> "background/background_07.png"
+                8 -> "custom"
+                else -> "background/background.jpg"
+            }
+
+            val cacheKey = "real_preview_bg_${bgPath}_${reqWidth}_${reqHeight}"
+            backgroundBitmapCache[cacheKey]?.let { return it }
+
+            val bitmap: Bitmap? = if (bgPath == "custom") {
+                val customFile = File(requireContext().filesDir, "custom_background.png")
+                if (customFile.exists()) {
+                    loadThumbnailFromAsset(requireContext(), customFile.absolutePath, reqWidth, reqHeight)
+                } else {
+                    loadThumbnailFromAsset(requireContext(), "background/background.jpg", reqWidth, reqHeight)
+                }
+            } else {
+                loadThumbnailFromAsset(requireContext(), bgPath, reqWidth, reqHeight)
+            }
+
+            if (bitmap != null) {
+                backgroundBitmapCache[cacheKey] = bitmap
+            }
+            return bitmap
+        }
+
+        private fun drawRealStaticStormScene(canvas: Canvas, w: Float, h: Float, optionIndex: Int) {
+            val brightnessMultiplier = when (optionIndex) {
+                0 -> 0.30f  // Muy oscuro (30%)
+                1 -> 0.60f  // Oscuro (60%)
+                2 -> 1.00f  // Normal (100%)
+                3 -> 1.50f  // Brillante (150%)
+                else -> 1.0f
+            }
+
+            val cornerRadius = 8.dpToPx().toFloat()
+            val rect = RectF(0f, 0f, w, h)
+
+            val saveCount = canvas.save()
+            val clipPath = Path().apply {
+                addRoundRect(rect, cornerRadius, cornerRadius, Path.Direction.CW)
+            }
+            canvas.clipPath(clipPath)
+
+            // 1. Fondo real de tormenta modulado por el brillo exacto
+            val bgBitmap = getRealStormBackgroundBitmap(w.toInt().coerceAtLeast(100), h.toInt().coerceAtLeast(100))
+            if (bgBitmap != null && !bgBitmap.isRecycled) {
+                val bW = bgBitmap.width.toFloat()
+                val bH = bgBitmap.height.toFloat()
+                val scale = maxOf(w / bW, h / bH)
+                val scaledW = bW * scale
+                val scaledH = bH * scale
+                val left = (w - scaledW) / 2f
+                val top = (h - scaledH) / 2f
+                val dst = RectF(left, top, left + scaledW, top + scaledH)
+
+                val cm = ColorMatrix(floatArrayOf(
+                    brightnessMultiplier, 0f, 0f, 0f, 0f,
+                    0f, brightnessMultiplier, 0f, 0f, 0f,
+                    0f, 0f, brightnessMultiplier, 0f, 0f,
+                    0f, 0f, 0f, 1f, 0f
+                ))
+                paint.colorFilter = ColorMatrixColorFilter(cm)
+                paint.style = Paint.Style.FILL
+                canvas.drawBitmap(bgBitmap, null, dst, paint)
+                paint.colorFilter = null
+            } else {
+                val topColor = Color.argb(
+                    255,
+                    (15 * brightnessMultiplier).toInt().coerceIn(5, 60),
+                    (20 * brightnessMultiplier).toInt().coerceIn(8, 75),
+                    (35 * brightnessMultiplier).toInt().coerceIn(15, 110)
+                )
+                val bottomColor = Color.argb(
+                    255,
+                    (35 * brightnessMultiplier).toInt().coerceIn(10, 100),
+                    (40 * brightnessMultiplier).toInt().coerceIn(12, 115),
+                    (55 * brightnessMultiplier).toInt().coerceIn(18, 140)
+                )
+                paint.shader = LinearGradient(0f, 0f, 0f, h, topColor, bottomColor, Shader.TileMode.CLAMP)
+                paint.style = Paint.Style.FILL
+                canvas.drawRect(rect, paint)
+                paint.shader = null
+            }
+
+            // 2. Nubes tormentosas en la parte superior moduladas por brillo
+            val cloudColor = Color.argb(
+                220,
+                (40 * brightnessMultiplier).toInt().coerceIn(12, 110),
+                (45 * brightnessMultiplier).toInt().coerceIn(15, 120),
+                (60 * brightnessMultiplier).toInt().coerceIn(20, 150)
+            )
+            paint.color = cloudColor
+            paint.style = Paint.Style.FILL
+            canvas.drawCircle(w * 0.15f, h * 0.05f, w * 0.32f, paint)
+            canvas.drawCircle(w * 0.45f, h * 0.02f, w * 0.38f, paint)
+            canvas.drawCircle(w * 0.75f, h * 0.06f, w * 0.34f, paint)
+            canvas.drawCircle(w * 1.02f, h * 0.03f, w * 0.36f, paint)
+
+            // 3. Relámpago estático que ilumina la escena
+            val boltAlpha = (240 * brightnessMultiplier.coerceIn(0.6f, 1.3f)).toInt().coerceIn(150, 255)
+            val boltColor = Color.argb(
+                boltAlpha,
+                Color.red(activeLightningColor),
+                Color.green(activeLightningColor),
+                Color.blue(activeLightningColor)
+            )
+            paint.color = Color.argb(50, Color.red(boltColor), Color.green(boltColor), Color.blue(boltColor))
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 4.dpToPx().toFloat()
+            drawCustomLightningPath(canvas, w * 0.55f, h * 0.12f, w * 0.52f, h * 0.88f)
+
+            paint.color = boltColor
+            paint.strokeWidth = 1.8f.dpToPx().toFloat()
+            drawCustomLightningPath(canvas, w * 0.55f, h * 0.12f, w * 0.52f, h * 0.88f)
+
+            // 4. Trazos estáticos de lluvia atravesando la escena según la dirección del viento
+            val rainAlpha = (190 * brightnessMultiplier.coerceIn(0.5f, 1.2f)).toInt().coerceIn(90, 240)
+            val streakColor = Color.argb(
+                rainAlpha,
+                Color.red(activeRainColor),
+                Color.green(activeRainColor),
+                Color.blue(activeRainColor)
+            )
+            paint.color = streakColor
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1.2f.dpToPx().toFloat()
+            paint.strokeCap = Paint.Cap.ROUND
+
+            val windDx = when (activeWindDir) {
+                0 -> -w * 0.07f
+                2 -> w * 0.07f
+                else -> 0f
+            }
+            val streakLen = h * 0.16f
+
+            for (i in 0 until 24) {
+                val sx = (w * ((i * 41 + 17) % 100) / 100f)
+                val sy = (h * ((i * 59 + 23) % 100) / 100f)
+                canvas.drawLine(sx, sy, sx + windDx, sy + streakLen, paint)
+            }
+
+            // 5. Borde sutil
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 1.dpToPx().toFloat()
+            paint.color = ContextCompat.getColor(context, R.color.settings_stroke)
+            canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
+
+            canvas.restoreToCount(saveCount)
+        }
+
+        private fun drawCustomLightningPath(canvas: Canvas, startX: Float, startY: Float, endX: Float, endY: Float) {
+            val boltPath = Path().apply {
+                moveTo(startX, startY)
+                val midY1 = startY + (endY - startY) * 0.28f
+                val midY2 = startY + (endY - startY) * 0.52f
+                val midY3 = startY + (endY - startY) * 0.76f
+                lineTo(startX - 6.dpToPx(), midY1)
+                lineTo(startX + 4.dpToPx(), midY1 + 2.dpToPx())
+                lineTo(startX - 2.dpToPx(), midY2)
+                lineTo(startX + 8.dpToPx(), midY2 + 3.dpToPx())
+                lineTo(endX - 3.dpToPx(), midY3)
+                lineTo(endX, endY)
+            }
+            canvas.drawPath(boltPath, paint)
         }
     }
 }

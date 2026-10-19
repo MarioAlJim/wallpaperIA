@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -16,25 +16,6 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false">
 
-        <!-- BotÃ³n de Ayuda: resumen de las secciones y cÃ³mo afectan al fondo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginBottom="4dp">
-
-            <ImageButton
-                android:id="@+id/btnStormHelp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_help"
-                android:tint="@color/settings_accent"
-                android:contentDescription="@string/help_button_description" />
-        </LinearLayout>
-
         <!-- Card: Tormenta Variable -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardStormVariable"
@@ -45,7 +26,10 @@
             app:strokeWidth="1dp"
             app:strokeColor="@color/settings_stroke"
             app:cardElevation="0dp"
-            app:cardBackgroundColor="@color/settings_card_bg">
+            app:cardBackgroundColor="@color/settings_card_bg"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -59,7 +43,7 @@
                     app:cardCornerRadius="18dp"
                     app:cardElevation="0dp"
                     app:strokeWidth="0dp"
-                    app:cardBackgroundColor="#E8F5E9"
+                    app:cardBackgroundColor="@color/settings_card_bg_alt"
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true">
                     <ImageView
@@ -68,7 +52,7 @@
                         android:layout_height="20dp"
                         android:layout_gravity="center"
                         android:src="@drawable/ic_lightning"
-                        app:tint="#4CAF50" />
+                        app:tint="@color/settings_accent" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <LinearLayout
@@ -76,8 +60,9 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_toEndOf="@id/badgeStormVariable"
-                    android:layout_toStartOf="@+id/switchStormVariable"
+                    android:layout_toStartOf="@+id/statusStormVariable"
                     android:layout_marginStart="12dp"
+                    android:layout_marginEnd="8dp"
                     android:layout_centerVertical="true">
 
                     <TextView
@@ -97,12 +82,22 @@
                         android:layout_marginTop="2dp" />
                 </LinearLayout>
 
+                <TextView
+                    android:id="@+id/statusStormVariable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/touch_interaction_disabled"
+                    android:textColor="@color/settings_text_muted"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/switchStormVariable"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true" />
+                    android:visibility="gone" />
             </RelativeLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -439,19 +434,45 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Modo de Viento / LÃ­neas de Viento Switch -->
+                    <!-- Modo de Viento / Líneas de Viento Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowWindLines"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="12dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconWindLines"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconWindLines"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_air"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_alignParentStart="true"
-                            android:layout_toStartOf="@id/switchWindLines"
-                            android:layout_marginEnd="16dp">
+                            android:layout_toEndOf="@id/cardIconWindLines"
+                            android:layout_toStartOf="@id/statusWindLines"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_centerVertical="true">
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -467,12 +488,21 @@
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp" />
                         </LinearLayout>
+                        <TextView
+                            android:id="@+id/statusWindLines"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchWindLines"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true" />
+                            android:visibility="gone" />
                     </RelativeLayout>
 
                     <!-- Intensidad de LÃ­neas de Viento Slider -->
@@ -765,43 +795,96 @@
                         android:textSize="12sp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Rain Color -->
-                    <TextView
+                    <!-- Rain Color Selector Card (Opens Dynamic Bottom Sheet) -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardRainColorSelector"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/rain_color_label"
-                        android:textColor="@color/settings_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="14dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="@color/settings_stroke"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/settings_card_bg_alt"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:requiresFadingEdge="horizontal"
-                        android:layout_marginStart="-8dp"
-                        android:layout_marginEnd="-8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:clipToPadding="false"
-                        android:fadingEdgeLength="32dp"
-                        android:layout_marginBottom="12dp">
-                        <LinearLayout
-                            android:id="@+id/spinnerRainColor"
-                            android:layout_width="wrap_content"
+                        <RelativeLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="4dp" />
-                    </HorizontalScrollView>
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/storm_elige_la_tonalidad_cromtica_de_las"
-                        android:textColor="@color/settings_text_tertiary"
-                        android:textSize="12sp" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@+id/layoutRainColorRight"
+                                android:layout_centerVertical="true">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/rain_color_label"
+                                    android:textColor="@color/settings_text_primary"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/storm_elige_la_tonalidad_cromtica_de_las"
+                                    android:textColor="@color/settings_text_tertiary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="2dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutRainColorRight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true">
+
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardRainColorSwatch"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    app:cardCornerRadius="12dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="1.5dp"
+                                    app:strokeColor="#33888888">
+                                    <View
+                                        android:id="@+id/viewRainColorSwatch"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:background="#1E90FF" />
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/textViewRainColorValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/settings_text_secondary"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="6dp" />
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_arrow_forward"
+                                    app:tint="@color/settings_text_tertiary" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Rain Spawn Mode -->
                     <TextView
@@ -852,16 +935,42 @@
 
                     <!-- Gotas en Pantalla Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowScreenDroplets"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="12dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconScreenDroplets"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconScreenDroplets"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_rain"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_alignParentStart="true"
-                            android:layout_toStartOf="@id/switchScreenDroplets"
-                            android:layout_marginEnd="16dp">
+                            android:layout_toEndOf="@id/cardIconScreenDroplets"
+                            android:layout_toStartOf="@id/statusScreenDroplets"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_centerVertical="true">
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
@@ -877,12 +986,21 @@
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp" />
                         </LinearLayout>
+                        <TextView
+                            android:id="@+id/statusScreenDroplets"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchScreenDroplets"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true" />
+                            android:visibility="gone" />
                     </RelativeLayout>
 
                     <!-- Gotas en Pantalla Size Slider -->
@@ -1097,44 +1215,96 @@
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Lightning Color -->
-                    <TextView
+                    <!-- Lightning Color Selector Card (Opens Dynamic Bottom Sheet) -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardLightningColorSelector"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/lightning_color_label"
-                        android:textColor="@color/settings_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="14dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="@color/settings_stroke"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/settings_card_bg_alt"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:requiresFadingEdge="horizontal"
-                        android:layout_marginStart="-8dp"
-                        android:layout_marginEnd="-8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:clipToPadding="false"
-                        android:fadingEdgeLength="32dp"
-                        android:layout_marginBottom="12dp">
-                        <LinearLayout
-                            android:id="@+id/spinnerLightningColor"
-                            android:layout_width="wrap_content"
+                        <RelativeLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="4dp" />
-                    </HorizontalScrollView>
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/storm_configura_el_tono_cromtico_de_los_d"
-                        android:textColor="@color/settings_text_tertiary"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="16dp" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@+id/layoutLightningColorRight"
+                                android:layout_centerVertical="true">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/lightning_color_label"
+                                    android:textColor="@color/settings_text_primary"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/storm_configura_el_tono_cromtico_de_los_d"
+                                    android:textColor="@color/settings_text_tertiary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="2dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutLightningColorRight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true">
+
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardLightningColorSwatch"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    app:cardCornerRadius="12dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="1.5dp"
+                                    app:strokeColor="#33888888">
+                                    <View
+                                        android:id="@+id/viewLightningColorSwatch"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:background="#FFFFFF" />
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/textViewLightningColorValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/settings_text_secondary"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="6dp" />
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_arrow_forward"
+                                    app:tint="@color/settings_text_tertiary" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Lightning Spawn Mode -->
                     <TextView
@@ -1280,66 +1450,154 @@
                         android:layout_marginTop="4dp"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Cloud Flash Color -->
-                    <TextView
+                    <!-- Cloud Flash Color Selector Card (Opens Dynamic Bottom Sheet) -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardCloudFlashColorSelector"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/storm_color_de_destellos_en_nubes"
-                        android:textColor="@color/settings_text_primary"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="6dp" />
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="14dp"
+                        app:strokeWidth="1dp"
+                        app:strokeColor="@color/settings_stroke"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/settings_card_bg_alt"
+                        android:clickable="true"
+                        android:focusable="true">
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none"
-                        android:requiresFadingEdge="horizontal"
-                        android:layout_marginStart="-8dp"
-                        android:layout_marginEnd="-8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:clipToPadding="false"
-                        android:fadingEdgeLength="32dp"
-                        android:layout_marginBottom="12dp">
-                        <LinearLayout
-                            android:id="@+id/spinnerCloudFlashColor"
-                            android:layout_width="wrap_content"
+                        <RelativeLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:paddingBottom="8dp"
-                            android:paddingTop="4dp" />
-                    </HorizontalScrollView>
+                            android:paddingStart="14dp"
+                            android:paddingEnd="14dp"
+                            android:paddingTop="12dp"
+                            android:paddingBottom="12dp">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/storm_configura_el_tono_cromtico_de_los_d_1"
-                        android:textColor="@color/settings_text_tertiary"
-                        android:textSize="12sp"
-                        android:layout_marginBottom="16dp" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:layout_alignParentStart="true"
+                                android:layout_toStartOf="@+id/layoutCloudFlashColorRight"
+                                android:layout_centerVertical="true">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/storm_color_de_destellos_en_nubes"
+                                    android:textColor="@color/settings_text_primary"
+                                    android:textSize="15sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/storm_configura_el_tono_cromtico_de_los_d_1"
+                                    android:textColor="@color/settings_text_tertiary"
+                                    android:textSize="12sp"
+                                    android:layout_marginTop="2dp" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutCloudFlashColorRight"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal"
+                                android:gravity="center_vertical"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true">
+
+                                <com.google.android.material.card.MaterialCardView
+                                    android:id="@+id/cardCloudFlashColorSwatch"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    app:cardCornerRadius="12dp"
+                                    app:cardElevation="0dp"
+                                    app:strokeWidth="1.5dp"
+                                    app:strokeColor="#33888888">
+                                    <View
+                                        android:id="@+id/viewCloudFlashColorSwatch"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="match_parent"
+                                        android:background="#FFFFFF" />
+                                </com.google.android.material.card.MaterialCardView>
+
+                                <TextView
+                                    android:id="@+id/textViewCloudFlashColorValue"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@color/settings_text_secondary"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="6dp" />
+
+                                <ImageView
+                                    android:layout_width="16dp"
+                                    android:layout_height="16dp"
+                                    android:src="@drawable/ic_arrow_forward"
+                                    app:tint="@color/settings_text_tertiary" />
+                            </LinearLayout>
+                        </RelativeLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
                     <!-- Cloud Flash Toggle -->
                     <RelativeLayout
+                        android:id="@+id/rowCloudFlash"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconCloudFlash"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconCloudFlash"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_cloud"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconCloudFlash"
+                            android:layout_toStartOf="@id/statusCloudFlash"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/storm_destellos_en_las_nubes"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchCloudFlash"
+                        <TextView
+                            android:id="@+id/statusCloudFlash"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchCloudFlash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -1353,25 +1611,61 @@
 
                     <!-- Lightning Flash Toggle -->
                     <RelativeLayout
+                        android:id="@+id/rowLightningFlash"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconLightningFlash"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconLightningFlash"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_bolt"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconLightningFlash"
+                            android:layout_toStartOf="@id/statusLightningFlash"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/storm_destellos_de_los_rayos"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchLightningFlash"
+                        <TextView
+                            android:id="@+id/statusLightningFlash"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchLightningFlash"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -1385,25 +1679,61 @@
 
                     <!-- Interactive Lightning Toggle -->
                     <RelativeLayout
+                        android:id="@+id/rowInteractiveLightning"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp">
+                        android:layout_marginBottom="8dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconInteractiveLightning"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconInteractiveLightning"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_touch"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconInteractiveLightning"
+                            android:layout_toStartOf="@id/statusInteractiveLightning"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/storm_rayos_interactivos_tctil"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchInteractiveLightning"
+                        <TextView
+                            android:id="@+id/statusInteractiveLightning"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchInteractiveLightning"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 

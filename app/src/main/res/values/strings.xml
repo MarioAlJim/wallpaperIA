@@ -473,4 +473,22 @@
         <item>Llamativo</item>
         <item>Muy denso</item>
     </string-array>
+
+    <!-- Strings para Modales Bottom Sheet (Material 3 / WhatsApp & Cash App) -->
+    <string name="color_mixer_title">Personalizar color</string>
+    <string name="color_mixer_presets_label">Colores existentes</string>
+    <string name="color_mixer_mixer_label">Mezclador</string>
+    <string name="color_mixer_hue">Tono</string>
+    <string name="color_mixer_saturation">Saturación</string>
+    <string name="color_mixer_brightness">Brillo</string>
+    <string name="color_mixer_accept">Aplicar</string>
+    <string name="color_mixer_cancel">Cancelar</string>
+    <string name="help_button_dismiss">Entendido</string>
+    <string name="help_button_tutorial">Ver tutorial interactivo</string>
+    <string name="settings_subtitle">Fondo de pantalla interactivo</string>
+    <string name="settings_apply_wallpaper">Establecer fondo de pantalla</string>
+    <string name="touch_interaction_enabled">Activado</string>
+    <string name="touch_interaction_disabled">Desactivado</string>
+    <string name="color_custom">Personalizado</string>
+    <string name="color_custom_action">Elegir color personalizado</string>
 </resources>

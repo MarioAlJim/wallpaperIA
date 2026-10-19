@@ -1,40 +1,33 @@
 package com.wolf.wallpaper
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.HorizontalScrollView
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 
 /**
- * Shared builder for the "row of 92dp cards" selector used by both settings fragments
- * (Storm / Sunny) in place of a Slider, extracted so both use a single implementation instead
- * of duplicated copies. Mirrors [SettingsAccordionHelper]'s role as a stateless, Context-aware
- * sibling helper.
- *
- * This only builds/wires the cards themselves - [SettingsAccordionHelper.scrollToSelected] is
- * reused as-is for centering the initially-selected card, and callers remain responsible for
- * anything fragment-specific (reading ConfigManager, calling updateSummaries, etc.) via the
- * [onSelected] callback.
+ * Shared builder for configuration selectors.
+ * Replaces repetitive horizontal card carousels with a clean, interactive Material 3 row card
+ * that triggers a dynamic Modal Bottom Sheet with live real-time preview feedback.
  */
 object SettingsCardSelectorHelper {
 
     /**
-     * Clears [container] and repopulates it with one 92dp [MaterialCardView] per entry in
-     * [options], each showing a small preview (from [previewFactory], if provided) above its
-     * title. [selectedIndex] starts highlighted and centered in its scroll view (if any).
-     *
-     * [previewFrameBackgroundRes] lets a caller reuse an existing drawable (e.g. Sunny's
-     * `R.drawable.mini_screen_bg`) for the preview frame's background instead of the default
-     * programmatic [GradientDrawable] (Storm's existing look) used when left as 0.
-     *
-     * [previewFactory] returns `null` for a bare frame with no preview child (already the
-     * existing behavior for a couple of Storm's frequency selectors).
+     * Clears [container] and populates it with an interactive Material 3 row card displaying
+     * the currently selected option, a mini-preview badge (if [previewFactory] is provided),
+     * and a forward chevron. Tapping the card opens a dynamic [SettingsBottomSheetHelper] modal
+     * with live interactive preview and reactive real-time updates.
      */
     fun populate(
         context: Context,
@@ -43,131 +36,295 @@ object SettingsCardSelectorHelper {
         selectedIndex: Int,
         previewFactory: ((optionIndex: Int) -> View?)? = null,
         previewFrameBackgroundRes: Int = 0,
+        title: String? = null,
+        subtitle: String? = null,
         onSelected: (optionIndex: Int) -> Unit
     ) {
         container.removeAllViews()
-        val cardViews = ArrayList<MaterialCardView>(options.size)
-        val titleViews = ArrayList<TextView>(options.size)
+        var currentSelected = selectedIndex.coerceIn(0, (options.size - 1).coerceAtLeast(0))
 
         val density = context.resources.displayMetrics.density
         fun Int.px() = Math.round(this * density)
 
-        val activeColor = ContextCompat.getColor(context, R.color.settings_accent_text)
-        val inactiveColor = ContextCompat.getColor(context, R.color.settings_text_primary)
-        val activeBgColor = ContextCompat.getColor(context, R.color.settings_chip_bg_active)
-        val inactiveBgColor = ContextCompat.getColor(context, R.color.settings_card_bg_alt)
-        val strokeActiveColor = ContextCompat.getColor(context, R.color.settings_accent)
-        val strokeInactiveColor = ContextCompat.getColor(context, R.color.settings_chip_bg_inactive)
+        // Ensure HorizontalScrollView and container expand to 100% full width
+        (container.parent as? HorizontalScrollView)?.isFillViewport = true
+        container.orientation = LinearLayout.VERTICAL
+        container.layoutParams = (container.layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )).apply {
+            width = ViewGroup.LayoutParams.MATCH_PARENT
+        }
 
-        fun applySelection(index: Int) {
-            cardViews.forEachIndexed { i, card ->
-                val titleView = titleViews[i]
-                if (i == index) {
-                    card.strokeColor = strokeActiveColor
-                    card.strokeWidth = 3.px()
-                    card.setCardBackgroundColor(activeBgColor)
-                    titleView.setTextColor(activeColor)
-                } else {
-                    card.strokeColor = strokeInactiveColor
-                    card.strokeWidth = 1.px()
-                    card.setCardBackgroundColor(inactiveBgColor)
-                    titleView.setTextColor(inactiveColor)
-                }
+        val settingTitle = title ?: findSettingTitle(container) ?: "Seleccionar opción"
+        val settingSubtitle = subtitle ?: "Selecciona una opción para previsualizar en tiempo real"
+
+        val rowCard = MaterialCardView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 4.px(), 0, 4.px())
             }
+            radius = 14.px().toFloat()
+            strokeWidth = 1.px()
+            strokeColor = ContextCompat.getColor(context, R.color.settings_stroke)
+            cardElevation = 0f
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt))
+            isClickable = true
+            isFocusable = true
+        }
+
+        val contentRow = LinearLayout(context).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(14.px(), 12.px(), 14.px(), 12.px())
         }
 
         val hasPreview = previewFactory != null
-        val cardHeight = if (hasPreview) 92.px() else 40.px()
-        val cardWidth = if (hasPreview) 86.px() else LinearLayout.LayoutParams.WRAP_CONTENT
+        var previewContainer: FrameLayout? = null
 
-        for (i in options.indices) {
-            val isLast = i == options.indices.last
-            val card = MaterialCardView(context).apply {
-                layoutParams = LinearLayout.LayoutParams(cardWidth, cardHeight).apply {
-                    setMargins(0, 0, if (isLast) 0 else 10.px(), 0)
+        if (hasPreview) {
+            previewContainer = FrameLayout(context).apply {
+                layoutParams = LinearLayout.LayoutParams(42.px(), 42.px()).apply {
+                    marginEnd = 12.px()
                 }
-                radius = if (hasPreview) 12.px().toFloat() else 8.px().toFloat()
-                strokeWidth = 1.px()
-                strokeColor = strokeInactiveColor
-                cardElevation = 0f
-                setCardBackgroundColor(inactiveBgColor)
-                isClickable = true
-                isFocusable = true
-            }
-
-            val innerLayout = LinearLayout(context).apply {
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                if (hasPreview) {
-                    setPadding(6.px(), 6.px(), 6.px(), 6.px())
+                background = if (previewFrameBackgroundRes != 0) {
+                    ContextCompat.getDrawable(context, previewFrameBackgroundRes)
                 } else {
-                    setPadding(16.px(), 0, 16.px(), 0)
-                }
-            }
-
-            if (hasPreview) {
-                val previewFrame = FrameLayout(context).apply {
-                    layoutParams = LinearLayout.LayoutParams(38.px(), 50.px()).apply {
-                        setMargins(0, 0, 0, 4.px())
-                    }
-                    background = if (previewFrameBackgroundRes != 0) {
-                        ContextCompat.getDrawable(context, previewFrameBackgroundRes)
-                    } else {
-                        GradientDrawable().apply {
-                            shape = GradientDrawable.RECTANGLE
-                            cornerRadius = 6 * density
-                            setColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt2))
-                            setStroke(1.px(), strokeInactiveColor)
-                        }
+                    GradientDrawable().apply {
+                        shape = GradientDrawable.RECTANGLE
+                        cornerRadius = 8 * density
+                        setColor(ContextCompat.getColor(context, R.color.settings_card_bg_alt2))
+                        setStroke(1.px(), ContextCompat.getColor(context, R.color.settings_chip_bg_inactive))
                     }
                 }
-
-                previewFactory?.invoke(i)?.let { preview ->
-                    if (preview.layoutParams == null) {
-                        preview.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
-                    }
-                    previewFrame.addView(preview)
-                }
-                innerLayout.addView(previewFrame)
+                clipToOutline = true
             }
 
-            val titleView = TextView(context).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT)
-                text = options[i]
-                setTextColor(if (i == selectedIndex) activeColor else inactiveColor)
-                textSize = if (hasPreview) 10f else 12f
-                gravity = Gravity.CENTER
-                setTypeface(null, android.graphics.Typeface.BOLD)
+            previewFactory?.invoke(currentSelected)?.let { preview ->
+                (preview.parent as? ViewGroup)?.removeView(preview)
+                previewContainer.addView(
+                    preview,
+                    FrameLayout.LayoutParams(
+                        FrameLayout.LayoutParams.MATCH_PARENT,
+                        FrameLayout.LayoutParams.MATCH_PARENT
+                    )
+                )
             }
-
-            innerLayout.addView(titleView)
-            card.addView(innerLayout)
-
-            if (i == selectedIndex) {
-                card.strokeColor = strokeActiveColor
-                card.strokeWidth = 3.px()
-                card.setCardBackgroundColor(activeBgColor)
-            }
-
-            card.setOnClickListener {
-                onSelected(i)
-                applySelection(i)
-            }
-
-            container.addView(card)
-            cardViews.add(card)
-            titleViews.add(titleView)
+            contentRow.addView(previewContainer)
         }
 
-        cardViews.getOrNull(selectedIndex)?.let { selectedCard ->
-            (container.parent as? HorizontalScrollView)?.let { scrollView ->
-                SettingsAccordionHelper.scrollToSelected(scrollView, selectedCard)
+        val textColumn = LinearLayout(context).apply {
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            orientation = LinearLayout.VERTICAL
+        }
+
+        val valueTextView = TextView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            text = options.getOrNull(currentSelected) ?: ""
+            setTextColor(ContextCompat.getColor(context, R.color.settings_text_primary))
+            textSize = 15f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+
+        val hintTextView = TextView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                topMargin = 2.px()
+            }
+            text = "Toca para cambiar"
+            setTextColor(ContextCompat.getColor(context, R.color.settings_text_secondary))
+            textSize = 12f
+        }
+
+        textColumn.addView(valueTextView)
+        textColumn.addView(hintTextView)
+        contentRow.addView(textColumn)
+
+        val chevron = ImageView(context).apply {
+            layoutParams = LinearLayout.LayoutParams(22.px(), 22.px())
+            setImageResource(R.drawable.ic_arrow_forward)
+            imageTintList = ColorStateList.valueOf(
+                ContextCompat.getColor(context, R.color.settings_text_secondary)
+            )
+        }
+        contentRow.addView(chevron)
+
+        rowCard.addView(contentRow)
+        container.addView(rowCard)
+
+        fun updateCardDisplay(index: Int) {
+            currentSelected = index.coerceIn(0, (options.size - 1).coerceAtLeast(0))
+            valueTextView.text = options.getOrNull(currentSelected) ?: ""
+            if (hasPreview && previewContainer != null) {
+                previewContainer.removeAllViews()
+                previewFactory?.invoke(currentSelected)?.let { preview ->
+                    (preview.parent as? ViewGroup)?.removeView(preview)
+                    previewContainer.addView(
+                        preview,
+                        FrameLayout.LayoutParams(
+                            FrameLayout.LayoutParams.MATCH_PARENT,
+                            FrameLayout.LayoutParams.MATCH_PARENT
+                        )
+                    )
+                }
             }
         }
+
+        rowCard.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicOptionPickerSheet(
+                context = context,
+                title = settingTitle,
+                subtitle = settingSubtitle,
+                options = options,
+                selectedIndex = currentSelected,
+                previewFactory = previewFactory
+            ) { selectedIdx ->
+                updateCardDisplay(selectedIdx)
+                onSelected(selectedIdx)
+            }
+        }
+    }
+
+    /**
+     * Inspects the view hierarchy preceding [container] to discover the setting title label.
+     */
+    fun findSettingTitle(container: View): String? {
+        var current: View = container
+        while (current.parent is View) {
+            val parent = current.parent as ViewGroup
+            val idx = parent.indexOfChild(current)
+            if (idx > 0) {
+                val prev = parent.getChildAt(idx - 1)
+                val title = extractTitleFromView(prev)
+                if (!title.isNullOrBlank()) {
+                    return title
+                }
+            }
+            if (parent is HorizontalScrollView) {
+                current = parent
+            } else {
+                break
+            }
+        }
+        return null
+    }
+
+    private fun extractTitleFromView(view: View): String? {
+        if (view is TextView && view.text.isNotBlank()) {
+            return view.text.toString()
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                val child = view.getChildAt(i)
+                val text = extractTitleFromView(child)
+                if (!text.isNullOrBlank()) {
+                    return text
+                }
+            }
+        }
+        return null
     }
 
     /** Index into [values] whose entry is numerically closest to [current] (ties favor the lower index). */
     fun closestValueIndex(values: IntArray, current: Int): Int =
         values.indices.minByOrNull { kotlin.math.abs(values[it] - current) } ?: 0
+
+    /** Locks or unlocks the selector container and all its child cards with dimmed visual feedback. */
+    fun setLocked(container: ViewGroup, locked: Boolean) {
+        container.isEnabled = !locked
+        container.alpha = if (locked) 0.38f else 1.0f
+        for (i in 0 until container.childCount) {
+            val child = container.getChildAt(i)
+            child.isEnabled = !locked
+            if (child is ViewGroup) {
+                for (j in 0 until child.childCount) {
+                    child.getChildAt(j).isEnabled = !locked
+                }
+            }
+        }
+    }
+
+    /** Creates an ImageView preview for selector cards with padding and optional tint. */
+    fun previewIcon(
+        context: Context,
+        @DrawableRes resId: Int,
+        tintColorHex: String? = null,
+        rotationDegrees: Float = 0f
+    ): ImageView {
+        val density = context.resources.displayMetrics.density
+        return ImageView(context).apply {
+            setImageResource(resId)
+            scaleType = ImageView.ScaleType.CENTER_INSIDE
+            val pad = Math.round(8 * density)
+            setPadding(pad, pad, pad, pad)
+            imageTintList = ColorStateList.valueOf(
+                if (tintColorHex != null) {
+                    Color.parseColor(tintColorHex)
+                } else {
+                    ContextCompat.getColor(context, R.color.settings_text_primary)
+                }
+            )
+            rotation = rotationDegrees
+        }
+    }
+
+    /** Creates a TextView text/symbol preview badge for selector cards. */
+    fun previewTextBadge(
+        context: Context,
+        text: String,
+        textColorHex: String = "#FFFFFF",
+        textSizeSp: Float = 16f
+    ): TextView {
+        return TextView(context).apply {
+            this.text = text
+            setTextColor(Color.parseColor(textColorHex))
+            textSize = textSizeSp
+            gravity = Gravity.CENTER
+            setTypeface(null, android.graphics.Typeface.BOLD)
+        }
+    }
+
+    /**
+     * Builds a 2-option selector ("Activado" / "Desactivado").
+     */
+    fun populateOnOff(
+        context: Context,
+        container: LinearLayout,
+        isEnabled: Boolean,
+        onIconRes: Int = R.drawable.ic_check,
+        onIconTint: String = "#4CAF50",
+        onSelected: (enabled: Boolean) -> Unit
+    ) {
+        val options = arrayOf(
+            context.getString(R.string.touch_interaction_enabled),
+            context.getString(R.string.touch_interaction_disabled)
+        )
+        val initialIndex = if (isEnabled) 0 else 1
+        populate(
+            context,
+            container,
+            options,
+            initialIndex,
+            previewFactory = { index ->
+                if (index == 0) {
+                    previewIcon(context, onIconRes, onIconTint)
+                } else {
+                    previewIcon(context, R.drawable.ic_cancel, "#888888")
+                }
+            }
+        ) { selectedIndex ->
+            onSelected(selectedIndex == 0)
+        }
+    }
 }

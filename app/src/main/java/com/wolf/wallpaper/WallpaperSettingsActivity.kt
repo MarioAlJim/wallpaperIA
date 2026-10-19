@@ -10,6 +10,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.tabs.TabLayout
@@ -33,10 +36,32 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
 
+        // Edge-to-Edge handling (TargetSdk 35+)
+        val rootContent = findViewById<View>(R.id.settingsRootContent)
+        val buttonContainer = findViewById<View>(R.id.buttonContainer)
+        val basePaddingTopPx = rootContent.paddingTop
+        val basePaddingBottomPx = buttonContainer.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(rootContent) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(top = basePaddingTopPx + bars.top)
+            insets
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(buttonContainer) { view, insets ->
+            val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.updatePadding(bottom = basePaddingBottomPx + bars.bottom)
+            insets
+        }
+
+        supportActionBar?.hide()
+
         configManager = ConfigManager(this)
         tutorialPreference = TutorialPreference(this)
 
         setupThemeModeControl()
+
+        findViewById<View>(R.id.buttonHeaderHelp)?.setOnClickListener {
+            showHelpDialog()
+        }
 
         val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
         val initialActiveEffect = configManager.getActiveEffect()
@@ -72,6 +97,13 @@ class WallpaperSettingsActivity : AppCompatActivity() {
                 )
             }
             startActivity(intent)
+        }
+    }
+
+    private fun showHelpDialog() {
+        val currentTab = configManager.getActiveEffect()
+        SettingsBottomSheetHelper.showHelpSheet(this, isStorm = (currentTab == 0)) {
+            startTutorial(currentTab)
         }
     }
 
@@ -194,7 +226,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             "Elige la imagen o color que se ve detrás de la tormenta (paisaje, negro o foto personalizada)."
         ),
         TutorialStep(
-            R.id.btnStormHelp,
+            R.id.buttonHeaderHelp,
             "Botón de Ayuda",
             "Toca este ícono en cualquier momento para ver un resumen de todas las secciones, o repetir este tutorial."
         ),
@@ -242,7 +274,7 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             "Solo aplica en modo Combinado o Reloj: define la velocidad del ciclo día/noche y la trayectoria compartida del sol y la luna."
         ),
         TutorialStep(
-            R.id.btnSunnyHelp,
+            R.id.buttonHeaderHelp,
             "Botón de Ayuda",
             "Toca este ícono en cualquier momento para ver un resumen de todas las secciones, o repetir este tutorial."
         ),

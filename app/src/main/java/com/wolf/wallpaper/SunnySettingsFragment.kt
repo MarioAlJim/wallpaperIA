@@ -61,9 +61,6 @@ class SunnySettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         configManager = (requireActivity() as WallpaperSettingsActivity).configManager
 
-        view.findViewById<ImageView>(R.id.btnSunnyHelp)?.setOnClickListener {
-            showHelpDialog()
-        }
 
         // 1. Setup Accordions
         SettingsAccordionHelper.setupAccordionGroup(
@@ -109,13 +106,23 @@ class SunnySettingsFragment : Fragment() {
         updateCustomSunnyBackgroundViewsVisibility(view, configManager.getSunnyBackgroundIndex())
 
         // Setup Sunny God Rays
+        val rowSunnyGodRays = view.findViewById<View>(R.id.rowSunnyGodRays)
         val switchSunnyGodRays = view.findViewById<SwitchMaterial>(R.id.switchSunnyGodRays)
+        val statusSunnyGodRays = view.findViewById<TextView>(R.id.statusSunnyGodRays)
+        val iconSunnyGodRays = view.findViewById<ImageView>(R.id.iconSunnyGodRays)
+        val cardIconSunnyGodRays = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyGodRays)
         val layoutSunnyGodRaysIntensity = view.findViewById<View>(R.id.layoutSunnyGodRaysIntensity)
-        if (switchSunnyGodRays != null) {
+        if (rowSunnyGodRays != null || switchSunnyGodRays != null) {
             val isEnabled = configManager.isSunnyGodRaysEnabled()
-            switchSunnyGodRays.isChecked = isEnabled
             layoutSunnyGodRaysIntensity?.visibility = if (isEnabled) View.VISIBLE else View.GONE
-            switchSunnyGodRays.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowSunnyGodRays ?: switchSunnyGodRays!!,
+                switch = switchSunnyGodRays,
+                isChecked = isEnabled,
+                statusView = statusSunnyGodRays,
+                iconView = iconSunnyGodRays,
+                iconCard = cardIconSunnyGodRays
+            ) { isChecked ->
                 configManager.setSunnyGodRaysEnabled(isChecked)
                 layoutSunnyGodRaysIntensity?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateSummaries(view)
@@ -128,22 +135,42 @@ class SunnySettingsFragment : Fragment() {
         ) { value -> configManager.setSunnyGodRaysIntensity(value) }
 
         // Setup Sunny Lens Flare
+        val rowSunnyLensFlare = view.findViewById<View>(R.id.rowSunnyLensFlare)
         val switchSunnyLensFlare = view.findViewById<SwitchMaterial>(R.id.switchSunnyLensFlare)
+        val statusSunnyLensFlare = view.findViewById<TextView>(R.id.statusSunnyLensFlare)
+        val iconSunnyLensFlare = view.findViewById<ImageView>(R.id.iconSunnyLensFlare)
+        val cardIconSunnyLensFlare = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyLensFlare)
         val layoutSunnyLensFlareIntensity = view.findViewById<View>(R.id.layoutSunnyLensFlareIntensity)
-        if (switchSunnyLensFlare != null) {
+        if (rowSunnyLensFlare != null || switchSunnyLensFlare != null) {
             val isEnabled = configManager.isSunnyLensFlareEnabled()
-            switchSunnyLensFlare.isChecked = isEnabled
             layoutSunnyLensFlareIntensity?.visibility = if (isEnabled) View.VISIBLE else View.GONE
-            switchSunnyLensFlare.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowSunnyLensFlare ?: switchSunnyLensFlare!!,
+                switch = switchSunnyLensFlare,
+                isChecked = isEnabled,
+                statusView = statusSunnyLensFlare,
+                iconView = iconSunnyLensFlare,
+                iconCard = cardIconSunnyLensFlare
+            ) { isChecked ->
                 configManager.setSunnyLensFlareEnabled(isChecked)
                 layoutSunnyLensFlareIntensity?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateSummaries(view)
             }
         }
+        val rowSunnyLensFlareChromatic = view.findViewById<View>(R.id.rowSunnyLensFlareChromatic)
         val switchSunnyLensFlareChromatic = view.findViewById<SwitchMaterial>(R.id.switchSunnyLensFlareChromatic)
-        if (switchSunnyLensFlareChromatic != null) {
-            switchSunnyLensFlareChromatic.isChecked = configManager.isSunnyLensFlareChromaticEnabled()
-            switchSunnyLensFlareChromatic.setOnCheckedChangeListener { _, isChecked ->
+        val statusSunnyLensFlareChromatic = view.findViewById<TextView>(R.id.statusSunnyLensFlareChromatic)
+        val iconSunnyLensFlareChromatic = view.findViewById<ImageView>(R.id.iconSunnyLensFlareChromatic)
+        val cardIconSunnyLensFlareChromatic = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyLensFlareChromatic)
+        if (rowSunnyLensFlareChromatic != null || switchSunnyLensFlareChromatic != null) {
+            SettingsSwitchHelper.bind(
+                row = rowSunnyLensFlareChromatic ?: switchSunnyLensFlareChromatic!!,
+                switch = switchSunnyLensFlareChromatic,
+                isChecked = configManager.isSunnyLensFlareChromaticEnabled(),
+                statusView = statusSunnyLensFlareChromatic,
+                iconView = iconSunnyLensFlareChromatic,
+                iconCard = cardIconSunnyLensFlareChromatic
+            ) { isChecked ->
                 configManager.setSunnyLensFlareChromaticEnabled(isChecked)
                 updateSummaries(view)
             }
@@ -155,30 +182,60 @@ class SunnySettingsFragment : Fragment() {
         ) { value -> configManager.setSunnyLensFlareIntensity(value) }
 
         // Setup Sunny Gyroscope Parallax
+        val rowSunnyGyro = view.findViewById<View>(R.id.rowSunnyGyro)
         val switchSunnyGyro = view.findViewById<SwitchMaterial>(R.id.switchSunnyGyro)
-        if (switchSunnyGyro != null) {
-            switchSunnyGyro.isChecked = configManager.isSunnyGyroEnabled()
-            switchSunnyGyro.setOnCheckedChangeListener { _, isChecked ->
+        val statusSunnyGyro = view.findViewById<TextView>(R.id.statusSunnyGyro)
+        val iconSunnyGyro = view.findViewById<ImageView>(R.id.iconSunnyGyro)
+        val cardIconSunnyGyro = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyGyro)
+        if (rowSunnyGyro != null || switchSunnyGyro != null) {
+            SettingsSwitchHelper.bind(
+                row = rowSunnyGyro ?: switchSunnyGyro!!,
+                switch = switchSunnyGyro,
+                isChecked = configManager.isSunnyGyroEnabled(),
+                statusView = statusSunnyGyro,
+                iconView = iconSunnyGyro,
+                iconCard = cardIconSunnyGyro
+            ) { isChecked ->
                 configManager.setSunnyGyroEnabled(isChecked)
                 updateSummaries(view)
             }
         }
 
         // Setup Sunny Touch Burst
+        val rowSunnyTouchBurst = view.findViewById<View>(R.id.rowSunnyTouchBurst)
         val switchSunnyTouchBurst = view.findViewById<SwitchMaterial>(R.id.switchSunnyTouchBurst)
-        if (switchSunnyTouchBurst != null) {
-            switchSunnyTouchBurst.isChecked = configManager.isSunnyTouchBurstEnabled()
-            switchSunnyTouchBurst.setOnCheckedChangeListener { _, isChecked ->
+        val statusSunnyTouchBurst = view.findViewById<TextView>(R.id.statusSunnyTouchBurst)
+        val iconSunnyTouchBurst = view.findViewById<ImageView>(R.id.iconSunnyTouchBurst)
+        val cardIconSunnyTouchBurst = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyTouchBurst)
+        if (rowSunnyTouchBurst != null || switchSunnyTouchBurst != null) {
+            SettingsSwitchHelper.bind(
+                row = rowSunnyTouchBurst ?: switchSunnyTouchBurst!!,
+                switch = switchSunnyTouchBurst,
+                isChecked = configManager.isSunnyTouchBurstEnabled(),
+                statusView = statusSunnyTouchBurst,
+                iconView = iconSunnyTouchBurst,
+                iconCard = cardIconSunnyTouchBurst
+            ) { isChecked ->
                 configManager.setSunnyTouchBurstEnabled(isChecked)
                 updateSummaries(view)
             }
         }
 
         // Setup Sunny Rainbow Always
+        val rowSunnyRainbowAlways = view.findViewById<View>(R.id.rowSunnyRainbowAlways)
         val switchSunnyRainbowAlways = view.findViewById<SwitchMaterial>(R.id.switchSunnyRainbowAlways)
-        if (switchSunnyRainbowAlways != null) {
-            switchSunnyRainbowAlways.isChecked = configManager.isRainbowAlwaysEnabled()
-            switchSunnyRainbowAlways.setOnCheckedChangeListener { _, isChecked ->
+        val statusSunnyRainbowAlways = view.findViewById<TextView>(R.id.statusSunnyRainbowAlways)
+        val iconSunnyRainbowAlways = view.findViewById<ImageView>(R.id.iconSunnyRainbowAlways)
+        val cardIconSunnyRainbowAlways = view.findViewById<com.google.android.material.card.MaterialCardView>(R.id.cardIconSunnyRainbowAlways)
+        if (rowSunnyRainbowAlways != null || switchSunnyRainbowAlways != null) {
+            SettingsSwitchHelper.bind(
+                row = rowSunnyRainbowAlways ?: switchSunnyRainbowAlways!!,
+                switch = switchSunnyRainbowAlways,
+                isChecked = configManager.isRainbowAlwaysEnabled(),
+                statusView = statusSunnyRainbowAlways,
+                iconView = iconSunnyRainbowAlways,
+                iconCard = cardIconSunnyRainbowAlways
+            ) { isChecked ->
                 configManager.setRainbowAlwaysEnabled(isChecked)
                 updateSummaries(view)
             }
@@ -189,13 +246,11 @@ class SunnySettingsFragment : Fragment() {
         setupMoonPhaseCards(view)
         setupMoonDirectionCards(view)
         setupMoonStationaryCards(view)
-        setupStarColorCards(view)
         setupStarModeCards(view)
         setupNightAndCombinedSliders(view)
         setupCombinedMoonPhaseCards(view)
-        setupCombinedStarColorCards(view)
         setupCombinedTrajectory(view)
-        setupStarColorPreviews(view)
+        setupStarColorRows(view)
 
         // Init summaries and views
         updateSummaries(view)
@@ -395,32 +450,16 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupSunnyThemeCards(parent: View) {
-        val cardNoon = parent.findViewById<MaterialCardView>(R.id.cardSunnyThemeNoon)
-        val cardSunset = parent.findViewById<MaterialCardView>(R.id.cardSunnyThemeSunset)
-        val cardDusk = parent.findViewById<MaterialCardView>(R.id.cardSunnyThemeDusk)
-        val cardCustom = parent.findViewById<MaterialCardView>(R.id.cardSunnyThemeCustom)
-
-        val cards = listOf(cardNoon, cardSunset, cardDusk, cardCustom)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutSunnyThemeCards) ?: return
         val customLayout = parent.findViewById<View>(R.id.layoutSunnyCustomGradient)
+        val options = arrayOf(
+            getString(R.string.summary_theme_noon),
+            getString(R.string.summary_theme_sunset),
+            getString(R.string.summary_theme_dusk),
+            getString(R.string.summary_theme_custom)
+        )
 
-        setCardGradientPreview(parent.findViewById(R.id.viewThemeNoonPreview), 0xFF0566D9.toInt(), 0xFF8DCCEF.toInt())
-        setCardGradientPreview(parent.findViewById(R.id.viewThemeSunsetPreview), 0xFF1A0D40.toInt(), 0xFFF2731A.toInt())
-        setCardGradientPreview(parent.findViewById(R.id.viewThemeDuskPreview), 0xFF261A59.toInt(), 0xFFE6808C.toInt())
-
-        fun updateThemeSelection(selectedTheme: Int) {
-            cards.forEachIndexed { index, card ->
-                if (card != null) {
-                    if (index == selectedTheme) {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                    } else {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                    }
-                }
-            }
+        fun updateCustomVisibility(selectedTheme: Int) {
             if (customLayout != null) {
                 val p = customLayout.parent as? ViewGroup
                 p?.let {
@@ -431,16 +470,33 @@ class SunnySettingsFragment : Fragment() {
             updateSunnyThemePreviews(parent)
         }
 
-        val initialTheme = configManager.getSunnyTheme()
-        updateThemeSelection(initialTheme)
-        scrollCardIntoView(cards.getOrNull(initialTheme))
+        val initialTheme = configManager.getSunnyTheme().coerceIn(0, options.size - 1)
+        updateCustomVisibility(initialTheme)
 
-        cards.forEachIndexed { index, card ->
-            card?.setOnClickListener {
-                configManager.setSunnyTheme(index)
-                updateThemeSelection(index)
-                updateSummaries(parent)
-            }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialTheme,
+            previewFactory = { index ->
+                val (topColor, bottomColor) = when (index) {
+                    0 -> Pair(0xFF0566D9.toInt(), 0xFF8DCCEF.toInt())
+                    1 -> Pair(0xFF1A0D40.toInt(), 0xFFF2731A.toInt())
+                    2 -> Pair(0xFF261A59.toInt(), 0xFFE6808C.toInt())
+                    else -> Pair(configManager.getSunnyCustomSkyTopColor(), configManager.getSunnyCustomSkyBottomColor())
+                }
+                View(requireContext()).apply {
+                    val gd = GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, intArrayOf(topColor, bottomColor)).apply {
+                        cornerRadius = 8 * resources.displayMetrics.density
+                    }
+                    background = gd
+                }
+            },
+            title = getString(R.string.sunny_tema_del_cielo)
+        ) { index ->
+            configManager.setSunnyTheme(index)
+            updateCustomVisibility(index)
+            updateSummaries(parent)
         }
 
         parent.findViewById<View>(R.id.btnCustomSkyTopColor)?.setOnClickListener {
@@ -484,75 +540,63 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupSunDirectionCards(parent: View) {
-        val cardL2R = parent.findViewById<MaterialCardView>(R.id.cardSunDirL2R)
-        val cardR2L = parent.findViewById<MaterialCardView>(R.id.cardSunDirR2L)
-        val cardStationary = parent.findViewById<MaterialCardView>(R.id.cardSunDirStationary)
-        val cardRandom = parent.findViewById<MaterialCardView>(R.id.cardSunDirRandom)
-        val cardChaotic = parent.findViewById<MaterialCardView>(R.id.cardSunDirChaotic)
-        val cards = listOf(cardL2R, cardR2L, cardStationary, cardRandom, cardChaotic)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutSunDirectionCards) ?: return
+        val options = arrayOf(
+            getString(R.string.sunny_izq_a_der),
+            getString(R.string.sunny_der_a_izq),
+            getString(R.string.sunny_esttico),
+            getString(R.string.sunny_aleatorio),
+            getString(R.string.sunny_catico)
+        )
+        val initialDir = configManager.getSunPathDirection().coerceIn(0, options.size - 1)
+        updateSunMoveSpeedSliderVisibility(parent, initialDir)
 
-        fun updateCardSelection(selectedDir: Int) {
-            cards.forEachIndexed { index, card ->
-                if (card != null) {
-                    if (index == selectedDir) {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                    } else {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                    }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialDir,
+            previewFactory = { index ->
+                val symbol = when (index) {
+                    0 -> "→"
+                    1 -> "←"
+                    2 -> "⚫"
+                    3 -> "?"
+                    else -> "⚡"
                 }
-            }
-            updateSunMoveSpeedSliderVisibility(parent, selectedDir)
-        }
-
-        updateCardSelection(configManager.getSunPathDirection())
-        scrollCardIntoView(cards.getOrNull(configManager.getSunPathDirection()))
-
-        cards.forEachIndexed { index, card ->
-            card?.setOnClickListener {
-                configManager.setSunPathDirection(index)
-                updateCardSelection(index)
-                updateSummaries(parent)
-            }
+                SettingsCardSelectorHelper.previewTextBadge(requireContext(), symbol, "#FFD700", 18f)
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_trayectoriamovimiento_del_sol)
+        ) { index ->
+            configManager.setSunPathDirection(index)
+            updateSunMoveSpeedSliderVisibility(parent, index)
+            updateSummaries(parent)
         }
     }
 
     private fun setupSunStationaryCards(parent: View) {
-        val cardTopLeft = parent.findViewById<MaterialCardView>(R.id.cardSunPosTopLeft)
-        val cardTopRight = parent.findViewById<MaterialCardView>(R.id.cardSunPosTopRight)
-        val cardCenter = parent.findViewById<MaterialCardView>(R.id.cardSunPosCenter)
-        val cardLeft = parent.findViewById<MaterialCardView>(R.id.cardSunPosLeft)
-        val cardRight = parent.findViewById<MaterialCardView>(R.id.cardSunPosRight)
-        val cardCustom = parent.findViewById<MaterialCardView>(R.id.cardSunPosCustom)
-        val cards = listOf(cardTopLeft, cardTopRight, cardCenter, cardLeft, cardRight, cardCustom)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutSunStationaryCards) ?: return
         val customLayout = parent.findViewById<View>(R.id.layoutSunCustomXY)
+        val options = arrayOf(
+            getString(R.string.sunny_sup_izq),
+            getString(R.string.sunny_sup_der),
+            getString(R.string.sunny_centro),
+            getString(R.string.sunny_borde_izq),
+            getString(R.string.sunny_borde_der),
+            getString(R.string.sunny_personalizado)
+        )
+        val initialPos = configManager.getSunStationaryPosition().coerceIn(0, options.size - 1)
 
-        fun updateCardSelection(selectedPosition: Int) {
-            cards.forEachIndexed { index, card ->
-                if (card != null) {
-                    if (index == selectedPosition) {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                        card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                    } else {
-                        card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                        card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                        card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                    }
-                }
-            }
+        fun updateCustomVisibility(pos: Int) {
             if (customLayout != null) {
                 val p = customLayout.parent as? ViewGroup
                 p?.let { TransitionManager.beginDelayedTransition(it, AutoTransition().apply { duration = 200 }) }
-                customLayout.visibility = if (selectedPosition == 5) View.VISIBLE else View.GONE
+                customLayout.visibility = if (pos == 5) View.VISIBLE else View.GONE
             }
         }
 
-        updateCardSelection(configManager.getSunStationaryPosition())
-        scrollCardIntoView(cards.getOrNull(configManager.getSunStationaryPosition()))
+        updateCustomVisibility(initialPos)
 
         // Wire sliders for custom X/Y
         setupSlider(parent, R.id.seekBarSunCustomX, R.id.textViewSunCustomXValue, configManager.getSunCustomX()) { value ->
@@ -562,12 +606,28 @@ class SunnySettingsFragment : Fragment() {
             configManager.setSunCustomY(value)
         }
 
-        cards.forEachIndexed { index, card ->
-            card?.setOnClickListener {
-                configManager.setSunStationaryPosition(index)
-                updateCardSelection(index)
-                updateSummaries(parent)
-            }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialPos,
+            previewFactory = { index ->
+                val symbol = when (index) {
+                    0 -> "↖"
+                    1 -> "↗"
+                    2 -> "⊙"
+                    3 -> "←"
+                    4 -> "→"
+                    else -> "⚙"
+                }
+                SettingsCardSelectorHelper.previewTextBadge(requireContext(), symbol, "#FFD700", 18f)
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_posicin_del_sol_esttico)
+        ) { index ->
+            configManager.setSunStationaryPosition(index)
+            updateCustomVisibility(index)
+            updateSummaries(parent)
         }
     }
 
@@ -584,14 +644,9 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun showHelpDialog() {
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setTitle(R.string.sunny_help_dialog_title)
-            .setMessage(Html.fromHtml(getString(R.string.sunny_help_dialog_message), Html.FROM_HTML_MODE_LEGACY))
-            .setNeutralButton("Ver tutorial") { _, _ ->
-                (requireActivity() as WallpaperSettingsActivity).startTutorial(1)
-            }
-            .setPositiveButton("Entendido", null)
-            .show()
+        SettingsBottomSheetHelper.showHelpSheet(requireContext(), isStorm = false) {
+            (requireActivity() as? WallpaperSettingsActivity)?.startTutorial(1)
+        }
     }
 
     private fun saveCustomSunnyBackground(uri: android.net.Uri) {
@@ -698,76 +753,43 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupCloudDensityCards(parent: View) {
-        val cardPoco = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityPoco) ?: return
-        val cardMedio = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityMedio) ?: return
-        val cardAlto = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityAlto) ?: return
-        val cardMuyAlto = parent.findViewById<MaterialCardView>(R.id.cardCloudDensityMuyAlto) ?: return
-        val cards = listOf(cardPoco, cardMedio, cardAlto, cardMuyAlto)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutCloudDensityCards) ?: return
+        val options = arrayOf(
+            getString(R.string.sunny_poco),
+            getString(R.string.sunny_medio),
+            getString(R.string.sunny_alto),
+            getString(R.string.sunny_muy_alto)
+        )
+        val values = intArrayOf(25, 50, 75, 100)
+        val initialIndex = when (configManager.getCloudDensity()) {
+            25 -> 0
+            50 -> 1
+            75 -> 2
+            100 -> 3
+            else -> 1
+        }
+        parent.findViewById<TextView>(R.id.textViewCloudDensityValue)?.text = options[initialIndex]
 
-        val textPoco = cardPoco.getChildAt(0) as? TextView
-        val textMedio = cardMedio.getChildAt(0) as? TextView
-        val textAlto = cardAlto.getChildAt(0) as? TextView
-        val textMuyAlto = cardMuyAlto.getChildAt(0) as? TextView
-        val texts = listOf(textPoco, textMedio, textAlto, textMuyAlto)
-
-        val activeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent_text)
-        val inactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_text_muted)
-        val activeBgColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active)
-        val inactiveBgColor = ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt)
-        val strokeActiveColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-        val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-
-        fun selectDensity(densityValue: Int) {
-            val index = when (densityValue) {
-                25 -> 0
-                50 -> 1
-                75 -> 2
-                100 -> 3
-                else -> 1 // Default to Medio (50)
-            }
-            cards.forEachIndexed { i, card ->
-                val text = texts[i]
-                if (i == index) {
-                    card.strokeColor = strokeActiveColor
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(activeBgColor)
-                    text?.setTextColor(activeColor)
-                } else {
-                    card.strokeColor = strokeInactiveColor
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(inactiveBgColor)
-                    text?.setTextColor(inactiveColor)
-                }
-            }
-            val valueText = when (index) {
-                0 -> "Poco"
-                1 -> "Medio"
-                2 -> "Alto"
-                3 -> "Muy Alto"
-                else -> "Medio"
-            }
-            parent.findViewById<TextView>(R.id.textViewCloudDensityValue)?.text = valueText
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialIndex,
+            previewFactory = { index ->
+                SettingsCardSelectorHelper.previewIcon(
+                    requireContext(),
+                    R.drawable.ic_cloud,
+                    "#80D8FF"
+                )
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.cloud_density_label)
+        ) { index ->
+            val value = values[index]
+            configManager.setCloudDensity(value)
+            parent.findViewById<TextView>(R.id.textViewCloudDensityValue)?.text = options[index]
             updateSummaries(parent)
         }
-
-        cardPoco.setOnClickListener {
-            configManager.setCloudDensity(25)
-            selectDensity(25)
-        }
-        cardMedio.setOnClickListener {
-            configManager.setCloudDensity(50)
-            selectDensity(50)
-        }
-        cardAlto.setOnClickListener {
-            configManager.setCloudDensity(75)
-            selectDensity(75)
-        }
-        cardMuyAlto.setOnClickListener {
-            configManager.setCloudDensity(100)
-            selectDensity(100)
-        }
-
-        selectDensity(configManager.getCloudDensity())
     }
 
     private fun setupTimeModeCards(parent: View) {
@@ -797,6 +819,10 @@ class SunnySettingsFragment : Fragment() {
         val strokeInactiveColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
 
         val switchClockMode = parent.findViewById<SwitchMaterial>(R.id.switchCombinedClockMode)
+        val rowCombinedClockMode = parent.findViewById<View>(R.id.rowCombinedClockMode)
+        val statusCombinedClockMode = parent.findViewById<TextView>(R.id.statusCombinedClockMode)
+        val iconCombinedClockMode = parent.findViewById<ImageView>(R.id.iconCombinedClockMode)
+        val cardIconCombinedClockMode = parent.findViewById<MaterialCardView>(R.id.cardIconCombinedClockMode)
 
         fun selectMode(mode: Int) {
             val highlightIndex = when (mode) {
@@ -822,11 +848,16 @@ class SunnySettingsFragment : Fragment() {
                     image?.setColorFilter(inactiveColor)
                 }
             }
-            // Update switch state
-            if (switchClockMode != null) {
-                switchClockMode.setOnCheckedChangeListener(null)
-                switchClockMode.isChecked = mode == 3
-                switchClockMode.setOnCheckedChangeListener { _, isChecked ->
+            // Update switch & illuminating icon state
+            if (rowCombinedClockMode != null || switchClockMode != null) {
+                SettingsSwitchHelper.bind(
+                    row = rowCombinedClockMode ?: switchClockMode!!,
+                    switch = switchClockMode,
+                    isChecked = mode == 3,
+                    statusView = statusCombinedClockMode,
+                    iconView = iconCombinedClockMode,
+                    iconCard = cardIconCombinedClockMode
+                ) { isChecked ->
                     val newMode = if (isChecked) 3 else 2
                     configManager.setTimeMode(newMode)
                     selectMode(newMode)
@@ -842,7 +873,7 @@ class SunnySettingsFragment : Fragment() {
         cards.forEachIndexed { i, card ->
             card.setOnClickListener {
                 if (i == 2) {
-                    val isClockChecked = switchClockMode?.isChecked == true
+                    val isClockChecked = configManager.getTimeMode() == 3
                     val selectedMode = if (isClockChecked) 3 else 2
                     configManager.setTimeMode(selectedMode)
                     selectMode(selectedMode)
@@ -896,72 +927,73 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupMoonPhaseCards(parent: View) {
-        val ids = listOf(
-            R.id.cardMoonPhase0, R.id.cardMoonPhase1, R.id.cardMoonPhase2, R.id.cardMoonPhase3,
-            R.id.cardMoonPhase4, R.id.cardMoonPhase5, R.id.cardMoonPhase6, R.id.cardMoonPhase7
+        val container = parent.findViewById<LinearLayout>(R.id.layoutMoonPhaseCards) ?: return
+        val options = resources.getStringArray(R.array.moon_phases)
+        val moonDrawables = intArrayOf(
+            R.drawable.ic_moon_phase_0,
+            R.drawable.ic_moon_phase_1,
+            R.drawable.ic_moon_phase_2,
+            R.drawable.ic_moon_phase_3,
+            R.drawable.ic_moon_phase_4,
+            R.drawable.ic_moon_phase_5,
+            R.drawable.ic_moon_phase_6,
+            R.drawable.ic_moon_phase_7
         )
-        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+        val initialPhase = configManager.getMoonPhase().coerceIn(0, options.size - 1)
 
-        fun selectPhase(phase: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == phase) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                }
-            }
-        }
-
-        selectPhase(configManager.getMoonPhase())
-        scrollCardIntoView(cards.getOrNull(configManager.getMoonPhase()))
-
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setMoonPhase(i)
-                selectPhase(i)
-                updateSummaries(parent)
-            }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialPhase,
+            previewFactory = { index ->
+                SettingsCardSelectorHelper.previewIcon(
+                    requireContext(),
+                    moonDrawables.getOrElse(index) { R.drawable.ic_moon_phase_4 },
+                    "#FFFFFF"
+                )
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_fase_lunar)
+        ) { phase ->
+            configManager.setMoonPhase(phase)
+            updateSummaries(parent)
         }
     }
 
     private fun setupMoonDirectionCards(parent: View) {
-        val cardL2R = parent.findViewById<MaterialCardView>(R.id.cardMoonDirL2R)
-        val cardR2L = parent.findViewById<MaterialCardView>(R.id.cardMoonDirR2L)
-        val cardStatic = parent.findViewById<MaterialCardView>(R.id.cardMoonDirStatic)
-        val cardRandom = parent.findViewById<MaterialCardView>(R.id.cardMoonDirRandom)
-        val cardChaotic = parent.findViewById<MaterialCardView>(R.id.cardMoonDirChaotic)
-        val cards = listOf(cardL2R, cardR2L, cardStatic, cardRandom, cardChaotic)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutMoonDirectionCards) ?: return
+        val options = arrayOf(
+            getString(R.string.sunny_izq_a_der),
+            getString(R.string.sunny_der_a_izq),
+            getString(R.string.sunny_esttico),
+            getString(R.string.sunny_aleatorio),
+            getString(R.string.sunny_catico)
+        )
+        val initialDir = configManager.getMoonPathDirection().coerceIn(0, options.size - 1)
+        updateMoonMoveSpeedVisibility(parent, initialDir)
 
-        fun selectDir(dir: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == dir) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialDir,
+            previewFactory = { index ->
+                val symbol = when (index) {
+                    0 -> "→"
+                    1 -> "←"
+                    2 -> "⚫"
+                    3 -> "?"
+                    else -> "⚡"
                 }
-            }
-            updateMoonMoveSpeedVisibility(parent, dir)
-        }
-
-        selectDir(configManager.getMoonPathDirection())
-        scrollCardIntoView(cards.getOrNull(configManager.getMoonPathDirection()))
-
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setMoonPathDirection(i)
-                selectDir(i)
-                updateSummaries(parent)
-            }
+                SettingsCardSelectorHelper.previewTextBadge(requireContext(), symbol, "#90CAF9", 18f)
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_trayectoria_de_la_luna)
+        ) { index ->
+            configManager.setMoonPathDirection(index)
+            updateMoonMoveSpeedVisibility(parent, index)
+            updateSummaries(parent)
         }
     }
 
@@ -978,26 +1010,19 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupMoonStationaryCards(parent: View) {
-        val ids = listOf(
-            R.id.cardMoonPosTopLeft, R.id.cardMoonPosTopRight, R.id.cardMoonPosCenter,
-            R.id.cardMoonPosMidLeft, R.id.cardMoonPosMidRight, R.id.cardMoonPosCustom
-        )
-        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+        val container = parent.findViewById<LinearLayout>(R.id.layoutMoonStationaryCards) ?: return
         val customLayout = parent.findViewById<View>(R.id.layoutMoonCustomXY)
+        val options = arrayOf(
+            getString(R.string.sunny_sup_izq),
+            getString(R.string.sunny_sup_der),
+            getString(R.string.sunny_centro),
+            getString(R.string.sunny_borde_izq),
+            getString(R.string.sunny_borde_der),
+            getString(R.string.sunny_personalizado)
+        )
+        val initialPos = configManager.getMoonStationaryPosition().coerceIn(0, options.size - 1)
 
-        fun selectPos(pos: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == pos) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                }
-            }
+        fun updateCustomVisibility(pos: Int) {
             if (customLayout != null) {
                 val p = customLayout.parent as? ViewGroup
                 p?.let { TransitionManager.beginDelayedTransition(it, AutoTransition().apply { duration = 200 }) }
@@ -1005,8 +1030,7 @@ class SunnySettingsFragment : Fragment() {
             }
         }
 
-        selectPos(configManager.getMoonStationaryPosition())
-        scrollCardIntoView(cards.getOrNull(configManager.getMoonStationaryPosition()))
+        updateCustomVisibility(initialPos)
 
         // Wire sliders for custom X/Y
         setupSlider(parent, R.id.seekBarMoonCustomX, R.id.textViewMoonCustomXValue, configManager.getMoonCustomX()) { value ->
@@ -1016,77 +1040,56 @@ class SunnySettingsFragment : Fragment() {
             configManager.setMoonCustomY(value)
         }
 
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setMoonStationaryPosition(i)
-                selectPos(i)
-                updateSummaries(parent)
-            }
-        }
-    }
-
-    private fun setupStarColorCards(parent: View) {
-        val ids = listOf(
-            R.id.cardStarColorWhite, R.id.cardStarColorBlue, R.id.cardStarColorWarm,
-            R.id.cardStarColorPink, R.id.cardStarColorGreen, R.id.cardStarColorMixed
-        )
-        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
-
-        fun selectColor(index: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == index) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialPos,
+            previewFactory = { index ->
+                val symbol = when (index) {
+                    0 -> "↖"
+                    1 -> "↗"
+                    2 -> "⊙"
+                    3 -> "←"
+                    4 -> "→"
+                    else -> "⚙"
                 }
-            }
-        }
-
-        selectColor(configManager.getStarColorIndex())
-        scrollCardIntoView(cards.getOrNull(configManager.getStarColorIndex()))
-
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setStarColorIndex(i)
-                selectColor(i)
-                updateSummaries(parent)
-            }
+                SettingsCardSelectorHelper.previewTextBadge(requireContext(), symbol, "#90CAF9", 18f)
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_posicin_de_la_luna_esttica)
+        ) { index ->
+            configManager.setMoonStationaryPosition(index)
+            updateCustomVisibility(index)
+            updateSummaries(parent)
         }
     }
 
     private fun setupStarModeCards(parent: View) {
-        val cardStatic = parent.findViewById<MaterialCardView>(R.id.cardStarModeStatic)
-        val cardRandom = parent.findViewById<MaterialCardView>(R.id.cardStarModeRandom)
-        val cards = listOf(cardStatic, cardRandom)
+        val container = parent.findViewById<LinearLayout>(R.id.layoutStarModeCards) ?: return
+        val options = arrayOf(
+            getString(R.string.sunny_esttico),
+            getString(R.string.sunny_aleatorio)
+        )
+        val initialMode = configManager.getStarMode().coerceIn(0, options.size - 1)
 
-        fun selectMode(mode: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == mode) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                }
-            }
-        }
-
-        selectMode(configManager.getStarMode())
-
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setStarMode(i)
-                selectMode(i)
-                updateSummaries(parent)
-            }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialMode,
+            previewFactory = { index ->
+                SettingsCardSelectorHelper.previewIcon(
+                    requireContext(),
+                    R.drawable.ic_star,
+                    if (index == 0) "#B0BEC5" else "#FFD54F"
+                )
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_modo_de_estrellas)
+        ) { index ->
+            configManager.setStarMode(index)
+            updateSummaries(parent)
         }
     }
 
@@ -1125,13 +1128,23 @@ class SunnySettingsFragment : Fragment() {
         ) { value -> configManager.setCombinedStarDensity(value) }
 
         // Setup Shooting Stars switch and slider
+        val rowShootingStars = parent.findViewById<View>(R.id.rowShootingStars)
         val switchShootingStars = parent.findViewById<SwitchMaterial>(R.id.switchShootingStars)
+        val statusShootingStars = parent.findViewById<TextView>(R.id.statusShootingStars)
+        val iconShootingStars = parent.findViewById<ImageView>(R.id.iconShootingStars)
+        val cardIconShootingStars = parent.findViewById<MaterialCardView>(R.id.cardIconShootingStars)
         val layoutDensityGroup = parent.findViewById<View>(R.id.layoutShootingStarsDensityGroup)
-        if (switchShootingStars != null) {
+        if (rowShootingStars != null || switchShootingStars != null) {
             val enabled = configManager.isShootingStarsEnabled()
-            switchShootingStars.isChecked = enabled
             layoutDensityGroup?.visibility = if (enabled) View.VISIBLE else View.GONE
-            switchShootingStars.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowShootingStars ?: switchShootingStars!!,
+                switch = switchShootingStars,
+                isChecked = enabled,
+                statusView = statusShootingStars,
+                iconView = iconShootingStars,
+                iconCard = cardIconShootingStars
+            ) { isChecked ->
                 configManager.setShootingStarsEnabled(isChecked)
                 layoutDensityGroup?.visibility = if (isChecked) View.VISIBLE else View.GONE
                 updateSummaries(parent)
@@ -1145,10 +1158,20 @@ class SunnySettingsFragment : Fragment() {
         ) { value -> configManager.setShootingStarsDensity(value) }
 
         // Setup Fireflies switch
+        val rowFireflies = parent.findViewById<View>(R.id.rowFireflies)
         val switchFireflies = parent.findViewById<SwitchMaterial>(R.id.switchFireflies)
-        if (switchFireflies != null) {
-            switchFireflies.isChecked = configManager.isFirefliesEnabled()
-            switchFireflies.setOnCheckedChangeListener { _, isChecked ->
+        val statusFireflies = parent.findViewById<TextView>(R.id.statusFireflies)
+        val iconFireflies = parent.findViewById<ImageView>(R.id.iconFireflies)
+        val cardIconFireflies = parent.findViewById<MaterialCardView>(R.id.cardIconFireflies)
+        if (rowFireflies != null || switchFireflies != null) {
+            SettingsSwitchHelper.bind(
+                row = rowFireflies ?: switchFireflies!!,
+                switch = switchFireflies,
+                isChecked = configManager.isFirefliesEnabled(),
+                statusView = statusFireflies,
+                iconView = iconFireflies,
+                iconCard = cardIconFireflies
+            ) { isChecked ->
                 configManager.setFirefliesEnabled(isChecked)
                 updateSummaries(parent)
             }
@@ -1158,13 +1181,23 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun setupNebulaSection(parent: View) {
+        val rowNebula = parent.findViewById<View>(R.id.rowNebula)
         val switchNebula = parent.findViewById<SwitchMaterial>(R.id.switchNebula)
+        val statusNebula = parent.findViewById<TextView>(R.id.statusNebula)
+        val iconNebula = parent.findViewById<ImageView>(R.id.iconNebula)
+        val cardIconNebula = parent.findViewById<MaterialCardView>(R.id.cardIconNebula)
         val layoutOptionsGroup = parent.findViewById<View>(R.id.layoutNebulaOptionsGroup)
-        if (switchNebula != null) {
+        if (rowNebula != null || switchNebula != null) {
             val enabled = configManager.isNebulaEnabled()
-            switchNebula.isChecked = enabled
             layoutOptionsGroup?.visibility = if (enabled) View.VISIBLE else View.GONE
-            switchNebula.setOnCheckedChangeListener { _, isChecked ->
+            SettingsSwitchHelper.bind(
+                row = rowNebula ?: switchNebula!!,
+                switch = switchNebula,
+                isChecked = enabled,
+                statusView = statusNebula,
+                iconView = iconNebula,
+                iconCard = cardIconNebula
+            ) { isChecked ->
                 configManager.setNebulaEnabled(isChecked)
                 layoutOptionsGroup?.visibility = if (isChecked) View.VISIBLE else View.GONE
             }
@@ -1196,228 +1229,162 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun showNebulaColorPickerDialog(parent: View, isColor2: Boolean) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
-        val previewView = dialogView.findViewById<View>(R.id.dialogColorPreview)
-        val hexInput = dialogView.findViewById<EditText>(R.id.dialogColorHexInput)
-
-        val sliderR = dialogView.findViewById<Slider>(R.id.sliderR)
-        val sliderG = dialogView.findViewById<Slider>(R.id.sliderG)
-        val sliderB = dialogView.findViewById<Slider>(R.id.sliderB)
-
-        val labelR = dialogView.findViewById<TextView>(R.id.labelR)
-        val labelG = dialogView.findViewById<TextView>(R.id.labelG)
-        val labelB = dialogView.findViewById<TextView>(R.id.labelB)
-
         val initialColor = if (isColor2) configManager.getNebulaColor2() else configManager.getNebulaColor()
-        var currentColor = initialColor
-
-        fun updateDialogColor(color: Int, updateHexText: Boolean = true, updateSliders: Boolean = true) {
-            currentColor = color
-            val previewDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(color)
-            }
-            previewView?.background = previewDrawable
-
-            val r = Color.red(color)
-            val g = Color.green(color)
-            val b = Color.blue(color)
-
-            if (updateHexText) {
-                hexInput?.setText(String.format("#%06X", 0xFFFFFF and color))
-            }
-            if (updateSliders) {
-                sliderR?.value = r.toFloat()
-                sliderG?.value = g.toFloat()
-                sliderB?.value = b.toFloat()
-            }
-
-            labelR?.text = "R: $r"
-            labelG?.text = "G: $g"
-            labelB?.text = "B: $b"
-        }
-
-        val sliderListener = {
-            val r = sliderR?.value?.toInt() ?: 0
-            val g = sliderG?.value?.toInt() ?: 0
-            val b = sliderB?.value?.toInt() ?: 0
-            updateDialogColor(Color.rgb(r, g, b), updateHexText = true, updateSliders = false)
-        }
-
-        sliderR?.addOnChangeListener { _, _, _ -> sliderListener() }
-        sliderG?.addOnChangeListener { _, _, _ -> sliderListener() }
-        sliderB?.addOnChangeListener { _, _, _ -> sliderListener() }
-
-        hexInput?.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) {
-                val str = s?.toString() ?: ""
-                if (str.length == 7 && str.startsWith("#")) {
-                    try {
-                        updateDialogColor(Color.parseColor(str), updateHexText = false, updateSliders = true)
-                    } catch (e: Exception) {}
-                }
-            }
-        })
-
-        val presets = intArrayOf(
-            0xFF8E4FDB.toInt(), 0xFF4F7FDB.toInt(), 0xFFDB4FA9.toInt(), 0xFF4FDBC4.toInt(),
-            0xFFDB914F.toInt(), 0xFF6A3093.toInt(), 0xFFE53935.toInt(), 0xFF8E24AA.toInt(),
-            0xFF00ACC1.toInt(), 0xFF43A047.toInt(), 0xFFFFB300.toInt(), 0xFFFFFFFF.toInt()
+        val presets = listOf(
+            0x8E4FDB, 0x4F7FDB, 0xDB4FA9, 0x4FDBC4,
+            0xDB914F, 0x6A3093, 0xE53935, 0x8E24AA,
+            0x00ACC1, 0x43A047, 0xFFB300, 0xFFFFFF
         )
-
-        for (i in 0..11) {
-            val presetId = resources.getIdentifier("presetColor$i", "id", requireContext().packageName)
-            val presetView = dialogView.findViewById<View>(presetId)
-            if (presetView != null) {
-                presetView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL
-                    setColor(presets[i])
-                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
-                }
-                presetView.setOnClickListener {
-                    updateDialogColor(presets[i], updateHexText = true, updateSliders = true)
-                }
+        SettingsBottomSheetHelper.showColorMixerSheet(requireContext(), initialColor, presets) { selectedColor ->
+            if (isColor2) {
+                configManager.setNebulaColor2(selectedColor)
+            } else {
+                configManager.setNebulaColor(selectedColor)
             }
+            updateNebulaColorPreview(parent)
         }
-
-        updateDialogColor(initialColor, updateHexText = true, updateSliders = true)
-
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Aceptar") { _, _ ->
-                if (isColor2) {
-                    configManager.setNebulaColor2(currentColor)
-                } else {
-                    configManager.setNebulaColor(currentColor)
-                }
-                updateNebulaColorPreview(parent)
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 
     private fun setupCombinedMoonPhaseCards(parent: View) {
-        val ids = listOf(
-            R.id.cardCombinedMoonPhase0, R.id.cardCombinedMoonPhase1, R.id.cardCombinedMoonPhase2, R.id.cardCombinedMoonPhase3,
-            R.id.cardCombinedMoonPhase4, R.id.cardCombinedMoonPhase5, R.id.cardCombinedMoonPhase6, R.id.cardCombinedMoonPhase7
+        val container = parent.findViewById<LinearLayout>(R.id.layoutCombinedMoonPhaseCards) ?: return
+        val options = resources.getStringArray(R.array.moon_phases)
+        val moonDrawables = intArrayOf(
+            R.drawable.ic_moon_phase_0,
+            R.drawable.ic_moon_phase_1,
+            R.drawable.ic_moon_phase_2,
+            R.drawable.ic_moon_phase_3,
+            R.drawable.ic_moon_phase_4,
+            R.drawable.ic_moon_phase_5,
+            R.drawable.ic_moon_phase_6,
+            R.drawable.ic_moon_phase_7
         )
-        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+        val initialPhase = configManager.getCombinedMoonPhase().coerceIn(0, options.size - 1)
 
-        fun selectPhase(phase: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == phase) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                }
-            }
+        SettingsCardSelectorHelper.populate(
+            context = requireContext(),
+            container = container,
+            options = options,
+            selectedIndex = initialPhase,
+            previewFactory = { index ->
+                SettingsCardSelectorHelper.previewIcon(
+                    requireContext(),
+                    moonDrawables.getOrElse(index) { R.drawable.ic_moon_phase_4 },
+                    "#FFFFFF"
+                )
+            },
+            previewFrameBackgroundRes = R.drawable.mini_screen_bg,
+            title = getString(R.string.sunny_fase_lunar)
+        ) { phase ->
+            if (configManager.isCombinedMoonPhaseAutoAdvanceEnabled()) return@populate
+            configManager.setCombinedMoonPhase(phase)
+            updateSummaries(parent)
         }
 
-        // When auto-advance is on, the phase is controlled entirely by the renderer (see
-        // SunnyRenderer.effectiveCombinedMoonPhase) - the manual cards become inert, dimmed
-        // pickers reflecting whatever phase was last saved, matching the pattern already used
-        // for Storm's variable-mode lock (StormSettingsFragment.updateControlsLockState).
-        fun updateLockState(autoAdvanceEnabled: Boolean) {
-            cards.forEach { card ->
-                card ?: return@forEach
-                card.isEnabled = !autoAdvanceEnabled
-                card.alpha = if (autoAdvanceEnabled) 0.4f else 1.0f
-            }
-        }
+        SettingsCardSelectorHelper.setLocked(container, configManager.isCombinedMoonPhaseAutoAdvanceEnabled())
 
-        selectPhase(configManager.getCombinedMoonPhase())
-        scrollCardIntoView(cards.getOrNull(configManager.getCombinedMoonPhase()))
-        updateLockState(configManager.isCombinedMoonPhaseAutoAdvanceEnabled())
-
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                if (configManager.isCombinedMoonPhaseAutoAdvanceEnabled()) return@setOnClickListener
-                configManager.setCombinedMoonPhase(i)
-                selectPhase(i)
-                updateSummaries(parent)
-            }
-        }
-
+        val rowAutoAdvance = parent.findViewById<View>(R.id.rowCombinedMoonPhaseAutoAdvance)
         val switchAutoAdvance = parent.findViewById<SwitchMaterial>(R.id.switchCombinedMoonPhaseAutoAdvance)
-        if (switchAutoAdvance != null) {
-            switchAutoAdvance.isChecked = configManager.isCombinedMoonPhaseAutoAdvanceEnabled()
-            switchAutoAdvance.setOnCheckedChangeListener { _, isChecked ->
+        val statusAutoAdvance = parent.findViewById<TextView>(R.id.statusCombinedMoonPhaseAutoAdvance)
+        val iconAutoAdvance = parent.findViewById<ImageView>(R.id.iconCombinedMoonPhaseAutoAdvance)
+        val cardIconAutoAdvance = parent.findViewById<MaterialCardView>(R.id.cardIconCombinedMoonPhaseAutoAdvance)
+        if (rowAutoAdvance != null || switchAutoAdvance != null) {
+            SettingsSwitchHelper.bind(
+                row = rowAutoAdvance ?: switchAutoAdvance!!,
+                switch = switchAutoAdvance,
+                isChecked = configManager.isCombinedMoonPhaseAutoAdvanceEnabled(),
+                statusView = statusAutoAdvance,
+                iconView = iconAutoAdvance,
+                iconCard = cardIconAutoAdvance
+            ) { isChecked ->
                 configManager.setCombinedMoonPhaseAutoAdvanceEnabled(isChecked)
-                updateLockState(isChecked)
+                SettingsCardSelectorHelper.setLocked(container, isChecked)
                 updateSummaries(parent)
             }
         }
     }
 
-    private fun setupCombinedStarColorCards(parent: View) {
-        val ids = listOf(
-            R.id.cardCombinedStarColorWhite, R.id.cardCombinedStarColorBlue, R.id.cardCombinedStarColorWarm,
-            R.id.cardCombinedStarColorPink, R.id.cardCombinedStarColorGreen, R.id.cardCombinedStarColorMixed
+    private fun setupStarColorRows(parent: View) {
+        val starColorNames = resources.getStringArray(R.array.star_color_index)
+        val starColorValues = listOf(
+            0xFFFFFFFF.toInt(),
+            0xFF99CCFF.toInt(),
+            0xFFFFF2B3.toInt(),
+            0xFFFFB3D9.toInt(),
+            0xFF80FFB3.toInt(),
+            0xFFD0B0FF.toInt()
         )
-        val cards = ids.map { id -> parent.findViewById<MaterialCardView>(id) }
+        val starOptions = starColorNames.mapIndexed { i, name ->
+            SettingsBottomSheetHelper.DynamicColorOption(
+                name = name,
+                colorInt = starColorValues.getOrElse(i) { 0xFFFFFFFF.toInt() },
+                isRainbow = (i == 5)
+            )
+        }
 
-        fun selectColor(index: Int) {
-            cards.forEachIndexed { i, card ->
-                card ?: return@forEachIndexed
-                if (i == index) {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_accent)
-                    card.strokeWidth = (3 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_active))
-                } else {
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive)
-                    card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                    card.setCardBackgroundColor(ContextCompat.getColor(requireContext(), R.color.settings_card_bg_alt))
-                }
+        fun updateMoonStarColorRow() {
+            val idx = configManager.getStarColorIndex().coerceIn(0, starOptions.size - 1)
+            val opt = starOptions[idx]
+            parent.findViewById<TextView>(R.id.textViewStarColorValue)?.text = opt.name
+            val swatch = parent.findViewById<View>(R.id.viewStarColorSwatch)
+            if (opt.isRainbow) {
+                swatch?.background = GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    intArrayOf(0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt(), 0xFF80FFB3.toInt(), 0xFF99CCFF.toInt())
+                )
+            } else {
+                swatch?.background = null
+                swatch?.setBackgroundColor(opt.colorInt)
             }
         }
 
-        selectColor(configManager.getCombinedStarColorIndex())
-        scrollCardIntoView(cards.getOrNull(configManager.getCombinedStarColorIndex()))
+        fun updateCombinedStarColorRow() {
+            val idx = configManager.getCombinedStarColorIndex().coerceIn(0, starOptions.size - 1)
+            val opt = starOptions[idx]
+            parent.findViewById<TextView>(R.id.textViewCombinedStarColorValue)?.text = opt.name
+            val swatch = parent.findViewById<View>(R.id.viewCombinedStarColorSwatch)
+            if (opt.isRainbow) {
+                swatch?.background = GradientDrawable(
+                    GradientDrawable.Orientation.LEFT_RIGHT,
+                    intArrayOf(0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt(), 0xFF80FFB3.toInt(), 0xFF99CCFF.toInt())
+                )
+            } else {
+                swatch?.background = null
+                swatch?.setBackgroundColor(opt.colorInt)
+            }
+        }
 
-        cards.forEachIndexed { i, card ->
-            card?.setOnClickListener {
-                configManager.setCombinedStarColorIndex(i)
-                selectColor(i)
+        updateMoonStarColorRow()
+        updateCombinedStarColorRow()
+
+        parent.findViewById<View>(R.id.cardStarColorSelector)?.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicColorPickerSheet(
+                context = requireContext(),
+                title = getString(R.string.sunny_color_de_estrellas),
+                subtitle = "Selecciona una tonalidad para las estrellas",
+                elementType = SettingsBottomSheetHelper.ElementType.STARS,
+                options = starOptions,
+                selectedIndex = configManager.getStarColorIndex()
+            ) { selectedPosition ->
+                configManager.setStarColorIndex(selectedPosition)
+                updateMoonStarColorRow()
                 updateSummaries(parent)
             }
         }
-    }
 
-    private fun setupStarColorPreviews(parent: View) {
-        val whiteView = parent.findViewById<View>(R.id.viewStarColorWhitePreview)
-        val blueView = parent.findViewById<View>(R.id.viewStarColorBluePreview)
-        val warmView = parent.findViewById<View>(R.id.viewStarColorWarmPreview)
-        val pinkView = parent.findViewById<View>(R.id.viewStarColorPinkPreview)
-        val greenView = parent.findViewById<View>(R.id.viewStarColorGreenPreview)
-        val mixedView = parent.findViewById<View>(R.id.viewStarColorMixedPreview)
-
-        setCircleColorPreview(whiteView, 0xFFFFFFFF.toInt())
-        setCircleColorPreview(blueView, 0xFF99CCFF.toInt())
-        setCircleColorPreview(warmView, 0xFFFFF2B3.toInt())
-        setCircleColorPreview(pinkView, 0xFFFFB3D9.toInt())
-        setCircleColorPreview(greenView, 0xFF80FFB3.toInt())
-        setCardGradientPreview(mixedView, 0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt())
-
-        val combinedWhiteView = parent.findViewById<View>(R.id.viewCombinedStarColorWhitePreview)
-        val combinedBlueView = parent.findViewById<View>(R.id.viewCombinedStarColorBluePreview)
-        val combinedWarmView = parent.findViewById<View>(R.id.viewCombinedStarColorWarmPreview)
-        val combinedPinkView = parent.findViewById<View>(R.id.viewCombinedStarColorPinkPreview)
-        val combinedGreenView = parent.findViewById<View>(R.id.viewCombinedStarColorGreenPreview)
-        val combinedMixedView = parent.findViewById<View>(R.id.viewCombinedStarColorMixedPreview)
-
-        setCircleColorPreview(combinedWhiteView, 0xFFFFFFFF.toInt())
-        setCircleColorPreview(combinedBlueView, 0xFF99CCFF.toInt())
-        setCircleColorPreview(combinedWarmView, 0xFFFFF2B3.toInt())
-        setCircleColorPreview(combinedPinkView, 0xFFFFB3D9.toInt())
-        setCircleColorPreview(combinedGreenView, 0xFF80FFB3.toInt())
-        setCardGradientPreview(combinedMixedView, 0xFFD0B0FF.toInt(), 0xFFFFA0D0.toInt())
+        parent.findViewById<View>(R.id.cardCombinedStarColorSelector)?.setOnClickListener {
+            SettingsBottomSheetHelper.showDynamicColorPickerSheet(
+                context = requireContext(),
+                title = getString(R.string.sunny_color_de_estrellas),
+                subtitle = "Selecciona una tonalidad para las estrellas",
+                elementType = SettingsBottomSheetHelper.ElementType.STARS,
+                options = starOptions,
+                selectedIndex = configManager.getCombinedStarColorIndex()
+            ) { selectedPosition ->
+                configManager.setCombinedStarColorIndex(selectedPosition)
+                updateCombinedStarColorRow()
+                updateSummaries(parent)
+            }
+        }
     }
 
     private fun setupCombinedTrajectory(parent: View) {
@@ -1428,112 +1395,25 @@ class SunnySettingsFragment : Fragment() {
     }
 
     private fun showColorPickerDialog(parent: View, isTopColor: Boolean) {
-        val dialogView = layoutInflater.inflate(R.layout.dialog_color_picker, null)
-        val previewView = dialogView.findViewById<View>(R.id.dialogColorPreview)
-        val hexInput = dialogView.findViewById<EditText>(R.id.dialogColorHexInput)
-        
-        val sliderR = dialogView.findViewById<Slider>(R.id.sliderR)
-        val sliderG = dialogView.findViewById<Slider>(R.id.sliderG)
-        val sliderB = dialogView.findViewById<Slider>(R.id.sliderB)
-        
-        val labelR = dialogView.findViewById<TextView>(R.id.labelR)
-        val labelG = dialogView.findViewById<TextView>(R.id.labelG)
-        val labelB = dialogView.findViewById<TextView>(R.id.labelB)
-        
         val initialColor = if (isTopColor) {
             configManager.getSunnyCustomSkyTopColor()
         } else {
             configManager.getSunnyCustomSkyBottomColor()
         }
-        
-        var currentColor = initialColor
-        
-        fun updateDialogColor(color: Int, updateHexText: Boolean = true, updateSliders: Boolean = true) {
-            currentColor = color
-            val previewDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                setColor(color)
-            }
-            previewView?.background = previewDrawable
-            
-            val r = Color.red(color)
-            val g = Color.green(color)
-            val b = Color.blue(color)
-            
-            if (updateHexText) {
-                hexInput?.setText(String.format("#%06X", 0xFFFFFF and color))
-            }
-            if (updateSliders) {
-                sliderR?.value = r.toFloat()
-                sliderG?.value = g.toFloat()
-                sliderB?.value = b.toFloat()
-            }
-            
-            labelR?.text = "R: $r"
-            labelG?.text = "G: $g"
-            labelB?.text = "B: $b"
-        }
-        
-        val sliderListener = {
-            val r = sliderR?.value?.toInt() ?: 0
-            val g = sliderG?.value?.toInt() ?: 0
-            val b = sliderB?.value?.toInt() ?: 0
-            updateDialogColor(Color.rgb(r, g, b), updateHexText = true, updateSliders = false)
-        }
-        
-        sliderR?.addOnChangeListener { _, _, _ -> sliderListener() }
-        sliderG?.addOnChangeListener { _, _, _ -> sliderListener() }
-        sliderB?.addOnChangeListener { _, _, _ -> sliderListener() }
-        
-        hexInput?.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) {
-                val str = s?.toString() ?: ""
-                if (str.length == 7 && str.startsWith("#")) {
-                    try {
-                        updateDialogColor(Color.parseColor(str), updateHexText = false, updateSliders = true)
-                    } catch (e: Exception) {}
-                }
-            }
-        })
-        
-        val presets = intArrayOf(
-            0xFF0566D9.toInt(), 0xFF8DCCEF.toInt(), 0xFF1A0D40.toInt(), 0xFFF2731A.toInt(),
-            0xFFE6808C.toInt(), 0xFF261A59.toInt(), 0xFFE53935.toInt(), 0xFF8E24AA.toInt(),
-            0xFF00ACC1.toInt(), 0xFF43A047.toInt(), 0xFFFFB300.toInt(), 0xFFFFFFFF.toInt()
+        val presets = listOf(
+            0x0566D9, 0x8DCCEF, 0x1A0D40, 0xF2731A,
+            0xE6808C, 0x261A59, 0xE53935, 0x8E24AA,
+            0x00ACC1, 0x43A047, 0xFFB300, 0xFFFFFF
         )
-        
-        for (i in 0..11) {
-            val presetId = resources.getIdentifier("presetColor$i", "id", requireContext().packageName)
-            val presetView = dialogView.findViewById<View>(presetId)
-            if (presetView != null) {
-                presetView.background = GradientDrawable().apply {
-                    shape = GradientDrawable.OVAL
-                    setColor(presets[i])
-                    setStroke((1 * resources.displayMetrics.density).toInt(), ContextCompat.getColor(requireContext(), R.color.settings_chip_bg_inactive))
-                }
-                presetView.setOnClickListener {
-                    updateDialogColor(presets[i], updateHexText = true, updateSliders = true)
-                }
+        SettingsBottomSheetHelper.showColorMixerSheet(requireContext(), initialColor, presets) { selectedColor ->
+            if (isTopColor) {
+                configManager.setSunnyCustomSkyTopColor(selectedColor)
+            } else {
+                configManager.setSunnyCustomSkyBottomColor(selectedColor)
             }
+            updateSunnyThemePreviews(parent)
+            updateSummaries(parent)
         }
-        
-        updateDialogColor(initialColor, updateHexText = true, updateSliders = true)
-        
-        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-            .setView(dialogView)
-            .setPositiveButton("Aceptar") { _, _ ->
-                if (isTopColor) {
-                    configManager.setSunnyCustomSkyTopColor(currentColor)
-                } else {
-                    configManager.setSunnyCustomSkyBottomColor(currentColor)
-                }
-                updateSunnyThemePreviews(parent)
-                updateSummaries(parent)
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 
     private fun updateSummaries(parent: View) {

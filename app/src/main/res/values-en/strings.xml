@@ -473,4 +473,22 @@
         <item>Striking</item>
         <item>Very dense</item>
     </string-array>
+
+    <!-- Strings for Bottom Sheet Modals (Material 3 / WhatsApp & Cash App) -->
+    <string name="color_mixer_title">Customize color</string>
+    <string name="color_mixer_presets_label">Existing colors</string>
+    <string name="color_mixer_mixer_label">Color Mixer</string>
+    <string name="color_mixer_hue">Hue</string>
+    <string name="color_mixer_saturation">Saturation</string>
+    <string name="color_mixer_brightness">Brightness</string>
+    <string name="color_mixer_accept">Apply</string>
+    <string name="color_mixer_cancel">Cancel</string>
+    <string name="help_button_dismiss">Got it</string>
+    <string name="help_button_tutorial">Watch interactive tutorial</string>
+    <string name="settings_subtitle">Interactive live wallpaper</string>
+    <string name="settings_apply_wallpaper">Set wallpaper</string>
+    <string name="touch_interaction_enabled">Enabled</string>
+    <string name="touch_interaction_disabled">Disabled</string>
+    <string name="color_custom">Custom</string>
+    <string name="color_custom_action">Choose custom color</string>
 </resources>

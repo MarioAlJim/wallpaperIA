@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -16,24 +16,6 @@
         android:paddingBottom="16dp"
         android:clipToPadding="false">
 
-        <!-- BotÃ³n de Ayuda: resumen de las secciones y cÃ³mo afectan al fondo -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginBottom="4dp">
-
-            <ImageButton
-                android:id="@+id/btnSunnyHelp"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:padding="8dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_help"
-                android:tint="@color/settings_accent"
-                android:contentDescription="@string/help_button_description" />
-        </LinearLayout>
 
         <!-- 1. Modo de Tiempo Card (At the top!) -->
         <com.google.android.material.card.MaterialCardView
@@ -64,7 +46,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Selecciona cÃ³mo se comporta el ciclo temporal en tu pantalla"
+                    android:text="Selecciona cómo se comporta el ciclo temporal en tu pantalla"
                     android:textColor="@color/settings_text_tertiary"
                     android:textSize="12sp"
                     android:layout_marginBottom="12dp" />
@@ -75,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     
-                    <!-- DÃ­a Button -->
+                    <!-- Día Button -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/cardTimeModeDay"
                         android:layout_width="0dp"
@@ -469,25 +451,61 @@
 
                     <!-- Gyroscope Parallax Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowSunnyGyro"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconSunnyGyro"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconSunnyGyro"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_gyroscope"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconSunnyGyro"
+                            android:layout_toStartOf="@id/statusSunnyGyro"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/sunny_efecto_de_inclinacin_3d_giroscopio"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSunnyGyro"
+                        <TextView
+                            android:id="@+id/statusSunnyGyro"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyGyro"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -502,7 +520,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 3. ConfiguraciÃ³n del Sol Card (Always visible inline when Day/Combined/Clock) -->
+        <!-- 3. Configuración del Sol Card (Always visible inline when Day/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnySun"
             android:layout_width="match_parent"
@@ -719,6 +737,7 @@
                         android:layout_marginBottom="12dp">
 
                         <LinearLayout
+                            android:id="@+id/layoutSunnyThemeCards"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="horizontal"
@@ -1008,6 +1027,7 @@
                             android:layout_marginBottom="12dp">
 
                             <LinearLayout
+                                android:id="@+id/layoutSunDirectionCards"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
@@ -1038,7 +1058,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="â†’"
+                                                android:text="→"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1077,7 +1097,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="â†"
+                                                android:text="←"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1116,7 +1136,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="âš«"
+                                                android:text="⚫"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="16sp"
                                                 android:layout_gravity="center" />
@@ -1194,7 +1214,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="ðŸŒ€"
+                                                android:text="🌀"
                                                 android:textColor="#FF5722"
                                                 android:textSize="18sp"
                                                 android:layout_gravity="center" />
@@ -1294,6 +1314,7 @@
                         android:fadingEdgeLength="32dp">
 
                                 <LinearLayout
+                                    android:id="@+id/layoutSunStationaryCards"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:orientation="horizontal"
@@ -1621,25 +1642,61 @@
 
                     <!-- God Rays Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowSunnyGodRays"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconSunnyGodRays"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconSunnyGodRays"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_sun"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconSunnyGodRays"
+                            android:layout_toStartOf="@id/statusSunnyGodRays"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/sunny_haces_de_luz_god_rays"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSunnyGodRays"
+                        <TextView
+                            android:id="@+id/statusSunnyGodRays"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyGodRays"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -1701,25 +1758,61 @@
 
                     <!-- Lens Flare Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowSunnyLensFlare"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconSunnyLensFlare"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconSunnyLensFlare"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_sun"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconSunnyLensFlare"
+                            android:layout_toStartOf="@id/statusSunnyLensFlare"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/sunny_destellos_de_lente_lens_flare"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSunnyLensFlare"
+                        <TextView
+                            android:id="@+id/statusSunnyLensFlare"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyLensFlare"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -1780,25 +1873,61 @@
 
                         <!-- Chromatic Aberration Toggle -->
                         <RelativeLayout
+                            android:id="@+id/rowSunnyLensFlareChromatic"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="8dp"
-                            android:layout_marginBottom="4dp">
+                            android:layout_marginBottom="4dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardIconSunnyLensFlareChromatic"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true">
+                                <ImageView
+                                    android:id="@+id/iconSunnyLensFlareChromatic"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_tune"
+                                    app:tint="@color/settings_accent"
+                                    android:contentDescription="@null" />
+                            </com.google.android.material.card.MaterialCardView>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
+                                android:layout_toEndOf="@id/cardIconSunnyLensFlareChromatic"
+                                android:layout_toStartOf="@id/statusSunnyLensFlareChromatic"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="8dp"
                                 android:layout_centerVertical="true"
                                 android:text="@string/sunny_aberracion_cromatica"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
                                 android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/statusSunnyLensFlareChromatic"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/touch_interaction_disabled"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/switchSunnyLensFlareChromatic"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true" />
+                                android:visibility="gone" />
                         </RelativeLayout>
                         <TextView
                             android:layout_width="match_parent"
@@ -1813,25 +1942,61 @@
 
                     <!-- Touch Burst Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowSunnyTouchBurst"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconSunnyTouchBurst"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconSunnyTouchBurst"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_touch"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconSunnyTouchBurst"
+                            android:layout_toStartOf="@id/statusSunnyTouchBurst"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/sunny_rfaga_solar_al_tocar"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSunnyTouchBurst"
+                        <TextView
+                            android:id="@+id/statusSunnyTouchBurst"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyTouchBurst"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="true" />
                     </RelativeLayout>
 
@@ -1845,25 +2010,61 @@
 
                     <!-- Rainbow Always Switch -->
                     <RelativeLayout
+                        android:id="@+id/rowSunnyRainbowAlways"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconSunnyRainbowAlways"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconSunnyRainbowAlways"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_sun"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentStart="true"
+                            android:layout_toEndOf="@id/cardIconSunnyRainbowAlways"
+                            android:layout_toStartOf="@id/statusSunnyRainbowAlways"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
                             android:layout_centerVertical="true"
                             android:text="@string/sunny_rainbow_always"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchSunnyRainbowAlways"
+                        <TextView
+                            android:id="@+id/statusSunnyRainbowAlways"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSunnyRainbowAlways"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
                             android:checked="false" />
                     </RelativeLayout>
 
@@ -1914,7 +2115,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 4. ConfiguraciÃ³n de Luna y Estrellas Card (Always visible inline when Night/Combined/Clock) -->
+        <!-- 4. Configuración de Luna y Estrellas Card (Always visible inline when Night/Combined/Clock) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyMoon"
             android:layout_width="match_parent"
@@ -2085,7 +2286,7 @@
                                                 android:gravity="center" />
                                         </LinearLayout>
                                     </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 1: Creciente CÃ³ncava -->
+                                    <!-- Card 1: Creciente Cóncava -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase1"
                                         android:layout_width="86dp"
@@ -2301,7 +2502,7 @@
                                                 android:gravity="center" />
                                         </LinearLayout>
                                     </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 7: Menguante CÃ³ncava -->
+                                    <!-- Card 7: Menguante Cóncava -->
                                     <com.google.android.material.card.MaterialCardView
                                         android:id="@+id/cardMoonPhase7"
                                         android:layout_width="86dp"
@@ -2392,7 +2593,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="â†’"
+                                                    android:text="→"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2430,7 +2631,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="â†"
+                                                    android:text="←"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2468,7 +2669,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="âš«"
+                                                    android:text="⚫"
                                                     android:textColor="@color/settings_text_primary"
                                                     android:textSize="16sp"
                                                     android:layout_gravity="center" />
@@ -2545,7 +2746,7 @@
                                                 <TextView
                                                     android:layout_width="wrap_content"
                                                     android:layout_height="wrap_content"
-                                                    android:text="ðŸŒ€"
+                                                    android:text="🌀"
                                                     android:textColor="#FF5722"
                                                     android:textSize="18sp"
                                                     android:layout_gravity="center" />
@@ -2642,6 +2843,7 @@
                         android:fadingEdgeLength="32dp"
                                     android:layout_marginBottom="12dp">
                                     <LinearLayout
+                                        android:id="@+id/layoutMoonStationaryCards"
                                         android:layout_width="wrap_content"
                                         android:layout_height="wrap_content"
                                         android:orientation="horizontal"
@@ -2955,252 +3157,96 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
-                            <!-- Star Color -->
-                            <TextView
+                            <!-- Star Color Selector Card (Opens Dynamic Bottom Sheet) -->
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardStarColorSelector"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/sunny_color_de_estrellas"
-                                android:textColor="@color/settings_text_primary"
-                                android:textSize="15sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="12dp"
-                                android:layout_marginBottom="8dp" />
-                            <HorizontalScrollView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:scrollbars="none"
-                            android:requiresFadingEdge="horizontal"
-                        android:layout_marginStart="-8dp"
-                        android:layout_marginEnd="-8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:clipToPadding="false"
-                        android:fadingEdgeLength="32dp"
-                                android:layout_marginBottom="12dp">
-                                <LinearLayout
-                                    android:id="@+id/layoutStarColorCards"
-                                    android:layout_width="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:layout_marginBottom="12dp"
+                                app:cardCornerRadius="14dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardElevation="0dp"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:clickable="true"
+                                android:focusable="true">
+
+                                <RelativeLayout
+                                    android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
-                                    android:orientation="horizontal"
-                                    android:paddingBottom="8dp"
-                                    android:paddingTop="4dp">
-                                    <!-- Card 0: White -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorWhite"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorWhitePreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_blanco"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 1: Blue -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorBlue"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorBluePreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_azul"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 2: Warm -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorWarm"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorWarmPreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_clido"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 3: Pink -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorPink"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorPinkPreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_rosa"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 4: Green -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorGreen"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        android:layout_marginEnd="10dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorGreenPreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_verde"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                    <!-- Card 5: Mixed -->
-                                    <com.google.android.material.card.MaterialCardView
-                                        android:id="@+id/cardStarColorMixed"
-                                        android:layout_width="86dp"
-                                        android:layout_height="92dp"
-                                        app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                        app:cardCornerRadius="12dp"
-                                        app:strokeColor="@color/settings_chip_bg_inactive"
-                                        app:strokeWidth="1dp">
-                                        <LinearLayout
-                                            android:layout_width="match_parent"
-                                            android:layout_height="match_parent"
-                                            android:orientation="vertical"
-                                            android:gravity="center"
-                                            android:padding="6dp">
-                                            <FrameLayout
-                                                android:layout_width="38dp"
-                                                android:layout_height="50dp"
-                                                android:background="@drawable/mini_screen_bg"
-                                                android:layout_marginBottom="4dp">
-                                                <View
-                                                    android:id="@+id/viewStarColorMixedPreview"
-                                                    android:layout_width="20dp"
-                                                    android:layout_height="20dp"
-                                                    android:layout_gravity="center" />
-                                            </FrameLayout>
-                                            <TextView
-                                                android:layout_width="wrap_content"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/sunny_mixto"
-                                                android:textColor="@color/settings_text_primary"
-                                                android:textSize="11sp"
-                                                android:gravity="center" />
-                                        </LinearLayout>
-                                    </com.google.android.material.card.MaterialCardView>
-                                </LinearLayout>
-                            </HorizontalScrollView>
+                                    android:paddingStart="14dp"
+                                    android:paddingEnd="14dp"
+                                    android:paddingTop="12dp"
+                                    android:paddingBottom="12dp">
+
+                                    <LinearLayout
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="vertical"
+                                        android:layout_alignParentStart="true"
+                                        android:layout_toStartOf="@+id/layoutStarColorRight"
+                                        android:layout_centerVertical="true">
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="@string/sunny_color_de_estrellas"
+                                            android:textColor="@color/settings_text_primary"
+                                            android:textSize="15sp"
+                                            android:textStyle="bold" />
+
+                                        <TextView
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:text="Tonalidad cromática de las estrellas"
+                                            android:textColor="@color/settings_text_tertiary"
+                                            android:textSize="12sp"
+                                            android:layout_marginTop="2dp" />
+                                    </LinearLayout>
+
+                                    <LinearLayout
+                                        android:id="@+id/layoutStarColorRight"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:orientation="horizontal"
+                                        android:gravity="center_vertical"
+                                        android:layout_alignParentEnd="true"
+                                        android:layout_centerVertical="true">
+
+                                        <com.google.android.material.card.MaterialCardView
+                                            android:id="@+id/cardStarColorSwatch"
+                                            android:layout_width="24dp"
+                                            android:layout_height="24dp"
+                                            app:cardCornerRadius="12dp"
+                                            app:cardElevation="0dp"
+                                            app:strokeWidth="1.5dp"
+                                            app:strokeColor="#33888888">
+                                            <View
+                                                android:id="@+id/viewStarColorSwatch"
+                                                android:layout_width="match_parent"
+                                                android:layout_height="match_parent"
+                                                android:background="#FFFFFF" />
+                                        </com.google.android.material.card.MaterialCardView>
+
+                                        <TextView
+                                            android:id="@+id/textViewStarColorValue"
+                                            android:layout_width="wrap_content"
+                                            android:layout_height="wrap_content"
+                                            android:textColor="@color/settings_text_secondary"
+                                            android:textSize="13sp"
+                                            android:textStyle="bold"
+                                            android:layout_marginStart="8dp"
+                                            android:layout_marginEnd="6dp" />
+
+                                        <ImageView
+                                            android:layout_width="16dp"
+                                            android:layout_height="16dp"
+                                            android:src="@drawable/ic_arrow_forward"
+                                            app:tint="@color/settings_text_tertiary" />
+                                    </LinearLayout>
+                                </RelativeLayout>
+                            </com.google.android.material.card.MaterialCardView>
 
                             <!-- Star Density -->
                             <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
@@ -3268,25 +3314,61 @@
 
                         <!-- Shooting Stars Title/Toggle -->
                         <RelativeLayout
+                            android:id="@+id/rowShootingStars"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:layout_marginBottom="4dp">
+                            android:layout_marginBottom="4dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardIconShootingStars"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true">
+                                <ImageView
+                                    android:id="@+id/iconShootingStars"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_star"
+                                    app:tint="@color/settings_accent"
+                                    android:contentDescription="@null" />
+                            </com.google.android.material.card.MaterialCardView>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
+                                android:layout_toEndOf="@id/cardIconShootingStars"
+                                android:layout_toStartOf="@id/statusShootingStars"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="8dp"
                                 android:layout_centerVertical="true"
                                 android:text="@string/sunny_estrellas_fugaces"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
-                            <com.google.android.material.switchmaterial.SwitchMaterial
-                                android:id="@+id/switchShootingStars"
+                            <TextView
+                                android:id="@+id/statusShootingStars"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
+                                android:text="@string/touch_interaction_disabled"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchShootingStars"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
                                 android:checked="true" />
                         </RelativeLayout>
 
@@ -3324,48 +3406,121 @@
 
                         <!-- Fireflies Title/Toggle -->
                         <RelativeLayout
+                            android:id="@+id/rowFireflies"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:layout_marginBottom="4dp">
+                            android:layout_marginBottom="4dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardIconFireflies"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true">
+                                <ImageView
+                                    android:id="@+id/iconFireflies"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_star"
+                                    app:tint="@color/settings_accent"
+                                    android:contentDescription="@null" />
+                            </com.google.android.material.card.MaterialCardView>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentStart="true"
+                                android:layout_toEndOf="@id/cardIconFireflies"
+                                android:layout_toStartOf="@id/statusFireflies"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="8dp"
                                 android:layout_centerVertical="true"
                                 android:text="@string/sunny_lucirnagas"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />
-                            <com.google.android.material.switchmaterial.SwitchMaterial
-                                android:id="@+id/switchFireflies"
+                            <TextView
+                                android:id="@+id/statusFireflies"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
+                                android:text="@string/touch_interaction_disabled"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                            <com.google.android.material.switchmaterial.SwitchMaterial
+                                android:id="@+id/switchFireflies"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:visibility="gone"
                                 android:checked="true" />
                         </RelativeLayout>
 
                         <!-- Nebula Title/Toggle -->
                         <RelativeLayout
+                            android:id="@+id/rowNebula"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="12dp"
-                            android:layout_marginBottom="4dp">
+                            android:layout_marginBottom="4dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardIconNebula"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true">
+                                <ImageView
+                                    android:id="@+id/iconNebula"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_cloud"
+                                    app:tint="@color/settings_accent"
+                                    android:contentDescription="@null" />
+                            </com.google.android.material.card.MaterialCardView>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_toStartOf="@+id/switchNebula"
+                                android:layout_toEndOf="@id/cardIconNebula"
+                                android:layout_toStartOf="@id/statusNebula"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_centerVertical="true"
                                 android:text="@string/sunny_nebulosa"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/statusNebula"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/touch_interaction_disabled"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/switchNebula"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
+                                android:visibility="gone"
                                 android:checked="true" />
                         </RelativeLayout>
                         <TextView
@@ -3443,7 +3598,7 @@
                                             <TextView
                                                 android:layout_width="wrap_content"
                                                 android:layout_height="wrap_content"
-                                                android:text="Color NÃºcleo"
+                                                android:text="Color Núcleo"
                                                 android:textColor="@color/settings_text_primary"
                                                 android:textSize="11sp"
                                                 android:textStyle="bold" />
@@ -3549,23 +3704,60 @@
                             android:layout_marginBottom="8dp" />
 
                         <RelativeLayout
+                            android:id="@+id/rowCombinedMoonPhaseAutoAdvance"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp">
+                            android:layout_marginBottom="4dp"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardIconCombinedMoonPhaseAutoAdvance"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
+                                app:cardCornerRadius="10dp"
+                                app:cardElevation="0dp"
+                                app:strokeWidth="1dp"
+                                app:strokeColor="@color/settings_stroke"
+                                app:cardBackgroundColor="@color/settings_card_bg_alt"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true">
+                                <ImageView
+                                    android:id="@+id/iconCombinedMoonPhaseAutoAdvance"
+                                    android:layout_width="20dp"
+                                    android:layout_height="20dp"
+                                    android:layout_gravity="center"
+                                    android:src="@drawable/ic_autorenew"
+                                    app:tint="@color/settings_accent"
+                                    android:contentDescription="@null" />
+                            </com.google.android.material.card.MaterialCardView>
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_toStartOf="@+id/switchCombinedMoonPhaseAutoAdvance"
+                                android:layout_toEndOf="@id/cardIconCombinedMoonPhaseAutoAdvance"
+                                android:layout_toStartOf="@id/statusCombinedMoonPhaseAutoAdvance"
+                                android:layout_marginStart="12dp"
+                                android:layout_marginEnd="8dp"
+                                android:layout_centerVertical="true"
                                 android:text="@string/sunny_avanzar_fase_con_cada_ciclo"
                                 android:textColor="@color/settings_text_primary"
                                 android:textSize="14sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/statusCombinedMoonPhaseAutoAdvance"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:text="@string/touch_interaction_disabled"
+                                android:textColor="@color/settings_text_muted"
+                                android:textSize="12sp"
                                 android:textStyle="bold" />
                             <com.google.android.material.switchmaterial.SwitchMaterial
                                 android:id="@+id/switchCombinedMoonPhaseAutoAdvance"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
+                                android:visibility="gone"
                                 android:checked="false" />
                         </RelativeLayout>
                         <TextView
@@ -3631,7 +3823,7 @@
                                             android:gravity="center" />
                                     </LinearLayout>
                                 </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 1: Creciente CÃ³ncava -->
+                                <!-- Card 1: Creciente Cóncava -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase1"
                                     android:layout_width="86dp"
@@ -3847,7 +4039,7 @@
                                             android:gravity="center" />
                                     </LinearLayout>
                                 </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 7: Menguante CÃ³ncava -->
+                                <!-- Card 7: Menguante Cóncava -->
                                 <com.google.android.material.card.MaterialCardView
                                     android:id="@+id/cardCombinedMoonPhase7"
                                     android:layout_width="86dp"
@@ -3885,252 +4077,96 @@
                             </LinearLayout>
                         </HorizontalScrollView>
 
-                        <!-- Combined Star Color -->
-                        <TextView
+                        <!-- Combined Star Color Selector Card (Opens Dynamic Bottom Sheet) -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardCombinedStarColorSelector"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/sunny_color_de_estrellas"
-                            android:textColor="@color/settings_text_primary"
-                            android:textSize="15sp"
-                            android:textStyle="bold"
-                            android:layout_marginTop="12dp"
-                            android:layout_marginBottom="8dp" />
-                        <HorizontalScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:scrollbars="none"
-                            android:requiresFadingEdge="horizontal"
-                        android:layout_marginStart="-8dp"
-                        android:layout_marginEnd="-8dp"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
-                        android:clipToPadding="false"
-                        android:fadingEdgeLength="32dp"
-                            android:layout_marginBottom="12dp">
-                            <LinearLayout
-                                android:id="@+id/layoutCombinedStarColorCards"
-                                android:layout_width="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="12dp"
+                            app:cardCornerRadius="14dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardElevation="0dp"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:clickable="true"
+                            android:focusable="true">
+
+                            <RelativeLayout
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:paddingBottom="8dp"
-                                android:paddingTop="4dp">
-                                <!-- Card 0: White -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorWhite"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorWhitePreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_blanco"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 1: Blue -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorBlue"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorBluePreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_azul"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 2: Warm -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorWarm"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorWarmPreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_clido"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 3: Pink -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorPink"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorPinkPreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_rosa"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 4: Green -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorGreen"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    android:layout_marginEnd="10dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorGreenPreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_verde"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                                <!-- Card 5: Mixed -->
-                                <com.google.android.material.card.MaterialCardView
-                                    android:id="@+id/cardCombinedStarColorMixed"
-                                    android:layout_width="86dp"
-                                    android:layout_height="92dp"
-                                    app:cardBackgroundColor="@color/settings_card_bg_alt"
-                                    app:cardCornerRadius="12dp"
-                                    app:strokeColor="@color/settings_chip_bg_inactive"
-                                    app:strokeWidth="1dp">
-                                    <LinearLayout
-                                        android:layout_width="match_parent"
-                                        android:layout_height="match_parent"
-                                        android:orientation="vertical"
-                                        android:gravity="center"
-                                        android:padding="6dp">
-                                        <FrameLayout
-                                            android:layout_width="38dp"
-                                            android:layout_height="50dp"
-                                            android:background="@drawable/mini_screen_bg"
-                                            android:layout_marginBottom="4dp">
-                                            <View
-                                                android:id="@+id/viewCombinedStarColorMixedPreview"
-                                                android:layout_width="20dp"
-                                                android:layout_height="20dp"
-                                                android:layout_gravity="center" />
-                                        </FrameLayout>
-                                        <TextView
-                                            android:layout_width="wrap_content"
-                                            android:layout_height="wrap_content"
-                                            android:text="@string/sunny_mixto"
-                                            android:textColor="@color/settings_text_primary"
-                                            android:textSize="11sp"
-                                            android:gravity="center" />
-                                    </LinearLayout>
-                                </com.google.android.material.card.MaterialCardView>
-                            </LinearLayout>
-                        </HorizontalScrollView>
+                                android:paddingStart="14dp"
+                                android:paddingEnd="14dp"
+                                android:paddingTop="12dp"
+                                android:paddingBottom="12dp">
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:layout_alignParentStart="true"
+                                    android:layout_toStartOf="@+id/layoutCombinedStarColorRight"
+                                    android:layout_centerVertical="true">
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/sunny_color_de_estrellas"
+                                        android:textColor="@color/settings_text_primary"
+                                        android:textSize="15sp"
+                                        android:textStyle="bold" />
+
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="Tonalidad cromática de las estrellas"
+                                        android:textColor="@color/settings_text_tertiary"
+                                        android:textSize="12sp"
+                                        android:layout_marginTop="2dp" />
+                                </LinearLayout>
+
+                                <LinearLayout
+                                    android:id="@+id/layoutCombinedStarColorRight"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:gravity="center_vertical"
+                                    android:layout_alignParentEnd="true"
+                                    android:layout_centerVertical="true">
+
+                                    <com.google.android.material.card.MaterialCardView
+                                        android:id="@+id/cardCombinedStarColorSwatch"
+                                        android:layout_width="24dp"
+                                        android:layout_height="24dp"
+                                        app:cardCornerRadius="12dp"
+                                        app:cardElevation="0dp"
+                                        app:strokeWidth="1.5dp"
+                                        app:strokeColor="#33888888">
+                                        <View
+                                            android:id="@+id/viewCombinedStarColorSwatch"
+                                            android:layout_width="match_parent"
+                                            android:layout_height="match_parent"
+                                            android:background="#FFFFFF" />
+                                    </com.google.android.material.card.MaterialCardView>
+
+                                    <TextView
+                                        android:id="@+id/textViewCombinedStarColorValue"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:textColor="@color/settings_text_secondary"
+                                        android:textSize="13sp"
+                                        android:textStyle="bold"
+                                        android:layout_marginStart="8dp"
+                                        android:layout_marginEnd="6dp" />
+
+                                    <ImageView
+                                        android:layout_width="16dp"
+                                        android:layout_height="16dp"
+                                        android:src="@drawable/ic_arrow_forward"
+                                        app:tint="@color/settings_text_tertiary" />
+                                </LinearLayout>
+                            </RelativeLayout>
+                        </com.google.android.material.card.MaterialCardView>
 
                         <!-- Combined Star Density -->
                         <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:layout_marginBottom="4dp">
@@ -4164,7 +4200,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 5. ConfiguraciÃ³n de TransiciÃ³n Card (Always visible inline when Combined) -->
+        <!-- 5. Configuración de Transición Card (Always visible inline when Combined) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardSunnyCombined"
             android:layout_width="match_parent"
@@ -4218,7 +4254,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="ConfiguraciÃ³n de TransiciÃ³n"
+                            android:text="Configuración de Transición"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
                             android:textStyle="bold" />
@@ -4262,23 +4298,60 @@
 
                     <!-- Real-time Clock Toggle -->
                     <RelativeLayout
+                        android:id="@+id/rowCombinedClockMode"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="4dp">
+                        android:layout_marginBottom="4dp"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/cardIconCombinedClockMode"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            app:cardCornerRadius="10dp"
+                            app:cardElevation="0dp"
+                            app:strokeWidth="1dp"
+                            app:strokeColor="@color/settings_stroke"
+                            app:cardBackgroundColor="@color/settings_card_bg_alt"
+                            android:layout_alignParentStart="true"
+                            android:layout_centerVertical="true">
+                            <ImageView
+                                android:id="@+id/iconCombinedClockMode"
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_clock"
+                                app:tint="@color/settings_accent"
+                                android:contentDescription="@null" />
+                        </com.google.android.material.card.MaterialCardView>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_toStartOf="@+id/switchCombinedClockMode"
+                            android:layout_toEndOf="@id/cardIconCombinedClockMode"
+                            android:layout_toStartOf="@+id/statusCombinedClockMode"
+                            android:layout_marginStart="12dp"
+                            android:layout_marginEnd="8dp"
+                            android:layout_centerVertical="true"
                             android:text="@string/sunny_modo_reloj_switch"
                             android:textColor="@color/settings_text_primary"
                             android:textSize="15sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/statusCombinedClockMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:text="@string/touch_interaction_disabled"
+                            android:textColor="@color/settings_text_muted"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
                         <com.google.android.material.switchmaterial.SwitchMaterial
                             android:id="@+id/switchCombinedClockMode"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:layout_centerVertical="true" />
+                            android:visibility="gone" />
                     </RelativeLayout>
                     <TextView
                         android:layout_width="match_parent"
