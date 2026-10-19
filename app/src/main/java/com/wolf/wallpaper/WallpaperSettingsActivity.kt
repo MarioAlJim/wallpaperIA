@@ -13,9 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.fragment.app.Fragment
 import com.google.android.material.card.MaterialCardView
-import com.google.android.material.tabs.TabLayout
 import com.wolf.wallpaper.core.ConfigManager
 
 class WallpaperSettingsActivity : AppCompatActivity() {
@@ -63,30 +61,22 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             showHelpDialog()
         }
 
-        val tabLayoutWeather = findViewById<TabLayout>(R.id.tabLayoutWeather)
-        val initialActiveEffect = configManager.getActiveEffect()
+        // Load Storm settings directly
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.settings_fragment_container, StormSettingsFragment())
+                .commit()
+        }
 
-        // Select initial tab and load fragment
-        tabLayoutWeather.getTabAt(initialActiveEffect)?.select()
-        loadSettingsFragment(initialActiveEffect)
+        title = getString(R.string.settings_title_storm)
 
         if (!tutorialPreference.hasSeenTutorial()) {
             tutorialPreference.setSeenTutorial(true)
             supportFragmentManager.executePendingTransactions()
             findViewById<View>(R.id.settings_fragment_container).post {
-                startTutorial(initialActiveEffect)
+                startTutorial()
             }
         }
-
-        tabLayoutWeather.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val position = tab?.position ?: 0
-                configManager.setActiveEffect(position)
-                loadSettingsFragment(position)
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-        })
 
         val buttonApply = findViewById<Button>(R.id.buttonApplyWallpaper)
         buttonApply.setOnClickListener {
@@ -101,26 +91,8 @@ class WallpaperSettingsActivity : AppCompatActivity() {
     }
 
     private fun showHelpDialog() {
-        val currentTab = configManager.getActiveEffect()
-        SettingsBottomSheetHelper.showHelpSheet(this, isStorm = (currentTab == 0)) {
-            startTutorial(currentTab)
-        }
-    }
-
-    private fun loadSettingsFragment(position: Int) {
-        val fragment: Fragment = if (position == 0) {
-            StormSettingsFragment()
-        } else {
-            SunnySettingsFragment()
-        }
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.settings_fragment_container, fragment)
-            .commit()
-
-        title = if (position == 0) {
-            getString(R.string.settings_title_storm)
-        } else {
-            getString(R.string.settings_title_sunny)
+        SettingsBottomSheetHelper.showHelpSheet(this, isStorm = true) {
+            startTutorial()
         }
     }
 
@@ -155,7 +127,6 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             }
         }
 
-        // Reflect the currently saved selection.
         updateSelection(themePreference.getThemeMode())
 
         cards.forEachIndexed { index, card ->
@@ -174,22 +145,12 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
 
-    /**
-     * Runs the step-by-step onboarding tutorial for [tabIndex] (0 = Tormenta, 1 = Día y Noche).
-     * Called automatically on first run, and can be replayed any time via the "Ver tutorial"
-     * button in each tab's help dialog.
-     */
-    fun startTutorial(tabIndex: Int = configManager.getActiveEffect()) {
-        val steps = if (tabIndex == 0) buildStormTutorialSteps() else buildSunnyTutorialSteps()
+    fun startTutorial(tabIndex: Int = 0) {
+        val steps = buildStormTutorialSteps()
         tutorialOverlay.start(steps)
     }
 
     private fun buildStormTutorialSteps(): List<TutorialStep> = listOf(
-        TutorialStep(
-            R.id.tabLayoutWeather,
-            "Elige el efecto",
-            "Aquí cambias entre Tormenta y Día y Noche: cada pestaña configura un fondo animado distinto para tu pantalla."
-        ),
         TutorialStep(
             R.id.layoutThemeMode,
             "Tema de la app",
@@ -224,54 +185,6 @@ class WallpaperSettingsActivity : AppCompatActivity() {
             R.id.headerBackground,
             "Fondo",
             "Elige la imagen o color que se ve detrás de la tormenta (paisaje, negro o foto personalizada)."
-        ),
-        TutorialStep(
-            R.id.buttonHeaderHelp,
-            "Botón de Ayuda",
-            "Toca este ícono en cualquier momento para ver un resumen de todas las secciones, o repetir este tutorial."
-        ),
-        TutorialStep(
-            R.id.buttonApplyWallpaper,
-            "Aplicar",
-            "Cuando estés conforme con los ajustes, toca aquí para establecer esta escena como tu fondo de pantalla en vivo."
-        )
-    )
-
-    private fun buildSunnyTutorialSteps(): List<TutorialStep> = listOf(
-        TutorialStep(
-            R.id.tabLayoutWeather,
-            "Elige el efecto",
-            "Aquí cambias entre Tormenta y Día y Noche: cada pestaña configura un fondo animado distinto para tu pantalla."
-        ),
-        TutorialStep(
-            R.id.layoutThemeMode,
-            "Tema de la app",
-            "Cambia el tema visual de esta pantalla de ajustes (Auto/Claro/Oscuro). No afecta al fondo de pantalla animado."
-        ),
-        TutorialStep(
-            R.id.cardTimeMode,
-            "Modo de Tiempo",
-            "Elige si el fondo muestra solo Día, solo Noche, un ciclo Combinado que alterna entre ambos, o el Reloj en tiempo real según la hora de tu dispositivo."
-        ),
-        TutorialStep(
-            R.id.headerSunnyEnvironment,
-            "Ajuste de Entorno",
-            "Configura la densidad de nubes diurnas, el fondo de paisaje y el efecto de inclinación 3D con el giroscopio."
-        ),
-        TutorialStep(
-            R.id.headerSunnySun,
-            "Configuración del Sol",
-            "Ajusta el tamaño y pulso del sol, el tema de color del cielo, su trayectoria de movimiento y los rayos de luz."
-        ),
-        TutorialStep(
-            R.id.headerSunnyMoon,
-            "Configuración de Luna y Estrellas",
-            "Ajusta la fase lunar, el brillo/estrellas del cielo nocturno y la nebulosa de fondo."
-        ),
-        TutorialStep(
-            R.id.headerSunnyCombined,
-            "Combinado",
-            "Solo aplica en modo Combinado o Reloj: define la velocidad del ciclo día/noche y la trayectoria compartida del sol y la luna."
         ),
         TutorialStep(
             R.id.buttonHeaderHelp,

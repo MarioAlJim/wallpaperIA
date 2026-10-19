@@ -26,5 +26,4 @@ rootProject.name = "wallpaper"
 include(":app")
 include(":core")
 include(":wallpaper-storm")
-include(":wallpaper-sunny")
 

@@ -1,18 +1,19 @@
 package com.wolf.wallpaper
 
+import android.content.Context
 import android.content.SharedPreferences
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.service.wallpaper.WallpaperService
 import android.view.MotionEvent
 import android.view.SurfaceHolder
 import com.wolf.wallpaper.core.ConfigManager
 import com.wolf.wallpaper.core.GLRenderThread
 import com.wolf.wallpaper.core.GLRenderer
-import com.wolf.wallpaper.core.WeatherType
-import android.content.Context
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import com.wolf.wallpaper.storm.SceneManager
+import com.wolf.wallpaper.storm.StormRenderer
 
 class DynamicWallpaperService : WallpaperService() {
 
@@ -23,9 +24,7 @@ class DynamicWallpaperService : WallpaperService() {
     inner class DynamicEngine : Engine(), SharedPreferences.OnSharedPreferenceChangeListener, SensorEventListener {
         private var renderThread: GLRenderThread? = null
         private lateinit var configManager: ConfigManager
-        private lateinit var rendererFactory: AppWallpaperRendererFactory
         private var currentRenderer: GLRenderer? = null
-        private var activeWeatherType = WeatherType.STORM
         private var currentHolder: SurfaceHolder? = null
         private var currentWidth = 0
         private var currentHeight = 0
@@ -39,13 +38,11 @@ class DynamicWallpaperService : WallpaperService() {
         override fun onCreate(surfaceHolder: SurfaceHolder?) {
             super.onCreate(surfaceHolder)
             configManager = ConfigManager(applicationContext)
-            rendererFactory = AppWallpaperRendererFactory(configManager)
-            
-            activeWeatherType = WeatherType.fromIndex(configManager.getActiveEffect())
-            currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
-            
+            val sceneManager = SceneManager(applicationContext, configManager)
+            currentRenderer = StormRenderer(applicationContext, sceneManager)
+
             setTouchEventsEnabled(true)
-            
+
             applicationContext.getSharedPreferences(ConfigManager.PREFS_NAME, MODE_PRIVATE)
                 .registerOnSharedPreferenceChangeListener(this)
 
@@ -96,7 +93,7 @@ class DynamicWallpaperService : WallpaperService() {
         ) {
             super.onOffsetsChanged(xOffset, yOffset, xStep, yStep, xPixels, yPixels)
             val clampedX = xOffset.coerceIn(0f, 1f)
-            virtualXOffset = clampedX // Keep touch simulation state synchronized with launcher state
+            virtualXOffset = clampedX
             renderThread?.queueOffsets(clampedX, yOffset)
         }
 
@@ -134,22 +131,7 @@ class DynamicWallpaperService : WallpaperService() {
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-            if (key == ConfigManager.KEY_ACTIVE_EFFECT) {
-                val newIndex = configManager.getActiveEffect()
-                val newWeatherType = WeatherType.fromIndex(newIndex)
-                if (newWeatherType != activeWeatherType) {
-                    activeWeatherType = newWeatherType
-                    
-                    // Detener e inicializar con el nuevo renderizador en caliente
-                    val holder = currentHolder
-                    if (holder != null) {
-                        currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
-                        startRenderThread(holder)
-                    } else {
-                        currentRenderer = rendererFactory.createRenderer(applicationContext, activeWeatherType)
-                    }
-                }
-            } else if (key == ConfigManager.KEY_SUNNY_GYRO_ENABLED) {
+            if (key == ConfigManager.KEY_SUNNY_GYRO_ENABLED) {
                 updateSensorListener()
             }
         }
@@ -205,13 +187,9 @@ class DynamicWallpaperService : WallpaperService() {
                 val ax = event.values[0]
                 val ay = event.values[1]
 
-                // Standardize range: ax maps approx to [-1.0, 1.0]
                 val targetTiltX = (ax / 9.8f).coerceIn(-1f, 1f)
-                // When device is vertical, ay is ~9.8. When flat, ay is ~0.
-                // Map ay ~ 4.9m/s^2 (45 degrees tilt) to 0.0
                 val targetTiltY = ((ay - 4.9f) / 4.9f).coerceIn(-1f, 1f)
 
-                // Low-pass filter to smooth movement
                 val alpha = 0.1f
                 smoothedTiltX = smoothedTiltX + alpha * (targetTiltX - smoothedTiltX)
                 smoothedTiltY = smoothedTiltY + alpha * (targetTiltY - smoothedTiltY)

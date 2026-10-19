@@ -7,23 +7,10 @@ class ConfigManager(context: Context) : ConfigProvider {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     private val storm = StormConfigStore(prefs)
-    private val sunny = SunnyConfigStore(prefs)
-    private val night = NightConfigStore(prefs)
-    private val combined = CombinedConfigStore(prefs)
 
-    // Each store memoizes its reads (see CachedPrefStore) so the render thread doesn't
-    // hit SharedPreferences on every frame. Settings can be changed from a different
-    // ConfigManager instance than the one the wallpaper engine is polling (the settings
-    // screen and the wallpaper service each hold their own), so we listen for changes on
-    // the underlying prefs object (shared per-process by Android) and drop the stale
-    // cached value wherever it lives. A strong reference to the listener is kept here
-    // because SharedPreferences only holds a weak reference to registered listeners.
     private val prefsChangeListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
         if (key != null) {
             storm.invalidate(key)
-            sunny.invalidate(key)
-            night.invalidate(key)
-            combined.invalidate(key)
         }
     }
 
@@ -51,143 +38,38 @@ class ConfigManager(context: Context) : ConfigProvider {
         const val KEY_INTERACTIVE_LIGHTNING_ENABLED = "interactive_lightning_enabled"
         const val KEY_BG_BRIGHTNESS = "bg_brightness"
 
-        // New keys
-        const val KEY_ACTIVE_EFFECT = "active_effect"
-        const val KEY_SUN_SIZE = "sun_size"
-        const val KEY_SUN_SPEED = "sun_speed"
-        const val KEY_SUNNY_THEME = "sunny_theme"
-        const val KEY_SUN_PATH_DIRECTION = "sun_path_direction"
-        const val KEY_SUN_MOVE_SPEED = "sun_move_speed"
-        const val KEY_SUNNY_BACKGROUND_INDEX = "sunny_background_index"
-        const val KEY_SUN_STATIONARY_POSITION = "sun_stationary_position"
-        const val KEY_SUN_CUSTOM_X = "sun_custom_x"
-        const val KEY_SUN_CUSTOM_Y = "sun_custom_y"
-        const val KEY_MOON_CUSTOM_X = "moon_custom_x"
-        const val KEY_MOON_CUSTOM_Y = "moon_custom_y"
-        const val KEY_SUNNY_CUSTOM_SKY_TOP_COLOR = "sunny_custom_sky_top_color"
-        const val KEY_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = "sunny_custom_sky_bottom_color"
-        const val KEY_SUNNY_GOD_RAYS_ENABLED = "sunny_god_rays_enabled"
-        const val KEY_SUNNY_GOD_RAYS_INTENSITY = "sunny_god_rays_intensity"
-        const val KEY_SUNNY_LENS_FLARE_ENABLED = "sunny_lens_flare_enabled"
-        const val KEY_SUNNY_LENS_FLARE_INTENSITY = "sunny_lens_flare_intensity"
-        const val KEY_SUNNY_LENS_FLARE_CHROMATIC = "sunny_lens_flare_chromatic"
-        const val KEY_SUNNY_GYRO_ENABLED = "sunny_gyro_enabled"
-        const val KEY_SUNNY_TOUCH_BURST_ENABLED = "sunny_touch_burst_enabled"
         const val KEY_SCREEN_DROPLETS_ENABLED = "screen_droplets_enabled"
         const val KEY_SCREEN_DROPLETS_SIZE = "screen_droplets_size"
         const val KEY_RAIN_SPAWN_MODE = "rain_spawn_mode"
         const val KEY_WIND_LINES_ENABLED = "wind_lines_enabled"
         const val KEY_WIND_LINES_INTENSITY = "wind_lines_intensity"
-        const val KEY_TIME_MODE = "time_mode"
-        const val KEY_MOON_PHASE = "moon_phase"
-        const val KEY_MOON_PATH_DIRECTION = "moon_path_direction"
-        const val KEY_MOON_MOVE_SPEED = "moon_move_speed"
-        const val KEY_MOON_STATIONARY_POSITION = "moon_stationary_position"
-        const val KEY_STAR_COLOR_INDEX = "star_color_index"
-        const val KEY_STAR_DENSITY = "star_density"
-        const val KEY_STAR_MODE = "star_mode"
-        const val KEY_NIGHT_CLOUD_DENSITY = "night_cloud_density"
-        const val KEY_GRADIENT_CYCLE_SPEED = "gradient_cycle_speed"
-        const val KEY_CONSTELLATION_SEED = "constellation_seed"
-        const val KEY_NEBULA_ENABLED = "nebula_enabled"
-        const val KEY_NEBULA_INTENSITY = "nebula_intensity"
-        const val KEY_NEBULA_COLOR = "nebula_color"
-        const val KEY_NEBULA_COLOR_2 = "nebula_color_2"
-        const val KEY_NEBULA_SEED = "nebula_seed"
 
-        // New keys for Combined Mode
-        const val KEY_COMBINED_SUN_SIZE = "combined_sun_size"
-        const val KEY_COMBINED_MOON_SIZE = "combined_moon_size"
-        const val KEY_COMBINED_MOON_PHASE = "combined_moon_phase"
-        const val KEY_COMBINED_STAR_DENSITY = "combined_star_density"
-        const val KEY_COMBINED_STAR_COLOR_INDEX = "combined_star_color_index"
-        const val KEY_COMBINED_PATH_DIRECTION = "combined_path_direction"
-        const val KEY_COMBINED_MOON_PHASE_AUTO_ADVANCE = "combined_moon_phase_auto_advance"
-
-        const val DEFAULT_TIME_MODE = 0
-        const val DEFAULT_MOON_PHASE = 4
-        const val DEFAULT_MOON_PATH_DIRECTION = 0
-        const val DEFAULT_MOON_MOVE_SPEED = 30
-        const val DEFAULT_MOON_STATIONARY_POSITION = 2
-        const val DEFAULT_STAR_COLOR_INDEX = 0
-        const val DEFAULT_STAR_DENSITY = 60
-        const val DEFAULT_STAR_MODE = 0
-        const val DEFAULT_NIGHT_CLOUD_DENSITY = 40
-        const val DEFAULT_GRADIENT_CYCLE_SPEED = 30
-        // Fallback only; getConstellationSeed() generates and persists a real random seed on first read.
-        const val DEFAULT_CONSTELLATION_SEED = 2024
-        const val DEFAULT_NEBULA_ENABLED = true
-        const val DEFAULT_NEBULA_INTENSITY = 55
-        const val DEFAULT_NEBULA_COLOR = 0xFF8E4FDB.toInt()
-        const val DEFAULT_NEBULA_COLOR_2 = 0xFF00B0FF.toInt()
-        // Fallback only; getNebulaSeed() generates and persists a real random seed on first read.
-        const val DEFAULT_NEBULA_SEED = 4242
-
-        const val DEFAULT_COMBINED_SUN_SIZE = 50
-        const val DEFAULT_COMBINED_MOON_SIZE = 50
-        const val DEFAULT_COMBINED_MOON_PHASE = 4
-        const val DEFAULT_COMBINED_STAR_DENSITY = 60
-        const val DEFAULT_COMBINED_STAR_COLOR_INDEX = 0
-        const val DEFAULT_COMBINED_PATH_DIRECTION = 0
-        const val DEFAULT_COMBINED_MOON_PHASE_AUTO_ADVANCE = false
+        const val KEY_SUNNY_GYRO_ENABLED = "sunny_gyro_enabled"
+        const val DEFAULT_SUNNY_GYRO_ENABLED = true
 
         const val DEFAULT_CLOUD_DENSITY = 50
         const val DEFAULT_RAIN_INTENSITY = 50
-        const val DEFAULT_LIGHTNING_FREQUENCY = 50
+        const val DEFAULT_LIGHTNING_FREQUENCY = 30
         const val DEFAULT_WIND_DIRECTION = 0
         const val DEFAULT_RAIN_COLOR_INDEX = 0
-        const val DEFAULT_WIND_INTENSITY = 50
-        const val KEY_RAINBOW_ALWAYS = "rainbow_always"
-        const val DEFAULT_RAINBOW_ALWAYS = false
+        const val DEFAULT_WIND_INTENSITY = 30
         const val DEFAULT_RAIN_SPEED = 50
         const val DEFAULT_LIGHTNING_COLOR_INDEX = 0
-        const val DEFAULT_LIGHTNING_DURATION = 30
-        const val DEFAULT_BACKGROUND_INDEX = 1
+        const val DEFAULT_LIGHTNING_DURATION = 50
+        const val DEFAULT_BACKGROUND_INDEX = 0
         const val DEFAULT_CLOUD_FLASH_FREQUENCY = 50
         const val DEFAULT_CLOUD_FLASH_COLOR_INDEX = 0
         const val DEFAULT_CLOUD_DYNAMICS_SPEED = 100
         const val DEFAULT_LIGHTNING_FLASH_ENABLED = true
         const val DEFAULT_CLOUD_FLASH_ENABLED = true
         const val DEFAULT_INTERACTIVE_LIGHTNING_ENABLED = true
-        const val DEFAULT_BG_BRIGHTNESS = 100
+        const val DEFAULT_BG_BRIGHTNESS = 20
 
-        // New defaults
-        const val DEFAULT_ACTIVE_EFFECT = 0
-        const val DEFAULT_SUN_SIZE = 50
-        const val DEFAULT_SUN_SPEED = 50
-        const val DEFAULT_SUNNY_THEME = 0
-        const val DEFAULT_SUN_PATH_DIRECTION = 0
-        const val DEFAULT_SUN_MOVE_SPEED = 50
-        const val DEFAULT_SUNNY_BACKGROUND_INDEX = 0
-        const val DEFAULT_SUN_STATIONARY_POSITION = 2
-        const val DEFAULT_SUN_CUSTOM_X = 50
-        const val DEFAULT_SUN_CUSTOM_Y = 74
-        const val DEFAULT_MOON_CUSTOM_X = 50
-        const val DEFAULT_MOON_CUSTOM_Y = 74
-        const val DEFAULT_SUNNY_CUSTOM_SKY_TOP_COLOR = 0xFF1A0D40.toInt()
-        const val DEFAULT_SUNNY_CUSTOM_SKY_BOTTOM_COLOR = 0xFFF2731A.toInt()
-        const val DEFAULT_SUNNY_GOD_RAYS_ENABLED = true
-        const val DEFAULT_SUNNY_GOD_RAYS_INTENSITY = 50
-        const val DEFAULT_SUNNY_LENS_FLARE_ENABLED = true
-        const val DEFAULT_SUNNY_LENS_FLARE_INTENSITY = 50
-        const val DEFAULT_SUNNY_LENS_FLARE_CHROMATIC = true
-        const val DEFAULT_SUNNY_GYRO_ENABLED = true
-        const val DEFAULT_SUNNY_TOUCH_BURST_ENABLED = true
         const val DEFAULT_SCREEN_DROPLETS_ENABLED = true
-        const val DEFAULT_SCREEN_DROPLETS_SIZE = 100
-        const val DEFAULT_RAIN_SPAWN_MODE = 0
+        const val DEFAULT_SCREEN_DROPLETS_SIZE = 50
+        const val DEFAULT_RAIN_SPAWN_MODE = 2
         const val DEFAULT_WIND_LINES_ENABLED = true
         const val DEFAULT_WIND_LINES_INTENSITY = 50
-
-        // Shooting Stars
-        const val KEY_SHOOTING_STARS_ENABLED = "shooting_stars_enabled"
-        const val KEY_SHOOTING_STARS_DENSITY = "shooting_stars_density"
-        const val DEFAULT_SHOOTING_STARS_ENABLED = true
-        const val DEFAULT_SHOOTING_STARS_DENSITY = 50
-
-        // Fireflies
-        const val KEY_FIREFLIES_ENABLED = "fireflies_enabled"
-        const val DEFAULT_FIREFLIES_ENABLED = true
 
         // Storm Variable
         const val KEY_STORM_VARIABLE_ENABLED = "storm_variable_enabled"
@@ -271,148 +153,8 @@ class ConfigManager(context: Context) : ConfigProvider {
     override fun getBgBrightness(): Int = storm.getBgBrightness()
     fun setBgBrightness(brightness: Int) = storm.setBgBrightness(brightness)
 
-    // Sunny (day) mode
-    override fun getActiveEffect(): Int = sunny.getActiveEffect()
-    fun setActiveEffect(effect: Int) = sunny.setActiveEffect(effect)
+    override fun isSunnyGyroEnabled(): Boolean = prefs.getBoolean(KEY_SUNNY_GYRO_ENABLED, DEFAULT_SUNNY_GYRO_ENABLED)
+    fun setSunnyGyroEnabled(enabled: Boolean) { prefs.edit().putBoolean(KEY_SUNNY_GYRO_ENABLED, enabled).apply() }
 
-    override fun getSunSize(): Int = sunny.getSunSize()
-    fun setSunSize(size: Int) = sunny.setSunSize(size)
-
-    override fun getSunSpeed(): Int = sunny.getSunSpeed()
-    fun setSunSpeed(speed: Int) = sunny.setSunSpeed(speed)
-
-    override fun getSunnyTheme(): Int = sunny.getSunnyTheme()
-    fun setSunnyTheme(theme: Int) = sunny.setSunnyTheme(theme)
-
-    override fun getSunPathDirection(): Int = sunny.getSunPathDirection()
-    fun setSunPathDirection(direction: Int) = sunny.setSunPathDirection(direction)
-
-    override fun getSunMoveSpeed(): Int = sunny.getSunMoveSpeed()
-    fun setSunMoveSpeed(speed: Int) = sunny.setSunMoveSpeed(speed)
-
-    override fun getSunnyBackgroundIndex(): Int = sunny.getSunnyBackgroundIndex()
-    fun setSunnyBackgroundIndex(index: Int) = sunny.setSunnyBackgroundIndex(index)
-
-    override fun getSunStationaryPosition(): Int = sunny.getSunStationaryPosition()
-    fun setSunStationaryPosition(position: Int) = sunny.setSunStationaryPosition(position)
-
-    override fun getSunCustomX(): Int = sunny.getSunCustomX()
-    fun setSunCustomX(x: Int) = sunny.setSunCustomX(x)
-
-    override fun getSunCustomY(): Int = sunny.getSunCustomY()
-    fun setSunCustomY(y: Int) = sunny.setSunCustomY(y)
-
-    override fun getMoonCustomX(): Int = sunny.getMoonCustomX()
-    fun setMoonCustomX(x: Int) = sunny.setMoonCustomX(x)
-
-    override fun getMoonCustomY(): Int = sunny.getMoonCustomY()
-    fun setMoonCustomY(y: Int) = sunny.setMoonCustomY(y)
-
-    override fun getSunnyCustomSkyTopColor(): Int = sunny.getSunnyCustomSkyTopColor()
-    fun setSunnyCustomSkyTopColor(color: Int) = sunny.setSunnyCustomSkyTopColor(color)
-
-    override fun getSunnyCustomSkyBottomColor(): Int = sunny.getSunnyCustomSkyBottomColor()
-    fun setSunnyCustomSkyBottomColor(color: Int) = sunny.setSunnyCustomSkyBottomColor(color)
-
-    override fun isSunnyGodRaysEnabled(): Boolean = sunny.isSunnyGodRaysEnabled()
-    fun setSunnyGodRaysEnabled(enabled: Boolean) = sunny.setSunnyGodRaysEnabled(enabled)
-
-    override fun getSunnyGodRaysIntensity(): Int = sunny.getSunnyGodRaysIntensity()
-    fun setSunnyGodRaysIntensity(intensity: Int) = sunny.setSunnyGodRaysIntensity(intensity)
-
-    override fun isSunnyLensFlareEnabled(): Boolean = sunny.isSunnyLensFlareEnabled()
-    fun setSunnyLensFlareEnabled(enabled: Boolean) = sunny.setSunnyLensFlareEnabled(enabled)
-
-    override fun isSunnyLensFlareChromaticEnabled(): Boolean = sunny.isSunnyLensFlareChromaticEnabled()
-    fun setSunnyLensFlareChromaticEnabled(enabled: Boolean) = sunny.setSunnyLensFlareChromaticEnabled(enabled)
-
-    override fun getSunnyLensFlareIntensity(): Int = sunny.getSunnyLensFlareIntensity()
-    fun setSunnyLensFlareIntensity(intensity: Int) = sunny.setSunnyLensFlareIntensity(intensity)
-
-    override fun isSunnyGyroEnabled(): Boolean = sunny.isSunnyGyroEnabled()
-    fun setSunnyGyroEnabled(enabled: Boolean) = sunny.setSunnyGyroEnabled(enabled)
-
-    override fun isSunnyTouchBurstEnabled(): Boolean = sunny.isSunnyTouchBurstEnabled()
-    fun setSunnyTouchBurstEnabled(enabled: Boolean) = sunny.setSunnyTouchBurstEnabled(enabled)
-
-    override fun isFirefliesEnabled(): Boolean = sunny.isFirefliesEnabled()
-    fun setFirefliesEnabled(enabled: Boolean) = sunny.setFirefliesEnabled(enabled)
-
-    override fun isRainbowAlwaysEnabled(): Boolean = sunny.isRainbowAlwaysEnabled()
-    fun setRainbowAlwaysEnabled(enabled: Boolean) = sunny.setRainbowAlwaysEnabled(enabled)
-
-    // Night mode
-    override fun getTimeMode(): Int = night.getTimeMode()
-    fun setTimeMode(mode: Int) = night.setTimeMode(mode)
-
-    override fun getMoonPhase(): Int = night.getMoonPhase()
-    fun setMoonPhase(phase: Int) = night.setMoonPhase(phase)
-
-    override fun getMoonPathDirection(): Int = night.getMoonPathDirection()
-    fun setMoonPathDirection(dir: Int) = night.setMoonPathDirection(dir)
-
-    override fun getMoonMoveSpeed(): Int = night.getMoonMoveSpeed()
-    fun setMoonMoveSpeed(speed: Int) = night.setMoonMoveSpeed(speed)
-
-    override fun getMoonStationaryPosition(): Int = night.getMoonStationaryPosition()
-    fun setMoonStationaryPosition(pos: Int) = night.setMoonStationaryPosition(pos)
-
-    override fun getStarColorIndex(): Int = night.getStarColorIndex()
-    fun setStarColorIndex(index: Int) = night.setStarColorIndex(index)
-
-    override fun getStarDensity(): Int = night.getStarDensity()
-    fun setStarDensity(density: Int) = night.setStarDensity(density)
-
-    override fun getStarMode(): Int = night.getStarMode()
-    fun setStarMode(mode: Int) = night.setStarMode(mode)
-
-    override fun getNightCloudDensity(): Int = night.getNightCloudDensity()
-    fun setNightCloudDensity(density: Int) = night.setNightCloudDensity(density)
-
-    override fun getGradientCycleSpeed(): Int = night.getGradientCycleSpeed()
-    fun setGradientCycleSpeed(speed: Int) = night.setGradientCycleSpeed(speed)
-
-    override fun getConstellationSeed(): Int = night.getConstellationSeed()
-
-    override fun isNebulaEnabled(): Boolean = night.isNebulaEnabled()
-    fun setNebulaEnabled(enabled: Boolean) = night.setNebulaEnabled(enabled)
-
-    override fun getNebulaIntensity(): Int = night.getNebulaIntensity()
-    fun setNebulaIntensity(intensity: Int) = night.setNebulaIntensity(intensity)
-
-    override fun getNebulaColor(): Int = night.getNebulaColor()
-    fun setNebulaColor(color: Int) = night.setNebulaColor(color)
-
-    override fun getNebulaColor2(): Int = night.getNebulaColor2()
-    fun setNebulaColor2(color: Int) = night.setNebulaColor2(color)
-
-    override fun getNebulaSeed(): Int = night.getNebulaSeed()
-
-    override fun isShootingStarsEnabled(): Boolean = night.isShootingStarsEnabled()
-    fun setShootingStarsEnabled(enabled: Boolean) = night.setShootingStarsEnabled(enabled)
-
-    override fun getShootingStarsDensity(): Int = night.getShootingStarsDensity()
-    fun setShootingStarsDensity(density: Int) = night.setShootingStarsDensity(density)
-
-    // Combined day+night mode
-    override fun getCombinedSunSize(): Int = combined.getCombinedSunSize()
-    fun setCombinedSunSize(size: Int) = combined.setCombinedSunSize(size)
-
-    override fun getCombinedMoonSize(): Int = combined.getCombinedMoonSize()
-    fun setCombinedMoonSize(size: Int) = combined.setCombinedMoonSize(size)
-
-    override fun getCombinedMoonPhase(): Int = combined.getCombinedMoonPhase()
-    fun setCombinedMoonPhase(phase: Int) = combined.setCombinedMoonPhase(phase)
-
-    override fun getCombinedStarDensity(): Int = combined.getCombinedStarDensity()
-    fun setCombinedStarDensity(density: Int) = combined.setCombinedStarDensity(density)
-
-    override fun getCombinedStarColorIndex(): Int = combined.getCombinedStarColorIndex()
-    fun setCombinedStarColorIndex(index: Int) = combined.setCombinedStarColorIndex(index)
-
-    override fun getCombinedPathDirection(): Int = combined.getCombinedPathDirection()
-    fun setCombinedPathDirection(dir: Int) = combined.setCombinedPathDirection(dir)
-
-    override fun isCombinedMoonPhaseAutoAdvanceEnabled(): Boolean = combined.isCombinedMoonPhaseAutoAdvanceEnabled()
-    fun setCombinedMoonPhaseAutoAdvanceEnabled(enabled: Boolean) = combined.setCombinedMoonPhaseAutoAdvanceEnabled(enabled)
+    override fun getActiveEffect(): Int = 0
 }

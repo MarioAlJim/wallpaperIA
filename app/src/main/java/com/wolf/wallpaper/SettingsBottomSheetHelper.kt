@@ -84,72 +84,40 @@ object SettingsBottomSheetHelper {
 
         val inflater = LayoutInflater.from(context)
 
-        val features = if (isStorm) {
-            heroImage.setImageResource(R.drawable.ic_storm)
-            titleView.setText(R.string.storm_help_dialog_title)
-            listOf(
-                HelpFeatureItem(
-                    R.drawable.ic_storm,
-                    "Tormenta Variable",
-                    "Ciclos automáticos que alternan calma y ráfagas. Bloquea controles manuales mientras ella misma modula los parámetros climáticos."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_sun,
-                    "Brillo Global",
-                    "Ajusta el nivel base de iluminación ambiental. Los relámpagos iluminan dinámicamente toda la escena."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_cloud,
-                    "Nubes y Viento",
-                    "Controla la densidad y desplazamiento de las nubes, así como la intensidad del viento que inclina lluvia y líneas de aire."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_rain,
-                    "Lluvia y Gotas en Pantalla",
-                    "Densidad, velocidad cromática y tamaño de las gotas simuladas con efecto lente sobre el cristal."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_lightning,
-                    "Rayos y Relámpagos",
-                    "Frecuencia, duración, tono de los arcos eléctricos, destellos internos en nubes y resplandor a pantalla completa."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_background,
-                    "Lienzo de Fondo",
-                    "Permite elegir entre paisaje predeterminado, fondo oscuro sólido o una fotografía personalizada."
-                )
+        heroImage.setImageResource(R.drawable.ic_storm)
+        titleView.setText(R.string.storm_help_dialog_title)
+        val features = listOf(
+            HelpFeatureItem(
+                R.drawable.ic_storm,
+                "Tormenta Variable",
+                "Ciclos automáticos que alternan calma y ráfagas. Bloquea controles manuales mientras ella misma modula los parámetros climáticos."
+            ),
+            HelpFeatureItem(
+                R.drawable.ic_bolt,
+                "Brillo Global",
+                "Ajusta el nivel base de iluminación ambiental. Los relámpagos iluminan dinámicamente toda la escena."
+            ),
+            HelpFeatureItem(
+                R.drawable.ic_cloud,
+                "Nubes y Viento",
+                "Controla la densidad y desplazamiento de las nubes, así como la intensidad del viento que inclina lluvia y líneas de aire."
+            ),
+            HelpFeatureItem(
+                R.drawable.ic_rain,
+                "Lluvia y Gotas en Pantalla",
+                "Densidad, velocidad cromática y tamaño de las gotas simuladas con efecto lente sobre el cristal."
+            ),
+            HelpFeatureItem(
+                R.drawable.ic_lightning,
+                "Rayos y Relámpagos",
+                "Frecuencia, duración, tono de los arcos eléctricos, destellos internos en nubes y resplandor a pantalla completa."
+            ),
+            HelpFeatureItem(
+                R.drawable.ic_background,
+                "Lienzo de Fondo",
+                "Permite elegir entre paisaje predeterminado, fondo oscuro sólido o una fotografía personalizada."
             )
-        } else {
-            heroImage.setImageResource(R.drawable.ic_sun)
-            titleView.setText(R.string.sunny_help_dialog_title)
-            listOf(
-                HelpFeatureItem(
-                    R.drawable.ic_clock,
-                    "Modo de Tiempo",
-                    "Alterna entre Día, Noche, Ciclo Combinado automático o Reloj en tiempo real según la hora del sistema."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_cloud,
-                    "Ajuste de Entorno",
-                    "Densidad de nubes diurnas, siluetas de fondo y efecto 3D Parallax mediante el giroscopio del móvil."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_sun,
-                    "Configuración del Sol",
-                    "Tamaño, pulsaciones, rayos de luz divinos (God Rays), destello de lente (Lens Flare) y degradado celeste."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_moon,
-                    "Luna y Estrellas",
-                    "Fases lunares con avance opcional, estrellas fugaces, luciérnagas titilantes y nebulosas espaciales."
-                ),
-                HelpFeatureItem(
-                    R.drawable.ic_combined,
-                    "Ciclo Combinado",
-                    "Velocidad de transición entre sol y luna con trayectorias compartidas y sincronizadas."
-                )
-            )
-        }
+        )
 
         featuresContainer.removeAllViews()
         features.forEach { item ->

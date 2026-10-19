@@ -166,43 +166,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Selector de Clima (TabLayout) -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardCornerRadius="12dp"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/settings_stroke"
-                app:cardElevation="0dp"
-                app:cardBackgroundColor="@color/settings_card_bg">
-
-                <com.google.android.material.tabs.TabLayout
-                    android:id="@+id/tabLayoutWeather"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:tabGravity="fill"
-                    app:tabMode="fixed"
-                    app:tabTextColor="@color/settings_text_secondary"
-                    app:tabSelectedTextColor="@color/settings_accent_text"
-                    app:tabIndicatorColor="@color/settings_accent"
-                    android:background="@color/settings_card_bg"
-                    app:tabBackground="@android:color/transparent"
-                    app:tabIndicatorHeight="3dp"
-                    app:tabRippleColor="@color/settings_accent_ripple">
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/act_tormenta" />
-
-                    <com.google.android.material.tabs.TabItem
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/act_da_y_noche" />
-
-                </com.google.android.material.tabs.TabLayout>
-            </com.google.android.material.card.MaterialCardView>
 
             <!-- Contenedor del fragmento -->
             <FrameLayout
