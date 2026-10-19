@@ -189,33 +189,25 @@ class StormRenderer(
         }
         rainTexture = loadTexture(context, "rain/rain_particle.png")
 
-        // Dynamically load lightning textures from assets/lightning
+        // Dynamically load lightning textures from assets/lightning (capped at MAX_LIGHTNING_TEXTURES, maxSize = 512)
         lightningTextures.clear()
         try {
             val assetManager = context.assets
             val files = assetManager.list("lightning") ?: emptyArray()
-            for (file in files) {
-                if (file.endsWith(".png")) {
-                    val tex = loadTexture(context, "lightning/$file", maxSize = 1024)
-                    if (tex != 0) {
-                        lightningTextures.add(tex)
-                    }
+            val sortedFiles = files.filter { it.endsWith(".png") }.sorted().take(SceneManager.MAX_LIGHTNING_TEXTURES)
+            for (file in sortedFiles) {
+                val tex = loadTexture(context, "lightning/$file", maxSize = 512)
+                if (tex != 0) {
+                    lightningTextures.add(tex)
                 }
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        // Load background textures
+        // Load background textures (Lazy loading: only initialize the active background)
         backgroundTextures.indices.forEach { backgroundTextures[it] = 0 }
-        loadBackgroundTexture(context, 0, "background/background.jpg")
-        loadBackgroundTexture(context, 1, "background/background_02.png")
-        loadBackgroundTexture(context, 2, "background/background_03.png")
-        loadBackgroundTexture(context, 3, "background/background_04.png")
-        loadBackgroundTexture(context, 4, "background/background_05.png")
-        loadBackgroundTexture(context, 5, "background/background_06.png")
-        loadBackgroundTexture(context, 6, "background/background_07.png")
-        loadCustomBackgroundTexture(context, 7)
+        loadBackgroundByIndex(sceneManager.getBackgroundIndex())
 
         noiseTexture = createNoiseTexture(noiseTextureSize)
 
@@ -973,7 +965,7 @@ class StormRenderer(
 
         var lastBoundTexture = -1
         for (lightning in activeLightnings) {
-            if (lightningTextures.isNotEmpty() && lightning.selectedTextureIndex < lightningTextures.size) {
+            if (lightningTextures.isNotEmpty()) {
                 GLES30.glUniform1f(flashIntensityHandle, lightning.intensity)
                 val color = lightning.customColor ?: getLightningColor(lightning.selectedColorIndex)
                 GLES30.glUniform4fv(colorHandle, 1, color, 0)
@@ -1008,7 +1000,7 @@ class StormRenderer(
                 Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
                 GLES30.glUniformMatrix4fv(mvpMatrixHandle, 1, false, modelViewProjection, 0)
 
-                val tex = lightningTextures[lightning.selectedTextureIndex]
+                val tex = lightningTextures[lightning.selectedTextureIndex % lightningTextures.size]
                 if (tex != lastBoundTexture) {
                     GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tex)
                     lastBoundTexture = tex
@@ -1057,9 +1049,54 @@ class StormRenderer(
         backgroundTextures[index] = textureId
     }
 
+    private var lastCustomBgModified: Long = 0L
+
+    private fun loadBackgroundByIndex(backgroundIndex: Int) {
+        if (backgroundIndex <= 0 || backgroundIndex > backgroundTextures.size) return
+        val texIndex = backgroundIndex - 1
+
+        // Check if custom background was modified
+        if (backgroundIndex == 8) {
+            val file = java.io.File(context.filesDir, "custom_background.png")
+            val fileModified = if (file.exists()) file.lastModified() else 0L
+            if (backgroundTextures[7] != 0 && fileModified != lastCustomBgModified) {
+                val toDelete = intArrayOf(backgroundTextures[7])
+                GLES30.glDeleteTextures(1, toDelete, 0)
+                backgroundTextures[7] = 0
+            }
+            lastCustomBgModified = fileModified
+        }
+
+        // Free previously loaded background texture if different to reclaim VRAM
+        val toDelete = IntArray(1)
+        for (i in backgroundTextures.indices) {
+            if (backgroundTextures[i] != 0 && i != texIndex) {
+                toDelete[0] = backgroundTextures[i]
+                GLES30.glDeleteTextures(1, toDelete, 0)
+                backgroundTextures[i] = 0
+            }
+        }
+
+        if (backgroundTextures[texIndex] != 0) return
+
+        when (backgroundIndex) {
+            1 -> loadBackgroundTexture(context, 0, "background/background.jpg")
+            2 -> loadBackgroundTexture(context, 1, "background/background_02.png")
+            3 -> loadBackgroundTexture(context, 2, "background/background_03.png")
+            4 -> loadBackgroundTexture(context, 3, "background/background_04.png")
+            5 -> loadBackgroundTexture(context, 4, "background/background_05.png")
+            6 -> loadBackgroundTexture(context, 5, "background/background_06.png")
+            7 -> loadBackgroundTexture(context, 6, "background/background_07.png")
+            8 -> loadCustomBackgroundTexture(context, 7)
+        }
+    }
+
     private fun drawBackground(backgroundIndex: Int, flash: LightningFlashAggregate) {
         if (backgroundIndex <= 0 || backgroundIndex > backgroundTextures.size) return
         val texIndex = backgroundIndex - 1
+        if (backgroundTextures[texIndex] == 0 || (backgroundIndex == 8 && java.io.File(context.filesDir, "custom_background.png").lastModified() != lastCustomBgModified)) {
+            loadBackgroundByIndex(backgroundIndex)
+        }
         val textureId = backgroundTextures[texIndex]
         if (textureId == 0) return
 

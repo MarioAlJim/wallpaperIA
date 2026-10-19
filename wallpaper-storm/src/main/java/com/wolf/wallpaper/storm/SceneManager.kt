@@ -49,6 +49,9 @@ class SceneManager(
         // Maximum cloud textures loaded in pool to optimize startup time and VRAM usage
         const val MAX_CLOUD_TEXTURES = 12
 
+        // Maximum lightning textures loaded in pool to optimize startup time and VRAM usage
+        const val MAX_LIGHTNING_TEXTURES = 12
+
         // Rain drop count mapping (intensity 0-100 -> drop count, max 1000)
         private const val MAX_RAIN_DROP_COUNT = 1000
 
@@ -441,7 +444,8 @@ class SceneManager(
         cachedLightningTextureCount?.let { return it }
         val count = if (context == null) 1 else try {
             val files = context.assets.list("lightning") ?: emptyArray()
-            files.count { it.endsWith(".png") }
+            val pngCount = files.count { it.endsWith(".png") }
+            if (pngCount > 0) minOf(pngCount, MAX_LIGHTNING_TEXTURES) else 1
         } catch (e: Exception) {
             1
         }
