@@ -48,12 +48,18 @@ class SceneManager(
 
         // Rain drop count mapping (intensity 0-100 -> drop count, max 1000)
         private const val MAX_RAIN_DROP_COUNT = 1000
+
+        // Depth comparators (cached to eliminate per-frame allocations)
+        private val CLOUD_DEPTH_COMPARATOR = Comparator<StormCloud> { a, b -> a.z.compareTo(b.z) }
+        private val WIND_LINE_DEPTH_COMPARATOR = Comparator<WindLine> { a, b -> a.z.compareTo(b.z) }
     }
 
     private val clouds = mutableListOf<StormCloud>()
     private val rainDrops = mutableListOf<RainDrop>()
     private val rainProjectedXBuffer = FloatArray(MAX_RAIN_DROP_COUNT)
     private val windLines = mutableListOf<WindLine>()
+    private var cloudsNeedSorting = true
+    private var windLinesNeedSorting = true
     val lightnings = List(6) { Lightning() }
     val lightning: Lightning get() = lightnings[0]
     
@@ -140,6 +146,7 @@ class SceneManager(
         for (cloud in clouds) {
             cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
         }
+        cloudsNeedSorting = true
         val allowFallback = configProvider.getRainSpawnMode() != 1
         var activeCount = 0
         for (drop in rainDrops) {
@@ -149,6 +156,7 @@ class SceneManager(
             }
         }
         windLines.clear()
+        windLinesNeedSorting = true
     }
 
     fun update(deltaTime: Float) {
@@ -250,6 +258,7 @@ class SceneManager(
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
                 cloud.reset(0f, aspectRatio, textureCount = getCloudTextureCount())
+                cloudsNeedSorting = true
                 val newHalfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
                 val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / CLOUD_DRIFT_WIND_THRESHOLD)).coerceIn(0f, 1f)
                 val netSpeed = windSpeed + (cloud.driftSpeed * driftInfluence)
@@ -300,6 +309,7 @@ class SceneManager(
             line.reset(aspectRatio, currentWindAngle, windIntensity)
             line.lifetime = Random.nextFloat() * line.maxLifetime
             windLines.add(line)
+            windLinesNeedSorting = true
         }
         while (windLines.size > targetWindLinesCount) {
             windLines.removeAt(windLines.size - 1)
@@ -309,6 +319,7 @@ class SceneManager(
             line.update(deltaTime)
             if (!line.isActive) {
                 line.reset(aspectRatio, currentWindAngle, windIntensity)
+                windLinesNeedSorting = true
             }
         }
 
@@ -382,8 +393,19 @@ class SceneManager(
     fun getClouds(): List<StormCloud> = clouds
     fun getRainDrops(): List<RainDrop> = rainDrops
     // Sorts the internal wind line / cloud lists in place by depth (z)
-    fun sortWindLinesByDepth() { windLines.sortBy { it.z } }
-    fun sortCloudsByDepth() { clouds.sortBy { it.z } }
+    fun sortWindLinesByDepth() {
+        if (windLinesNeedSorting) {
+            windLines.sortWith(WIND_LINE_DEPTH_COMPARATOR)
+            windLinesNeedSorting = false
+        }
+    }
+
+    fun sortCloudsByDepth() {
+        if (cloudsNeedSorting) {
+            clouds.sortWith(CLOUD_DEPTH_COMPARATOR)
+            cloudsNeedSorting = false
+        }
+    }
     fun getRainColorIndex(): Int = configProvider.getRainColorIndex()
     fun getBackgroundIndex(): Int = configProvider.getBackgroundIndex()
     fun getBgBrightness(): Float = configProvider.getBgBrightness() / 100f
@@ -578,6 +600,7 @@ class SceneManager(
                 cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
+                cloudsNeedSorting = true
                 needed--
             }
         } else if (activeClouds.size > targetCount) {
