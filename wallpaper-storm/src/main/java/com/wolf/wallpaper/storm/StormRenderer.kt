@@ -60,7 +60,6 @@ class StormRenderer(
     private var targetTiltY = 0f
     private var swipeOffset = 0f
     private var targetSwipeOffset = 0f
-    private var lastSwipeOffsetSampleTimeNanos = 0L
 
     // Reusable buffers to avoid allocations in drawRain and drawWindLines
     private var rainVertexBuffer: FloatBuffer? = null
@@ -376,20 +375,7 @@ class StormRenderer(
 
     override fun onOffsetsChanged(xOffset: Float, yOffset: Float) {
         val clampedX = xOffset.coerceIn(0f, 1f)
-        val newSwipeOffset = (clampedX - 0.5f) * 2.0f
-
-        val nowNanos = System.nanoTime()
-        if (lastSwipeOffsetSampleTimeNanos != 0L) {
-            val dt = (nowNanos - lastSwipeOffsetSampleTimeNanos) / 1_000_000_000f
-            if (dt in kWindSwipeMinDt..kWindSwipeMaxDt) {
-                val velocity = (newSwipeOffset - targetSwipeOffset) / dt
-                if (kotlin.math.abs(velocity) > kWindSwipeMinVelocity) {
-                    sceneManager.applySwipeWindImpulse(velocity)
-                }
-            }
-        }
-        lastSwipeOffsetSampleTimeNanos = nowNanos
-        targetSwipeOffset = newSwipeOffset
+        targetSwipeOffset = (clampedX - 0.5f) * 2.0f
     }
 
     override fun onSensorValuesChanged(tiltX: Float, tiltY: Float) {
@@ -582,7 +568,8 @@ class StormRenderer(
             GLES30.glUniform3f(flashColorHandle, finalR, finalG, finalB)
 
             if (cloudTextures.isNotEmpty()) {
-                val tex = cloudTextures[cloud.textureIndex % cloudTextures.size]
+                val texIndex = cloud.textureIndex % cloudTextures.size
+                val tex = cloudTextures[texIndex]
                 if (tex != lastBoundTexture) {
                     GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, tex)
                     lastBoundTexture = tex
@@ -1223,9 +1210,5 @@ class StormRenderer(
         return currentFloatBuf
     }
 
-    companion object {
-        private const val kWindSwipeMinVelocity = 1.2f
-        private const val kWindSwipeMaxDt = 0.5f
-        private const val kWindSwipeMinDt = 0.0005f
-    }
+
 }

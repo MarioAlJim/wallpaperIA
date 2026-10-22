@@ -23,3 +23,5 @@ local.properties
 
 # Stray local build output that isn't under build/
 /app/debug/
+.claude/
+
