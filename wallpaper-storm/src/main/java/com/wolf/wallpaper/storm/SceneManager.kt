@@ -47,7 +47,7 @@ class SceneManager(
         private const val MAX_CLOUD_COUNT = 10
 
         // Maximum cloud textures loaded in pool to optimize startup time and VRAM usage
-        const val MAX_CLOUD_TEXTURES = 14
+        const val MAX_CLOUD_TEXTURES = 16
 
         // Maximum lightning textures loaded in pool to optimize startup time and VRAM usage
         const val MAX_LIGHTNING_TEXTURES = 12
