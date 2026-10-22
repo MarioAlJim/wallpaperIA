@@ -17,6 +17,9 @@ class StormCloud(
 
     var z: Float = 1.0f
     var layerIndex: Int = 0
+    var subLayerIndex: Int = 0
+    var flipX: Boolean = false
+    var aspectStretch: Float = 1.0f
     var targetOpacity: Float = opacity
     var isFadingOut: Boolean = false
 
@@ -185,43 +188,50 @@ class StormCloud(
         aspectRatio: Float,
         textureCount: Int = 0,
         layer: Int? = null,
-        totalLayers: Int = 10
+        subIndex: Int? = null,
+        totalLayers: Int = 5
     ) {
-        val rank = layer ?: Random.nextInt(totalLayers)
-        layerIndex = rank
+        val safeTotalLayers = if (totalLayers > 1) totalLayers else 5
+        val l = (layer ?: Random.nextInt(safeTotalLayers)).coerceIn(0, safeTotalLayers - 1)
+        val s = (subIndex ?: Random.nextInt(2)).coerceAtLeast(0)
+        layerIndex = l
+        subLayerIndex = s
 
-        val safeTotal = if (totalLayers > 1) totalLayers - 1 else 1
-        val t = (rank.toFloat() / safeTotal).coerceIn(0f, 1f)
+        val t = (l.toFloat() / (safeTotalLayers - 1).toFloat()).coerceIn(0f, 1f)
 
-        // Staircase depth (Option B): strictly ordered with subtle organic jitter
-        val stepZ = 0.70f / totalLayers
-        val zBase = 0.30f + rank * stepZ
-        val zJitter = Random.nextFloat() * (stepZ * 0.45f) // Never exceeds half-step, guarantees strict depth hierarchy
-        z = (zBase + zJitter).coerceIn(0.30f, 1.0f)
+        // Depth: each layer has a distinct depth band. Multiple clouds in the same layer get subtle offsets
+        val stepZ = 0.65f / (safeTotalLayers - 1).toFloat()
+        val zBase = 0.30f + l * stepZ
+        val zOffset = s * 0.015f + Random.nextFloat() * 0.006f
+        z = (zBase + zOffset).coerceIn(0.30f, 1.0f)
 
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
-        
-        // Staircase scale: monotonic increase from back (0.43125) to front (1.40625) with organic variance
+
+        // Scale: proportional to layer with natural jitter
         val minScale = 0.43125f
         val maxScale = 1.40625f
         val nominalScale = minScale + (maxScale - minScale) * t
-        val scaleJitter = Random.nextFloat() * 0.04f - 0.02f
+        val scaleJitter = Random.nextFloat() * 0.05f - 0.025f
         baseScale = (nominalScale + scaleJitter).coerceIn(minScale, maxScale)
         scale = baseScale
-        
-        // Staircase Y position: lower bound at horizon (Y = 0.20) climbing progressively up to Y = 0.85
+
+        // Vertical position Y: bottom (horizon, Y = 0.20) climbing to top (Y = 0.82)
         val minY = 0.20f
-        val maxY = 0.85f
+        val maxY = 0.82f
         val nominalY = minY + (maxY - minY) * t
-        val yJitter = Random.nextFloat() * 0.04f - 0.02f
-        positionY = (nominalY + yJitter).coerceIn(0.20f, 1.0f)
+        val yJitter = Random.nextFloat() * 0.06f - 0.03f
+        positionY = (nominalY + yJitter).coerceIn(0.18f, 0.95f)
         basePositionY = positionY
-        
+
+        // Form variation (Punto 3): flipX and aspect ratio stretch
+        flipX = Random.nextBoolean()
+        aspectStretch = Random.nextFloat() * 0.22f + 0.89f
+
         targetOpacity = ((Random.nextFloat() * 0.3f + 0.55f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
         opacity = targetOpacity
         isFadingOut = false
-  
+
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
         onlyGrows = Random.nextBoolean()
@@ -232,13 +242,18 @@ class StormCloud(
     }
 
     fun wrap(aspectRatio: Float, windSpeed: Float, textureCount: Int = 0) {
+        if (textureCount > 1) {
+            // Pick a different texture to guarantee visual alternation across cycles
+            textureIndex = (textureIndex + 1 + Random.nextInt(textureCount - 1)) % textureCount
+        }
+        flipX = Random.nextBoolean()
+        aspectStretch = Random.nextFloat() * 0.22f + 0.89f
+
         driftSpeed = Random.nextFloat() * 0.06f - 0.03f
         pulseTime = Random.nextFloat() * 10f
         onlyGrows = Random.nextBoolean()
-        if (textureCount > 1) {
-            textureIndex = Random.nextInt(textureCount)
-        }
-        val halfWidth = scale * 2.4f
+
+        val halfWidth = scale * 2.4f * aspectStretch
         val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / 0.1f)).coerceIn(0f, 1f)
         val netSpeed = windSpeed + (driftSpeed * driftInfluence)
         positionX = if (netSpeed >= 0f) {

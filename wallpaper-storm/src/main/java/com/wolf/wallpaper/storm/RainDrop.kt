@@ -110,7 +110,7 @@ class RainDrop(
         parentCloud = spawnCloud
         spawnFromCloud = true
         
-        val halfWidth = spawnCloud.scale * 1.2f
+        val halfWidth = spawnCloud.scale * 1.2f * spawnCloud.aspectStretch
         
         // Mitchell's Best-Candidate algorithm to find best spawnX to avoid overlapping paths
         var bestSpawnX = spawnCloud.positionX

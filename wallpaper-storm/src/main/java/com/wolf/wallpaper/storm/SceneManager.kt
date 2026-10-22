@@ -45,6 +45,7 @@ class SceneManager(
 
         // Cloud count mapping (density 0-100 -> cloud count, max 10)
         private const val MAX_CLOUD_COUNT = 10
+        private const val NUM_CLOUD_LAYERS = 5
 
         // Maximum cloud textures loaded in pool to optimize startup time and VRAM usage
         const val MAX_CLOUD_TEXTURES = 16
@@ -150,13 +151,39 @@ class SceneManager(
         // Re-align objects to new aspect ratio coordinates
         val textureCount = getCloudTextureCount()
         val count = clouds.size
+        val layerCounts = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
+            val layer = if (count <= 1) {
+                NUM_CLOUD_LAYERS / 2
+            } else if (count <= NUM_CLOUD_LAYERS) {
+                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
+            } else {
+                (i * NUM_CLOUD_LAYERS) / count
+            }
+            layerCounts[layer]++
+        }
+        val currentLayerCounters = IntArray(NUM_CLOUD_LAYERS)
+        for (i in 0 until count) {
+            val layer = if (count <= 1) {
+                NUM_CLOUD_LAYERS / 2
+            } else if (count <= NUM_CLOUD_LAYERS) {
+                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
+            } else {
+                (i * NUM_CLOUD_LAYERS) / count
+            }
+            val subIndex = currentLayerCounters[layer]++
+            val cloudsInThisLayer = layerCounts[layer]
+            val slotWidth = (aspectRatio * 2f) / maxOf(1, cloudsInThisLayer)
+            val slotCenter = -aspectRatio + slotWidth * (subIndex + 0.5f)
+            val jitter = (Random.nextFloat() * 0.4f - 0.2f) * slotWidth
+            val startX = (slotCenter + jitter).coerceIn(-aspectRatio * 1.1f, aspectRatio * 1.1f)
             clouds[i].reset(
-                Random.nextFloat() * aspectRatio * 2 - aspectRatio,
+                startX,
                 aspectRatio,
                 textureCount = textureCount,
-                layer = i,
-                totalLayers = maxOf(count, 1)
+                layer = layer,
+                subIndex = subIndex,
+                totalLayers = NUM_CLOUD_LAYERS
             )
         }
         cloudsNeedSorting = true
@@ -267,7 +294,7 @@ class SceneManager(
                 flashFrequency,
                 flashColorIndex
             )
-            val halfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
+            val halfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR * cloud.aspectStretch
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
                 cloud.wrap(aspectRatio, windSpeed, textureCount = getCloudTextureCount())
@@ -616,15 +643,40 @@ class SceneManager(
             }
         }
 
-        // Re-assign natural staircase layers to active clouds (back/small/horizon -> front/large/sky)
+        // Re-assign natural staircase layers to active clouds with priority distribution (allowing multiple clouds per layer)
         val currentActive = clouds.filter { !it.isFadingOut }
         val count = currentActive.size
+        val layerCounts = IntArray(NUM_CLOUD_LAYERS)
+        for (i in 0 until count) {
+            val layer = if (count <= 1) {
+                NUM_CLOUD_LAYERS / 2
+            } else if (count <= NUM_CLOUD_LAYERS) {
+                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
+            } else {
+                (i * NUM_CLOUD_LAYERS) / count
+            }
+            layerCounts[layer]++
+        }
+        val currentLayerCounters = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
             val cloud = currentActive[i]
+            val layer = if (count <= 1) {
+                NUM_CLOUD_LAYERS / 2
+            } else if (count <= NUM_CLOUD_LAYERS) {
+                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
+            } else {
+                (i * NUM_CLOUD_LAYERS) / count
+            }
+            val subIndex = currentLayerCounters[layer]++
+            val cloudsInThisLayer = layerCounts[layer]
+
             val isNew = (cloud.opacity == 0f)
-            if (isNew || cloud.layerIndex != i) {
+            if (isNew || cloud.layerIndex != layer || cloud.subLayerIndex != subIndex) {
                 val startX = if (isNew) {
-                    Random.nextFloat() * aspectRatio * 2 - aspectRatio
+                    val slotWidth = (aspectRatio * 2f) / maxOf(1, cloudsInThisLayer)
+                    val slotCenter = -aspectRatio + slotWidth * (subIndex + 0.5f)
+                    val jitter = (Random.nextFloat() * 0.4f - 0.2f) * slotWidth
+                    (slotCenter + jitter).coerceIn(-aspectRatio * 1.1f, aspectRatio * 1.1f)
                 } else {
                     cloud.positionX
                 }
@@ -633,8 +685,9 @@ class SceneManager(
                     startX,
                     aspectRatio,
                     textureCount = textureCount,
-                    layer = i,
-                    totalLayers = maxOf(count, 1)
+                    layer = layer,
+                    subIndex = subIndex,
+                    totalLayers = NUM_CLOUD_LAYERS
                 )
                 if (isNew) {
                     cloud.opacity = 0f

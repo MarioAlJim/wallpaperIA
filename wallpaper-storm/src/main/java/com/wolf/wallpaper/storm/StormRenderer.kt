@@ -575,7 +575,7 @@ class StormRenderer(
                     lastBoundTexture = tex
                 }
             }
-            GLES30.glUniform2f(cloudScaleHandle, cloud.scale * 2.4f, cloud.scale)
+            GLES30.glUniform2f(cloudScaleHandle, cloud.scale * 2.4f * cloud.aspectStretch, cloud.scale)
 
             // Gyroscope depth-based parallax shift
             // Foreground clouds (z = 1.0) shift more; background clouds (z = 0.3) shift less
@@ -593,7 +593,8 @@ class StormRenderer(
             val modelMatrix = scratchModelMatrix
             Matrix.setIdentityM(modelMatrix, 0)
             Matrix.translateM(modelMatrix, 0, posX, posY, 0f)
-            Matrix.scaleM(modelMatrix, 0, cloud.scale * 2.4f, cloud.scale, 1.0f)
+            val flipFactor = if (cloud.flipX) -1.0f else 1.0f
+            Matrix.scaleM(modelMatrix, 0, flipFactor * cloud.scale * 2.4f * cloud.aspectStretch, cloud.scale, 1.0f)
 
             val modelViewProjection = scratchMVPMatrix
             Matrix.multiplyMM(modelViewProjection, 0, projectionMatrix, 0, modelMatrix, 0)
