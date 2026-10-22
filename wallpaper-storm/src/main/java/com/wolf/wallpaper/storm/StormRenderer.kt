@@ -948,7 +948,6 @@ class StormRenderer(
 
         val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.12f else 0f
         val gyroY = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltY * 0.12f else 0f
-        val maxSwipeShift = aspectRatio * 0.3f
 
         var lastBoundTexture = -1
         for (lightning in activeLightnings) {
@@ -965,9 +964,8 @@ class StormRenderer(
                 val depthFactor = 0.2f + 0.8f * ((lightning.z - 0.3f) / 0.7f).coerceIn(0f, 1f)
                 val lightningGyroX = gyroX * depthFactor
                 val lightningGyroY = gyroY * depthFactor
-                val lightningSwipeX = -swipeOffset * maxSwipeShift * depthFactor
 
-                val posX = lightning.positionX + lightningGyroX + lightningSwipeX
+                val posX = lightning.positionX + lightningGyroX
                 val posY = lightning.positionY + lightningGyroY
 
                 // Apply world translation
