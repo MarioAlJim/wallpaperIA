@@ -16,6 +16,7 @@ class StormCloud(
 ) : StormObject {
 
     var z: Float = 1.0f
+    var layerIndex: Int = 0
     var targetOpacity: Float = opacity
     var isFadingOut: Boolean = false
 
@@ -179,28 +180,42 @@ class StormCloud(
         // Rendering is coordinated by StormRenderer using the StormCloud attributes
     }
 
-    fun reset(startX: Float, aspectRatio: Float, textureCount: Int = 0) {
-        z = Random.nextFloat() * 0.7f + 0.3f
+    fun reset(
+        startX: Float,
+        aspectRatio: Float,
+        textureCount: Int = 0,
+        layer: Int? = null,
+        totalLayers: Int = 10
+    ) {
+        val rank = layer ?: Random.nextInt(totalLayers)
+        layerIndex = rank
+
+        val safeTotal = if (totalLayers > 1) totalLayers - 1 else 1
+        val t = (rank.toFloat() / safeTotal).coerceIn(0f, 1f)
+
+        // Staircase depth (Option B): strictly ordered with subtle organic jitter
+        val stepZ = 0.70f / totalLayers
+        val zBase = 0.30f + rank * stepZ
+        val zJitter = Random.nextFloat() * (stepZ * 0.45f) // Never exceeds half-step, guarantees strict depth hierarchy
+        z = (zBase + zJitter).coerceIn(0.30f, 1.0f)
+
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
         
+        // Staircase scale: monotonic increase from back (0.43125) to front (1.40625) with organic variance
         val minScale = 0.43125f
         val maxScale = 1.40625f
-        val normZ = (z - 0.3f) / 0.7f // 0.0 (background/far) to 1.0 (foreground/near)
-
-        // Scale proportional to depth (farther = smaller, closer = larger) with some random jitter
-        val scaleJitter = (Random.nextFloat() * 0.2f - 0.1f)
-        baseScale = (minScale + (maxScale - minScale) * normZ + scaleJitter).coerceIn(minScale, maxScale)
+        val nominalScale = minScale + (maxScale - minScale) * t
+        val scaleJitter = Random.nextFloat() * 0.04f - 0.02f
+        baseScale = (nominalScale + scaleJitter).coerceIn(minScale, maxScale)
         scale = baseScale
         
-        // Position: smaller/farther (normZ = 0) near Y = 0.2 (lower bound of top 2/5), 
-        // larger/closer (normZ = 1) higher up (Y = 0.85) for enhanced 3D depth perspective.
-        // Clouds must strictly be in the top 2/5 of the screen (Y >= 0.2).
-        val minY = 0.2f
+        // Staircase Y position: lower bound at horizon (Y = 0.20) climbing progressively up to Y = 0.85
+        val minY = 0.20f
         val maxY = 0.85f
-        val targetY = minY + (maxY - minY) * normZ
-        val jitter = (Random.nextFloat() * 2f - 1f) * 0.06f
-        positionY = (targetY + jitter).coerceIn(0.2f, 1.0f)
+        val nominalY = minY + (maxY - minY) * t
+        val yJitter = Random.nextFloat() * 0.04f - 0.02f
+        positionY = (nominalY + yJitter).coerceIn(0.20f, 1.0f)
         basePositionY = positionY
         
         targetOpacity = ((Random.nextFloat() * 0.3f + 0.55f) * 2.0f * (0.6f + 0.4f * z)).coerceAtMost(1.0f)
@@ -213,6 +228,23 @@ class StormCloud(
 
         if (textureCount > 1) {
             textureIndex = Random.nextInt(textureCount)
+        }
+    }
+
+    fun wrap(aspectRatio: Float, windSpeed: Float, textureCount: Int = 0) {
+        driftSpeed = Random.nextFloat() * 0.06f - 0.03f
+        pulseTime = Random.nextFloat() * 10f
+        onlyGrows = Random.nextBoolean()
+        if (textureCount > 1) {
+            textureIndex = Random.nextInt(textureCount)
+        }
+        val halfWidth = scale * 2.4f
+        val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / 0.1f)).coerceIn(0f, 1f)
+        val netSpeed = windSpeed + (driftSpeed * driftInfluence)
+        positionX = if (netSpeed >= 0f) {
+            -aspectRatio - halfWidth
+        } else {
+            aspectRatio + halfWidth
         }
     }
 }

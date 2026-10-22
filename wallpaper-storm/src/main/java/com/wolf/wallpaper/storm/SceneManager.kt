@@ -149,8 +149,15 @@ class SceneManager(
         
         // Re-align objects to new aspect ratio coordinates
         val textureCount = getCloudTextureCount()
-        for (cloud in clouds) {
-            cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
+        val count = clouds.size
+        for (i in 0 until count) {
+            clouds[i].reset(
+                Random.nextFloat() * aspectRatio * 2 - aspectRatio,
+                aspectRatio,
+                textureCount = textureCount,
+                layer = i,
+                totalLayers = maxOf(count, 1)
+            )
         }
         cloudsNeedSorting = true
         val allowFallback = configProvider.getRainSpawnMode() != 1
@@ -263,16 +270,7 @@ class SceneManager(
             val halfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
             val maxBound = aspectRatio + halfWidth
             if (cloud.positionX > maxBound || cloud.positionX < -maxBound) {
-                cloud.reset(0f, aspectRatio, textureCount = getCloudTextureCount())
-                cloudsNeedSorting = true
-                val newHalfWidth = cloud.scale * CLOUD_WRAP_SCALE_FACTOR
-                val driftInfluence = (1.0f - (kotlin.math.abs(windSpeed) / CLOUD_DRIFT_WIND_THRESHOLD)).coerceIn(0f, 1f)
-                val netSpeed = windSpeed + (cloud.driftSpeed * driftInfluence)
-                if (netSpeed >= 0f) {
-                    cloud.positionX = -aspectRatio - newHalfWidth
-                } else {
-                    cloud.positionX = aspectRatio + newHalfWidth
-                }
+                cloud.wrap(aspectRatio, windSpeed, textureCount = getCloudTextureCount())
             }
         }
 
@@ -604,10 +602,8 @@ class SceneManager(
                 val cloudId = if (clouds.isNotEmpty()) clouds.maxOf { it.id } + 1 else 0
                 val textureIndex = Random.nextInt(textureCount)
                 val cloud = StormCloud(cloudId, 0f, 0f, 0f, 0f, 0f, textureIndex)
-                cloud.reset(Random.nextFloat() * aspectRatio * 2 - aspectRatio, aspectRatio, textureCount = textureCount)
                 cloud.opacity = 0f
                 clouds.add(cloud)
-                cloudsNeedSorting = true
                 needed--
             }
         } else if (activeClouds.size > targetCount) {
@@ -619,6 +615,35 @@ class SceneManager(
                 }
             }
         }
+
+        // Re-assign natural staircase layers to active clouds (back/small/horizon -> front/large/sky)
+        val currentActive = clouds.filter { !it.isFadingOut }
+        val count = currentActive.size
+        for (i in 0 until count) {
+            val cloud = currentActive[i]
+            val isNew = (cloud.opacity == 0f)
+            if (isNew || cloud.layerIndex != i) {
+                val startX = if (isNew) {
+                    Random.nextFloat() * aspectRatio * 2 - aspectRatio
+                } else {
+                    cloud.positionX
+                }
+                val prevOpacity = cloud.opacity
+                cloud.reset(
+                    startX,
+                    aspectRatio,
+                    textureCount = textureCount,
+                    layer = i,
+                    totalLayers = maxOf(count, 1)
+                )
+                if (isNew) {
+                    cloud.opacity = 0f
+                } else {
+                    cloud.opacity = prevOpacity
+                }
+            }
+        }
+        cloudsNeedSorting = true
     }
 
     private fun adjustRain(intensity: Int) {
