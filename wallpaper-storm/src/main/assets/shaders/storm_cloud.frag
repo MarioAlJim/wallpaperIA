@@ -133,9 +133,5 @@ void main() {
     float darkRay = GetDarkGodRays(ndc, uLightningPos, uFlashIntensity, uTime, uAspectRatio);
     finalColor *= darkRay;
 
-    // Cloud visibility factor: at low brightness, clouds are subtle/faint and surge to full opacity during a lightning flash
-    float flashAlphaBoost = clamp(uFlashIntensity * 2.0, 0.0, 1.0);
-    float cloudAlphaFactor = clamp(mix(0.35, 1.0, clamp(uBgBrightness, 0.0, 1.0)) + flashAlphaBoost, 0.0, 1.0);
-
-    fragColor = vec4(finalColor, texColor.a * uOpacity * cloudAlphaFactor);
+    fragColor = vec4(finalColor, texColor.a * uOpacity);
 }
