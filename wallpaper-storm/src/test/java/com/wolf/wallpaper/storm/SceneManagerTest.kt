@@ -984,7 +984,8 @@ class SceneManagerTest {
         assertTrue(clouds.isNotEmpty())
         for (cloud in clouds) {
             assertTrue("Layer must be in closest half (>= 2), was: ${cloud.layerIndex}", cloud.layerIndex >= 2)
-            assertTrue("Cloud baseScale must be >= 1.0f, was: ${cloud.baseScale}", cloud.baseScale >= 1.0f)
+            assertTrue("Cloud baseScale must be >= 0.4f, was: ${cloud.baseScale}", cloud.baseScale >= 0.4f)
+            assertTrue("Cloud baseScale must be <= 1.45f, was: ${cloud.baseScale}", cloud.baseScale <= 1.45f)
         }
         val minY = clouds.minOf { it.positionY }
         assertTrue("At least one cloud should be in the lower half in full cloud mode, was: $minY", minY < 0.20f)

@@ -299,7 +299,9 @@ void main() {
     float darkFactor = (uIsCloudMode > 0.5)
         ? (0.28 * uBgBrightness)
         : (mix(0.32, 0.10, normY) * uBgBrightness);
-    vec3 baseColor = baseTexColor * vec3(darkFactor, darkFactor, darkFactor * 1.22);
+    // Harmonized atmospheric storm filter consistent with clouds
+    vec3 stormAtmosphere = (uIsCloudMode > 0.5) ? vec3(0.90, 0.96, 1.16) : vec3(1.00, 1.00, 1.22);
+    vec3 baseColor = baseTexColor * darkFactor * stormAtmosphere;
 
     // Add lightning illumination (up to +1.5 brightness with flash color)
     vec3 flashLight = baseTexColor * uFlashColor * uFlashIntensity * 1.5;

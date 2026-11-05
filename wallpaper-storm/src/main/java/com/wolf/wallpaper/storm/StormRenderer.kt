@@ -528,7 +528,12 @@ class StormRenderer(
         val flashColorHandle = cloudFlashColorHandle
         val cloudColorHandle = cloudCloudColorHandle
         val heightFactorHandle = cloudHeightFactorHandle
-        GLES30.glUniform3f(cloudColorHandle, 0.7f, 0.7f, 0.7f)
+        // Harmonized atmospheric storm filter consistent with the background sky
+        if (sceneManager.getBackgroundIndex() == 0) {
+            GLES30.glUniform3f(cloudColorHandle, 0.62f, 0.66f, 0.80f)
+        } else {
+            GLES30.glUniform3f(cloudColorHandle, 0.70f, 0.70f, 0.70f)
+        }
         GLES30.glUniform1f(cloudBgBrightnessHandle, sceneManager.getBgBrightness())
 
         // Bind additional uniforms for refraction and dark god rays
