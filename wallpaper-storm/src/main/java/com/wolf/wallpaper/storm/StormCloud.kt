@@ -216,8 +216,8 @@ class StormCloud(
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
 
         // Scale: proportional to layer with natural jitter.
-        // In full cloud mode, minimum and maximum cloud size is increased by 300% (+300% = 4x)
-        val scaleMultiplier = if (isFullCloudMode) 4.0f else 1.0f
+        // In full cloud mode, cloud size is increased by 150% (+150% = 2.5x) relative to general maximum
+        val scaleMultiplier = if (isFullCloudMode) 2.5f else 1.0f
         val minScale = 0.43125f * scaleMultiplier
         val maxScale = 1.40625f * scaleMultiplier
         val nominalScale = minScale + (maxScale - minScale) * t

@@ -1,4 +1,4 @@
-﻿package com.wolf.wallpaper.storm
+package com.wolf.wallpaper.storm
 
 import android.content.Context
 import com.wolf.wallpaper.core.ConfigProvider
@@ -984,7 +984,7 @@ class SceneManagerTest {
         assertTrue(clouds.isNotEmpty())
         for (cloud in clouds) {
             assertTrue("Layer must be in closest half (>= 2), was: ${cloud.layerIndex}", cloud.layerIndex >= 2)
-            assertTrue("Cloud baseScale must be >= 1.6f, was: ${cloud.baseScale}", cloud.baseScale >= 1.6f)
+            assertTrue("Cloud baseScale must be >= 1.0f, was: ${cloud.baseScale}", cloud.baseScale >= 1.0f)
         }
         val minY = clouds.minOf { it.positionY }
         assertTrue("At least one cloud should be in the lower half in full cloud mode, was: $minY", minY < 0.20f)
