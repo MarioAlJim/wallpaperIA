@@ -1,4 +1,4 @@
-﻿package com.wolf.wallpaper
+package com.wolf.wallpaper
 
 import android.content.Context
 import android.graphics.Bitmap

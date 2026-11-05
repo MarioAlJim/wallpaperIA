@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="storm_bg_brightness_title">Brillo global</string>
     <string name="storm_bg_brightness_desc">Ajusta el brillo base de la escena y las nubes (aumentará con los relámpagos).</string>

@@ -90,7 +90,7 @@ object SettingsBottomSheetHelper {
             HelpFeatureItem(
                 R.drawable.ic_storm,
                 "Tormenta Variable",
-                "Ciclos automáticos que alternan calma y ráfagas. Bloquea controles manuales mientras ella misma modula los parámetros climáticos."
+                "Ciclos automáticos que alternan calma y ráfagas con duración personalizable (Corta, Media o Larga)."
             ),
             HelpFeatureItem(
                 R.drawable.ic_bolt,
@@ -100,22 +100,22 @@ object SettingsBottomSheetHelper {
             HelpFeatureItem(
                 R.drawable.ic_cloud,
                 "Nubes y Viento",
-                "Controla la densidad y desplazamiento de las nubes, así como la intensidad del viento que inclina lluvia y líneas de aire."
+                "Controla densidad y velocidad en capas escalonadas con variación de forma, además de dirección, fuerza y líneas de viento."
             ),
             HelpFeatureItem(
                 R.drawable.ic_rain,
                 "Lluvia y Gotas en Pantalla",
-                "Densidad, velocidad cromática y tamaño de las gotas simuladas con efecto lente sobre el cristal."
+                "Densidad, velocidad cromática, origen de caída y gotas sobre el cristal con efecto lupa y refracción."
             ),
             HelpFeatureItem(
                 R.drawable.ic_lightning,
                 "Rayos y Relámpagos",
-                "Frecuencia, duración, tono de los arcos eléctricos, destellos internos en nubes y resplandor a pantalla completa."
+                "Frecuencia, duración, color de los arcos eléctricos, destellos internos en nubes e invocación al tocar la pantalla."
             ),
             HelpFeatureItem(
                 R.drawable.ic_background,
                 "Lienzo de Fondo",
-                "Permite elegir entre paisaje predeterminado, fondo oscuro sólido o una fotografía personalizada."
+                "Elige entre modo Puras Nubes (cielo dinámico sin siluetas, como en la app original), paisajes predeterminados o una foto personalizada."
             )
         )
 

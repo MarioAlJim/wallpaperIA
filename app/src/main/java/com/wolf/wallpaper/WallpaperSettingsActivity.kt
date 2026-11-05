@@ -159,37 +159,37 @@ class WallpaperSettingsActivity : AppCompatActivity() {
         TutorialStep(
             R.id.cardStormVariable,
             "Tormenta Variable",
-            "Actívala para que la tormenta cambie sola, alternando ciclos de calma y ráfagas, sin que tengas que ajustar nada manualmente."
+            "Actívala para alternar ciclos automáticos de calma y ráfagas, y elegir la duración de cada fase (Corta, Media o Larga)."
         ),
         TutorialStep(
             R.id.cardGlobalBrightness,
             "Brillo Global",
-            "Ajusta el nivel de brillo base del fondo y las nubes: en niveles bajos la escena se oscurece y se ilumina con los relámpagos."
+            "Ajusta el nivel de iluminación ambiental base: en niveles bajos la noche se oscurece y los relámpagos iluminan dinámicamente toda la escena."
         ),
         TutorialStep(
             R.id.headerCloudsWind,
             "Nubes y Viento",
-            "Toca aquí para desplegar la densidad y velocidad de las nubes, y la dirección/intensidad del viento."
+            "Despliega la densidad y velocidad de las nubes (escalonadas en capas con variación de formas), además de dirección, intensidad y líneas de viento."
         ),
         TutorialStep(
             R.id.headerRain,
             "Lluvia",
-            "Aquí controlas qué tan intensa y rápida cae la lluvia, su color y si nace desde las nubes o los bordes de la pantalla."
+            "Controla la intensidad, velocidad y color de la lluvia, origen de caída (nubes o bordes) y las gotas sobre la pantalla con efecto lupa y refracción."
         ),
         TutorialStep(
             R.id.headerLightning,
             "Rayos",
-            "Configura la frecuencia, duración y color de los relámpagos, y los destellos de luz que producen sobre las nubes."
+            "Configura la frecuencia, duración y color de los rayos, destellos internos en nubes e interacción táctil para invocarlos al tocar la pantalla."
         ),
         TutorialStep(
             R.id.headerBackground,
             "Fondo",
-            "Elige la imagen o color que se ve detrás de la tormenta (paisaje, negro o foto personalizada)."
+            "Elige el modo de fondo: Puras Nubes (cielo dinámico sin siluetas, como en la app original), paisajes predeterminados o una imagen personalizada de tu galería."
         ),
         TutorialStep(
             R.id.buttonHeaderHelp,
             "Botón de Ayuda",
-            "Toca este ícono en cualquier momento para ver un resumen de todas las secciones, o repetir este tutorial."
+            "Toca este ícono en cualquier momento para ver un resumen de todas las secciones, o repetir este tutorial interactivo."
         ),
         TutorialStep(
             R.id.buttonApplyWallpaper,

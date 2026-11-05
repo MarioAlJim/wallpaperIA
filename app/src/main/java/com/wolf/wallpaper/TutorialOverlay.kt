@@ -197,13 +197,71 @@ class TutorialOverlay(private val activity: Activity) {
         }
 
         cardView?.visibility = View.INVISIBLE
-        // Bring the target into view (it may be below the fold in a scrollable section) before
-        // measuring its on-screen position.
-        target.requestRectangleOnScreen(Rect(0, 0, target.width, target.height), false)
+        // Bring the target into view centered in the scrollable viewport before measuring its position.
+        val scrollContainer = findScrollParent(target)
+        if (scrollContainer != null) {
+            scrollToCenter(scrollContainer, target)
+        } else {
+            target.requestRectangleOnScreen(Rect(0, 0, target.width, target.height), false)
+        }
         target.postDelayed({
             if (activity.isFinishing || activity.isDestroyed || overlayContainer == null) return@postDelayed
             positionOverlayForTarget(target, step, index)
         }, 320)
+    }
+
+    private fun findScrollParent(view: View): ViewGroup? {
+        var current: View? = view
+        var activeScrollView: ViewGroup? = null
+        while (current != null) {
+            if (current is androidx.core.widget.NestedScrollView || current is android.widget.ScrollView) {
+                val group = current as ViewGroup
+                val child = group.getChildAt(0)
+                if (child != null && child.height > group.height) {
+                    return group
+                }
+                activeScrollView = group
+            }
+            val p = current.parent
+            current = if (p is View) p else null
+        }
+        return activeScrollView
+    }
+
+    private fun getRelativeTop(target: View, parent: View): Int {
+        var top = 0
+        var current: View? = target
+        while (current != null && current !== parent) {
+            top += current.top
+            val p = current.parent
+            current = if (p is View) p else null
+        }
+        return top
+    }
+
+    private fun scrollToCenter(scrollContainer: ViewGroup, target: View) {
+        val scrollChild = scrollContainer.getChildAt(0) ?: return
+        val relativeTop = getRelativeTop(target, scrollChild)
+        val targetHeight = target.height
+        val viewportHeight = scrollContainer.height - scrollContainer.paddingTop - scrollContainer.paddingBottom
+        if (viewportHeight <= 0) return
+
+        val density = target.resources.displayMetrics.density
+        val topMargin = (16f * density).toInt()
+
+        val targetScrollY = if (targetHeight in 1 until viewportHeight) {
+            relativeTop - (viewportHeight - targetHeight) / 2
+        } else {
+            relativeTop - topMargin
+        }
+
+        val maxScrollY = (scrollChild.height - scrollContainer.height).coerceAtLeast(0)
+        val clampedScrollY = targetScrollY.coerceIn(0, maxScrollY)
+
+        when (scrollContainer) {
+            is androidx.core.widget.NestedScrollView -> scrollContainer.smoothScrollTo(0, clampedScrollY)
+            is android.widget.ScrollView -> scrollContainer.smoothScrollTo(0, clampedScrollY)
+        }
     }
 
     private fun positionOverlayForTarget(target: View, step: TutorialStep, index: Int) {
