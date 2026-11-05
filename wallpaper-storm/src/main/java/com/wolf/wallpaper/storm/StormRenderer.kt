@@ -1,4 +1,4 @@
-﻿package com.wolf.wallpaper.storm
+package com.wolf.wallpaper.storm
 
 import android.content.Context
 import android.opengl.GLES30

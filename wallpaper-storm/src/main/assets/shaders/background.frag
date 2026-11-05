@@ -1,4 +1,4 @@
-﻿#version 300 es
+#version 300 es
 // Default precision is mediump: color/blend/opacity math dominates this shader and
 // runs faster (and uses fewer registers) at mediump on mobile GPUs. Anything that
 // derives a texture-sampling coordinate (including the droplet grid cell math, whose

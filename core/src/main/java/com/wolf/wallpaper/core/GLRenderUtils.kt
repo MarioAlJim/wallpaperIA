@@ -16,7 +16,7 @@ object GLRenderUtils {
 
     fun readAssetFile(context: Context, path: String): String {
         return try {
-            context.assets.open(path).bufferedReader().use { it.readText() }
+            context.assets.open(path).bufferedReader().use { it.readText() }.removePrefix("\uFEFF")
         } catch (e: IOException) {
             throw RuntimeException("Could not open asset file: $path", e)
         }
