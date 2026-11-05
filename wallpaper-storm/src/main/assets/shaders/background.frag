@@ -1,4 +1,4 @@
-#version 300 es
+﻿#version 300 es
 // Default precision is mediump: color/blend/opacity math dominates this shader and
 // runs faster (and uses fewer registers) at mediump on mobile GPUs. Anything that
 // derives a texture-sampling coordinate (including the droplet grid cell math, whose
@@ -9,6 +9,9 @@ in highp vec2 vTexCoord;
 in highp vec2 vScreenPos; // Screen coordinates from vertex shader
 
 uniform sampler2D uTexture;
+uniform sampler2D uTextureNext;
+uniform float uTransitionAlpha;
+uniform float uIsCloudMode;
 uniform float uFlashIntensity;
 uniform vec3 uFlashColor;
 uniform highp float uTime;
@@ -268,16 +271,19 @@ void main() {
         distortedUV = clamp(vTexCoord - droplet.xy * uTexCoordScale, vec2(0.0), vec2(1.0));
     }
 
-    // Sample the background texture
-    vec4 texColor = texture(uTexture, distortedUV);
+    // Sample the background texture (with optional crossfade)
+    vec4 texColorA = texture(uTexture, distortedUV);
+    vec4 texColor = (uTransitionAlpha > 0.001) ? mix(texColorA, texture(uTextureNext, distortedUV), uTransitionAlpha) : texColorA;
 
-    // Calculate luma and final alpha for silhouette masking
-    float luma = (texColor.r + texColor.g + texColor.b) / 3.0;
-    float alpha = smoothstep(0.96, 0.90, luma);
-    float finalAlpha = min(texColor.a, alpha);
-
-    if (finalAlpha <= 0.0) {
-        discard;
+    // Calculate final alpha: solid backdrop in pure cloud mode; silhouette cutout in landscape mode
+    float finalAlpha = 1.0;
+    if (uIsCloudMode < 0.5) {
+        float luma = (texColor.r + texColor.g + texColor.b) / 3.0;
+        float alpha = smoothstep(0.96, 0.90, luma);
+        finalAlpha = min(texColor.a, alpha);
+        if (finalAlpha <= 0.0) {
+            discard;
+        }
     }
 
     // Tint color contribution inside active droplet
@@ -288,9 +294,11 @@ void main() {
         baseTexColor = mix(baseTexColor, desaturatedRainColor, 0.15 * fadeVal);
     }
 
-    // Base storm dimming (dark stormy night look, with a vertical gradient: darker at the top, lighter at the bottom)
+    // Base storm dimming (dark stormy night look)
     float normY = (vScreenPos.y + 1.0) * 0.5;
-    float darkFactor = mix(0.32, 0.10, normY) * uBgBrightness;
+    float darkFactor = (uIsCloudMode > 0.5)
+        ? (0.28 * uBgBrightness)
+        : (mix(0.32, 0.10, normY) * uBgBrightness);
     vec3 baseColor = baseTexColor * vec3(darkFactor, darkFactor, darkFactor * 1.22);
 
     // Add lightning illumination (up to +1.5 brightness with flash color)
@@ -302,11 +310,12 @@ void main() {
     float darkRay = GetDarkGodRays(vScreenPos, uLightningPos, uFlashIntensity, uTime, uAspectRatio);
     finalColor *= darkRay;
 
-    // Rim Lighting: highlights the upper edge of the silhouettes facing the lightning
+    // Rim Lighting: highlights the upper edge of the silhouettes facing the lightning (landscape mode only)
     vec3 rimColor = vec3(0.0);
-    if (uFlashIntensity > 0.01) {
+    if (uIsCloudMode < 0.5 && uFlashIntensity > 0.01) {
         highp vec2 rimOffset = normalize(vec2(vScreenPos.x - uLightningPos.x, 1.2)) * 0.008;
-        vec4 texAbove = texture(uTexture, distortedUV + rimOffset);
+        vec4 texAboveA = texture(uTexture, distortedUV + rimOffset);
+        vec4 texAbove = (uTransitionAlpha > 0.001) ? mix(texAboveA, texture(uTextureNext, distortedUV + rimOffset), uTransitionAlpha) : texAboveA;
         float lumaAbove = (texAbove.r + texAbove.g + texAbove.b) / 3.0;
         float alphaAbove = smoothstep(0.96, 0.90, lumaAbove);
         float rimMask = clamp(finalAlpha - alphaAbove, 0.0, 1.0);

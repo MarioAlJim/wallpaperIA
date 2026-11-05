@@ -1,4 +1,4 @@
-package com.wolf.wallpaper.storm
+﻿package com.wolf.wallpaper.storm
 
 import android.content.Context
 import com.wolf.wallpaper.core.ConfigProvider
@@ -108,6 +108,7 @@ class SceneManager(
     private var isBurstActive = false
     private var currentBurstWindDirection = 2
     private var stormTransitionFactor = 0f
+    private var lastBackgroundIndex = -1
 
     fun getCalmDuration(): Float = when (configProvider.getStormVariableDuration()) {
         DURATION_CORTA -> 20.0f
@@ -140,7 +141,20 @@ class SceneManager(
         updateFromConfig()
         currentWindAngle = targetWindAngle
         currentRainSpeed = targetRainSpeed
+        lastBackgroundIndex = configProvider.getBackgroundIndex()
         setupNextLightningDelay()
+    }
+
+    private fun getCloudLayer(index: Int, totalCount: Int, isFullCloud: Boolean): Int {
+        val startLayer = if (isFullCloud) NUM_CLOUD_LAYERS / 2 else 0
+        val activeLayerRange = NUM_CLOUD_LAYERS - startLayer
+        return if (totalCount <= 1) {
+            startLayer + activeLayerRange / 2
+        } else if (totalCount <= activeLayerRange) {
+            startLayer + (index * (activeLayerRange - 1)) / (totalCount - 1)
+        } else {
+            startLayer + (index * activeLayerRange) / totalCount
+        }
     }
 
     fun onSurfaceChanged(width: Int, height: Int) {
@@ -151,26 +165,14 @@ class SceneManager(
         // Re-align objects to new aspect ratio coordinates
         val textureCount = getCloudTextureCount()
         val count = clouds.size
+        val isFullCloud = (configProvider.getBackgroundIndex() == 0)
         val layerCounts = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
-            val layer = if (count <= 1) {
-                NUM_CLOUD_LAYERS / 2
-            } else if (count <= NUM_CLOUD_LAYERS) {
-                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
-            } else {
-                (i * NUM_CLOUD_LAYERS) / count
-            }
-            layerCounts[layer]++
+            layerCounts[getCloudLayer(i, count, isFullCloud)]++
         }
         val currentLayerCounters = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
-            val layer = if (count <= 1) {
-                NUM_CLOUD_LAYERS / 2
-            } else if (count <= NUM_CLOUD_LAYERS) {
-                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
-            } else {
-                (i * NUM_CLOUD_LAYERS) / count
-            }
+            val layer = getCloudLayer(i, count, isFullCloud)
             val subIndex = currentLayerCounters[layer]++
             val cloudsInThisLayer = layerCounts[layer]
             val slotWidth = (aspectRatio * 2f) / maxOf(1, cloudsInThisLayer)
@@ -183,7 +185,8 @@ class SceneManager(
                 textureCount = textureCount,
                 layer = layer,
                 subIndex = subIndex,
-                totalLayers = NUM_CLOUD_LAYERS
+                totalLayers = NUM_CLOUD_LAYERS,
+                isFullCloudMode = isFullCloud
             )
         }
         cloudsNeedSorting = true
@@ -569,6 +572,16 @@ class SceneManager(
             cloudDensity = targetDensity
         }
 
+        val currentBgIndex = configProvider.getBackgroundIndex()
+        if (currentBgIndex != lastBackgroundIndex) {
+            val wasFullCloud = (lastBackgroundIndex == 0)
+            val isNowFullCloud = (currentBgIndex == 0)
+            lastBackgroundIndex = currentBgIndex
+            if (wasFullCloud != isNowFullCloud) {
+                adjustClouds(cloudDensity, forceRefresh = true)
+            }
+        }
+
         // Calculate target values
         targetWindAngle = when (targetWind) {
             0 -> -(targetWindIntensity / 100f) * MAX_WIND_ANGLE_DEGREES
@@ -597,7 +610,7 @@ class SceneManager(
         }
     }
 
-    private fun adjustClouds(density: Int) {
+    private fun adjustClouds(density: Int, forceRefresh: Boolean = false) {
         val targetCount = if (density in 0..10) {
             density
         } else {
@@ -646,32 +659,20 @@ class SceneManager(
         // Re-assign natural staircase layers to active clouds with priority distribution (allowing multiple clouds per layer)
         val currentActive = clouds.filter { !it.isFadingOut }
         val count = currentActive.size
+        val isFullCloud = (configProvider.getBackgroundIndex() == 0)
         val layerCounts = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
-            val layer = if (count <= 1) {
-                NUM_CLOUD_LAYERS / 2
-            } else if (count <= NUM_CLOUD_LAYERS) {
-                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
-            } else {
-                (i * NUM_CLOUD_LAYERS) / count
-            }
-            layerCounts[layer]++
+            layerCounts[getCloudLayer(i, count, isFullCloud)]++
         }
         val currentLayerCounters = IntArray(NUM_CLOUD_LAYERS)
         for (i in 0 until count) {
             val cloud = currentActive[i]
-            val layer = if (count <= 1) {
-                NUM_CLOUD_LAYERS / 2
-            } else if (count <= NUM_CLOUD_LAYERS) {
-                (i * (NUM_CLOUD_LAYERS - 1)) / (count - 1)
-            } else {
-                (i * NUM_CLOUD_LAYERS) / count
-            }
+            val layer = getCloudLayer(i, count, isFullCloud)
             val subIndex = currentLayerCounters[layer]++
             val cloudsInThisLayer = layerCounts[layer]
 
             val isNew = (cloud.opacity == 0f)
-            if (isNew || cloud.layerIndex != layer || cloud.subLayerIndex != subIndex) {
+            if (isNew || cloud.layerIndex != layer || cloud.subLayerIndex != subIndex || forceRefresh) {
                 val startX = if (isNew) {
                     val slotWidth = (aspectRatio * 2f) / maxOf(1, cloudsInThisLayer)
                     val slotCenter = -aspectRatio + slotWidth * (subIndex + 0.5f)
@@ -687,7 +688,8 @@ class SceneManager(
                     textureCount = textureCount,
                     layer = layer,
                     subIndex = subIndex,
-                    totalLayers = NUM_CLOUD_LAYERS
+                    totalLayers = NUM_CLOUD_LAYERS,
+                    isFullCloudMode = isFullCloud
                 )
                 if (isNew) {
                     cloud.opacity = 0f

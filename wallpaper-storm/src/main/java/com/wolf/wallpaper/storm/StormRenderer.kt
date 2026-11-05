@@ -1,4 +1,4 @@
-package com.wolf.wallpaper.storm
+﻿package com.wolf.wallpaper.storm
 
 import android.content.Context
 import android.opengl.GLES30
@@ -28,6 +28,18 @@ class StormRenderer(
     private var rainTexture = 0
     private val lightningTextures = mutableListOf<Int>()
     private val backgroundTextures = IntArray(8)
+    private val cloudBgTextures = IntArray(3)
+    private var cloudBgTexturesLoaded = false
+    private var currentCloudBgIndex = 0
+    private var nextCloudBgIndex = 1
+    private var cloudBgTransitionProgress = 0f
+    private var isCloudBgTransitioning = false
+    private var cloudBgDisplayTimer = 0f
+
+    companion object {
+        private const val CLOUD_BG_DISPLAY_TIME = 15.0f
+        private const val CLOUD_BG_TRANSITION_TIME = 3.5f
+    }
 
     private var viewportWidth = 0
     private var viewportHeight = 0
@@ -121,6 +133,9 @@ class StormRenderer(
     private var bgFlashIntensityHandle = -1
     private var bgFlashColorHandle = -1
     private var bgTextureHandle = -1
+    private var bgTextureNextHandle = -1
+    private var bgTransitionAlphaHandle = -1
+    private var bgIsCloudModeHandle = -1
     private var bgTimeHandle = -1
     private var bgAspectHandle = -1
     private var bgDropletsEnabledHandle = -1
@@ -303,6 +318,9 @@ class StormRenderer(
         bgFlashIntensityHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashIntensity")
         bgFlashColorHandle = GLES30.glGetUniformLocation(backgroundProgram, "uFlashColor")
         bgTextureHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTexture")
+        bgTextureNextHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTextureNext")
+        bgTransitionAlphaHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTransitionAlpha")
+        bgIsCloudModeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uIsCloudMode")
         bgTimeHandle = GLES30.glGetUniformLocation(backgroundProgram, "uTime")
         bgAspectHandle = GLES30.glGetUniformLocation(backgroundProgram, "uAspectRatio")
         bgDropletsEnabledHandle = GLES30.glGetUniformLocation(backgroundProgram, "uScreenDropletsEnabled")
@@ -362,6 +380,25 @@ class StormRenderer(
         val swipeLerpFactor = 4f * deltaTime
         swipeOffset += (targetSwipeOffset - swipeOffset) * swipeLerpFactor
         
+        if (sceneManager.getBackgroundIndex() == 0) {
+            if (isCloudBgTransitioning) {
+                cloudBgTransitionProgress += deltaTime / CLOUD_BG_TRANSITION_TIME
+                if (cloudBgTransitionProgress >= 1.0f) {
+                    cloudBgTransitionProgress = 0f
+                    isCloudBgTransitioning = false
+                    currentCloudBgIndex = nextCloudBgIndex
+                    cloudBgDisplayTimer = 0f
+                }
+            } else {
+                cloudBgDisplayTimer += deltaTime
+                if (cloudBgDisplayTimer >= CLOUD_BG_DISPLAY_TIME) {
+                    isCloudBgTransitioning = true
+                    cloudBgTransitionProgress = 0f
+                    nextCloudBgIndex = (currentCloudBgIndex + 1 + kotlin.random.Random.nextInt(2)) % 3
+                }
+            }
+        }
+
         sceneManager.update(deltaTime)
     }
 
@@ -513,8 +550,7 @@ class StormRenderer(
 
         // Pass background scale to keep coordinates matched
         val bgIndex = sceneManager.getBackgroundIndex()
-        val texIndex = (bgIndex - 1).coerceIn(0, backgroundAspectRatios.size - 1)
-        val bgAspect = backgroundAspectRatios[texIndex]
+        val bgAspect = if (bgIndex == 0) 1.0f else backgroundAspectRatios[(bgIndex - 1).coerceIn(0, backgroundAspectRatios.size - 1)]
         val screenAspect = aspectRatio
         var scaleX = 1.0f
         var scaleY = 1.0f
@@ -1035,10 +1071,53 @@ class StormRenderer(
         backgroundTextures[index] = textureId
     }
 
+    private fun loadCloudBgTextures() {
+        if (cloudBgTexturesLoaded) return
+        val cloudBgFiles = arrayOf(
+            "background/cloud_bg_01.jpg",
+            "background/cloud_bg_02.jpg",
+            "background/cloud_bg_03.jpg"
+        )
+        for (i in cloudBgFiles.indices) {
+            cloudBgTextures[i] = loadTexture(context, cloudBgFiles[i], maxSize = 1024)
+        }
+        currentCloudBgIndex = kotlin.random.Random.nextInt(3)
+        nextCloudBgIndex = (currentCloudBgIndex + 1 + kotlin.random.Random.nextInt(2)) % 3
+        cloudBgTexturesLoaded = true
+    }
+
+    private fun freeCloudBgTextures() {
+        if (!cloudBgTexturesLoaded) return
+        val toDelete = IntArray(1)
+        for (i in cloudBgTextures.indices) {
+            if (cloudBgTextures[i] != 0) {
+                toDelete[0] = cloudBgTextures[i]
+                GLES30.glDeleteTextures(1, toDelete, 0)
+                cloudBgTextures[i] = 0
+            }
+        }
+        cloudBgTexturesLoaded = false
+    }
+
     private var lastCustomBgModified: Long = 0L
 
     private fun loadBackgroundByIndex(backgroundIndex: Int) {
-        if (backgroundIndex <= 0 || backgroundIndex > backgroundTextures.size) return
+        if (backgroundIndex < 0 || backgroundIndex > backgroundTextures.size) return
+
+        if (backgroundIndex == 0) {
+            val toDelete = IntArray(1)
+            for (i in backgroundTextures.indices) {
+                if (backgroundTextures[i] != 0) {
+                    toDelete[0] = backgroundTextures[i]
+                    GLES30.glDeleteTextures(1, toDelete, 0)
+                    backgroundTextures[i] = 0
+                }
+            }
+            loadCloudBgTextures()
+            return
+        }
+
+        freeCloudBgTextures()
         val texIndex = backgroundIndex - 1
 
         // Check if custom background was modified
@@ -1078,13 +1157,51 @@ class StormRenderer(
     }
 
     private fun drawBackground(backgroundIndex: Int, flash: LightningFlashAggregate) {
-        if (backgroundIndex <= 0 || backgroundIndex > backgroundTextures.size) return
-        val texIndex = backgroundIndex - 1
-        if (backgroundTextures[texIndex] == 0 || (backgroundIndex == 8 && java.io.File(context.filesDir, "custom_background.png").lastModified() != lastCustomBgModified)) {
-            loadBackgroundByIndex(backgroundIndex)
+        if (backgroundIndex < 0 || backgroundIndex > backgroundTextures.size) return
+        val isCloudMode = (backgroundIndex == 0)
+
+        if (isCloudMode) {
+            if (!cloudBgTexturesLoaded) {
+                loadCloudBgTextures()
+            }
+            // Reclaim VRAM from landscape textures when in cloud mode
+            val toDelete = IntArray(1)
+            for (i in backgroundTextures.indices) {
+                if (backgroundTextures[i] != 0) {
+                    toDelete[0] = backgroundTextures[i]
+                    GLES30.glDeleteTextures(1, toDelete, 0)
+                    backgroundTextures[i] = 0
+                }
+            }
+        } else {
+            if (cloudBgTexturesLoaded) {
+                freeCloudBgTextures()
+            }
+            val texIndex = backgroundIndex - 1
+            if (backgroundTextures[texIndex] == 0 || (backgroundIndex == 8 && java.io.File(context.filesDir, "custom_background.png").lastModified() != lastCustomBgModified)) {
+                loadBackgroundByIndex(backgroundIndex)
+            }
         }
-        val textureId = backgroundTextures[texIndex]
+
+        val textureId = if (isCloudMode) {
+            cloudBgTextures[currentCloudBgIndex]
+        } else {
+            backgroundTextures[backgroundIndex - 1]
+        }
         if (textureId == 0) return
+
+        val nextTextureId = if (isCloudMode && isCloudBgTransitioning) {
+            cloudBgTextures[nextCloudBgIndex]
+        } else {
+            textureId
+        }
+
+        val transitionAlpha = if (isCloudMode && isCloudBgTransitioning) {
+            val p = cloudBgTransitionProgress.coerceIn(0f, 1f)
+            p * p * (3f - 2f * p) // smoothstep
+        } else {
+            0f
+        }
 
         GLES30.glUseProgram(backgroundProgram)
         val mvpMatrixHandle = bgMvpHandle
@@ -1114,11 +1231,17 @@ class StormRenderer(
         GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, noiseTexture)
         GLES30.glUniform1i(bgNoiseTextureHandle, 1)
 
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE2)
+        GLES30.glBindTexture(GLES30.GL_TEXTURE_2D, nextTextureId)
+        GLES30.glUniform1i(bgTextureNextHandle, 2)
+        GLES30.glUniform1f(bgTransitionAlphaHandle, transitionAlpha)
+        GLES30.glUniform1f(bgIsCloudModeHandle, if (isCloudMode) 1.0f else 0.0f)
+
         val modelMatrix = scratchModelMatrix
         Matrix.setIdentityM(modelMatrix, 0)
 
         val screenAspect = aspectRatio
-        val bgAspect = backgroundAspectRatios[texIndex]
+        val bgAspect = if (isCloudMode) 1.0f else backgroundAspectRatios[backgroundIndex - 1]
         var scaleX = 1.0f
         var scaleY = 1.0f
 
@@ -1128,6 +1251,15 @@ class StormRenderer(
         } else {
             scaleX = bgAspect
             scaleY = 1.0f
+        }
+
+        // In pure cloud mode, add subtle background parallax / drift imitating original Storm APK
+        if (isCloudMode) {
+            val maxShift = (scaleX - screenAspect).coerceAtLeast(0f)
+            val gyroX = if (sceneManager.configProvider.isSunnyGyroEnabled()) sensorTiltX * 0.04f else 0f
+            val swipeShift = -swipeOffset * screenAspect * 0.06f
+            val bgDriftX = (gyroX + swipeShift).coerceIn(-maxShift, maxShift)
+            Matrix.translateM(modelMatrix, 0, bgDriftX, 0f, 0f)
         }
 
         val texCoordScaleX = screenAspect / scaleX
@@ -1175,6 +1307,7 @@ class StormRenderer(
 
         GLES30.glDisableVertexAttribArray(0)
         GLES30.glDisableVertexAttribArray(1)
+        GLES30.glActiveTexture(GLES30.GL_TEXTURE0)
     }
 
     private fun getRainBuffer(requiredFloats: Int): FloatBuffer {

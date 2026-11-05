@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="storm_bg_brightness_title">Global brightness</string>
     <string name="storm_bg_brightness_desc">Adjust the base brightness of the scene and clouds (increases with lightning).</string>
@@ -258,7 +258,7 @@
     <string name="wind_intensity_label">Wind Strength</string>
 
     <string-array name="background_modes">
-        <item>Dark Color (No Image)</item>
+        <item>Pure Clouds (No Image)</item>
         <item>Mountain</item>
         <item>Valley</item>
         <item>Forest</item>

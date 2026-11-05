@@ -1,4 +1,4 @@
-package com.wolf.wallpaper
+﻿package com.wolf.wallpaper
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -421,7 +421,7 @@ class StormSettingsFragment : Fragment() {
         }
 
         val bgPath = when (optionIndex) {
-            0 -> "black"
+            0 -> "background/cloud_bg_01.jpg"
             1 -> "background/background.jpg"
             2 -> "background/background_02.png"
             3 -> "background/background_03.png"
@@ -1513,7 +1513,7 @@ class StormSettingsFragment : Fragment() {
         private fun getRealStormBackgroundBitmap(reqWidth: Int, reqHeight: Int): Bitmap? {
             val bgIndex = configManager.getBackgroundIndex()
             val bgPath = when (bgIndex) {
-                0 -> "background/background.jpg" // Fallback to classic landscape to clearly showcase brightness levels
+                0 -> "background/cloud_bg_01.jpg"
                 1 -> "background/background.jpg"
                 2 -> "background/background_02.png"
                 3 -> "background/background_03.png"

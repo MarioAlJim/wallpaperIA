@@ -1,4 +1,4 @@
-package com.wolf.wallpaper.storm
+﻿package com.wolf.wallpaper.storm
 
 import kotlin.random.Random
 import kotlin.math.sin
@@ -189,7 +189,8 @@ class StormCloud(
         textureCount: Int = 0,
         layer: Int? = null,
         subIndex: Int? = null,
-        totalLayers: Int = 5
+        totalLayers: Int = 5,
+        isFullCloudMode: Boolean = false
     ) {
         val safeTotalLayers = if (totalLayers > 1) totalLayers else 5
         val l = (layer ?: Random.nextInt(safeTotalLayers)).coerceIn(0, safeTotalLayers - 1)
@@ -197,7 +198,13 @@ class StormCloud(
         layerIndex = l
         subLayerIndex = s
 
-        val t = (l.toFloat() / (safeTotalLayers - 1).toFloat()).coerceIn(0f, 1f)
+        val startLayer = if (isFullCloudMode) safeTotalLayers / 2 else 0
+        val effectiveRange = maxOf(1, safeTotalLayers - 1 - startLayer)
+        val t = if (isFullCloudMode) {
+            ((l - startLayer).toFloat() / effectiveRange.toFloat()).coerceIn(0f, 1f)
+        } else {
+            (l.toFloat() / (safeTotalLayers - 1).toFloat()).coerceIn(0f, 1f)
+        }
 
         // Depth: each layer has a distinct depth band. Multiple clouds in the same layer get subtle offsets
         val stepZ = 0.65f / (safeTotalLayers - 1).toFloat()
@@ -208,20 +215,27 @@ class StormCloud(
         positionX = startX
         speedFactor = Random.nextFloat() * 0.4f + 0.8f // Random speed factor between 0.8 and 1.2
 
-        // Scale: proportional to layer with natural jitter
-        val minScale = 0.43125f
-        val maxScale = 1.40625f
+        // Scale: proportional to layer with natural jitter.
+        // In full cloud mode, minimum and maximum cloud size is increased by 300% (+300% = 4x)
+        val scaleMultiplier = if (isFullCloudMode) 4.0f else 1.0f
+        val minScale = 0.43125f * scaleMultiplier
+        val maxScale = 1.40625f * scaleMultiplier
         val nominalScale = minScale + (maxScale - minScale) * t
-        val scaleJitter = Random.nextFloat() * 0.05f - 0.025f
+        val scaleJitter = (Random.nextFloat() * 0.05f - 0.025f) * scaleMultiplier
         baseScale = (nominalScale + scaleJitter).coerceIn(minScale, maxScale)
         scale = baseScale
 
         // Vertical position Y: bottom (horizon, Y = 0.20) climbing to top (Y = 0.82)
-        val minY = 0.20f
-        val maxY = 0.82f
+        // In full cloud mode, appearance area expands from top half to the entire screen
+        val minY = if (isFullCloudMode) -0.75f else 0.20f
+        val maxY = if (isFullCloudMode) 0.75f else 0.82f
         val nominalY = minY + (maxY - minY) * t
         val yJitter = Random.nextFloat() * 0.06f - 0.03f
-        positionY = (nominalY + yJitter).coerceIn(0.18f, 0.95f)
+        positionY = if (isFullCloudMode) {
+            (nominalY + yJitter).coerceIn(-0.85f, 0.85f)
+        } else {
+            (nominalY + yJitter).coerceIn(0.18f, 0.95f)
+        }
         basePositionY = positionY
 
         // Form variation (Punto 3): flipX and aspect ratio stretch
